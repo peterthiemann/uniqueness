@@ -1,0 +1,94 @@
+\documentclass{llncs}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[utf8]{inputenc}
+\usepackage{mathpartir}
+
+\input{macros}
+
+\begin{document}
+Syntax
+\begin{align*}
+  e &::= x \mid \LAM xe \mid \APP ee \mid \LET xee \mid \REC{ \overline{a=e}} \mid \GET ea \mid \UPD eae \\
+  \ell &::= \LIN \mid \UN & \UN & \sqsubset \LIN \\
+  u &::= \READ \mid \WRITE & \WRITE & \sqsubset \READ \\
+  t &::= b\,\ell\, u \\
+  b &::= t \to t \mid \REC{ \overline{a : t}}
+\end{align*}
+Every type has two attributes, linearity $\ell$ and uniqueness $u$.
+
+An environment $A$ is a partial mapping from variables to types. Environment overriding $A=A_1\OVERRIDE A_2$ is defined pointwise as a ternary  relation. We write $x:t\,-$ to indicate that no binding for $x$ exists. 
+\begin{align*}
+  x : t\,\UN\,\READ & =  x:t\,\UN\,\READ  \OVERRIDE x:t\,\UN\,\READ \\
+  x : t\,\UN\,\WRITE & =  x:t\,\UN\,\WRITE  \OVERRIDE x:t\,- \\
+  x : t\,\UN\,\WRITE & =  x:t\,\UN\,\READ  \OVERRIDE x:t\, \UN\,\WRITE \\
+  x : t\,\LIN\,u & =  x:t\,\LIN\,u  \OVERRIDE x:t\,- \\
+  x : t\,\LIN\,u & =  x:t\,-  \OVERRIDE x:t\, \LIN\,u \\
+\end{align*}
+For $n>2$ define $A= A_1 \OVERRIDE A_2 \OVERRIDE \dots \OVERRIDE A_n$ by $A= A_1 \OVERRIDE A_1'$ and $A_1' = A_2 \OVERRIDE \dots \OVERRIDE A_n$. 
+
+
+If any of the record components is linear, then the record must be linear, too.
+If any of the components has write premission, then the record must have it, too.
+\begin{mathpar}
+  \inferrule{
+    A = A_1 \OVERRIDE \dots \OVERRIDE A_n \\
+    A_i \vdash e_i : t_i\,\ell_i\,u_i \\
+    \ell_i \sqsubseteq \ell \\
+    u \sqsubseteq u_i
+  }{
+    A \vdash \REC{ \overline{a_i=e_i}} : \REC{ \overline{a_i : t_i}}\,\ell\, u
+  }
+\end{mathpar}
+To read from a record, the linearity or uniqueness of the record do not matter. However, the fields that are dropped must be unrestricted. The attributes of the field's type remain as they are.
+\begin{mathpar}
+  \inferrule{
+    A \vdash e : \REC{ a:t \mid r}\,\ell\,u \\
+    \UN (r)
+  }{
+    A \vdash \GET ea : t
+  }
+\end{mathpar}
+To write to a record, we need write permission. The type of the overwritten field must be unrestricted because the old contents is dropped. (It would be good to have an update operation that works on linear fields.)
+\begin{mathpar}
+  \inferrule{
+    A_0 \vdash e_0 : \REC{ a:t \mid r}\,\ell\,\WRITE \\
+    A_1 \vdash e_1 : t \\
+    \UN (t) \\
+    A = A_0 \OVERRIDE A_1
+  }{
+    A \vdash \UPD {e_0}a{e_1} : \REC{ a:t \mid r}\,\ell\,u
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \inferrule{
+  }{
+    A, x: t \vdash x:t
+  }
+\end{mathpar}
+Uniqueness does not matter for a function. However, a function that captures a linear variable or a variable with write permission must be linear. A function that captures a record with read permission can be influenced by subsequent writes to that record. Thus the following combinations are possible.
+\begin{itemize}
+\item $A$ is readonly, which means that no future writes through $A$ are possible. Currently, we have no notion of readonly.
+\item $A$ has write permissions and $\ell = \LIN$, so that writes are only executed at most once.
+\item $A$ contains linear stuff and $\ell = \LIN$, so that the linear stuff is used exactly once.
+\end{itemize}
+\begin{mathpar}
+  \inferrule{
+    A, x:t' \vdash e : t
+  }{
+    A \vdash \LAM x e : (t' \to t)\,\ell\,u
+  }
+\end{mathpar}
+Function application has no particular restrictions, it seems.
+\begin{mathpar}
+  \inferrule{
+    A_0 \vdash e_0 : (t_1 \to t_2)\, \ell\,u \\
+    A_1 \vdash e_1 : t_1 \\
+    A = A_0 \OVERRIDE A_1
+  }{
+    A \vdash \APP{e_0}e_1 :
+  }
+\end{mathpar}
+\end{document}
