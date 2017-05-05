@@ -18,18 +18,33 @@ Syntax
 \end{align*}
 Every type has two attributes, linearity $\ell$ and uniqueness $u$.
 
-An environment $A$ is a partial mapping from variables to types. Environment overriding $A=A_1\OVERRIDE A_2$ is defined pointwise as a ternary  relation. We write $x:t\,-$ to indicate that no binding for $x$ exists. 
-\begin{align*}
-  x : t\,\UN\,\READ & =  x:t\,\UN\,\READ  \OVERRIDE x:t\,\UN\,\READ \\
-  x : t\,\UN\,\WRITE & =  x:t\,\UN\,\WRITE  \OVERRIDE x:t\,- \\
-  x : t\,\UN\,\WRITE & =  x:t\,\UN\,\READ  \OVERRIDE x:t\, \UN\,\WRITE \\
-  x : t\,\LIN\,u & =  x:t\,\LIN\,u  \OVERRIDE x:t\,- \\
-  x : t\,\LIN\,u & =  x:t\,-  \OVERRIDE x:t\, \LIN\,u \\
-\end{align*}
+An environment $A$ is a partial mapping from variables to types. Environment overriding $A=A'\OVERRIDE A''$ is defined as the pointwise extension of a ternary relation on types. We write $x:t\,-$ to indicate that no binding for $x$ exists. 
+\begin{mathpar}
+  \inferrule{}{b\,\UN\,\READ  =  b\,\UN\,\READ   \OVERRIDE' b\,\UN\,\READ}
+
+  \inferrule{}{b\,\UN\,\WRITE  =  b\,\UN\,\WRITE  \OVERRIDE b\,-}
+  \\
+  \inferrule{b = b' \OVERRIDE' b''}
+  {b\,\UN\,\WRITE  =  b'\,\UN\,\READ   \OVERRIDE' b''\, \UN\,\WRITE}
+
+  \inferrule{t = t' \OVERRIDE' t''}{t = t' \OVERRIDE t''}
+  \\
+  \inferrule{}{t\,\LIN\,u           =  t\,\LIN\,u           \OVERRIDE t\,-}
+
+  \inferrule{}{t\,\LIN\,u           =  t\,-                     \OVERRIDE t\, \LIN\,u}
+  \\
+  \inferrule{
+    t_i = t_i' \OVERRIDE' t_i''
+  }{
+    \REC{ a_1:t_1, \dots } =     \REC{ a_1:t_1', \dots } \OVERRIDE'     \REC{ a_1:t_1'', \dots }
+  }
+
+  \inferrule{}{t_1\to t_2 = t_1 \to t_2 \OVERRIDE' t_1 \to t_2}
+\end{mathpar}
 For $n>2$ define $A= A_1 \OVERRIDE A_2 \OVERRIDE \dots \OVERRIDE A_n$ by $A= A_1 \OVERRIDE A_1'$ and $A_1' = A_2 \OVERRIDE \dots \OVERRIDE A_n$. 
 
-
-If any of the record components is linear, then the record must be linear, too.
+\newpage
+If any record component is linear, then the record must be linear, too.
 If any of the components has write premission, then the record must have it, too.
 \begin{mathpar}
   \inferrule{
@@ -41,7 +56,9 @@ If any of the components has write premission, then the record must have it, too
     A \vdash \REC{ \overline{a_i=e_i}} : \REC{ \overline{a_i : t_i}}\,\ell\, u
   }
 \end{mathpar}
-To read from a record, the linearity or uniqueness of the record do not matter. However, the fields that are dropped must be unrestricted. The attributes of the field's type remain as they are.
+Reading from a record is a use of the record: If the record is linear, then there can be only one use. The fields that are dropped  must not be linear. Thus, a linear record can have at most a single linear field and no other field can be accessed. (That seems overly restrictive, but could be amended by a record elimination that reads more than one field at a time.) 
+
+Uniqueness of the record does not matter for reading. The attributes of the field's type remain as they are, if the record has write permission. (If the record has only read permission, then none of the fields can have write permission, so the attributes remain the same, too.)
 \begin{mathpar}
   \inferrule{
     A \vdash e : \REC{ a:t \mid r}\,\ell\,u \\
@@ -70,9 +87,9 @@ To write to a record, we need write permission. The type of the overwritten fiel
 \end{mathpar}
 Uniqueness does not matter for a function. However, a function that captures a linear variable or a variable with write permission must be linear. A function that captures a record with read permission can be influenced by subsequent writes to that record. Thus the following combinations are possible.
 \begin{itemize}
-\item $A$ is readonly, which means that no future writes through $A$ are possible. Currently, we have no notion of readonly.
-\item $A$ has write permissions and $\ell = \LIN$, so that writes are only executed at most once.
-\item $A$ contains linear stuff and $\ell = \LIN$, so that the linear stuff is used exactly once.
+\item $y:t \in A$ is readonly, which means that no future writes through $y$ are possible. Readonly variables impose no restriction on the function type, but currently we have no notion of readonly.
+\item $y:t \in A$ needs write permission to typecheck $e$. This requires $\ell = \LIN$, so that writes are only executed at  most once. If $\ell \ne\LIN$, then $y$ needs to be copied each time the closure is invoked.
+\item $y:t \in A$ is linear requires that $\ell = \LIN$, so that the linear stuff is used exactly once.
 \end{itemize}
 \begin{mathpar}
   \inferrule{
@@ -88,7 +105,7 @@ Function application has no particular restrictions, it seems.
     A_1 \vdash e_1 : t_1 \\
     A = A_0 \OVERRIDE A_1
   }{
-    A \vdash \APP{e_0}e_1 :
+    A \vdash \APP{e_0}e_1 : t_2
   }
 \end{mathpar}
 \end{document}
