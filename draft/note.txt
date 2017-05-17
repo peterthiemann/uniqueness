@@ -1,3 +1,13 @@
+PT May 16:
+Observation: records with linear fields may be split like environments.
+No linearity in first round, only uniqueness.
+
+Records captured by a closure must have (full) write permission or they must be readonly (i.e., there must be NO writers).
+Inside the closure, captured records only have read permission so that every execution of the closure creates copies as needed.
+
+Preliminary ideas for dealing with polymorphic types: count the number of uses of polymorphic data.
+If it is used more than once, then its type should not be instantiated with write permission.
+
 PT May 17:
 A record update should avoid creating a recursive / cyclic data structure.
 In this case, a copy should be enforced.
