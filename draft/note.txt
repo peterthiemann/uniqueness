@@ -1,0 +1,3 @@
+PT May 17:
+A record update should avoid creating a recursive / cyclic data structure.
+In this case, a copy should be enforced.
