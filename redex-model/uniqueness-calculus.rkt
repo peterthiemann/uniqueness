@@ -203,6 +203,23 @@
            (or (member x2 xs1) x2-in-xs1))))
     (not (or x1-in-xs2 x2-in-xs1))))
 
+(define-metafunction lam-rec-runtime
+  keep-bindings : (x ...) ϱ -> ϱ
+  [(keep-bindings (x_0 ...) ϱ_0)
+   (keep-bindings-aux (x_0 ...) ϱ_0 ())]
+  )
+(define-metafunction lam-rec-runtime
+  keep-bindings-aux : (x ...) ϱ ϱ -> ϱ
+  [(keep-bindings-aux (x_0 ...) () ϱ_1)
+   ϱ_1]
+  [(keep-bindings-aux (x_0 ...) ((x_1 V_1) (x_2 V_2) ...) ((x_3 V_3) ...))
+   (keep-bindings-aux (x_0 ...) ((x_2 V_2) ...) ((x_1 V_1) (x_3 V_3) ...))
+   (side-condition (member (term x_1) (term (x_0 ...))))]
+  [(keep-bindings-aux (x_0 ...) ((x_1 V_1) (x_2 V_2) ...) ((x_3 V_3) ...))
+   (keep-bindings-aux (x_0 ...) ((x_2 V_2) ...) ((x_3 V_3) ...))
+   (side-condition (not (member (term x_1) (term (x_0 ...)))))]
+  )
+
 (define lam-rec-red
   (reduction-relation
    lam-rec-runtime
@@ -211,8 +228,14 @@
         (Σ (in-hole E (lookup-env ϱ x)))
         "var")
    
-   (--> (Σ (in-hole E (sub (λ x T e) ϱ)))
-        ((insert Σ lam:0 (closure x T e ϱ)) (in-hole E lam:0))
+   (--> (Σ (in-hole E (sub (λ x T e_0) ϱ_0)))
+        ((insert Σ lam:0 (closure x T e_0 ϱ_0)) (in-hole E lam:0))
+        (fresh lam:0)
+        (where ϱ_1 (keep-bindings (free (λ x T e_0)) ϱ_0))
+        "lam-ϱ")
+
+   (--> (Σ (in-hole E (λ x T e_0)))
+        ((insert Σ lam:0 (closure x T e_0 ())) (in-hole E lam:0))
         (fresh lam:0)
         "lam")
 
