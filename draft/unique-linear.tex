@@ -8,9 +8,13 @@
 \input{macros}
 
 \begin{document}
+\section{First Attempt: Uniqueness and Linearity}
+\label{sec:first-attempt:-uniq}
+
+
 Syntax
 \begin{align*}
-  e &::= x \mid \LAM xe \mid \APP ee \mid \LET xee \mid \REC{ \overline{a=e}} \mid \GET ea \mid \UPD eae \\
+  e &::= x \mid \LAM xte \mid \APP ee \mid \LET xee \mid \REC{ \overline{a=e}} \mid \GET ea \mid \UPD eae \\
   \ell &::= \LIN \mid \UN & \UN & \sqsubset \LIN \\
   u &::= \READ \mid \WRITE & \WRITE & \sqsubset \READ \\
   t &::= b\,\ell\, u \\
@@ -93,9 +97,9 @@ Uniqueness does not matter for a function. However, a function that captures a l
 \end{itemize}
 \begin{mathpar}
   \inferrule{
-    A, x:t' \vdash e : t
+    A, x:t \vdash e : t'
   }{
-    A \vdash \LAM x e : (t' \to t)\,\ell\,u
+    A \vdash \LAM x t e : (t \to t')\,\ell\,u
   }
 \end{mathpar}
 Function application has no particular restrictions, it seems.
@@ -108,4 +112,88 @@ Function application has no particular restrictions, it seems.
     A \vdash \APP{e_0}e_1 : t_2
   }
 \end{mathpar}
+
+\clearpage{}
+
+\section{Second Attempt: Uniqueness Only}
+\label{sec:second-attempt:-uniq}
+
+Syntax
+\begin{align*}
+  e &::= x \mid \LAM xte \mid \APP ee \mid \LET xee  \mid c \mid e+e \mid \IF eee\\
+  &\mid \REC{ \overline{a=e}} \mid \GET ea \mid \UPD[u] eae \\
+  u,v &::= \READ \mid \WRITE & \WRITE & \sqsubset \READ \\
+  s,t &::= \NUM \mid s \to t \mid \REC[u]{ \overline{a : t}}
+\end{align*}
+Only record types have a uniqueness attribute $u$.
+The $u$ attribute on the update operation determines whether it is destructive ($u=\WRITE$) or copying ($u=\READ$).
+
+\begin{mathpar}
+  \inferrule{
+    A_2 \vdash e_0 : \REC[u]{ a_1:t \mid r} \dashv A_1 \\
+    A_1 \vdash e_1 : t \dashv A_0 
+  }{
+    A_2 \vdash
+    \UPD[u] {e_0}{a_1}{e_1} : \REC[v]{ a_1:t \mid r}
+    \dashv A_0
+  }
+
+  \inferrule{
+    A_1 \vdash e : \REC[\READ]{ a:t \mid r}
+    \dashv A_0
+  }{
+    A_1 \vdash \GET ea : t
+    \dashv A_0
+  }
+  
+  \inferrule{
+    A_{i+1} \vdash e_i : t_i \dashv A_i \\
+  }{
+    A_{n+1} \vdash \REC{ \overline{a_i=e_i}} : \REC[u]{ \overline{a_i : t_i}}
+    \dashv A_0
+  }
+
+  \inferrule{
+    t_0 = t_1 \OVERRIDE t
+  }{
+    A, x: t_1 \vdash x : t \dashv A, x:t_0
+  }
+
+    \inferrule{
+    A_2 \vdash e_0 : (t_1 \to t_2) \dashv A_1 \\
+    A_1 \vdash e_1 : t_1 \dashv A_0
+  }{
+    A_2 \vdash
+    \APP{e_0}e_1 : t_2
+    \dashv A_0
+  }
+
+    \inferrule{
+      A_1, x:t_1 \vdash
+      e : t
+      \dashv A_0^{X:\READ}, x:t_0 \\
+      X = \FREE (\LAM x {t_0} e)
+  }{
+    A_0^{X:\READ} \vdash
+    \LAM x {t_0} e : (t_0 \to t)
+    \dashv A_0
+  }
+
+  \inferrule{
+    A_4 \vdash e_0 : \NUM \dashv A_3 \\
+    A_1 \vdash e_1 : t_1 \dashv A_0 \\
+    A_2 \vdash e_2 : t_2 \dashv A_0 \\
+    t_1, t_2 \sqsubseteq t_3 \\
+    A_1, A_2 \sqsubseteq A_3
+  }{
+    A_4 \vdash \IF {e_0}{e_1}{e_2} : t_3 \dashv A_0
+  }
+\end{mathpar}
+
+Operationally, the lambda takes a deep copy of all free variables.
+Thus, it must not propagate write permission to the left.
+As the lambda may be invoked multiple times, the free variables must
+not have write permission.
+The notation $A^{X:\READ}$ means that all permissions in the types of the
+variables in $X$ are set to $\READ$.
 \end{document}

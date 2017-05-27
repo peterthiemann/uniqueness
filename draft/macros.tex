@@ -1,11 +1,14 @@
 \newcommand\kw{\textsf}
+\newcommand\meta{\textit}
 
-\newcommand\LAM[1]{\lambda#1.}
+\newcommand\LAM[2]{\lambda#1:#2.}
 \newcommand\APP[1]{#1\,}
 \newcommand\LET[2]{\kw{let}\,#1=#2\,\kw{in}\,}
-\newcommand\REC[1]{\kw{rec}\{#1\}}
+\newcommand\REC[2][{}]{\kw{rec}^{#1}\{#2\}}
 \newcommand\GET[1]{#1.}
-\newcommand\UPD[3]{#1\{#2=#3\}}
+\newcommand\UPD[4][{}]{#2^{#1}\{#3=#4\}}
+
+\newcommand\IF[2]{\kw{if}\,#1\,#2\,}
 
 \newcommand\OVERRIDE\rhd
 
@@ -15,6 +18,9 @@
 \newcommand\READ{\kw{R}}
 \newcommand\WRITE{\kw{W}}
 
+\newcommand\NUM{\kw{num}}
+
+\newcommand\FREE{\meta{free}}
 
 %%% Local Variables: 
 %%% mode: latex
