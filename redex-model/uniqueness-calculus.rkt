@@ -1,6 +1,7 @@
 #lang racket
 
 (require redex)
+(require rackunit)
 
 (define-language lam-rec
   ;; expressions
@@ -28,13 +29,15 @@
      tvar
      NUM BOOL
      (-> T T)
-     (REC u (l T)))
+     (REC u (l T) ...))
   (S ::=
      (forall (uvar ...) (tvar ...) T))
   ;; typing environment
   (TEE ::= (x T))
   (TE ::=
       (TEE ...))
+  ;; maybe type
+  (MT ::= (left string) (right T))
   )
 
 (define-extended-language lam-rec-runtime lam-rec
@@ -317,12 +320,14 @@
    (side-condition (not (equal? (term x_0) (term x_1))))])
 
 (define-metafunction lam-rec-runtime
-  lookup-trec : ((l T) ...) l -> T
+  lookup-trec : ((l T) ...) l -> MT
   [(lookup-trec ((l_0 T_0) (l T) ...) l_0)
-   T_0]
+   (right T_0)]
   [(lookup-trec ((l_0 T_0) (l T) ...) l_1)
    (lookup-trec ((l T) ...) l_1)
-   (side-condition (not (equal? (term l_0) (term l_1))))])
+   (side-condition (not (equal? (term l_0) (term l_1))))]
+  [(lookup-trec () l_0)
+   (left "label not found")])
 
 (define-metafunction lam-rec-runtime
   split-tenv* : TE (x ...) ..._1 -> (TE ..._1)
@@ -394,6 +399,17 @@
             ([x1 xs1])
     (and (member x1 xs2) x1-in-xs2)))
 
+
+(define (my-equal? x y)
+  (display (list 'my-equal x y))
+  (equal? x y))
+
+(define (my-member x y)
+  (let ((r (member x y)))
+    (display (list 'my-member x y '= r))
+    r))
+
+
 (define-judgment-form lam-rec-runtime
   #:mode (typing I I I O)
   #:contract (typing TE e : T)
@@ -447,8 +463,7 @@
   [
    (typing TE_0 (get e_0 l_0) : T_0)
    (typing TE_0 e_0 : (REC u (l_1 T_1) ...))
-   (side-condition (member (term l_0) (term (l_1 ...))))
-   (where T_0 (lookup-trec ((l_1 T_1) ...) l_0))
+   (where (right T_0) (lookup-trec ((l_1 T_1) ...) l_0))
    "ty-get"
    ]
 
@@ -456,28 +471,42 @@
    (typing TE_0 (update mode e_9 (l_1 e_1) ...) : (REC READ (l_2 T_2) ...))
    (where (TE_9 TE_1 ...) (split-tenv* TE_0 (free e_9) (free e_1) ...))
    (typing TE_9 e_9 : (REC READ (l_2 T_2) ...))
-   (typing TE_1 e_1 : T_1) ...
-   (side-condition (subset? (term (l_1 ...)) (term (l_2 ...))))
-   (where (T_3 ...) ((lookup-trec ((l_2 T_2) ...) l_1) ...))
-   (side-condition (my-equal? (term (T_1 ...)) (term (T_3 ...))))
+   (where ((right T_3) ...) ((lookup-trec ((l_2 T_2) ...) l_1) ...))
+   (typing TE_1 e_1 : T_3) ...
    "ty-update"
    ]
   
   )
-
-(define (my-equal? x y)
-  (display (list 'my-equal x y))
-  (equal? x y))
-
 ;; examples
 
+;(define (test-typing te ty)
+;  (judgment-holds (typing () ,te : ,ty)))
+
 (define ex1 (term (app (λ x BOOL x) #t)))
+(check-true (judgment-holds (typing () ,ex1 : BOOL)))
+
 (define ex2 (term (record (l:a 1))))
-(define problem1 (term (record))) ;; does not type check
+(check-true (judgment-holds (typing () ,ex2 : (REC u (l:a NUM)))))
+
+(define ex4 (term (record)))
+(check-true (judgment-holds (typing () ,ex4 : (REC u))))
+
 (define ex3 (term (get (record (l:a 1)) l:a)))
-(define problem2 (term (get (record (l:a 1)) l:b))) ;; crashes instead of type error
+(check-true (judgment-holds (typing () ,ex3 : NUM)))
 
-(define why-does-this-succeed?
-  (judgment-holds (typing () (update in-place (record (l:a 1)) (l:a #f)) : T)))
+(define ex5 (term (get (record (l:a 1)) l:b)))
+(check-false (judgment-holds (typing () ,ex5 : T)))
 
+(define ex6 (term (update in-place (record (l:a 1)) (l:a #f))))
+(check-false (judgment-holds (typing () ,ex6 : T)))
+
+(define ex7 (term (update in-place (record (l:a 1)) (l:a 42))))
+(check-true (judgment-holds (typing () ,ex7 : T)))
+
+(check-true
+ (judgment-holds
+  (typing () (update in-place (record (l:a 1) (l:b #f)) (l:b #t) (l:a 42) ) : T)))
+(check-false
+ (judgment-holds
+  (typing () (update in-place (record (l:a 1) (l:b #f)) (l:b #t) (l:a 42) (l:c #f) ) : T)))
 
