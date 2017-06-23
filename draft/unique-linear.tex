@@ -207,11 +207,9 @@ variables in $X$ are set to $\READ$.
     A = A_1 \OVERRIDE \dots \OVERRIDE A_n \\
     A_i \vdash e_i : t_i 
   }{
-    A \vdash \REC{ \overline{a_i=e_i}} : \REC{ \overline{a_i : t_i}}
+    A \vdash \REC{ \overline{a_i=e_i}} : \REC{ \overline{a_i :^{P_i} t_i}}
   }
-\end{mathpar}
 
-\begin{mathpar}
   \inferrule
   {
     A \vdash e : \REC{ a:^\READ t \mid r}
@@ -220,45 +218,66 @@ variables in $X$ are set to $\READ$.
   {
     A \vdash \GET ea : t
   }
-\end{mathpar}
 
-\begin{mathpar}
   \inferrule{
     A_0 \vdash e_0 : \REC{ a:^\WRITE t \mid r} \\
     A_1 \vdash e_1 : t \\
     % \WRITE \in P \\
     A = A_0 \OVERRIDE A_1
   }{
-    A \vdash \UPD {e_0}a{e_1} : \REC{ a:t \mid r}
+    A \vdash \UPD {e_0}a{e_1} : \REC{ a:^P t \mid r}
   }
-\end{mathpar}
-
-
-\begin{mathpar}
+  \\
   \inferrule{
   }{
-    A, x: t \vdash x:t
+    A, x: t \vdash x: t
+  }
+
+  \inferrule{
+    A_0, x:t \vdash e : t' \\
+    A = A_0^*
+  }{
+    A \vdash \LAM x t e : (t \to t')
+  }
+\end{mathpar}
+Function closures have ``infinite'' splitting $(a :^P t)^*$ into $(a :^Q t)$.
+\begin{itemize}
+\item $P \le \{\READ\}$ propagate $Q = \READ$, no action required
+\item $\WRITE \in P$: propagate $Q = \READ$, insert copy into closure
+\end{itemize}
+
+Function application has no particular restrictions, it seems.
+\begin{mathpar}
+  \inferrule{
+    A_0 \vdash e_0 : (t_1 \to t_2) \\
+    A_1 \vdash e_1 : t_1 \\
+    A = A_0 \OVERRIDE A_1
+  }{
+    A \vdash \APP{e_0}e_1 : t_2
   }
 \end{mathpar}
 
 Look at combining $a :^O t \OVERRIDE a:^P t$ upwards to $a : ^Q t$
 \begin{itemize}
-\item $O\subseteq \{\READ\}$: $Q = O \cup P$,
+\item if $O=\emptyset$ or $P=\emptyset$ (field only used in one branch), then $Q = O \cup P$, no
+  action required
+\item if $O\subseteq \{\READ\}$: $Q = O \cup P$,
   no further action required as potential writing in $P$ happens after reading
-\item $\WRITE \in O$, $P \subseteq \{\READ\}$: two choices, not clear
+\item if $\WRITE \in O$, $P = \{\READ\}$: two choices, not clear
   which is better
   \begin{itemize}
   \item $Q = \READ$ insert copy, propagate left to the write operation
   \item $Q = \WRITE$ insert copy, propagate right to the read operation
   \end{itemize}
-\item $\WRITE\in O$, $\WRITE \in P$: $Q = \WRITE$ insert copy,
+\item if $\WRITE\in O$, $\WRITE \in P$: $Q = \WRITE$ insert copy,
   propagate left (or right)
 \end{itemize}
 
 \begin{mathpar}
   \inferrule
-  { A \vdash e_1 : t_1 \\
-    A, x : t_1 \vdash e_2 : t_2
+  { A_1 \vdash e_1 : t_1 \\
+    A_2, x : t_1 \vdash e_2 : t_2 \\
+    A = A_1 \OVERRIDE A_2
   }
   { A \vdash \LET x{e_1} e_2 : t}
 \end{mathpar}
