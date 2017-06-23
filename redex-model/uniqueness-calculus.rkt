@@ -342,6 +342,10 @@
    ]
   )
 
+;; split the environment
+;; variables bound to splittable types get moved to both output environments
+;; other variable get moved to the output environment where they occur
+;; (if a variable of non-splittable type occurs in both subterms, we give up)
 (define-metafunction lam-rec-runtime
   split-tenv : TE (x ...) (x ...) -> (TE TE)
   [(split-tenv TE_0 (x_1 ...) (y_1 ...))
