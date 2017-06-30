@@ -202,9 +202,13 @@ variables in $X$ are set to $\READ$.
 \section{Third Attempt: Field Effects}
 \label{sec:third-attempt:-field}
 
-Effects attached to single record labels
+Effects attached to single record labels, intuitively $P, Q \subseteq
+\{ \READ, \WRITE \}$ but it does not make sense to distinguish
+$\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice
 \begin{align*}
-  P, Q &\subseteq \{ \READ, \WRITE \}
+  O, P, Q &::= \NOTHING \mid \READ \mid \WRITE
+  & \text{ordered by } \NOTHING
+  &\sqsubset \READ \sqsubset \WRITE
 \end{align*}
 
 \begin{figure}[tp]
@@ -251,33 +255,80 @@ Effects attached to single record labels
 \end{figure}
 Function closures have ``infinite'' splitting $(a :^P t)^*$ into $(a :^Q t)$.
 \begin{itemize}
-\item $P \subseteq \{\READ\}$ propagate $Q = \READ$, no action required
-\item $\WRITE \in P$: propagate $Q = \READ$, insert copy into closure
+\item $P = \NOTHING$ propagate $Q=\NOTHING$.
+\item $P = \READ$ propagate $Q = \WRITE$, no action required inside closure.
+\item $P = \WRITE$ propagate $Q = \WRITE$, perform copy inside of closure.
 \end{itemize}
+ Propagating $\READ$ is not safe in both cases because that enables a write operation on the same
+ record after the closure has been constructed. Alternatively, we could have another READONLY mode,
+ which prevents subsequent write operations.
 
 Function application has no particular restrictions, it seems.
 Let improves on lambda combined with app because infinite splitting is avoided.
 
 Look at combining $a :^O t \OVERRIDE a:^P t$ upwards to $a : ^Q t$:
-$Q= O \OVERRIDE P$
+
+$Q= O \OVERRIDE P$ is defined by:
 \begin{itemize}
-\item if $O=\emptyset$ or $P=\emptyset$ (field only used in one branch), then $Q = O \cup P$, no
+\item if $O=\NOTHING$ or $P=\NOTHING$ (field only used in one branch), then $Q = O \sqcup P$, no
   action required
-\item if $O\subseteq \{\READ\}$: $Q = O \cup P$,
+\item if $O\sqsubseteq \READ$: $Q = O \sqcup P$,
   no further action required as potential writing in $P$ happens after reading
-\item if $\WRITE \in O$, $P = \{\READ\}$: two choices, not clear
-  which is better
+\item if $O = \WRITE$, $P = \READ$, then there are two choices
   \begin{itemize}
   \item $Q = \READ$ insert copy, propagate left to the write operation
   \item $Q = \WRITE$ insert copy, propagate right to the read operation
   \end{itemize}
-\item if $\WRITE\in O$, $\WRITE \in P$: $Q = \WRITE$ insert copy,
+  First option is preferred because it keeps writes local and prevents
+  further copies downstream.
+\item if $O=\WRITE$, $P =\WRITE$: $Q = \WRITE$ insert copy,
   propagate left (or right)
 \end{itemize}
+We need an operation that returns $\READ$ if a copy is required and
+$\NOTHING$ otherwise.
+\begin{align*}
+  \COPY (O, P) &=
+                 \begin{cases}
+                   \READ & O=\WRITE \wedge \READ \sqsubseteq P \\
+                   \NOTHING & \text{otherwise}
+                 \end{cases}
+  \\
+  \COPY (\overline{O}, \overline{P})
+               &= \bigsqcup_i \COPY (O_i, P_i)
+  \\
+  \COPY (\NUM, \NUM)
+               & = \NOTHING
+  \\
+  \COPY (t_1 \to t_2, t_1 \to t_2)
+               & = \NOTHING
+  \\
+  \COPY (\REC{ \overline{a_i :^{O_i} t_i'}}, \REC{ \overline{a_i :^{P_i} t_i''}})
+  &=\COPY (\overline{O_i}, \overline{P_i})
+    \sqcup \bigsqcup_i \overline{\COPY (t_i', t_i'')}
+\end{align*}
 
 Combining environments: pointwise
 
-Combining records
+Combining types and records
+\begin{mathpar}
+  \inferrule{}{ \NUM = \NUM \OVERRIDE \NUM}
+
+  \inferrule{}{t_1 \to t_2 = t_1 \to t_2 \OVERRIDE t_1 \to t_2}
+  \\
+  \inferrule{
+    Q_i = (O_i \OVERRIDE P_i)
+    \sqcup \COPY (\overline{O_i}, \overline{P_i})
+    \sqcup \bigsqcup_i \overline{\COPY (t_i', t_i'')} \\
+    t_i = t_i' \OVERRIDE t_i''
+  }{
+    \REC{ \overline{a_i :^{Q_i} t_i}}
+    =
+    \REC{ \overline{a_i :^{O_i} t_i'}}
+    \OVERRIDE
+    \REC{ \overline{a_i :^{P_i} t_i''}}
+  }
+\end{mathpar}
+
 \begin{mathpar}
   \inferrule
   {}
@@ -295,78 +346,78 @@ Combining records
   \begin{array}{|c|c||c|c||c|c|l}
     Q_a&Q_b&O_a&O_b&P_a&P_b& \\
     \hline
-    P_a &\emptyset& \emptyset & \emptyset & P_a & \emptyset & \\
-    O_a & \emptyset& O_a & \emptyset & \emptyset & \emptyset & \\
-    P_a\cup\READ   &\emptyset& \READ & \emptyset & P_a & \emptyset & \\
-    \READ&\READ& \WRITE\in & \emptyset & \READ & \emptyset
+    P_a &\NOTHING& \NOTHING & \NOTHING & P_a & \NOTHING & \\
+    O_a & \NOTHING& O_a & \NOTHING & \NOTHING & \NOTHING & \\
+    P_a\sqcup\READ   &\NOTHING& \READ & \NOTHING & P_a & \NOTHING & \\
+    \READ&\READ& \WRITE & \NOTHING & \READ & \NOTHING
                        &  \text{copy, propagate left to write}\\
-    \WRITE &\READ& \WRITE\in & \emptyset & \WRITE\in & \emptyset
+    \WRITE &\READ& \WRITE & \NOTHING & \WRITE & \NOTHING
                        &\text{copy, propagate left to write} \\
   \end{array}
 
   \begin{array}{|c|c||c|c||c|c|l}
     Q_a&Q_b&O_a&O_b&P_a&P_b& \\
     \hline
-    P_a & P_b & \emptyset & \emptyset & P_a & P_b & \\
-    O_a & P_b & O_a & \emptyset & \emptyset & P_b & \\
-    P_a\cup\READ   &P_b& \READ & \emptyset & P_a & P_b & \\
-    \READ&P_b\cup\READ& \WRITE\in & \emptyset & \READ & P_b
+    P_a & P_b & \NOTHING & \NOTHING & P_a & P_b & \\
+    O_a & P_b & O_a & \NOTHING & \NOTHING & P_b & \\
+    P_a\sqcup\READ   &P_b& \READ & \NOTHING & P_a & P_b & \\
+    \READ&P_b\sqcup\READ& \WRITE & \NOTHING & \READ & P_b
                        &  \text{copy, propagate left to write}\\
-    \WRITE & P_b\cup\READ & \WRITE\in & \emptyset & \WRITE\in & P_b
+    \WRITE & P_b\sqcup\READ & \WRITE & \NOTHING & \WRITE & P_b
                        &\text{copy, propagate left to write} \\
   \end{array}
 
   \begin{array}{|c|c||c|c||c|c|l}
     Q_a&Q_b&O_a&O_b&P_a&P_b& \\
     \hline
-    P_a & O_b & \emptyset & O_b & P_a & \emptyset & \\
-    O_a & O_b & O_a & O_b & \emptyset & \emptyset & \\
-    P_a\cup\READ  & O_b & \READ & O_b & P_a & \emptyset & \\
-    \READ&O_b \cup\READ& \WRITE\in & O_b & \READ & \emptyset
+    P_a & O_b & \NOTHING & O_b & P_a & \NOTHING & \\
+    O_a & O_b & O_a & O_b & \NOTHING & \NOTHING & \\
+    P_a\sqcup\READ  & O_b & \READ & O_b & P_a & \NOTHING & \\
+    \READ&O_b \sqcup\READ& \WRITE & O_b & \READ & \NOTHING
                        &  \text{copy, propagate left to write}\\
-    \WRITE &O_b\cup\READ& \WRITE\in & O_b & \WRITE\in & \emptyset
+    \WRITE &O_b\sqcup\READ& \WRITE & O_b & \WRITE & \NOTHING
                            &\text{copy, propagate left to write} \\
   \end{array}
 
 \begin{array}{|c|c||c|c||c|c|l}
     Q_a&Q_b&O_a&O_b&P_a&P_b& \\
     \hline
-    P_a &P_b\cup\READ& \emptyset & \READ & P_a & P_b & \\
-    O_a & P_b\cup\READ& O_a & \READ & \emptyset & P_b & \\
-    P_a\cup\READ   &P_b\cup\READ& \READ & \READ & P_a & P_b & \\
-    \READ&P_b\cup\READ& \WRITE\in & \READ & \READ & P_b
+    P_a &P_b\sqcup\READ& \NOTHING & \READ & P_a & P_b & \\
+    O_a & P_b\sqcup\READ& O_a & \READ & \NOTHING & P_b & \\
+    P_a\sqcup\READ   &P_b\sqcup\READ& \READ & \READ & P_a & P_b & \\
+    \READ&P_b\sqcup\READ& \WRITE & \READ & \READ & P_b
                        &  \text{copy, propagate left to write}\\
-    \WRITE &P_b\cup\READ& \WRITE\in & \READ & \WRITE\in & P_b
+    \WRITE &P_b\sqcup\READ& \WRITE & \READ & \WRITE & P_b
                        &\text{copy, propagate left to write} \\
   \end{array}
 
   \begin{array}{|c|c||c|c||c|c|l}
     Q_a&Q_b&O_a&O_b&P_a&P_b& \\
     \hline
-    P_a\cup\READ &\READ& \emptyset & \WRITE\in & P_a & \READ
+    P_a\sqcup\READ &\READ& \NOTHING & \WRITE & P_a & \READ
                            & \text{copy, propagate left to write} \\
-    \READ & \READ& O_a & \WRITE\in & \emptyset & \READ
+    \READ & \READ& O_a & \WRITE & \NOTHING & \READ
                            & \text{copy, propagate left to write} \\
-    P_a\cup\READ   &\READ& \READ & \WRITE\in & P_a & \READ
+    P_a\sqcup\READ   &\READ& \READ & \WRITE & P_a & \READ
                            &  \text{copy, propagate left to write}\\
-    \READ&\READ& \WRITE\in & \WRITE\in & \READ & \READ
+    \READ&\READ& \WRITE & \WRITE & \READ & \READ
                        &  \text{copy, propagate left to write}\\
-    \WRITE &\READ& \WRITE\in & \WRITE\in & \WRITE\in & \READ
+    \WRITE &\READ& \WRITE & \WRITE & \WRITE & \READ
                        &\text{copy, propagate left to write} \\
   \end{array}
 
   \begin{array}{|c|c||c|c||c|c|l}
     Q_a&Q_b&O_a&O_b&P_a&P_b& \\
     \hline
-    P_a\cup\READ &\WRITE& \emptyset & \WRITE\in & P_a & \WRITE\in
+    P_a\sqcup\READ &\WRITE& \NOTHING & \WRITE & P_a & \WRITE
                            & \text{copy, propagate left to write} \\
-    \READ & \WRITE& O_a & \WRITE\in & \emptyset & \WRITE\in
+    \READ & \WRITE& O_a & \WRITE & \NOTHING & \WRITE
                            & \text{copy, propagate left to write} \\
-    P_a\cup\READ   &\WRITE& \READ & \WRITE\in & P_a & \WRITE\in
+    P_a\sqcup\READ   &\WRITE& \READ & \WRITE & P_a & \WRITE
                            &  \text{copy, propagate left to write}\\
-    \READ&\WRITE& \WRITE\in & \WRITE\in & \READ & \WRITE\in
+    \READ&\WRITE& \WRITE & \WRITE & \READ & \WRITE
                        &  \text{copy, propagate left to write}\\
-    \WRITE &\WRITE& \WRITE\in & \WRITE\in & \WRITE\in & \WRITE\in
+    \WRITE &\WRITE& \WRITE & \WRITE & \WRITE & \WRITE
                        &\text{copy, propagate left to write} \\
   \end{array}
 \end{mathpar}
