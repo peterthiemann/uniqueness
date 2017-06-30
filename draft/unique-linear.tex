@@ -202,52 +202,35 @@ variables in $X$ are set to $\READ$.
 \section{Third Attempt: Field Effects}
 \label{sec:third-attempt:-field}
 
-\begin{mathpar}
-  \inferrule{
-    A = A_1 \OVERRIDE \dots \OVERRIDE A_n \\
-    A_i \vdash e_i : t_i 
-  }{
-    A \vdash \REC{ \overline{a_i=e_i}} : \REC{ \overline{a_i :^{P_i} t_i}}
-  }
+Effects attached to single record labels
+\begin{align*}
+  P, Q &\subseteq \{ \READ, \WRITE \}
+\end{align*}
 
-  \inferrule
-  {
-    A \vdash e : \REC{ a:^\READ t \mid r}
-    % \\ \READ \in P
-  }
-  {
-    A \vdash \GET ea : t
-  }
+\begin{figure}[tp]
+  \begin{mathpar}
+    \inferrule{
+      A = A_1 \OVERRIDE \dots \OVERRIDE A_n \\
+      A_i \vdash e_i : t_i }{ A \vdash \REC{ \overline{a_i=e_i}} :
+      \REC{ \overline{a_i :^{P_i} t_i}} }
 
-  \inferrule{
-    A_0 \vdash e_0 : \REC{ a:^\WRITE t \mid r} \\
-    A_1 \vdash e_1 : t \\
-    % \WRITE \in P \\
-    A = A_0 \OVERRIDE A_1
-  }{
-    A \vdash \UPD {e_0}a{e_1} : \REC{ a:^P t \mid r}
-  }
-  \\
-  \inferrule{
-  }{
-    A, x: t \vdash x: t
-  }
+    \inferrule { A \vdash e : \REC{ a:^\READ t \mid r}
+      % \\ \READ \in P
+    } { A \vdash \GET ea : t }
 
-  \inferrule{
-    A_0, x:t \vdash e : t' \\
-    A = A_0^*
-  }{
-    A \vdash \LAM x t e : (t \to t')
-  }
-\end{mathpar}
-Function closures have ``infinite'' splitting $(a :^P t)^*$ into $(a :^Q t)$.
-\begin{itemize}
-\item $P \le \{\READ\}$ propagate $Q = \READ$, no action required
-\item $\WRITE \in P$: propagate $Q = \READ$, insert copy into closure
-\end{itemize}
+    \inferrule{
+      A_0 \vdash e_0 : \REC{ a:^\WRITE t \mid r} \\
+      A_1 \vdash e_1 : t \\
+      % \WRITE \in P \\
+      A = A_0 \OVERRIDE A_1 }{ A \vdash \UPD {e_0}a{e_1} : \REC{ a:^P
+        t \mid r} }
+    \\
+    \inferrule{ }{ A, x: t \vdash x: t }
 
-Function application has no particular restrictions, it seems.
-\begin{mathpar}
+    \inferrule{
+      A_0, x:t \vdash e : t' \\
+      A = A_0^* }{ A \vdash \LAM x t e : (t \to t') }
+
   \inferrule{
     A_0 \vdash e_0 : (t_1 \to t_2) \\
     A_1 \vdash e_1 : t_1 \\
@@ -255,9 +238,28 @@ Function application has no particular restrictions, it seems.
   }{
     A \vdash \APP{e_0}e_1 : t_2
   }
-\end{mathpar}
 
-Look at combining $a :^O t \OVERRIDE a:^P t$ upwards to $a : ^Q t$
+  \inferrule
+  { A_1 \vdash e_1 : t_1 \\
+    A_2, x : t_1 \vdash e_2 : t_2 \\
+    A = A_1 \OVERRIDE A_2
+  }
+  { A \vdash \LET x{e_1} e_2 : t}
+  \end{mathpar}
+  \caption{Propagation rules}
+  \label{fig:field-effects}
+\end{figure}
+Function closures have ``infinite'' splitting $(a :^P t)^*$ into $(a :^Q t)$.
+\begin{itemize}
+\item $P \subseteq \{\READ\}$ propagate $Q = \READ$, no action required
+\item $\WRITE \in P$: propagate $Q = \READ$, insert copy into closure
+\end{itemize}
+
+Function application has no particular restrictions, it seems.
+Let improves on lambda combined with app because infinite splitting is avoided.
+
+Look at combining $a :^O t \OVERRIDE a:^P t$ upwards to $a : ^Q t$:
+$Q= O \OVERRIDE P$
 \begin{itemize}
 \item if $O=\emptyset$ or $P=\emptyset$ (field only used in one branch), then $Q = O \cup P$, no
   action required
@@ -273,13 +275,70 @@ Look at combining $a :^O t \OVERRIDE a:^P t$ upwards to $a : ^Q t$
   propagate left (or right)
 \end{itemize}
 
+Combining environments: pointwise
+
+Combining records
 \begin{mathpar}
   \inferrule
-  { A_1 \vdash e_1 : t_1 \\
-    A_2, x : t_1 \vdash e_2 : t_2 \\
-    A = A_1 \OVERRIDE A_2
+  {}
+  {
+    \REC{ {a :^{Q_a} t_a}, {b :^{Q_b} t_b}}
+    =
+    \REC{ {a :^{O_a} t_a}, {b :^{O_b} t_b}}
+    \OVERRIDE
+    \REC{ {a :^{P_a} t_a}, {b :^{P_b} t_b}}
   }
-  { A \vdash \LET x{e_1} e_2 : t}
+\end{mathpar}
+
+\clearpage
+\begin{mathpar}
+  \begin{array}{|c|c||c|c||c|c|l}
+    Q_a&Q_b&O_a&O_b&P_a&P_b& \\
+    \hline
+    P_a &\emptyset& \emptyset & \emptyset & P_a & \emptyset & \\
+    O_a & \emptyset& O_a & \emptyset & \emptyset & \emptyset & \\
+    P_a\cup\READ   &\emptyset& \subseteq\READ & \emptyset & P_a & \emptyset & \\
+    \READ&\READ& \WRITE\in & \emptyset & \READ & \emptyset
+                       &  \text{copy, propagate left to write}\\
+    \WRITE &\READ& \WRITE\in & \emptyset & \WRITE\in & \emptyset
+                       &\text{copy, propagate left to write} \\
+  \end{array}
+
+  \begin{array}{|c|c||c|c||c|c|l}
+    Q_a&Q_b&O_a&O_b&P_a&P_b& \\
+    \hline
+    P_a & P_b & \emptyset & \emptyset & P_a & P_b & \\
+    O_a & P_b & O_a & \emptyset & \emptyset & P_b & \\
+    P_a\cup\READ   &P_b& \subseteq\READ & \emptyset & P_a & P_b & \\
+    \READ&P_b\cup\READ& \WRITE\in & \emptyset & \READ & P_b
+                       &  \text{copy, propagate left to write}\\
+    \WRITE & P_b\cup\READ & \WRITE\in & \emptyset & \WRITE\in & P_b
+                       &\text{copy, propagate left to write} \\
+  \end{array}
+
+  \begin{array}{|c|c||c|c||c|c|l}
+    Q_a&Q_b&O_a&O_b&P_a&P_b& \\
+    \hline
+    P_a & O_b & \emptyset & O_b & P_a & \emptyset & \\
+    O_a & O_b & O_a & O_b & \emptyset & \emptyset & \\
+    P_a\cup\READ  & O_b & \subseteq\READ & O_b & P_a & \emptyset & \\
+    \READ&O_b \cup\READ& \WRITE\in & O_b & \READ & \emptyset
+                       &  \text{copy, propagate left to write}\\
+    \WRITE &O_b\cup\READ& \WRITE\in & O_b & \WRITE\in & \emptyset
+                           &\text{copy, propagate left to write} \\
+  \end{array}
+
+\begin{array}{|c|c||c|c||c|c|l}
+    Q_a&Q_b&O_a&O_b&P_a&P_b& \\
+    \hline
+    P_a &\emptyset& \emptyset & \emptyset & P_a & \emptyset & \\
+    O_a & \emptyset& O_a & \emptyset & \emptyset & \emptyset & \\
+    P_a\cup\READ   &\emptyset& \subseteq\READ & \emptyset & P_a & \emptyset & \\
+    \READ&\READ& \WRITE\in & \emptyset & \READ & \emptyset
+                       &  \text{copy, propagate left to write}\\
+    \WRITE &\READ& \WRITE\in & \emptyset & \WRITE\in & \emptyset
+                       &\text{copy, propagate left to write} \\
+  \end{array}
 \end{mathpar}
 
 \end{document}
