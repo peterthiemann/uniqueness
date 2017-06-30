@@ -297,7 +297,7 @@ Combining records
     \hline
     P_a &\emptyset& \emptyset & \emptyset & P_a & \emptyset & \\
     O_a & \emptyset& O_a & \emptyset & \emptyset & \emptyset & \\
-    P_a\cup\READ   &\emptyset& \subseteq\READ & \emptyset & P_a & \emptyset & \\
+    P_a\cup\READ   &\emptyset& \READ & \emptyset & P_a & \emptyset & \\
     \READ&\READ& \WRITE\in & \emptyset & \READ & \emptyset
                        &  \text{copy, propagate left to write}\\
     \WRITE &\READ& \WRITE\in & \emptyset & \WRITE\in & \emptyset
@@ -309,7 +309,7 @@ Combining records
     \hline
     P_a & P_b & \emptyset & \emptyset & P_a & P_b & \\
     O_a & P_b & O_a & \emptyset & \emptyset & P_b & \\
-    P_a\cup\READ   &P_b& \subseteq\READ & \emptyset & P_a & P_b & \\
+    P_a\cup\READ   &P_b& \READ & \emptyset & P_a & P_b & \\
     \READ&P_b\cup\READ& \WRITE\in & \emptyset & \READ & P_b
                        &  \text{copy, propagate left to write}\\
     \WRITE & P_b\cup\READ & \WRITE\in & \emptyset & \WRITE\in & P_b
@@ -321,7 +321,7 @@ Combining records
     \hline
     P_a & O_b & \emptyset & O_b & P_a & \emptyset & \\
     O_a & O_b & O_a & O_b & \emptyset & \emptyset & \\
-    P_a\cup\READ  & O_b & \subseteq\READ & O_b & P_a & \emptyset & \\
+    P_a\cup\READ  & O_b & \READ & O_b & P_a & \emptyset & \\
     \READ&O_b \cup\READ& \WRITE\in & O_b & \READ & \emptyset
                        &  \text{copy, propagate left to write}\\
     \WRITE &O_b\cup\READ& \WRITE\in & O_b & \WRITE\in & \emptyset
@@ -331,14 +331,46 @@ Combining records
 \begin{array}{|c|c||c|c||c|c|l}
     Q_a&Q_b&O_a&O_b&P_a&P_b& \\
     \hline
-    P_a &\emptyset& \emptyset & \emptyset & P_a & \emptyset & \\
-    O_a & \emptyset& O_a & \emptyset & \emptyset & \emptyset & \\
-    P_a\cup\READ   &\emptyset& \subseteq\READ & \emptyset & P_a & \emptyset & \\
-    \READ&\READ& \WRITE\in & \emptyset & \READ & \emptyset
+    P_a &P_b\cup\READ& \emptyset & \READ & P_a & P_b & \\
+    O_a & P_b\cup\READ& O_a & \READ & \emptyset & P_b & \\
+    P_a\cup\READ   &P_b\cup\READ& \READ & \READ & P_a & P_b & \\
+    \READ&P_b\cup\READ& \WRITE\in & \READ & \READ & P_b
                        &  \text{copy, propagate left to write}\\
-    \WRITE &\READ& \WRITE\in & \emptyset & \WRITE\in & \emptyset
+    \WRITE &P_b\cup\READ& \WRITE\in & \READ & \WRITE\in & P_b
+                       &\text{copy, propagate left to write} \\
+  \end{array}
+
+  \begin{array}{|c|c||c|c||c|c|l}
+    Q_a&Q_b&O_a&O_b&P_a&P_b& \\
+    \hline
+    P_a\cup\READ &\READ& \emptyset & \WRITE\in & P_a & \READ
+                           & \text{copy, propagate left to write} \\
+    \READ & \READ& O_a & \WRITE\in & \emptyset & \READ
+                           & \text{copy, propagate left to write} \\
+    P_a\cup\READ   &\READ& \READ & \WRITE\in & P_a & \READ
+                           &  \text{copy, propagate left to write}\\
+    \READ&\READ& \WRITE\in & \WRITE\in & \READ & \READ
+                       &  \text{copy, propagate left to write}\\
+    \WRITE &\READ& \WRITE\in & \WRITE\in & \WRITE\in & \READ
+                       &\text{copy, propagate left to write} \\
+  \end{array}
+
+  \begin{array}{|c|c||c|c||c|c|l}
+    Q_a&Q_b&O_a&O_b&P_a&P_b& \\
+    \hline
+    P_a\cup\READ &\WRITE& \emptyset & \WRITE\in & P_a & \WRITE\in
+                           & \text{copy, propagate left to write} \\
+    \READ & \WRITE& O_a & \WRITE\in & \emptyset & \WRITE\in
+                           & \text{copy, propagate left to write} \\
+    P_a\cup\READ   &\WRITE& \READ & \WRITE\in & P_a & \WRITE\in
+                           &  \text{copy, propagate left to write}\\
+    \READ&\WRITE& \WRITE\in & \WRITE\in & \READ & \WRITE\in
+                       &  \text{copy, propagate left to write}\\
+    \WRITE &\WRITE& \WRITE\in & \WRITE\in & \WRITE\in & \WRITE\in
                        &\text{copy, propagate left to write} \\
   \end{array}
 \end{mathpar}
+A copy operation reads \textbf{every} field. Hence, a copy operation
+caused by one field implies a read effect on all fields.
 
 \end{document}
