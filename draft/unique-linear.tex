@@ -353,7 +353,10 @@ $\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice as i
     \overline{O_I = P_i \sqcup Q_i}}
     {\JOIN{\REC{ \overline{a_i :^{O_i} s_i}}}{\REC{ \overline{a_i :^{P_i} s_i'}}}{\REC{ \overline{a_i :^{Q_i} s_i''}}}}
   \end{mathpar}
-  \caption{Bounding and splitting operations on types}
+  \caption{Bounding and splitting operations on types. The intuition is that \SPLITK{} propagates
+    information in the positive positions of a type downwards towards the subexpressions. At the
+    same time, it joins information in the negative positions and propagates the join upwards. The
+    \JOINK{} operation works dually.}
   \label{fig:bounding-3}
 \end{figure}
 The novel ingredient in the typing rules are the propagation and splitting rules for the effect annotations on
