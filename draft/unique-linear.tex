@@ -264,11 +264,12 @@ $\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice as i
 
   \inferrule
   {
-    A = A_1 \OVERRIDE (A_2 \sqcup A_3) \\
-    A_1 \vdash e : \NUM \\
+    A = A_0 \OVERRIDE A_1 \\
+    \JOIN{A_1}{A_2}{ A_3} \\
+    \SPLIT{t_1}{  t_2}{ t_3} \\\\
+    A_0 \vdash e : \NUM \\
     A_2 \vdash f : t_2 \\
-    A_3 \vdash g : t_3 \\
-    \SPLIT{t_1}{  t_2}{ t_3}
+    A_3 \vdash g : t_3
   }
   {
     A \vdash \IF e f g : t_1
@@ -310,16 +311,16 @@ $\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice as i
 %   \label{fig:subtyping-3}
 % \end{figure}
 \begin{figure}[tp]
-  \begin{align*}
-    \NUM \sqcup \NUM
-    & = \NUM
-    \\
-    (s \to t) \sqcup (s' \to t')
-    & = (s \sqcap s') \to (t \sqcup t') \qquad ???
-    \\
-    \REC{ \overline{a_i :^{P_i} s_i}} \sqcup \REC{ \overline{a_i :^{Q_i} t_i}}
-    &= \REC{ \overline{a_i :^{P_i \sqcup Q_i} (s_i \sqcup t_i)}}
-  \end{align*}
+  % \begin{align*}
+  %   \NUM \sqcup \NUM
+  %   & = \NUM
+  %   \\
+  %   (s \to t) \sqcup (s' \to t')
+  %   & = (s \sqcap s') \to (t \sqcup t') \qquad ???
+  %   \\
+  %   \REC{ \overline{a_i :^{P_i} s_i}} \sqcup \REC{ \overline{a_i :^{Q_i} t_i}}
+  %   &= \REC{ \overline{a_i :^{P_i \sqcup Q_i} (s_i \sqcup t_i)}}
+  % \end{align*}
   \begin{mathpar}
     \inferrule{}{
       \SPLIT \NUM \NUM \NUM
@@ -337,9 +338,8 @@ $\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice as i
     }
 
     \inferrule{
-      ??? \\
-      \JOIN{s}{ s_1}{ s_2} \\
-      \SPLIT{t}{t_1}{t_2}
+      \SPLIT{s}{ s_1}{ s_2} \\
+      \JOIN{t}{t_1}{t_2}
     }{
       \JOIN{s \to t}{s_1 \to t_1}{s_2 \to t_2}
     }
@@ -347,6 +347,11 @@ $\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice as i
     \inferrule
     {\overline{\SPLIT{s_i}{s_i'}{s_i''}}}
     {\SPLIT{\REC{ \overline{a_i :^{P_i} s_i}}}{\REC{ \overline{a_i :^{P_i} s_i'}}}{\REC{ \overline{a_i :^{P_i} s_i''}}}}
+
+    \inferrule
+    {\overline{\JOIN{s_i}{s_i'}{s_i''}} \\
+    \overline{O_I = P_i \sqcup Q_i}}
+    {\JOIN{\REC{ \overline{a_i :^{O_i} s_i}}}{\REC{ \overline{a_i :^{P_i} s_i'}}}{\REC{ \overline{a_i :^{Q_i} s_i''}}}}
   \end{mathpar}
   \caption{Bounding and splitting operations on types}
   \label{fig:bounding-3}
