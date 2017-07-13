@@ -1,6 +1,7 @@
 \newcommand\kw{\textsf}
 \newcommand\meta{\textit}
 
+\newcommand\FIX[2]{\kw{fix}\,#1:#2.}
 \newcommand\LAM[2]{\lambda#1:#2.}
 \newcommand\APP[1]{#1\,}
 \newcommand\LET[2]{\kw{let}\,#1=#2\,\kw{in}\,}
@@ -12,6 +13,9 @@
 
 \newcommand\OVERRIDE\rhd
 
+\newcommand\JOIN[3]{\meta{join} (#1, #2, #3)}
+\newcommand\SPLIT[3]{\meta{meet} (#1, #2, #3)}
+
 \newcommand\UN{\kw{un}}
 \newcommand\LIN{\kw{lin}}
 
@@ -19,7 +23,11 @@
 \newcommand\READ{\kw{R}}
 \newcommand\WRITE{\kw{W}}
 
+\newcommand\TVAR{\alpha}
+\newcommand\PVAR{\pi}
 \newcommand\NUM{\kw{num}}
+
+\newcommand\SUB{\le}
 
 \newcommand\FREE{\meta{free}}
 \newcommand\COPY{\meta{copy}}
