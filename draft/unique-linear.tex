@@ -204,10 +204,13 @@ variables in $X$ are set to $\READ$.
 
 \begin{figure}[tp]
   \begin{align*}
-    e &::= x \mid \LAM xte \mid \APP ee \mid \LET xee  \mid c \mid e+e \mid \IF eee\\
-      &\mid \REC{ \overline{a=e}} \mid \GET ea \mid \UPD eae \\
-    O,P,Q &::= \NOTHING \mid \READ \mid \WRITE & \NOTHING & \sqsubseteq\WRITE\sqsubset \READ \\
-    s,t &::= \NUM \mid s \to t \mid \REC{ \overline{a :^P t}} \\
+    e,f,g,r
+    &::= x \mid \LAM xte \mid \APP fe \mid \FIX xtf \\
+    & \mid \LET xef  \mid c \mid f+g \mid \IF efg\\
+    &\mid \REC{ \overline{a=e}} \mid \GET ra \mid \UPD rae \\
+    O,P,Q &::= \PVAR \mid \NOTHING \mid \READ \mid \WRITE & \NOTHING & \sqsubseteq\WRITE\sqsubset \READ \\
+    s,t &::= \TVAR \mid \NUM \mid s \to t \mid \REC{ \overline{a :^P t}} \\
+    S, T& ::= \forall \TVAR. T \mid \forall \PVAR. T \mid t
   \end{align*}
   \caption{Syntax}
   \label{fig:syntax-3}
@@ -240,6 +243,10 @@ $\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice as i
       A_0, x:t \vdash e : t' \\
       A = A_0^* }{ A \vdash \LAM x t e : (t \to t') }
 
+  \inferrule[PT: Subtyping needed?]
+  { A, x:s \vdash f :t  \\ s \SUB t}
+  { A \vdash \FIX xtf : t}
+
   \inferrule{
     A_0 \vdash e_0 : (t_1 \to t_2) \\
     A_1 \vdash e_1 : t_1 \\
@@ -254,12 +261,98 @@ $\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice as i
     A = A_1 \OVERRIDE A_2
   }
   { A \vdash \LET x{e_1} e_2 : t}
+
+  \inferrule
+  {
+    A = A_1 \OVERRIDE (A_2 \sqcup A_3) \\
+    A_1 \vdash e : \NUM \\
+    A_2 \vdash f : t_2 \\
+    A_3 \vdash g : t_3 \\
+    \SPLIT{t_1}{  t_2}{ t_3}
+  }
+  {
+    A \vdash \IF e f g : t_1
+  }
+  % PT: is subtyping really needed? We are propagating demand information *backwards*, so (e.g.) the demand
+  % on the branches of a conditional is the same as the demand on the result of the conditional.
+  % \inferrule[Sub]
+  % {A \vdash e : s \\ s \SUB t}
+  % {A \vdash e : t}
   \end{mathpar}
-  \caption{Typing rules}
+  \caption{Typing rules.
+  It seems like the subtyping in the FIX rule can alway be eliminated by unfolding the fixed point
+  once.
+  If the demand on $t$ is stronger or weaker than $s$, then unfolding will mediate the demand.
+  NB the directionality of subtyping is wrong if interpolated from the lattice ordering (as it is presently).
+}
   \label{fig:field-effects}
 \end{figure}
+% \begin{figure}[tp]
+%   \begin{mathpar}
+%     \inferrule{}{\NUM \SUB \NUM}
+%
+%     \inferrule{
+%       s' \SUB s \\ t \SUB t'
+%     }{
+%       s \to t \SUB s' \to t' 
+%     }
+%
+%     \inferrule{
+%       \overline{s_i \SUB t_i} \\
+%       \overline{P_i \sqsubseteq Q_i}
+%     }{
+%       \REC{ \overline{a_i :^{P_i} s_i}}
+%       \SUB
+%       \REC{ \overline{a_i :^{Q_i} t_i}}
+%     }
+%   \end{mathpar}
+%   \caption{Subtyping}
+%   \label{fig:subtyping-3}
+% \end{figure}
+\begin{figure}[tp]
+  \begin{align*}
+    \NUM \sqcup \NUM
+    & = \NUM
+    \\
+    (s \to t) \sqcup (s' \to t')
+    & = (s \sqcap s') \to (t \sqcup t') \qquad ???
+    \\
+    \REC{ \overline{a_i :^{P_i} s_i}} \sqcup \REC{ \overline{a_i :^{Q_i} t_i}}
+    &= \REC{ \overline{a_i :^{P_i \sqcup Q_i} (s_i \sqcup t_i)}}
+  \end{align*}
+  \begin{mathpar}
+    \inferrule{}{
+      \SPLIT \NUM \NUM \NUM
+    }
+
+    \inferrule{}{
+      \JOIN \NUM \NUM \NUM
+    }
+    \\
+    \inferrule{
+      \JOIN{s}{ s_1}{ s_2} \\
+      \SPLIT{t}{t_1}{t_2}
+    }{
+      \SPLIT{s \to t}{s_1 \to t_1}{s_2 \to t_2}
+    }
+
+    \inferrule{
+      ??? \\
+      \JOIN{s}{ s_1}{ s_2} \\
+      \SPLIT{t}{t_1}{t_2}
+    }{
+      \JOIN{s \to t}{s_1 \to t_1}{s_2 \to t_2}
+    }
+    \\
+    \inferrule
+    {\overline{\SPLIT{s_i}{s_i'}{s_i''}}}
+    {\SPLIT{\REC{ \overline{a_i :^{P_i} s_i}}}{\REC{ \overline{a_i :^{P_i} s_i'}}}{\REC{ \overline{a_i :^{P_i} s_i''}}}}
+  \end{mathpar}
+  \caption{Bounding and splitting operations on types}
+  \label{fig:bounding-3}
+\end{figure}
 The novel ingredient in the typing rules are the propagation and splitting rules for the effect annotations on
-record labels.
+record labels indicated by the ternary override relation $\OVERRIDE$.
 Function closures have ``infinite'' splitting $(a :^P t)^*$ into $(a :^Q t)$.
 \begin{itemize}
 \item $P = \NOTHING$ propagate $Q=\NOTHING$.
@@ -430,5 +523,21 @@ Combining types and records
 \end{mathpar}
 A copy operation reads \textbf{every} field. Hence, a copy operation
 caused by one field implies a read effect on all fields.
-
+\clearpage{}
+Consider the typing for 
+\begin{align*}
+  f
+  &=(\LAM r{\REC{ a:^\WRITE \NUM}} \UPD r a{42})
+  &&: \REC{ a:^\WRITE \NUM} \to \REC{ a:^\PVAR \NUM}
+  \\
+  g
+  &=(\LAM r{\REC{a :^\NOTHING \NUM}} \REC{a = 0})
+  &&: \REC{a :^\NOTHING \NUM} \to \REC{ a:^\PVAR \NUM}
+  \\
+  &\IF e{f}{g}
+  &&: \REC{ a:^\WRITE \NUM} \to \REC{ a:^\PVAR \NUM}
+\end{align*}
+This propagation is correct,
+\textbf{but} if the write is propagated, this may cause a useless copy if $e$ is false.
 \end{document}
+
