@@ -202,14 +202,19 @@ variables in $X$ are set to $\READ$.
 \section{Third Attempt: Field Effects}
 \label{sec:third-attempt:-field}
 
-Effects attached to single record labels, intuitively $P, Q \subseteq
+\begin{figure}[tp]
+  \begin{align*}
+    e &::= x \mid \LAM xte \mid \APP ee \mid \LET xee  \mid c \mid e+e \mid \IF eee\\
+      &\mid \REC{ \overline{a=e}} \mid \GET ea \mid \UPD eae \\
+    O,P,Q &::= \NOTHING \mid \READ \mid \WRITE & \NOTHING & \sqsubseteq\WRITE\sqsubset \READ \\
+    s,t &::= \NUM \mid s \to t \mid \REC{ \overline{a :^P t}} \\
+  \end{align*}
+  \caption{Syntax}
+  \label{fig:syntax-3}
+\end{figure}
+In the syntax in Figure~\ref{fig:syntax-3}, effects are attached to single record labels, intuitively $P, Q \subseteq
 \{ \READ, \WRITE \}$ but it does not make sense to distinguish
-$\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice
-\begin{align*}
-  O, P, Q &::= \NOTHING \mid \READ \mid \WRITE
-  & \text{ordered by } \NOTHING
-  &\sqsubset \READ \sqsubset \WRITE
-\end{align*}
+$\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice as indicated.
 
 \begin{figure}[tp]
   \begin{mathpar}
@@ -250,9 +255,11 @@ $\{\WRITE, \READ\}$ from $\{\WRITE\}$, so we take the three element lattice
   }
   { A \vdash \LET x{e_1} e_2 : t}
   \end{mathpar}
-  \caption{Propagation rules}
+  \caption{Typing rules}
   \label{fig:field-effects}
 \end{figure}
+The novel ingredient in the typing rules are the propagation and splitting rules for the effect annotations on
+record labels.
 Function closures have ``infinite'' splitting $(a :^P t)^*$ into $(a :^Q t)$.
 \begin{itemize}
 \item $P = \NOTHING$ propagate $Q=\NOTHING$.
