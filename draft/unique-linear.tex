@@ -545,7 +545,53 @@ Consider the typing for
   &\IF e{f}{g}
   &&: \REC{ a:^\WRITE \NUM} \to \REC{ a:^\PVAR \NUM}
 \end{align*}
-This propagation is correct,
-\textbf{but} if the write is propagated, this may cause a useless copy if $e$ is false.
+This propagation using $\WRITE\sqcup\NOTHING = \WRITE$ is correct,
+\textbf{but} the propagation of $\WRITE$  may cause a useless copy if $e$ is false.
+
+The typing is analogous to pushing the conditional into the lamdas.
+\begin{align*}
+  r : \REC{ a:^\WRITE \NUM} & \vdash \UPD r a{42} &&: \REC{ a:^\PVAR \NUM}
+  \\
+  r : \REC{ a:^\NOTHING \NUM} & \vdash \REC{a = 0} &&: \REC{ a:^\PVAR \NUM}
+  \\
+  r : \REC{ a:^\WRITE \NUM}& \vdash \IF e{( \UPD r a{42})}{(\REC{a = 0})} &&: \REC{ a:^\PVAR \NUM}
+  \\
+  \vdash \LAM r {\REC{ a:^\WRITE \NUM}} & \IF e{( \UPD r a{42})}{(\REC{a = 0})}
+                                                  &&: {\REC{ a:^\WRITE \NUM}} \to \REC{ a:^\PVAR \NUM}
+\end{align*}
+
+\textbf{Let's finally get down to polymorphism. }
+\begin{align*}
+  \mathit{id} =
+  \LAM x\TVAR x & : \forall\TVAR.\TVAR\to\TVAR
+  &&\text{seems fine, just instantiate}
+  \\
+  \mathit{dup} =
+  \LAM x\TVAR x & : \forall\TVAR.\TVAR\to(\TVAR,\TVAR)
+\end{align*}
+\begin{verbatim}
+lambda r.
+  let (r1, r2) = dup r 
+  in  (r1 { a = 42 }, r2.a)
+-- should behave like "write before read"
+lambda r. 
+      (r  { a = 42 }, r .a)
+\end{verbatim}
+\begin{align*}
+  r : \REC{ a:^\WRITE \NUM} & \vdash \UPD r a{42} &&: \REC{ a:^\PVAR \NUM}
+  \\
+  r : \REC{ a:^\READ \NUM} & \vdash  r. a &&: \NUM
+  \\
+  r : \REC{ a:^\READ \NUM} & \vdash (\UPD r a{42}, r. a)  &&: \REC{ a:^\PVAR \NUM} \times \NUM
+\end{align*}
+Using \textit{dup}
+\begin{align*}
+  r_1 : \REC{ a:^\WRITE \NUM} & \vdash \UPD r a{42} &&: \REC{ a:^\PVAR \NUM}
+  \\
+  r_2 : \REC{ a:^\READ \NUM} & \vdash  r. a &&: \NUM
+  \\
+  r_1 : \REC{ a:^\WRITE \NUM},
+  r_2 : \REC{ a:^\READ \NUM} & \vdash  (\UPD r a{42} , r. a) &&: \REC{ a:^\PVAR \NUM} \times \NUM
+\end{align*}
 \end{document}
 
