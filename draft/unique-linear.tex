@@ -593,5 +593,42 @@ Using \textit{dup}
   r_1 : \REC{ a:^\WRITE \NUM},
   r_2 : \REC{ a:^\READ \NUM} & \vdash  (\UPD r a{42} , r. a) &&: \REC{ a:^\PVAR \NUM} \times \NUM
 \end{align*}
+\textbf{Suggestion}
+Distiguish positive and negative occurrences of a type variable.
+\begin{itemize}
+\item If a negative occurrence of a type variable is instantiated with a record type, then its fields are all set to
+  \READ.
+\item Every instantiation of a positive occurrence of a type variable with a record type is allowed
+  to have \textbf{different field permissions}. If a record type ends up with permission $\WRITE$,
+  then the corresponding record is copied after instantiation.
+\item If there is only one positive occurrence under an affine type constructor, then its permission
+  is pushed through.
+\end{itemize}
+That does not quite solve the problem:
+\begin{verbatim}
+let (r1, r2) = (r, r)
+in  (r1 { a = 42 }, r2.a)
+\end{verbatim}
+Here the reads and writes to \texttt{r1} and \texttt{r2} get out of order due to aliasing in the
+pair.
+
+Practical instance: the state monad. Turns out that the bind cannot be handled satisfactorily by the
+suggestion on the table because we don't know that \texttt{s} is linear. Seems like linearity is
+useful knowledge for polymorphic arguments.
+\begin{verbatim}
+type ST s a = s -> (s,a)
+
+-- a: -, +
+-- s: -, +
+returnST :: a -> ST s a
+returnST a = \s -> (s, a)
+
+-- b: -, +
+-- a: -, +
+-- s: +, -, +, -, -, +
+bindST :: ST s a -> (a -> ST s b) -> ST s b
+bindST ma f = \s -> let (s1,a) = ma s 
+                    in  f s1 a
+\end{verbatim}
 \end{document}
 
