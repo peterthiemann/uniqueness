@@ -1,0 +1,109 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathpartir}
+
+\newcommand{\KVAR}{\kappa}
+\newcommand{\ONE}{\circ}
+\newcommand{\MANY}{\ast}
+
+\newcommand{\TVAR}{\alpha}
+\newcommand{\TALL}[2]{\forall#1\colon#2.}
+\newcommand{\KALL}[1]{\forall#1.}
+
+\newcommand{\LAM}[2]{\lambda#1\colon#2.}
+\newcommand{\APP}[1]{#1\,}
+\newcommand{\TLAM}[2]{\Lambda#1\colon#2.}
+\newcommand{\TAPP}[2]{#1\,[#2]}
+\newcommand{\KLAM}[1]{\Lambda#1.}
+\newcommand{\KAPP}[2]{#1\,\{#2\}}
+
+\newcommand{\TENV}{\Gamma}
+
+\newcommand{\SPLIT}[3]{#1 \Join #2 = #3}
+
+\title{$F^{\ONE}$ with subkinding}
+\author{Peter Thiemann}
+
+\begin{document}
+\maketitle
+Syntax (perhaps more expressions are needed)
+\begin{align*}
+  k &::= \KVAR \mid \ONE \mid \MANY & \text{kinds, where }  \MANY \sqsubseteq \ONE \\
+  t &::= \TVAR \mid t \stackrel{k}{\to} t \mid \TALL\TVAR k t \mid \KALL\KVAR t \mid k \le k \Rightarrow t & \text{types} \\
+  e &::= x \mid \LAM x t e \mid \APP ee \mid \TLAM \TVAR k v \mid \TAPP et \mid \KLAM \KVAR v \mid \KAPP ek & \text{expressions} \\
+  v &::=  \LAM x t e \mid  \TLAM \TVAR k v & \text{values}
+\end{align*}
+
+Kinding rules
+\begin{mathpar}
+  \inferrule{}{\TENV, \KVAR \vdash \KVAR }
+
+  \inferrule{}{\TENV \vdash \ONE}
+
+  \inferrule{}{\TENV \vdash \MANY}
+  \\
+  \inferrule{k_1 \sqsubseteq k_2}{\TENV \vdash k_1 \le k_2}
+
+  \inferrule{}{\TENV, k_1 \le k_2 \vdash k_1 \le k_2}
+
+  \inferrule{\TENV \vdash k}{\TENV \vdash k \le k}
+
+  \inferrule{\TENV \vdash k_1 \le k_2 \\\TENV \vdash k_2 \le k_3}{\TENV \vdash k_1 \le k_3}
+  \\
+  \inferrule{\TENV \vdash t : k \\ \TENV \vdash k \le k' }{\TENV \vdash t : k'}
+
+  \inferrule{\TENV \vdash t_1 : k_1 \\ \TENV \vdash t_2 : k_2}{ \TENV \vdash t_1 \stackrel{k}{\to} t_2 : k}
+
+  \inferrule{}{\TENV, \TVAR:k \vdash \TVAR:k}
+
+  \inferrule{\TENV \vdash k\\ \TENV, \TVAR:k \vdash t:k' \\ \TVAR \notin \TENV}{\TENV \vdash \TALL\TVAR k t : k'}
+
+  \inferrule{\TENV, \KVAR \vdash t: k \\ \KVAR \notin \TENV}{\TENV \vdash \KALL\KVAR t : k}
+
+  \inferrule{\TENV \vdash k_1, k_2 \\
+    \TENV, k_1 \le k_2 \vdash t : k}{\TENV \vdash k_1 \le k_2 \Rightarrow t : k}
+\end{mathpar}
+
+Typing rules
+\begin{mathpar}
+  \inferrule{\TENV \vdash \MANY }{\TENV, x:t \vdash x:t }
+
+  \inferrule
+  {\TENV \vdash k' \\ \TENV \vdash k \le k' \\ \TENV, x:t \vdash e : t'}
+  {\TENV \vdash \LAM xte : t \stackrel{k}\to t'}
+
+  \inferrule
+  { \SPLIT{\TENV_1}{\TENV_2}{\TENV} \\
+    \TENV_1 \vdash e : t' \stackrel{k}\to t \\
+    \TENV_2 \vdash e' : t'}
+  {\TENV \vdash \APP ee' : t}
+
+  \inferrule
+  {\TENV, \TVAR\colon k \vdash v : t }
+  {\TENV \vdash \TLAM\TVAR k v : \TALL \TVAR k t}
+
+  \inferrule
+  { \TENV \vdash e : \TALL \TVAR k t' \\
+    \TENV \vdash t : k     
+  }
+  {\TENV \vdash \TAPP e t : t'[\TVAR \mapsto t]}
+
+  \inferrule
+  {\TENV, \KVAR \vdash e : t \\ \KVAR \notin \TENV}
+  {\TENV \vdash \KLAM\KVAR e : \KALL\KVAR t}
+
+  \inferrule
+  {\TENV \vdash e : \KALL\KVAR t \\ \TENV \vdash k}
+  {\TENV \vdash \KAPP e k : t[\KVAR \mapsto k]}
+
+  \inferrule
+  {\TENV,   k_1 \le k_2 \vdash e : t}
+  {\TENV \vdash e :  k_1 \le k_2 \Rightarrow t}
+
+  \inferrule
+  {\TENV \vdash e :  k_1 \le k_2 \Rightarrow t \\ \TENV \vdash k_1 \le k_2}
+  {\TENV \vdash e : t}
+\end{mathpar}
+
+\end{document}
