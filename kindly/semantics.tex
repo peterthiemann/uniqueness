@@ -1,0 +1,22 @@
+\begin{mathpar}
+  \inferrule[Lam]
+  { j \fresh }
+  { \ered{\closure{j}{x}{e}}{\emptyset}{\lam{x}{e}}{\closure{j}{x}{e}} }
+  \and
+  \inferrule[App]
+  { \ered{I}{E}{f}{\closure{j}{x}{e_f}} \\
+    \ered{I'}{E'}{e}{v} \\
+    \ered{I''}{E''}{\subst{x}{v}{e_f}}{v_f}
+  }
+  { \ered{I,I',I''}{E,E',E'',\closure{j}{x}{e_f}}{\app{f}{e}}{v_f} }
+  \and
+  \inferrule[Let]
+  { \ered{I}{E}{e}{v} \\
+    \ered{I'}{E'}{\subst{x}{v}{e'}}{v'}
+  }
+  { \ered{I,I'}{E,E'}{\letin{x}{e}{e'}}{v'} }
+\end{mathpar}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

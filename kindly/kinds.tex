@@ -1,0 +1,38 @@
+\begin{mathpar}
+  \inferrule
+  { }
+  { \subkind{P}{\E}{\kun}{\klin} }
+  \and
+  \inferrule
+  { \bineq{k}{k'} \in P }
+  { \subkind{P}{\E}{k}{k'} }
+  \and
+  \inferrule{}
+  { \lk \text{ reflexive, transitive}}
+  \\
+  \inferrule
+  { }
+  { \haskind{P}{\E}{\tau\tarr{k}\tau'}{k} }
+  \and
+  \inferrule
+  { }
+  { \haskind{P}{\E}{\alpha}{\kvar_\alpha} }
+  \and
+  \inferrule
+  { \bty{t}{k}{\tau} \in \E }
+  { \haskind{P}{\E}{\T{t}}{k} }
+  \and
+  \inferrule
+  { \haskind{P}{\E}{\tau}{k'} \\ \subkind{P}{\E}{k'}{k} }
+  { \haskind{P}{\E}{\tau}{k} }
+  \\
+  \inferrule
+  { \forall\bvar{x_i}{\tau_i}\in\E,\quad\haskind{P}{\E}{\tau_i}{k} }
+  { \envkind{P}{\E}{k} }
+\end{mathpar}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

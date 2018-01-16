@@ -1,0 +1,64 @@
+
+\documentclass[sigconf,author]{acmart}\settopmatter{printfolios=true}
+
+% Encoding and lang
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+% Graphical packages
+\usepackage{graphicx}
+
+% Math
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+% \usepackage{mathrsfs}
+\usepackage{mathtools}
+% \usepackage{textcomp}
+% \usepackage{textgreek}
+
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{natbib}% Good citations and bibliography
+\usepackage{mathpartir} % Syntax trees
+\usepackage[nameinlink,capitalize]{cleveref}
+
+
+\bibliographystyle{ACM-Reference-Format}
+\citestyle{acmauthoryear}
+
+\input{prelude}
+\input{notations}
+
+\begin{document}
+
+\title{Kindly Bent to Free Us}
+\maketitle
+
+\begin{figure*}[h]
+  \centering
+  \input{syntax}
+  \caption{Syntax}
+  
+  \input{kinds}
+  \caption{Kind rules -- $\haskind{P}{\E}{\tau}{k}$ }
+
+  \input{typing}
+  \caption{Typing rules -- $\hastype{P}{\E}{e}{\tau}$ }
+
+  \input{semantics}
+  \caption{Reduction rules -- $\ered{I}{E}{e}{v}$ }
+  
+\end{figure*}
+
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

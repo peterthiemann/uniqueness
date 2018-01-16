@@ -1,0 +1,37 @@
+\begin{mathpar}
+  \inferrule[Var]
+  { \envkind{P}{\E}{\kun} \\ \instanciate{\sigma}{\ (\qual{P}{\tau})} }
+  { \hastype{P}{\E,\bvar{x}{\sigma}}{x}{\tau} }
+  \and
+  \inferrule[Let]
+  {  \E = \esplit{\E_1}{\E_2} \\
+    \hastype{Q}{\E_1}{e_1}{\tau_1} \\
+    \sigma = \generalize{Q}{\E_1}{\tau_1} \\
+    \hastype{P}{\E_2,\bvar{x}{\sigma}}{e_2}{\tau_2} 
+  }
+  { \hastype{P}{\E}{\letin{x}{e_1}{e_2}}{\tau_2} }
+  \and
+  \inferrule[App]
+  { \E = \esplit{\E_1}{\E_2} \\
+    \hastype{P}{\E_1}{e_1}{\tau'\tarr{k}\tau} \\
+    \hastype{P}{\E_2}{e_2}{\tau'} }
+  { \hastype{P}{\E}{\app{e_1}{e_2}}{\tau} }
+  \and
+  \inferrule[Lam]
+  { \envkind{P}{\E}{k} \\ \hastype{P}{\E,\bvar{x}{\tau_x}}{e}{\tau} }
+  { \hastype{P}{\E}{\lam{x}{e}}{\tau_x\tarr{k}{\tau}} }
+  \and
+  \inferrule[Fix]
+  { \hastype{P}{\E}{e}{\tau\tarr{\kun}\tau} }
+  { \hastype{P}{\E}{\fix{e}}{\tau} }
+  \and
+  \inferrule
+  { \E = \E_1\cup\E_2 \\ \envkind{P}{\E_1\cap\E_2}{\kun} }
+  { \E = \esplit{\E_1}{\E_2} }
+\end{mathpar}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

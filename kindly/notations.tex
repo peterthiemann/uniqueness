@@ -1,0 +1,56 @@
+
+%% Syntax
+
+% Kinds
+\newcommand\lk{\leq}
+\newcommand\klin{\circ}
+\newcommand\kun{\ast}
+\newcommand\karr{\operatorname{\rightarrow}}
+\newcommand\kvar{\kappa}
+\newcommand\K[1]{\mathrm{#1}}
+
+% Types
+\newcommand\tvar{\alpha}
+\newcommand\tarr[1]{\operatorname{\xrightarrow{#1}}}
+\newcommand\T[1]{\mathrm{#1}}
+\newcommand\qual[2]{#1 \operatorname{\Rightarrow} #2}
+
+\newcommand\instanciate[2]{#1 \operatorname{\succ} #2}
+\newcommand\generalize[3]{\operatorname{\text{Gen}}(#1,#2,#3)}
+
+% Expressions
+\newcommand\lam[2]{\lambda #1 . #2}
+\newcommand\elet{\mathtt{let}}
+\newcommand\ein{\mathtt{in}}
+\newcommand\letin[3]{\elet\ #1 = #2\ \ein\ #3}
+\newcommand\fix[1]{\mathtt{fix}\ #1}
+\newcommand\app[2]{(#1\ #2)}
+
+
+%% Typing environments
+\newcommand\E{\Gamma}
+\newcommand\bvar[2]{(#1 : #2)}
+\newcommand\bty[3]{(\T{#1} : #2 = #3)}
+\newcommand\bineq[2]{(#1 \lk #2)}
+
+\newcommand\esplit[2]{#1 \operatorname{\Join} #2}
+
+%% Judgements
+\newcommand\BAR{\operatorname{|}}
+\newcommand\dash{\operatorname{\vdash}}
+\newcommand\hastype[4]{#1 \BAR #2 \dash #3 : #4}
+\newcommand\haskind[4]{#1 \BAR #2 \dash #3 \lk #4}
+\newcommand\subkind[4]{#1 \dash\ \bineq{#3}{#4}}
+\newcommand\envkind[3]{#1 \dash #2 \lk #3}
+
+%% Reductions
+
+\newcommand\subst[3]{#3[#1\rightarrow#2]}
+\newcommand\fresh{\operatorname{\text{fresh}}}
+\newcommand\closure[3]{\lambda^{#1} #2 . #3}
+\newcommand\ered[4]{#3\ \operatorname{\Downarrow^{#1}_{#2}}\ #4}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
