@@ -4,19 +4,20 @@
   e ::=&\ c\tag{Constant}\\
   |&\ x\ \tag{Variables}\\
   |&\ \fix{e}\tag{Fixpoint}\\
-  |&\ \app{e}{e} \tag{Application}\\
+  |&\ \app{e}{e'} \tag{Application}\\
   |&\ \lam{x}{e} \tag{Function}\\
-  |&\ \letin{x}{e}{e}\tag{Let binding}\\
+  |&\ \letin{x}{e}{e'}\tag{Let binding}\\
   \htag{Environments}
   \E ::=&\ b^*\\
   b ::=&\ \bvar{x}{\tau}\tag{Variable bindings}\\
+  |&\ \bvar{\tvar}{k}\tag{Type variable bindings}\\
   |&\ \bty{\T{t}}{k}{\tau}\tag{Type bindings}
 \end{align*}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.5\linewidth}
 \begin{align*}
   \htag{Type Schemes}
-  \sigma ::=&\ \forall\kappa^*\forall\alpha^*.(\qual{\pi^*}{\tau})\\
+  \sigma ::=&\ \forall\kvar^*\forall\bvar{\alpha}{\kvar}^*.(\qual{\pi^*}{\tau})\\
   \htag{Type Expressions}
   \tau ::=&\ \alpha\tag{Type variables}\\
   |&\ \tau\tarr{k}\tau\tag{Function types}\\
@@ -25,7 +26,8 @@
   |&\ \klin\tag{Linear kind}\\
   |&\ \kun\tag{Unrestricted kind}\\
   \htag{Constraints}
-  \pi ::=&\ \bineq{k}{k}
+  \pi ::=&\ \bineq{k}{k'}\\
+  P ::=&\ \pi^*
 \end{align*}
 \end{subfigure}
 

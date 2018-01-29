@@ -15,8 +15,8 @@
   { \haskind{P}{\E}{\tau\tarr{k}\tau'}{k} }
   \and
   \inferrule
-  { }
-  { \haskind{P}{\E}{\alpha}{\kvar_\alpha} }
+  { \bvar{\alpha}{k} \in \E }
+  { \haskind{P}{\E}{\alpha}{k} }
   \and
   \inferrule
   { \bty{t}{k}{\tau} \in \E }
@@ -29,6 +29,18 @@
   \inferrule
   { \forall\bvar{x_i}{\tau_i}\in\E,\quad\haskind{P}{\E}{\tau_i}{k} }
   { \envkind{P}{\E}{k} }
+  \\
+  \inferrule
+  { \haskind{P;\bineq{\kvar}{\kun}}{\E}{\sigma}{k} }
+  { \haskind{P}{\E}{\forall\kvar.\sigma}{k} }
+  \and
+  \inferrule
+  { \haskind{P}{\E,\bvar{\tvar}{\kvar}}{\sigma}{k} }
+  { \haskind{P}{\E}{\forall\bvar{\tvar}{\kvar}.\sigma}{k} }
+  \and
+  \inferrule
+  { \haskind{P;\pi^*}{\E}{\sigma}{k} }
+  { \haskind{P}{\E}{\qual{\pi^*}{\sigma}}{k} }
 \end{mathpar}
 
 
