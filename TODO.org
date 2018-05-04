@@ -1,0 +1,122 @@
+* Related work
+
+** Linearity/Uniqueness
+
+*** Typing
+- Fpop 
+  Constraint language not rich enough
+- Alm
+  Very complex. No inference
+- Garett Moris
+  Rich constraint language, but no kind variables.
+  Lazy Haskell-y language
+
+*** Semantics
+- Resource Polymorphism by Guillaume Munch-Maccagnoni 
+  https://hal.inria.fr/hal-01724997
+  Assume the existence of a *linear* type system.
+
+* Language features
+
+** Linear vs. Uniq
+
+Linear is better compatible with
+- exceptions
+- RAII-like semantics 
+
+Uniqueness is more suited for:
+- Resources that *must* be collected, such as channels.
+
+** Abstract data types
+Can be very expressive when using encapsulation and modules.
+Formalization for modules is annoying.
+Explicit quantifiers à la systemF are easier to formalize, but annoying to program with.
+
+** Exceptions/Effects
+Difficult to marry with uniqueness, consider the code:
+
+```ocaml
+let f x = ... raise Exn ...
+
+let g a b c ... = 
+  .... f x ...
+```
+
+If `a`, `b` or `c` is unique, we have to bundle them in an existential when raising.
+This has to happen for any code point in the call stack that leads up to the call to `f`.
+This is particular incompatible with semantics that just unwind the stack (or worse, jump
+pointers) when raising.
+Furthermore, bundling the unique objects in an existential hide their types, which severely
+limits the usefulness. The only valid operation would be to de-alocate them, but we might
+as well use linearity (and a Drop traits, à la Rust).
+
+** Threads
+Similar to channels.
+Investigate Go and Rust
+
+** Subtyping
+
+** Kind features
+
+*** Polykinding
+*** Subkinding
+*** How many arrow types?
+
+** Inference
+An ML-ish style with
+- value restriction
+- principal type inference?
+- (principal?) kind inference?
+
+** Type ascriptions
+
+** Module language
+- Encapsulation allow very powerful abstractions
+- Soundness is annoying to state
+
+** Decompose linearity and uniqueness in smaller features:
+
+- plin: "In the past, only used once"
+- flin: "In the future, must be used only once"
+- un: Unrestricted
+
+un ≤ flin
+
+* Categorize various languages
+
+** Clean
+"unique" = plin                    where   ≤ un
+"necessarely uniq" = plin & flin   where   ≰ un
+
+** Linear Haskell
+a -> b      ≃      t -{un}-> t' where t,t' : un
+a ->. b     ≃      t -{un}-> t' where t,t' : uniq    and uniq ≤ un
+
+
+* Examples
+
+** Composition
+```
+o : ('a -{k}-> 'b) -> ('b -{k'}-> 'c) -> ('a -{k''}-> 'c)
+k ≤ k'' && k' ≤ k''
+```
+
+** Mutable manually allocated arrays
+```
+module LinArray : sig
+  type -'a w : lin
+  type +'a r : un
+  val freeze : 'a w -> 'a r
+  val create : 'a ≤ un => int -> 'a -> 'a w
+  val get : 'a r -> 'a 
+  val set : 'a w -> 'a -> 'a w
+end
+```
+
+* Soundness of `free`
+  Depends on the feature of the language.
+  Should find a counter example.
+  Investigate the various APIs
+
+* Formalization
+  Coq ?
