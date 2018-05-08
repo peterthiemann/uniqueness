@@ -7,20 +7,25 @@
 \newcommand{\ONE}{\circ}
 \newcommand{\MANY}{\ast}
 
+\newcommand{\TASS}[1]{#1\colon\!}
+
 \newcommand{\TVAR}{\alpha}
-\newcommand{\TALL}[2]{\forall#1\colon#2.}
+\newcommand{\TALL}[2]{\forall\TASS{#1}#2.}
 \newcommand{\KALL}[1]{\forall#1.}
 
-\newcommand{\LAM}[2]{\lambda#1\colon#2.}
+\newcommand{\LAM}[2]{\lambda\TASS{#1}#2.}
 \newcommand{\APP}[1]{#1\,}
-\newcommand{\TLAM}[2]{\Lambda#1\colon#2.}
+\newcommand{\TLAM}[2]{\Lambda\TASS{#1}#2.}
 \newcommand{\TAPP}[2]{#1\,[#2]}
 \newcommand{\KLAM}[1]{\Lambda#1.}
 \newcommand{\KAPP}[2]{#1\,\{#2\}}
 
 \newcommand{\TENV}{\Gamma}
+\newcommand{\TENVEMPTY}{\Diamond}
 
 \newcommand{\SPLIT}[3]{#1 \Join #2 = #3}
+
+\newcommand\stepsto{\longrightarrow}
 
 \title{$F^{\ONE}$ with subkinding}
 \author{Peter Thiemann}
@@ -30,27 +35,45 @@
 Syntax (perhaps more expressions are needed)
 \begin{align*}
   k &::= \KVAR \mid \ONE \mid \MANY & \text{kinds, where }  \MANY \sqsubseteq \ONE \\
+    &\mid k \to k & \text{constructor kinds}\\
   t &::= \TVAR \mid t \stackrel{k}{\to} t \mid \TALL\TVAR k t \mid \KALL\KVAR t \mid k \le k \Rightarrow t & \text{types} \\
+    & \mid \LAM\TVAR k t \mid \APP tt  & \text{constructors} \\
   e &::= x \mid \LAM x t e \mid \APP ee \mid \TLAM \TVAR k v \mid \TAPP et \mid \KLAM \KVAR v \mid \KAPP ek & \text{expressions} \\
   v &::=  \LAM x t e \mid  \TLAM \TVAR k v & \text{values}
+  \\
+  \TENV &::=
+          \TENVEMPTY
+          \mid \TENV, \TASS x t
+          \mid \TENV, \TASS \TVAR k
+          \mid \TENV, k \le k
+          \mid \TENV, \KVAR
+          & \text{environments}
 \end{align*}
-
-Kinding rules
+%
+Kind formation
 \begin{mathpar}
   \inferrule{}{\TENV, \KVAR \vdash \KVAR }
 
   \inferrule{}{\TENV \vdash \ONE}
 
   \inferrule{}{\TENV \vdash \MANY}
-  \\
+
+  \inferrule{\TENV \vdash k_1 \\ \TENV \vdash k_2}{\TENV \vdash k_1 \to k_2}
+\end{mathpar}
+Subkinding
+\begin{mathpar}
   \inferrule{k_1 \sqsubseteq k_2}{\TENV \vdash k_1 \le k_2}
 
   \inferrule{}{\TENV, k_1 \le k_2 \vdash k_1 \le k_2}
 
+  \inferrule{\TENV \vdash k_2 \le k_1 \\ \TENV \vdash k_1' \le k_2'}{\TENV \vdash k_1 \to k_1' \le k_2 \to k_2'}
+
   \inferrule{\TENV \vdash k}{\TENV \vdash k \le k}
 
   \inferrule{\TENV \vdash k_1 \le k_2 \\\TENV \vdash k_2 \le k_3}{\TENV \vdash k_1 \le k_3}
-  \\
+\end{mathpar}
+Kinding
+\begin{mathpar}
   \inferrule{\TENV \vdash t : k \\ \TENV \vdash k \le k' }{\TENV \vdash t : k'}
 
   \inferrule{\TENV \vdash t_1 : k_1 \\ \TENV \vdash t_2 : k_2}{ \TENV \vdash t_1 \stackrel{k}{\to} t_2 : k}
@@ -63,14 +86,74 @@ Kinding rules
 
   \inferrule{\TENV \vdash k_1, k_2 \\
     \TENV, k_1 \le k_2 \vdash t : k}{\TENV \vdash k_1 \le k_2 \Rightarrow t : k}
-\end{mathpar}
 
+  \inferrule{\TENV, \TVAR:k \vdash t : k'}{\TENV \vdash \LAM\TVAR k t : k \to k'}
+
+  \inferrule{\TENV \vdash t_1 : k_2 \to k_1 \\ \TENV \vdash t_2 : k_2}{\TENV \vdash \APP{t_1}{t_2} : k_1}
+\end{mathpar}
+Environment formation (should be restricted to non-arrow kinds)
+\begin{mathpar}
+  \inferrule{}{\TENVEMPTY \models k}
+
+  \inferrule{\TENV \models k \\ \TENV \vdash x:t \\ \TENV \vdash t : k' \\ \TENV \vdash k' \le k }{
+    \TENV, \TASS x t \models k}
+
+  \inferrule{\TENV \models k \\ \TENV \vdash k' \\ \TVAR\notin\TENV }{\TENV, \TASS\TVAR{k'} \models k}
+
+  \inferrule{\TENV \models k \\ \TENV \vdash k', k''}{\TENV, k' \le k'' \models k}
+
+  \inferrule{\TENV \models k \\ \KVAR\notin \TENV}{\TENV, \KVAR \models k}
+\end{mathpar}
+Type conversion (congruence rules omitted)
+\begin{mathpar}
+  \inferrule{\TENV, \TASS\TVAR k' \vdash t:k \\ \TENV \vdash t' : k' }{
+    \TENV \vdash \APP{(\LAM\TVAR {k'} t)}{t'} = t[\TVAR \mapsto t'] : k}
+\end{mathpar}
+Environment splitting
+\begin{mathpar}
+  \inferrule{}{
+    \SPLIT{\TENVEMPTY}{\TENVEMPTY}{\TENVEMPTY}}
+
+  \inferrule{
+    \SPLIT{\TENV_1}{\TENV_2}{\TENV} \\
+    \TENV \vdash t : k \\
+    \TENV \vdash k \le \MANY
+  }{
+    \SPLIT{\TENV_1, \TASS x t}{\TENV_2, \TASS x t}{\TENV, \TASS x t}}
+
+  \inferrule{
+    \SPLIT{\TENV_1}{\TENV_2}{\TENV} 
+  }{
+    \SPLIT{\TENV_1, \TASS x t}{\TENV_2}{\TENV, \TASS x t}}
+
+  \inferrule{
+    \SPLIT{\TENV_1}{\TENV_2}{\TENV} 
+  }{
+    \SPLIT{\TENV_1}{\TENV_2, \TASS x t}{\TENV, \TASS x t}}
+
+  \inferrule{
+    \SPLIT{\TENV_1}{\TENV_2}{\TENV}
+  }{
+    \SPLIT{\TENV_1, \TASS \TVAR k}{\TENV_2, \TASS \TVAR k}{\TENV, \TASS \TVAR k}}
+
+  \inferrule{
+    \SPLIT{\TENV_1}{\TENV_2}{\TENV}
+  }{
+    \SPLIT{\TENV_1, k \le k'}{\TENV_2, k \le k'}{\TENV, k \le k'}}
+
+  \inferrule{
+    \SPLIT{\TENV_1}{\TENV_2}{\TENV}
+  }{
+    \SPLIT{\TENV_1, \KVAR}{\TENV_2, \KVAR}{\TENV, \KVAR}}
+\end{mathpar}
 Typing rules
 \begin{mathpar}
-  \inferrule{\TENV \vdash \MANY }{\TENV, x:t \vdash x:t }
+  \inferrule{\TENV \vdash e:t \\ \TENV \vdash t = t' : k }{\TENV \vdash e : t'}
+
+  \inferrule{\TENV \models \MANY }{\TENV, x:t \vdash x:t }
 
   \inferrule
-  {\TENV \vdash k' \\ \TENV \vdash k \le k' \\ \TENV, x:t \vdash e : t'}
+  {\TENV \models k \\ \TENV, x:t \vdash e : t'}
   {\TENV \vdash \LAM xte : t \stackrel{k}\to t'}
 
   \inferrule
@@ -80,7 +163,7 @@ Typing rules
   {\TENV \vdash \APP ee' : t}
 
   \inferrule
-  {\TENV, \TVAR\colon k \vdash v : t }
+  {\TENV, \TASS\TVAR k \vdash v : t }
   {\TENV \vdash \TLAM\TVAR k v : \TALL \TVAR k t}
 
   \inferrule
@@ -106,4 +189,26 @@ Typing rules
   {\TENV \vdash e : t}
 \end{mathpar}
 
+Simple small-step semantics (for type preservation) with
+$e[x \mapsto v]$ standing for capture-avoiding substitution of $v$ for
+$x$ in $e$. Call-by-value as in $F^{\ONE}$.
+\begin{mathpar}
+  \inferrule{}{\APP{(\LAM x t e)}v \stepsto e[x \mapsto v]}
+
+  \inferrule{}{\TAPP{(\TLAM \TVAR k v)}t \stepsto v[\TVAR \mapsto t]}
+
+  \inferrule{}{\KAPP{(\KLAM \KVAR v)}k \stepsto v[\KVAR \mapsto k]}
+
+  \inferrule{e_1 \stepsto e_1'
+  }{\APP{e_1}{e_2} \stepsto \APP{e_1'}{e_2}}
+
+  \inferrule{e \stepsto e'}{\APP v e \stepsto \APP v e'}
+
+  \inferrule{e \stepsto e'}{\TAPP{e} t \stepsto \TAPP{e'} t}
+
+  \inferrule{e \stepsto e'}{\KAPP{e} k \stepsto \KAPP{e'} k}
+\end{mathpar}
+
+TODO: More elaborate semantics that tracks linearity.
+Templates in $F^{\ONE}$, work by Morris, Bernardi, and others.
 \end{document}
