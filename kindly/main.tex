@@ -43,17 +43,23 @@
   \centering
   \input{syntax}
   \caption{Syntax}
-  
+\end{figure*}
+\begin{figure*}[h]
   \input{kinds}
   \caption{Kind rules -- $\haskind{P}{\E}{\tau}{k}$ }
 
-  \input{typing}
-  \caption{Typing rules -- $\hastype{P}{\E}{e}{\tau}$ }
-
-  \input{semantics}
-  \caption{Reduction rules -- $\ered{I}{E}{e}{v}$ }
-  
+  % \input{typing}
+  % \caption{Typing rules -- $\hastype{P}{\E}{e}{\tau}$ }
 \end{figure*}
+\begin{figure*}[h]
+  \input{inference}
+  \caption{Inference rules -- $\inferW{\Sigma}{(C,\psi)}{\bf{\E}}{\bf{e}}{\tau}$ }
+\end{figure*}
+% \begin{figure*}[h]
+%   \input{semantics}
+%   \caption{Reduction rules -- $\ered{I}{E}{e}{v}$ }
+  
+% \end{figure*}
 
 
 \end{document}

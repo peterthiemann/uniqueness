@@ -16,7 +16,10 @@
 \newcommand\qual[2]{#1 \operatorname{\Rightarrow} #2}
 
 \newcommand\instanciate[2]{#1 \operatorname{\succ} #2}
-\newcommand\generalize[3]{\operatorname{\text{Gen}}(#1,#2,#3)}
+\newcommand\generalize[3]{\operatorname{\text{gen}}(#1,#2,#3)}
+
+\newcommand\unif{\mathrm{\psi}}
+\newcommand\mostgeneral{\operatorname{\sqcup}}
 
 % Expressions
 \newcommand\lam[2]{\lambda #1 . #2}
@@ -26,6 +29,11 @@
 \newcommand\fix[1]{\mathtt{fix}\ #1}
 \newcommand\app[2]{(#1\ #2)}
 
+%% Constraints
+\newcommand\Ckind[2]{(#1 : #2)}
+\newcommand\Cleq[2]{(#1 \leq #2)}
+\newcommand\Ceq[2]{(#1 = #2)}
+\newcommand\Cand{\operatorname{\wedge}}
 
 %% Typing environments
 \newcommand\E{\Gamma}
@@ -34,6 +42,13 @@
 \newcommand\bineq[2]{(#1 \lk #2)}
 
 \newcommand\esplit[2]{#1 \operatorname{\Join} #2}
+\newcommand\fv[1]{\operatorname{fv}(#1)}
+
+%% Sets
+\newcommand\Sone[1]{\{#1\}}
+\newcommand\Sunion{\operatorname{\cup}}
+\newcommand\Sinter{\operatorname{\cap}}
+\newcommand\Sv{\Sigma}
 
 %% Judgements
 \newcommand\BAR{\operatorname{|}}
@@ -42,6 +57,9 @@
 \newcommand\haskind[4]{#1 \BAR #2 \dash #3 \lk #4}
 \newcommand\subkind[4]{#1 \dash\ \bineq{#3}{#4}}
 \newcommand\envkind[3]{#1 \dash #2 \lk #3}
+\newcommand\inferW[5]{#1 \BAR #2 \BAR #3 \dash #4 : #5}
+
+\newcommand\normalize[2]{\operatorname{normalize}(#1,#2)}
 
 %% Reductions
 
