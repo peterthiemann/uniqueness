@@ -1,3 +1,4 @@
+\centering
 \begin{mathpar}
   \inferrule[Var]
   { \bvar{x}{
@@ -11,9 +12,10 @@
   { \inferW{\Sone{\kvar_x}}{(C,\unif|_{\fv{\E}})}{\E}{x}{\unif\tau} }
 
   \inferrule[Abs]
-  { \inferW{\Sv}{(D,\unif')}{\E;\bvar{x}{\tau}}{e}{\tau} \\
+  { \inferW{\Sv}{(C',\unif')}{\E;\bvar{x}{\alpha}}{e}{\tau} \\
     \tvar,\kvar\text{ new}\\
-    (C,\unif) = \normalize{D\Cand\Cleq{\Sv}{\kvar}}{\unif'}
+    D = C'\Cand\Cleq{\Sv}{\kvar}\Cand\addlin{\Weaken(x,\Sv)}\\
+    (C,\unif) = \normalize{D}{\unif'}
   }
   { \inferW{\Sv}{(C,\unif)}{\E}{\lam{x}{e}}{\unif(\tvar)\tarr{\kvar}\tau} }
 
@@ -31,16 +33,23 @@
 
   \inferrule[Let]
   { \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
-    (C'_1,\sigma) = \generalize{C_1}{\unif_1\E}{\tau} \\
+    (C'_1,\sigma) = \generalize{C_1}{\unif_1\E}{\tau_1} \\
     \inferW{\Sv_2}{(C_2,\unif_2)}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\\\
     \unif' = \unif_1 \mostgeneral \unif_2 \\
     D =
-    C_1 \Cand C_2 \Cand \Cleq{\Sv_1 \Sinter \Sv_2}{\kun} \\
+    C'_1 \Cand C_2 \Cand \Cleq{\Sv_1 \Sinter \Sv_2}{\kun}
+    \Cand \addlin{\Weaken(x,\Sv)} \\
     (C,\unif) = \normalize{D}{\unif'}\\
   }
   { \inferW{\Sv_1 \Sunion \Sv_2}{(C,\unif|_{\fv{\E}})}{\E}{\letin{x}{e_1}{e_2}}
     {\unif\tau_2} }
 \end{mathpar}
+
+\begin{align*}
+  \Weaken(x,\Sv)
+  &= \operatorname{kind}(x)\lk\kun &\text{if } \operatorname{kind}(x)\in\Sv\\
+  &= \Cempty &\text{otherwise}\\
+\end{align*}
 
 %%% Local Variables:
 %%% mode: latex

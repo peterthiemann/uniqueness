@@ -1,5 +1,5 @@
 
-\documentclass[sigconf,author]{acmart}\settopmatter{printfolios=true}
+\documentclass[manuscript,author]{acmart}\settopmatter{printfolios=true}
 
 % Encoding and lang
 \usepackage[T1]{fontenc}
@@ -60,6 +60,22 @@
 %   \caption{Reduction rules -- $\ered{I}{E}{e}{v}$ }
   
 % \end{figure*}
+
+\section*{Todo}
+
+\begin{itemize}
+\item Add type constructors
+\item Properly ensure that it respects HM(X) (cylindric, \dots)
+\item Show principal type inference:
+  \begin{itemize}
+  \item Principal constraint system
+  \item Regular constraint system: $\Ceq{\tau}{\tau'} \implies \fv{\tau} = \fv{\tau'}$.
+  \item Solved forms are in simplified form.
+    $C\in S, \entail{C}{\Ceq{\tau}{\tau'}} \implies \entail{}{\Ceq{\tau}{\tau'}}$.
+  \end{itemize}
+\item Show equivalence with the logic-based system.
+
+\end{itemize}
 
 
 \end{document}

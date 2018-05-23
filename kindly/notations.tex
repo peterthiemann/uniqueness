@@ -30,10 +30,13 @@
 \newcommand\app[2]{(#1\ #2)}
 
 %% Constraints
+\newcommand\Cempty{\emptyset}
 \newcommand\Ckind[2]{(#1 : #2)}
 \newcommand\Cleq[2]{(#1 \leq #2)}
 \newcommand\Ceq[2]{(#1 = #2)}
 \newcommand\Cand{\operatorname{\wedge}}
+\newcommand\Cproj[2]{\exists #1.#2}
+\newcommand\Weaken{\operatorname{Weaken}}
 
 %% Typing environments
 \newcommand\E{\Gamma}
@@ -53,6 +56,7 @@
 %% Judgements
 \newcommand\BAR{\operatorname{|}}
 \newcommand\dash{\operatorname{\vdash}}
+\newcommand\entail[2]{#1 \operatorname{\vdash_e} #2}
 \newcommand\hastype[4]{#1 \BAR #2 \dash #3 : #4}
 \newcommand\haskind[4]{#1 \BAR #2 \dash #3 \lk #4}
 \newcommand\subkind[4]{#1 \dash\ \bineq{#3}{#4}}
@@ -67,6 +71,9 @@
 \newcommand\fresh{\operatorname{\text{fresh}}}
 \newcommand\closure[3]{\lambda^{#1} #2 . #3}
 \newcommand\ered[4]{#3\ \operatorname{\Downarrow^{#1}_{#2}}\ #4}
+
+%% Misc
+\newcommand\addlin[1]{\color{blue}{#1}}
 
 %%% Local Variables:
 %%% mode: latex

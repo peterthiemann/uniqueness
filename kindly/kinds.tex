@@ -1,46 +1,18 @@
 \begin{mathpar}
   \inferrule
   { }
-  { \subkind{P}{\E}{\kun}{\klin} }
+  { \entail{}{\Cleq{\kun}{\klin}} }
   \and
   \inferrule
-  { \bineq{k}{k'} \in P }
-  { \subkind{P}{\E}{k}{k'} }
-  \and
-  \inferrule{}
-  { \lk \text{ reflexive, transitive}}
-  \\
-  \inferrule
-  { }
-  { \haskind{P}{\E}{\tau\tarr{k}\tau'}{k} }
+  { \entail{C}{\Cleq{k}{k'}} \\
+    \entail{C}{\Cleq{k'}{k}} }
+  { \entail{C}{\Ceq{k}{k'}} }
   \and
   \inferrule
-  { \bvar{\alpha}{k} \in \E }
-  { \haskind{P}{\E}{\alpha}{k} }
+  { \entail{C}{\Ceq{k}{k'}} }
+  { \entail{C}{\Ckind{\tau_0\tarr{k}\tau_1}}{k'}}
   \and
-  \inferrule
-  { \bty{t}{k}{\tau} \in \E }
-  { \haskind{P}{\E}{\T{t}}{k} }
-  \and
-  \inferrule
-  { \haskind{P}{\E}{\tau}{k'} \\ \subkind{P}{\E}{k'}{k} }
-  { \haskind{P}{\E}{\tau}{k} }
-  \\
-  \inferrule
-  { \forall\bvar{x_i}{\tau_i}\in\E,\quad\haskind{P}{\E}{\tau_i}{k} }
-  { \envkind{P}{\E}{k} }
-  \\
-  \inferrule
-  { \haskind{P;\bineq{\kvar}{\kun}}{\E}{\sigma}{k} }
-  { \haskind{P}{\E}{\forall\kvar.\sigma}{k} }
-  \and
-  \inferrule
-  { \haskind{P}{\E,\bvar{\tvar}{\kvar}}{\sigma}{k} }
-  { \haskind{P}{\E}{\forall\bvar{\tvar}{\kvar}.\sigma}{k} }
-  \and
-  \inferrule
-  { \haskind{P;\pi^*}{\E}{\sigma}{k} }
-  { \haskind{P}{\E}{\qual{\pi^*}{\sigma}}{k} }
+  \text{D1-D6}
 \end{mathpar}
 
 
