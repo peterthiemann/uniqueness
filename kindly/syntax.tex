@@ -16,21 +16,23 @@
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.5\linewidth}
 \begin{align*}
-  \htag{Type Schemes}
-  \sigma ::=&\ \forall\kvar^*\forall\bvar{\alpha}{\kvar}^*.(\qual{\pi^*}{\tau})\\
+  \htag{Type and kind Schemes}
+  \sigma ::=&\ \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau})\\
+  \theta ::=&\ \forall\kvar^*.(\qual{C}{k_i^* \karr k})\\
   \htag{Type Expressions}
   \tau ::=&\ \alpha\tag{Type variables}\\
   |&\ \tau\tarr{k}\tau\tag{Function types}\\
+  |&\ \tapp{t}{k^* \tau^*}\tag{Type constructors}\\
   \htag{Kinds}
   k ::=&\ \kvar\tag{Kind variables}\\
-  |&\ \klin\tag{Linear kind}\\
+  |&\ \kaff\tag{Affine kind}\\
   |&\ \kun\tag{Unrestricted kind}\\
   \htag{Constraints}
   C ::=&\ \Ceq{\tau_1}{\tau_2}\\
   |&\ \Cleq{k_1}{k_2}\\
   |&\ \Ckind{\tau}{k}\\
   |&\ C_1 \Cand C_2\\
-  |&\Cproj{\alpha^*}{C}
+  |&\ \Cproj{\alpha}{C}
 \end{align*}
 \end{subfigure}
 

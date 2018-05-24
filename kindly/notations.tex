@@ -4,15 +4,17 @@
 % Kinds
 \newcommand\lk{\leq}
 \newcommand\klin{\mathbf{lin}}
+\newcommand\kaff{\mathbf{aff}}
 \newcommand\kun{\mathbf{un}}
 \newcommand\karr{\operatorname{\rightarrow}}
 \newcommand\kvar{\kappa}
 \newcommand\K[1]{\mathrm{#1}}
 
 % Types
+\newcommand\T[1]{\mathrm{#1}}
 \newcommand\tvar{\alpha}
 \newcommand\tarr[1]{\operatorname{\xrightarrow{#1}}}
-\newcommand\T[1]{\mathrm{#1}}
+\newcommand\tapp[2]{\T{#1}\ #2}
 \newcommand\qual[2]{#1 \operatorname{\Rightarrow} #2}
 
 \newcommand\instanciate[2]{#1 \operatorname{\succ} #2}
@@ -40,6 +42,7 @@
 
 %% Typing environments
 \newcommand\E{\Gamma}
+\newcommand\bkind[1]{(#1)}
 \newcommand\bvar[2]{(#1 : #2)}
 \newcommand\bty[3]{(\T{#1} : #2 = #3)}
 \newcommand\bineq[2]{(#1 \lk #2)}
@@ -57,11 +60,10 @@
 \newcommand\BAR{\operatorname{|}}
 \newcommand\dash{\operatorname{\vdash}}
 \newcommand\entail[2]{#1 \operatorname{\vdash_e} #2}
-\newcommand\hastype[4]{#1 \BAR #2 \dash #3 : #4}
-\newcommand\haskind[4]{#1 \BAR #2 \dash #3 \lk #4}
-\newcommand\subkind[4]{#1 \dash\ \bineq{#3}{#4}}
-\newcommand\envkind[3]{#1 \dash #2 \lk #3}
 \newcommand\inferW[5]{#1 \BAR #2 \BAR #3 \dash #4 : #5}
+
+\newcommand\tyval[3]{#1 \BAR #2 \operatorname{\vdash_t} #3}
+\newcommand\schval[3]{#1 \BAR #2 \operatorname{\vdash_t} #3}
 
 \newcommand\normalize[2]{\operatorname{normalize}(#1,#2)}
 

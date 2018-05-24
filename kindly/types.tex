@@ -1,0 +1,28 @@
+\begin{mathpar}
+  \inferrule[TyVar]
+  { \bvar{\alpha}{k}\in\E }
+  { \tyval{C}{\E}{\alpha} }
+  \and
+  \inferrule[TyArrow]
+  { \tyval{C}{\E}{\tau_0} \\
+    \tyval{C}{\E}{\tau_1}
+  }
+  { \tyval{C}{\E}{\tau_0\tarr{k}\tau_1} }
+  \and
+  \inferrule[TyApp]
+  { \bvar{t}{\forall\kvar_j^*.(\qual{D}{k^* \karr k})}\in\E \\
+    \entail{C}{\subst{\kvar_j}{k_i}{D}} \\
+    \forall i, \tyval{C}{\E}{\tau_i}
+  }
+  { \tyval{C}{\E}{\tapp{t}{k_i^* \tau_i^*}} }
+  \\
+  \inferrule[TyScheme]
+  { \tyval{C \Cand D}
+    {\E;\bkind{\kvar_i}^*;\bvar{\alpha_j}{k_j}^*}{\tau} }
+  { \schval{C}{\E}{\forall\kvar_i^*\forall\bvar{\alpha_j}{k_j}^*.(\qual{D}{\tau})} }
+\end{mathpar}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

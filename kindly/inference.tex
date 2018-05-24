@@ -47,8 +47,12 @@
 
 \begin{align*}
   \Weaken(x,\Sv)
-  &= \operatorname{kind}(x)\lk\kun &\text{if } \operatorname{kind}(x)\in\Sv\\
-  &= \Cempty &\text{otherwise}\\
+  &\equiv \begin{cases}
+    \operatorname{kind}(x)\lk\kun &\text{if } \operatorname{kind}(x)\in\Sv\\
+    \Cempty &\text{otherwise}
+  \end{cases}\\
+  \Cleq{\Sv}{k}
+  &\equiv \bigwedge_{\kvar\in\Sv} \Cleq{\kvar}{k}
 \end{align*}
 
 %%% Local Variables:
