@@ -42,7 +42,7 @@ Syntax (perhaps more expressions are needed)
   k &::= \KVAR \mid \ONE \mid \MANY & \text{kinds, where }  \MANY \sqsubseteq \ONE \\
     &\mid k \to k & \text{constructor kinds}\\
     &\mid \KALL\KVAR k & \text{universal kinds}\\
-    &\mid k \le k \Rightarrow k & \text{constrained kinds}\\
+    % &\mid k \le k \Rightarrow k & \text{constrained kinds}\\
   t &::= \TVAR \mid t \stackrel{k}{\to} t \mid \TALL\TVAR k t \mid \KALL\KVAR t \mid k \le k \Rightarrow t & \text{types} \\
     & \mid \LAM\TVAR k t \mid \APP tt \mid \KLAM\KVAR t \mid \KAPP t k  & \text{constructors} \\
   e &::= x \mid \LAM x t e \mid \APP ee \mid \TLAM \TVAR k v \mid \TAPP et \mid \KLAM \KVAR v \mid \KAPP ek & \text{expressions} \\
@@ -72,7 +72,7 @@ Kind environment formation
 \end{mathpar}
 Kind formation
 \begin{mathpar}
-  \inferrule{\KENV \models}{\KENV, \KVAR \vdash \KVAR }
+  \inferrule{\KENV, \KVAR, \KENV' \models}{\KENV, \KVAR, \KENV' \vdash \KVAR }
 
   \inferrule{\KENV \models}{\KENV \vdash \ONE}
 
@@ -81,8 +81,8 @@ Kind formation
   \inferrule{\KENV \vdash k_1, k_2}{\KENV \vdash k_1 \to k_2}
 
   \inferrule{\KENV, \KVAR \vdash k}{\KENV \vdash \KALL\KVAR k}
-
-  \inferrule{\KENV, k_1 \le k_2 \vdash k_3}{\KENV \vdash k_1 \le k_2 \Rightarrow k_3}
+  % 
+  % \inferrule{\KENV, k_1 \le k_2 \vdash k_3}{\KENV \vdash k_1 \le k_2 \Rightarrow k_3}
 \end{mathpar}
 Subkinding
 \begin{mathpar}
@@ -90,14 +90,14 @@ Subkinding
 
   \inferrule{\KENV \vdash \KVAR}{\KENV \vdash \KVAR \le \KVAR}
 
-  \inferrule{\KENV, k_1 \le k_2 \models}{\KENV, k_1 \le k_2 \vdash k_1 \le k_2}
+  \inferrule{\KENV, k_1 \le k_2, \KENV' \models}{\KENV, k_1 \le k_2, \KENV' \vdash k_1 \le k_2}
 
   \inferrule{\KENV \vdash k_2 \le k_1 \\ \KENV \vdash k_1' \le k_2'}{\KENV \vdash k_1 \to k_1' \le k_2 \to k_2'}
 
   \inferrule{\KENV, \KVAR \vdash k_1 \le k_2}{\KENV \vdash \KALL\KVAR k_1 \le \KALL\KVAR k_2}
 
-  \inferrule[HOW?]{}{\KENV \vdash (k_1 \le k_2 \Rightarrow k_3) \le (k_1' \le k_2' \Rightarrow k_3')}
-
+  % \inferrule[HOW?]{}{\KENV \vdash (k_1 \le k_2 \Rightarrow k_3) \le (k_1' \le k_2' \Rightarrow k_3')}
+  %
   \inferrule{\KENV \vdash k_1 \le k_2 \\\KENV \vdash k_2 \le k_3}{\KENV \vdash k_1 \le k_3}
 \end{mathpar}
 Kinding
@@ -106,7 +106,7 @@ Kinding
 
   \inferrule[KFun]{\KENV \vdash t_1 : \ONE \\ \KENV \vdash t_2 : \ONE}{ \KENV \vdash t_1 \stackrel{k}{\to} t_2 : k}
 
-  \inferrule[KVar]{}{\KENV, \TVAR:k \vdash \TVAR:k}
+  \inferrule[KVar]{}{\KENV, \TVAR:k, \KENV' \vdash \TVAR:k}
 
   \inferrule[KTAll]{\KENV \vdash k\\ \KENV, \TVAR:k \vdash t:k' \\ \TVAR \notin \KENV}{\KENV \vdash \TALL\TVAR k t : k'}
 
@@ -125,9 +125,9 @@ Kinding
 \end{mathpar}
 Type environment formation
 \begin{mathpar}
-  \inferrule{\KENV \models \\ \KENV \vdash k \le \ONE }{\KENV; \TENVEMPTY \models k}
+  \inferrule[TEStart]{\KENV \models \\ \KENV \vdash k \le \ONE }{\KENV; \TENVEMPTY \models k}
 
-  \inferrule{\KENV; \TENV \models k \\  \KENV \vdash t : k' \\ \KENV \vdash k' \le k \\ x \notin \TENV }{
+  \inferrule[TEAssume]{\KENV; \TENV \models k \\  \KENV \vdash t : k' \\ \KENV \vdash k' \le k \\ x \notin \TENV }{
     \KENV; \TENV, \TASS x t \models k}
 \end{mathpar}
 Type conversion (congruence rules omitted)
@@ -167,7 +167,7 @@ Typing rules
   \inferrule[Conv]{
     \KENV; \TENV \vdash e:t \\ \KENV \vdash t = t' : k }{\KENV; \TENV \vdash e : t'}
 
-  \inferrule[Var]{ \KENV; \TENV \models \MANY \\ \KENV \vdash t : k \\ \KENV \vdash k \le \ONE }{\KENV; \TENV, x:t \vdash x:t }
+  \inferrule[Var]{ \KENV; \TENV, \TENV' \models \MANY \\ \KENV \vdash t : k \\ \KENV \vdash k \le \ONE }{\KENV; \TENV, x:t, \TENV' \vdash x:t }
 
   \inferrule[Lam]
   {\KENV; \TENV \models k \\ \KENV; \TENV, x:t \vdash e : t'}
@@ -211,20 +211,20 @@ Simple small-step semantics (for type preservation) with
 $e[x \mapsto v]$ standing for capture-avoiding substitution of $v$ for
 $x$ in $e$. Call-by-value as in $F^{\ONE}$.
 \begin{mathpar}
-  \inferrule{}{\APP{(\LAM x t e)}v \stepsto e[x \mapsto v]}
+  \inferrule[V-Beta]{}{\APP{(\LAM x t e)}v \stepsto e[x \mapsto v]}
 
-  \inferrule{}{\TAPP{(\TLAM \TVAR k v)}t \stepsto v[\TVAR \mapsto t]}
+  \inferrule[T-Beta]{}{\TAPP{(\TLAM \TVAR k v)}t \stepsto v[\TVAR \mapsto t]}
 
-  \inferrule{}{\KAPP{(\KLAM \KVAR v)}k \stepsto v[\KVAR \mapsto k]}
-
-  \inferrule{e_1 \stepsto e_1'
+  \inferrule[K-Beta]{}{\KAPP{(\KLAM \KVAR v)}k \stepsto v[\KVAR \mapsto k]}
+  \\
+  \inferrule[App-Left]{e_1 \stepsto e_1'
   }{\APP{e_1}{e_2} \stepsto \APP{e_1'}{e_2}}
 
-  \inferrule{e \stepsto e'}{\APP v e \stepsto \APP v e'}
+  \inferrule[App-Right]{e \stepsto e'}{\APP v e \stepsto \APP v e'}
 
-  \inferrule{e \stepsto e'}{\TAPP{e} t \stepsto \TAPP{e'} t}
+  \inferrule[TApp-Left]{e \stepsto e'}{\TAPP{e} t \stepsto \TAPP{e'} t}
 
-  \inferrule{e \stepsto e'}{\KAPP{e} k \stepsto \KAPP{e'} k}
+  \inferrule[KApp-Left]{e \stepsto e'}{\KAPP{e} k \stepsto \KAPP{e'} k}
 \end{mathpar}
 
 \clearpage
@@ -264,6 +264,105 @@ $x$ in $e$. Call-by-value as in $F^{\ONE}$.
   \begin{gather*}
     \KENV; \TENV \vdash v : t_x
   \end{gather*}
+\end{proof}
+\begin{lemma}[Type Substitution]\label{lemma:type-substitution}
+  Suppose that $\KENV \vdash t' : k'$.
+  \begin{enumerate}
+  \item\label{item:1} If $\KENV, \TASS\TVAR {k'} \vdash t : k$, then
+    $\KENV \vdash t[\TVAR \mapsto t'] : k$.
+  \item\label{item:3} If $\KENV, \TASS\TVAR {k'}; \TENV \models k$,
+    then $\KENV; \TENV[\TVAR \mapsto t'] \models k$.
+  \item\label{item:5} If $\KENV, \TASS\TVAR {k'} \vdash t_1 = t_2 : k$,
+    then $\KENV \vdash t_1[\TVAR \mapsto t'] = t_2[\TVAR \mapsto t'] : k$.
+  \item\label{item:4} If
+    $\KENV, \TASS\TVAR {k'} \vdash \SPLIT{\TENV_1}{\TENV_2}{\TENV}$,
+    then $\KENV \vdash \SPLIT{\TENV_1[\TVAR \mapsto t']}{\TENV_2[\TVAR \mapsto t']}{\TENV[\TVAR \mapsto t']}$.
+  \item\label{item:2} If $\KENV, \TASS\TVAR {k'}; \TENV \vdash e : t$, then
+    $\KENV; \TENV[\TVAR \mapsto t'] \vdash e[\TVAR \mapsto t'] : t[\TVAR \mapsto t']$.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  \textbf{Item}~\ref{item:1} is proved by induction on the derivation of
+  $\KENV, \TASS\TVAR {k'} \vdash t : k$.
+
+  The only interesting rule is \TirName{KVar}:
+  $\KENV, \TASS\TVAR {k'} \vdash \TVAR : k'$. As
+  $\TVAR[\TVAR \mapsto t'] = t'$, we have $\KENV \vdash t' : k'$ by
+  assumption.
+
+  All remaining cases are immediate by appeal to the inductive hypothesis.
+
+  \textbf{Item}~\ref{item:3} is proved by induction on the derivation of
+  $\KENV, \TASS\TVAR {k'}; \TENV \models k$.
+
+  \textbf{Case} \TirName{TEStart}. Immediate.
+
+  \textbf{Case} \TirName{TEAssume}. From $\KENV, \TASS\TVAR {k'}; \TENV, \TASS x t \models k$ inversion yields
+  \begin{gather}
+    \label{eq:4}
+    \KENV, \TASS\TVAR {k'}; \TENV \models k \\
+    \KENV, \TASS\TVAR {k'} \vdash t : k'' \\
+    \KENV, \TASS\TVAR {k'} \vdash k'' \le k \\
+    x \notin \TENV
+  \end{gather}
+  By induction from~\eqref{eq:4}
+  \begin{gather}
+    \KENV; \TENV[\TVAR \mapsto t'] \models k
+  \end{gather}
+  By Item~\ref{item:1}
+  \begin{gather}
+    \KENV \vdash t[\TVAR\mapsto t'] : k''
+  \end{gather}
+  As $\TVAR\notin k'', k$
+  \begin{gather}
+    \KENV \vdash k'' \le k
+  \end{gather}
+  By \TirName{TEAssume}
+  \begin{gather}
+    \KENV; (\TENV, \TASS x t)[\TVAR \mapsto t'] \models k
+  \end{gather}
+
+  \textbf{Item}~\ref{item:5} is proved by induction on the derivation of
+  $\KENV, \TASS\TVAR{ k'} \vdash t_1 = t_2 : k$.
+
+  \textbf{Item}~\ref{item:4} is proved by induction on the derivation of splitting.
+
+  \textbf{Item}~\ref{item:2} is proved by induction on the derivation of
+  $\KENV, \TASS\TVAR k; \TENV \vdash e : t$.
+
+  \textbf{Case} \TirName{Conv}: immediate by Item~\ref{item:5}.
+
+  \textbf{Case} \TirName{Var}: immediate by Item~\ref{item:1} and Item~\ref{item:3}.
+
+  \textbf{Case} \TirName{Lam}: by Item~\ref{item:3} and induction.
+
+  \textbf{Case} \TirName{App}: by Item~\ref{item:4} and induction.
+
+  The remaining cases present no new problems.
+\end{proof}
+Kind substitution can lead to unsatisfiable constraints. That does not
+mean that kind substitution is bad, but that a value with a bad kind
+substitution cannot be used as the unsatisfiable sonstraint cannot be
+eliminated by \TirName{CElim}!
+\begin{lemma}[Kind Substitution]\label{lemma:kind-substitution}
+  Suppose that $\KENV \vdash k$.
+  \begin{enumerate}
+  \item If $\KENV, \KVAR \vdash t : k'$,
+    then $\KENV \vdash t[\KVAR \mapsto k] : k'[\KVAR \mapsto k]$.
+  \item If $\KENV, \KVAR \vdash t = t' : k'$,
+    then $\KENV \vdash t[\KVAR \mapsto k] = t'[\KVAR \mapsto k] : k'[\KVAR \mapsto k]$.
+  \item If $\KENV, \KVAR ; \TENV \models k'$,
+    then $\KENV; \TENV[\KVAR \mapsto k] \models k'[\KVAR \mapsto k]$.
+  \item If $\KENV,\KVAR \vdash k_1 \le k_2$,
+    then $\KENV \vdash k_1[\KVAR \mapsto k] \le k_2[\KVAR \mapsto k]$.
+  \item If $\KENV, \KVAR \vdash \SPLIT{\TENV_1}{\TENV_2}{\TENV}$,
+    then $\KENV \vdash \SPLIT{\TENV_1[\KVAR \mapsto k]}{\TENV_2[\KVAR \mapsto k]}{\TENV[\KVAR \mapsto k]}$. 
+  \item If $\KENV, \KVAR; \TENV \vdash e : t$,
+    then $\KENV; \TENV[\KVAR \mapsto k] \vdash e[\KVAR \mapsto k] : t[\KVAR \mapsto k]$.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  \textbf{!!! TODO !!!}
 \end{proof}
 \begin{lemma}[Inversion for Function Type]\label{lemma:inversion-function}
   If $\KENV; \TENVEMPTY \vdash \LAM x {t_x} e : t_f$,
@@ -313,6 +412,36 @@ $x$ in $e$. Call-by-value as in $F^{\ONE}$.
   k_{12}\Rightarrow \dots k_{n1}\le k_{n2} \Rightarrow t_x
   \stackrel{k}\to t : k'$, which proves the claim.
 \end{proof}
+\begin{lemma}[Inversion for Type Abstraction]\label{lemma:inversion-universal}
+  Suppose that $\KENV; \TENVEMPTY \vdash \TLAM\TVAR k v : t_a$.
+  Then there is some $n\ge0$ and $k_{i1}$, $k_{i2}$ (for $1\le i\le n$) such that 
+  \begin{gather}
+    \KENV \vdash t_a = k_{11}\le k_{12}\Rightarrow \dots k_{n1}\le k_{n2} \Rightarrow \TALL \TVAR k t' : k'
+    \\
+    \KENV, \TASS \TVAR{k}; \TENVEMPTY \vdash v : t'
+    \\
+    \KENV \vdash k' \le \ONE
+    \mathrm{.}
+  \end{gather}
+\end{lemma}
+\begin{proof}
+  Analogous to Lemma~\ref{lemma:inversion-function}.
+\end{proof}
+\begin{lemma}[Inversion for Kind Abstraction]\label{lemma:inversion-kind-abstraction}
+  Suppose that $\KENV; \TENVEMPTY \vdash \KLAM\KVAR v : t_a$.
+  Then there is some $n\ge0$ and $k_{i1}$, $k_{i2}$ (for $1\le i\le n$) such that 
+  \begin{gather}
+    \KENV \vdash t_a = k_{11}\le k_{12}\Rightarrow \dots k_{n1}\le k_{n2} \Rightarrow \KALL \KVAR t' : k'
+    \\
+    \KENV, \KVAR; \TENVEMPTY \vdash v : t'
+    \\
+    \KENV \vdash k' \le \ONE
+    \mathrm{.}
+  \end{gather}
+\end{lemma}
+\begin{proof}
+  Analogous to Lemma~\ref{lemma:inversion-function}.
+\end{proof}
 \begin{lemma}[Type Preservation]~\\
   Suppose that $\KENV; \TENVEMPTY \vdash e : t$ and $e \stepsto e'$.
   Then $\KENV;\TENVEMPTY \vdash e' : t$.
@@ -320,7 +449,7 @@ $x$ in $e$. Call-by-value as in $F^{\ONE}$.
 \begin{proof}
   In each case we proceed by induction on the derivation of the
   assumed judgment.  If the top-level rule is \TirName{Conv},
-  \TirName{CIntro}, and \TirName{CElim}, then the claim holds by
+  \TirName{CIntro}, or \TirName{CElim}, then the claim holds by
   induction.
 
   \textbf{Case} ${\APP{(\LAM x {t_x} e)}v \stepsto e[x \mapsto v]}$.
@@ -364,8 +493,88 @@ $x$ in $e$. Call-by-value as in $F^{\ONE}$.
     \KENV \vdash t' : k \\
     t = t_0 [\TVAR\mapsto t']
   \end{gather}
+  By Lemma~\ref{lemma:inversion-universal}, there exists an $n\ge0$ and $k_{i1}$, $k_{i2}$ (for $1\le i\le n$) such that
+  \begin{gather}
+    \KENV \vdash \TALL\TVAR k t_0 = k_{11}\le k_{12}\Rightarrow \dots k_{n1}\le k_{n2} \Rightarrow \TALL\TVAR k t_1 : k_1
+    \\
+    \label{eq:5}
+    \KENV, \TASS \TVAR{k}; \TENVEMPTY \vdash v : t_1
+  \end{gather}
+  Hence, $n=0$ and
+  \begin{gather}
+    \KENV \vdash \TALL\TVAR k t_0 = \TALL\TVAR k t_1 : k_1
+  \end{gather}
+  from which we can follow
+  \begin{gather}
+    \label{eq:6}
+    \KENV, \TASS\TVAR k \vdash t_0 = t_1 : k_1
+  \end{gather}
+  By Lemma~\ref{lemma:type-substitution} (type substitution) applied to~\eqref{eq:5}
+  \begin{gather}
+    \label{eq:7}
+    \KENV; \TENVEMPTY \vdash v[\TVAR \mapsto t'] : t_1[\TVAR \mapsto t']
+  \end{gather}
+  By Lemma~\ref{lemma:type-substitution} (type substitution) applied to~\eqref{eq:6}
+  \begin{gather}
+    \label{eq:8}
+    \KENV \vdash t_0[\TVAR \mapsto t'] = t_1[\TVAR \mapsto t'] : k_1
+  \end{gather}
+  By \TirName{Conv} applied to~\eqref{eq:7} and~\eqref{eq:8}
+  \begin{gather}
+    \KENV; \TENVEMPTY \vdash v[\TVAR \mapsto t'] : t
+  \end{gather}
+  as required.
 
-  \textbf{!!!TBC}
+  \textbf{Case} $\KAPP{(\KLAM \KVAR v)}k \stepsto v[\KVAR \mapsto k]$.
+
+  By inversion of rule \TirName{KApp}, we obtain from
+  $\KENV; \TENVEMPTY \vdash \KAPP{(\KLAM \KVAR v)}k : t_e$ that
+  \begin{gather}
+    t_e =  t[\KVAR \mapsto k] \\
+    \label{eq:9}
+    \KENV; \TENVEMPTY \vdash \KLAM \KVAR v : \KALL\KVAR t \\
+    \KENV \vdash k
+  \end{gather}
+  By Lemma~\ref{lemma:inversion-kind-abstraction} applied to~\eqref{eq:9} we find that
+  \begin{gather}
+    \KENV \vdash
+    \KALL\KVAR t
+    = k_{11}\le k_{12}\Rightarrow \dots k_{n1}\le k_{n2} \Rightarrow
+    \KALL \KVAR t' : k'     \\
+    \label{eq:10}
+    \KENV, \KVAR; \TENVEMPTY \vdash v : t'
+  \end{gather}
+  so that $n=0$ and
+  \begin{gather}
+    \KENV \vdash
+    \KALL\KVAR t
+    = 
+    \KALL \KVAR t' : k'
+  \end{gather}
+  and thus
+  \begin{gather}\label{eq:11}
+    \KENV, \KVAR \vdash
+    t
+    = 
+    t' : k'
+  \end{gather}
+  Applying kind substitution to~\eqref{eq:10} and~\eqref{eq:11} yields
+  \begin{gather}
+    \KENV; \TENVEMPTY \vdash v[\KVAR \mapsto k] : t'[\KVAR \mapsto k]
+    \\
+    \KENV \vdash
+    t[\KVAR \mapsto k]
+    = 
+    t'[\KVAR \mapsto k] : k'[\KVAR \mapsto k]
+  \end{gather}
+  and thus by \TirName{Conv} the desired
+  \begin{gather}
+    \KENV; \TENVEMPTY \vdash v[\KVAR \mapsto k] : t_e
+  \end{gather}
+
+  \textbf{Case} reduction in context by rules \TirName{App-Left},
+  \TirName{App-Right}, \TirName{TApp-Left}, and \TirName{KApp-Left}. The result is
+  immediate by inversion of the respective rule and then by appeal to the inductive hypothesis.
 \end{proof}
 
 TODO: More elaborate semantics that tracks linearity.
