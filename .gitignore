@@ -180,6 +180,9 @@ TSWLatexianTemp*
 # KBibTeX
 *~[0-9]*
 
+# Agda
+*.agdai
+
 # Racket
 *~
 
