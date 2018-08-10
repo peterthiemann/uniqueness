@@ -112,27 +112,30 @@ usplit-env (rght ts) (x ∷ ϱ) = usplit-env ts ϱ >>= λ{ (ϱ₁ , ϱ₂) → r
 TODO: we need two levels of Maybe.
 One for indicating lack of gas and the other for indicating type errors.
 \begin{code}
-Lifting : (P : ℕ → Set) → Set
-Lifting P = ∀ {n} → (k : ℕ) → P n → P (n + k)
+inject≤′ :  ∀ {m n} → Fin m → m ≤′ n → Fin n
+inject≤′ i ≤′-refl = i
+inject≤′ i (≤′-step p) = inject₁ (inject≤′ i p) 
 
-liftUVal : Lifting UVal
-liftUVal k = λ { (UNum j) → UNum j
-               ; (UAddr a) → UAddr (inject+ k a) } 
+≤′-trans : ∀ {l m n} → l ≤′ m → m ≤′ n → l ≤′ n
+≤′-trans ≤′-refl ≤′-refl = ≤′-refl
+≤′-trans ≤′-refl (≤′-step m≤n) = ≤′-step m≤n
+≤′-trans (≤′-step l≤m) ≤′-refl = ≤′-step l≤m
+≤′-trans (≤′-step l≤m) (≤′-step m≤n) = ≤′-step (≤′-trans (≤′-step l≤m) m≤n)
 
-liftUEnv : Lifting UEnv
-liftUEnv k = Data.List.map (liftUVal k)
+Lifting' : (P : ℕ → Set) → Set
+Lifting' P = ∀ {m n} → (m ≤′ n) → P m → P (n)
 
-liftUStorable : Lifting UStorable
-liftUStorable k = λ{ (UFun ϱ e) → UFun (liftUEnv k ϱ) e }
+liftUVal' : Lifting' UVal
+liftUVal' p = λ{ (UNum j) → UNum j
+               ; (UAddr a) → UAddr (inject≤′ a p) }
+               
+liftUEnv' : Lifting' UEnv
+liftUEnv' p = Data.List.map (liftUVal' p)
 
-getDifference : ∀ {m n} → m ≤′ n → ∃ λ k → n ≡ k + m
-getDifference ≤′-refl = 0 , refl
-getDifference (≤′-step p) 
-  with getDifference p
-... | k , p≡
-  = (suc k) , (cong suc p≡)
+liftUStorable' : Lifting' UStorable
+liftUStorable' p = λ{ (UFun ϱ e) → UFun (liftUEnv' p ϱ) e }
 \end{code}
-Inversion of fins
+Inversion of Fin
 \begin{code}
 invert : (n : ℕ) (i : Fin n) → Fin n
 invert (suc n) zero = fromℕ n
@@ -170,9 +173,9 @@ eval (Cst j) i σ ϱ
 eval Var i σ ϱ
   = uhead ϱ >>= λ v → return ( , (≤′-refl , σ , v))
 eval{n = n} (Lam k w t₁ e) i σ ϱ
-  with UFun (liftUEnv 1 ϱ) e
+  with UFun (liftUEnv' (≤′-step ≤′-refl) ϱ) e
 ... | v 
-  with Data.Vec.map (liftUStorable 1) σ
+  with Data.Vec.map (liftUStorable' (≤′-step ≤′-refl)) σ
 ... | σ'
   rewrite (ppp{n})
   = return (suc n , ≤′-step ≤′-refl , v ∷ σ' , UAddr (fromℕ n))
@@ -183,9 +186,9 @@ eval (App ts e₁ e₂) (suc i) σ ϱ
                   ; (UAddr a) →
     let idx = invert n₁ a in
     case get σ₁ idx of λ{ (UFun ϱ' e') →
-    let k,p≡ = getDifference n≤n₁ in
-    eval e₂ i σ₁ (liftUEnv {!!} {!ϱ₂!}) >>= λ{ (n₂ , n₁≤n₂ , σ₂ , v₂) →
-    eval {!!} {!!} {!!} {!!} }}}}}
+    eval e₂ i σ₁ (liftUEnv' n≤n₁ ϱ₂) >>= λ{ (n₂ , n₁≤n₂ , σ₂ , v₂) →
+    eval e' i σ₂ (v₂ ∷ liftUEnv' n₁≤n₂ ϱ') >>= λ{ (n' , n₂≤n' , σ' , v') →
+    return (n' , (≤′-trans n≤n₁ (≤′-trans n₁≤n₂ n₂≤n') , σ' , v')) }}}}}}
 eval (Weaken ts un-Φ e) i σ ϱ
   = usplit-env ts ϱ >>= λ{ (ϱ₁ , ϱ₂) → eval e i σ ϱ₂ }
 \end{code}
