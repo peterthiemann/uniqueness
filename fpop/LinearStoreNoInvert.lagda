@@ -1,6 +1,6 @@
 Untyped definitional interpreter with soundness proof for untyped linear lambda calculus with store-based semantics that checks linearity.
 \begin{code}
-module LinearSimpleStore where
+module LinearStoreNoInvert where
 
 open import Data.Fin hiding (_≤_; lift; _+_)
 open import Data.List using (List; []; _∷_; [_]; length)
@@ -80,7 +80,6 @@ nothing >>=M fb = nothing
 \end{code}
 
 \begin{code}
-
 mutual
 
   UStore : ℕ → Set
@@ -100,11 +99,6 @@ mutual
 uhead : ∀ {A : Set} → List A → MM A
 uhead [] = nothing
 uhead (x ∷ ϱ) = return x
-
-utail : ∀ {A : Set} → List A → Maybe (List A)
-utail [] = nothing
-utail (x ∷ ϱ) = just ϱ
-
 
 usplit-env : ∀ {σ Φ Φ₁ Φ₂} → (ts : Split Φ Φ₁ Φ₂) (ϱ : UEnv σ) → Maybe (UEnv σ × UEnv σ)
 usplit-env [] [] = just ([] , [])
@@ -133,31 +127,35 @@ get (x ∷ v) (suc i) = get v i
 \end{code}
 
 \begin{code}
-Lifting' : (P : ℕ → Set) → Set
-Lifting' P = ∀ {m n} → (m ≤′ n) → P m → P n
+Lifting : (P : ℕ → Set) → Set
+Lifting P = ∀ {m n} → (m ≤′ n) → P m → P n
 
-liftUVal' : Lifting' UVal
-liftUVal' p = λ{ (UNum j) → UNum j
-               ; (UAddr a) → UAddr (inject≤′ a p) }
+liftAddr : Lifting Fin
+liftAddr ≤′-refl a = a
+liftAddr (≤′-step p) a = suc (liftAddr p a)
+
+liftUVal : Lifting UVal
+liftUVal p = λ{ (UNum j) → UNum j
+               ; (UAddr a) → UAddr (liftAddr p a) }
                
-liftUEnv' : Lifting' UEnv
-liftUEnv' p = Data.List.map (liftUVal' p)
+liftUEnv : Lifting UEnv
+liftUEnv p = Data.List.map (liftUVal p)
 
-liftUStorable' : Lifting' UStorable
-liftUStorable' p = λ{ Used → Used ; (UFun k ϱ e) → UFun k (liftUEnv' p ϱ) e }
+liftUStorable : Lifting UStorable
+liftUStorable p = λ{ Used → Used ; (UFun k ϱ e) → UFun k (liftUEnv p ϱ) e }
 
-liftUPreStore : ∀ {m} → Lifting' (λ n → (Vec (UStorable n) m))
-liftUPreStore p = Data.Vec.map (liftUStorable' p)
+liftUPreStore : ∀ {m} → Lifting (λ n → (Vec (UStorable n) m))
+liftUPreStore p = Data.Vec.map (liftUStorable p)
 
 get-lift : ∀ {n m}
   (σ' : Vec (UStorable n) m) →
   (i : Fin m) →
-  get (liftUPreStore (≤′-step ≤′-refl) σ') i ≡ liftUStorable' (≤′-step ≤′-refl) (get σ' i)
+  get (liftUPreStore (≤′-step ≤′-refl) σ') i ≡ liftUStorable (≤′-step ≤′-refl) (get σ' i)
 get-lift (x ∷ σ') zero = refl
 get-lift (x ∷ σ') (suc i) = get-lift σ' i
 \end{code}
 
-We have two layers of Maybe.
+There are two layers of Maybe.
 An outer layer of nothing indicates lack of gas. 
 The inner layer indicates type errors.
 just nothing is a type error, whereas just (just x) yields value x.
@@ -168,6 +166,9 @@ n+1=suc-n : ∀ {n} → n + 1 ≡ suc n
 n+1=suc-n {zero} = refl
 n+1=suc-n {suc n} = cong suc n+1=suc-n
 
+up1 : ∀ {n} → n ≤′ suc n
+up1 = ≤′-step ≤′-refl
+
 nuke-if-lin : ∀ {n} → (k : Kind) → UStore n → Fin n → UStore n
 nuke-if-lin One σ i = σ [ i ]≔ Used
 nuke-if-lin Many σ i = σ
@@ -175,42 +176,44 @@ nuke-if-lin Many σ i = σ
 eval : ∀ {Φ t n} → Exp Φ t → Gas → (σ : UStore n) → UEnv n 
   → MM (∃ λ n' → n ≤′ n' × UStore n' × UVal n')
 eval e zero σ ϱ = ∅
-eval (Cst j) i σ ϱ
+eval (Cst j) (suc i) σ ϱ
   = return ( , (≤′-refl , σ , UNum j))
-eval Var i σ ϱ
+eval Var (suc i) σ ϱ
   = uhead ϱ >>= λ v → return ( , (≤′-refl , σ , v))
-eval{n = n} (Lam k w t₁ e) i σ ϱ
-  with UFun k (liftUEnv' (≤′-step ≤′-refl) ϱ) e
+eval{n = n} (Lam k w t₁ e) (suc i) σ ϱ
+  with UFun k (liftUEnv up1 ϱ) e
 ... | v 
-  with Data.Vec.map (liftUStorable' (≤′-step ≤′-refl)) σ
+  with Data.Vec.map (liftUStorable up1) σ
 ... | σ'
   rewrite (n+1=suc-n{n})
-  = return (suc n , ≤′-step ≤′-refl , v ∷ σ' , UAddr (fromℕ n))
+  = return (suc n , up1 , v ∷ σ' , UAddr zero)
 eval (App ts e₁ e₂) (suc i) σ ϱ
   = just (usplit-env ts ϱ) >>= λ{ (ϱ₁ , ϱ₂) →
     eval e₁ i σ ϱ₁ >>= λ{ (n₁ , n≤n₁ , σ₁ , v₁) →
       case v₁ of λ{ (UNum j) → just ∅
                   ; (UAddr a) →
-    let idx = invert n₁ a in
-    case get σ₁ idx of λ{ Used → just ∅ 
+      case get σ₁ a of λ{ Used → just ∅ 
                         ; (UFun k ϱ' e') →
-    let σ₁' = nuke-if-lin k σ₁ idx in
-    eval e₂ i σ₁' (liftUEnv' n≤n₁ ϱ₂) >>= λ{ (n₂ , n₁≤n₂ , σ₂ , v₂) →
-    eval e' i σ₂ (v₂ ∷ liftUEnv' n₁≤n₂ ϱ') >>= λ{ (n' , n₂≤n' , σ' , v') →
-    return (n' , (≤′-trans n≤n₁ (≤′-trans n₁≤n₂ n₂≤n') , σ' , v')) }}}}}}
-eval (Weaken ts un-Φ e) i σ ϱ
+      let σ₁' = nuke-if-lin k σ₁ a in
+      eval e₂ i σ₁' (liftUEnv n≤n₁ ϱ₂) >>= λ{ (n₂ , n₁≤n₂ , σ₂ , v₂) →
+      eval e' i σ₂ (v₂ ∷ liftUEnv n₁≤n₂ ϱ') >>= λ{ (n' , n₂≤n' , σ' , v') →
+      return (n' , (≤′-trans n≤n₁ (≤′-trans n₁≤n₂ n₂≤n') , σ' , v')) }}}}}}
+eval (Weaken ts un-Φ e) (suc i) σ ϱ
   = just (usplit-env ts ϱ) >>= λ{ (ϱ₁ , ϱ₂) → eval e i σ ϱ₂ }
 \end{code}
+
 
 Soundness relations
 \begin{code}
 mutual
   data [_]_∈∈_ {n} (σ : UStore n) : UVal n → Type → Set where
     in-num : ∀ {j} → [ σ ] UNum j ∈∈ Num
-    in-fun : ∀ {a k t₁ t₂} → [ σ ] get σ (invert n a) ∈∈' Fun k t₁ t₂ → [ σ ] UAddr a ∈∈ Fun k t₁ t₂
+    in-fun : ∀ {a k t₁ t₂} → [ σ ] get σ a ∈∈' Fun k t₁ t₂ → [ σ ] UAddr a ∈∈ Fun k t₁ t₂
 
   data [_]_∈∈'_ {n} (σ : UStore n) : UStorable n → Type → Set where
-    st-fun : ∀ {k t₁ Ψ' t₂ ϱ'} {e' : Exp (t₁ ∷ Ψ') t₂} (p' : [ σ ] ϱ' ⊧ Ψ')
+    st-fun : ∀ {k t₁ Ψ' t₂ ϱ'} 
+      {e' : Exp (t₁ ∷ Ψ') t₂}
+      (p' : [ σ ] ϱ' ⊧ Ψ')
       → [ σ ] UFun k ϱ' e' ∈∈' Fun k t₁ t₂
 
   data [_]_⊧_ {n} (σ : UStore n) : UEnv n → TEnv → Set where
@@ -240,8 +243,8 @@ mutual
     (us : UStorable n)
     → [ σ' ] us ∈∈' Fun k t₁ t₂
     →
-    [ vs' ∷ liftUPreStore (≤′-step ≤′-refl) σ' ] 
-    liftUStorable' (≤′-step ≤′-refl) us ∈∈' Fun k t₁ t₂
+    [ vs' ∷ liftUPreStore up1 σ' ] 
+    liftUStorable up1 us ∈∈' Fun k t₁ t₂
   lift-∈∈' σ' vs' Used ()
   lift-∈∈' σ' vs' (UFun k ϱ e) (st-fun p') = st-fun (lift-⊧ vs' p')
 
@@ -249,51 +252,34 @@ mutual
     (vs' : UStorable (suc n)) →
     (v∈t : [ σ' ] v ∈∈ t)
     → 
-    let up = (≤′-step ≤′-refl) in
-    [ vs' ∷ liftUPreStore up σ' ] liftUVal' up v ∈∈ t
+    [ vs' ∷ liftUPreStore up1 σ' ] liftUVal up1 v ∈∈ t
+  lift-∈∈ vs' in-num = in-num
+  lift-∈∈{n}{σ'} vs' (in-fun{a} x∈∈') 
+    with get (liftUPreStore up1 σ') a
+  ... | glsa
+    rewrite (get-lift σ' a)
+{-
+    with get σ' a | inspect (get σ') a
+  lift-∈∈ {n} {σ'} vs' (in-fun {a} ()) | Used | _
+  lift-∈∈ {n} {σ'} vs' (in-fun {a} (st-fun p')) | UFun k ϱ e | [[ eq ]]
+-}
+    = in-fun {!!}
+{-
   lift-∈∈ {zero} vs' in-num = in-num
   lift-∈∈ {zero} vs' (in-fun{a} x) 
     with invert zero a
   lift-∈∈ {zero} vs' (in-fun {a} x) | ()
   lift-∈∈ {suc n} vs' in-num = in-num
   lift-∈∈ {suc n}{σ'} vs' (in-fun{a = a} x) 
-    rewrite sym (invert-s n a)
-    = in-fun{a = inject₁ a} (tr (tr2 (lift-∈∈' σ' vs' (get σ' (invert (suc n) a)) x)))
-    where 
-      tr : ∀ {k t₁ t₂} →
-        [
-        vs' ∷ liftUPreStore (≤′-step ≤′-refl) σ'
-        ]
-        get
-        (vs' ∷ liftUPreStore (≤′-step ≤′-refl) σ')
-        (suc (invert (suc n) a))
-        ∈∈' Fun k t₁ t₂
-        → 
-        [
-        vs' ∷ liftUPreStore (≤′-step ≤′-refl) σ'
-        ]
-        get
-        (vs' ∷ liftUPreStore (≤′-step ≤′-refl) σ')
-        (invert (suc (suc n)) (inject₁ a))
-        ∈∈' Fun k t₁ t₂
-      tr prf rewrite invert-s n a = prf
-    
-      tr2 : ∀ {k t₁ t₂} →
-        [ vs' ∷ liftUPreStore (≤′-step ≤′-refl) σ' ]
-        liftUStorable' (≤′-step ≤′-refl) (get σ' (invert (suc n) a)) ∈∈'
-        Fun k t₁ t₂
-        →
-        [ vs' ∷ liftUPreStore (≤′-step ≤′-refl) σ' ]
-        get (liftUPreStore (≤′-step ≤′-refl) σ') (invert (suc n) a) ∈∈'
-        Fun k t₁ t₂
-      tr2 prf rewrite get-lift σ' (invert (suc n) a) = prf
+    = in-fun {!!}
+-}
 
   lift-⊧ : ∀ {n}{σ' : UStore n}{ϱ' : UEnv n}{Φ'}
     (vs' : UStorable (suc n)) →
     [ σ' ] ϱ' ⊧ Φ'
     → 
     let up = (≤′-step ≤′-refl) in
-    [ vs' ∷ liftUPreStore up σ' ] liftUEnv' up ϱ' ⊧ Φ'
+    [ vs' ∷ liftUPreStore up σ' ] liftUEnv up ϱ' ⊧ Φ'
   lift-⊧ v' empty = empty
   lift-⊧ v' (elem v∈t srf) = elem (lift-∈∈ v' v∈t) (lift-⊧ v' srf)
 
@@ -304,7 +290,7 @@ mutual
     → [ σ₀ ] σ ⊧' Ψ' → 
     let sv = UFun k ϱ' e' in
     let up = (≤′-step ≤′-refl) in
-    let σ₀' = (liftUStorable' up sv ∷ liftUPreStore up σ₀) in
+    let σ₀' = (liftUStorable up sv ∷ liftUPreStore up σ₀) in
     ( [ σ₀' ] (liftUPreStore up σ) ⊧' (Fun k t₁ t₂ ∷ Ψ'))
   lift-⊧' {n} {σ₀} {.[]} {Φ'} {ϱ'} .[] k t₁ t₂ e' p empty = {!elem!}
   lift-⊧' {n} {σ₀} {.(_ ∷ _)} {Φ'} {ϱ'} .(_ ∷ _) k t₁ t₂ e' p (elem x smp) = {!!}
@@ -312,32 +298,15 @@ mutual
     = let ee = st-fun{n}{k = k}{ϱ' = ϱ'}{e' = e'} p in
       let sv = UFun k ϱ' e' in
       let up = (≤′-step{n} ≤′-refl) in
-      let sv' = liftUStorable' up sv in
+      let sv' = liftUStorable up sv in
       let σ₀' = (sv' ∷ liftUPreStore up σ₀) in
       elem (st-fun (lift-⊧ sv' p)) {!lift-⊧' !}
   -}
 \end{code}
 
-Lemmas
-\begin{code}
-lemma : ∀ {n' m k t₁ t₂ Φ a}
-  {σ : UStore n'}
-  {σ' : Vec (UStorable n') m}
-  {Ψ' : TEnv}
-  (e' : Exp (t₁ ∷ Φ) t₂)
-  (ϱ' : UEnv n')
-  (rel : [ σ ] ϱ' ⊧ Φ)
-  (ps : [ σ ] σ' ⊧' Ψ')
-  → UFun k ϱ' e' ≡ get σ' (invert m a)
-lemma{a = a} e' ϱ' rel empty 
-  with invert 0 a
-... | ()
-lemma {a = zero} e' ϱ' rel (elem x ps) = {!!}
-lemma {a = suc a} e' ϱ' rel (elem x ps) = lemma e' ϱ' rel ps
-\end{code}
 
 Soundness proof
-\begin{code}
+%%\begin{code}
 sound-split : ∀ {n Φ₁ Φ₂} 
   (σ : UStore n) (Ψ : TEnv) (σ⊧Ψ : [ σ ] σ ⊧' Ψ)
   (ϱ : UEnv n) (Φ : TEnv) (ϱ⊧Φ : [ σ ] ϱ ⊧ Φ)
@@ -374,10 +343,10 @@ sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ e zero = in-nogas
 sound σ Ψ σ⊧Ψ ϱ [] ϱ⊧Φ (Cst n) (suc i) = in-acceptable σ⊧Ψ in-num
 sound σ Ψ σ⊧Ψ .(_ ∷ _) (t ∷ []) (elem v∈t ϱ⊧Φ) Var (suc i) = in-acceptable σ⊧Ψ v∈t
 sound{n} σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (Lam{t₂ = t₂} k w t₁ e) (suc i)
-  with UFun k (liftUEnv' (≤′-step ≤′-refl) ϱ) e 
-    | inspect (UFun k (liftUEnv' (≤′-step ≤′-refl) ϱ)) e
+  with UFun k (liftUEnv (≤′-step ≤′-refl) ϱ) e 
+    | inspect (UFun k (liftUEnv (≤′-step ≤′-refl) ϱ)) e
 ... | v | [[ v≡ ]]
-  with Data.Vec.map (liftUStorable' (≤′-step ≤′-refl)) σ
+  with Data.Vec.map (liftUStorable (≤′-step ≤′-refl)) σ
 ... | σ'
   rewrite (n+1=suc-n{n}) -- (invert-0 n)
   = in-acceptable 
@@ -388,7 +357,7 @@ sound{n} σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (Lam{t₂ = t₂} k w t₁ e) (suc i)
         gen-xx : [ v ∷ σ' ] v ∈∈' Fun k t₁ t₂ → 
                  [ v ∷ σ' ] get (v ∷ σ') (invert (suc n) (fromℕ n)) ∈∈' Fun k t₁ t₂
         gen-xx r rewrite get-xx = r
-        rev-xx : let v' = UFun k (liftUEnv' (≤′-step ≤′-refl) ϱ) e in 
+        rev-xx : let v' = UFun k (liftUEnv (≤′-step ≤′-refl) ϱ) e in 
                  [ v' ∷ σ' ] v' ∈∈' Fun k t₁ t₂ → [ v ∷ σ' ] v ∈∈' Fun k t₁ t₂
         rev-xx r rewrite v≡ = r
 sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App{k}{t₁}{t₂} ts e e₁) (suc i) 
@@ -410,5 +379,5 @@ sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (Weaken ts un-Φ e) (suc i)
   with sound-split σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ ts
 ... | ϱ₁ , ϱ₂ , ups≡ , p₁ , p₂
   rewrite ups≡
-  = sound σ Ψ σ⊧Ψ ϱ₂ _ p₂ e (suc i)
+  = sound σ Ψ σ⊧Ψ ϱ₂ _ p₂ e i
 \end{code}
