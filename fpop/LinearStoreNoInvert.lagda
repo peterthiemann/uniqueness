@@ -12,6 +12,7 @@ open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Product
 open import Data.Vec hiding (drop; [_]; _>>=_; _∈_)
+open import Data.Vec.All hiding (All)
 open import Function
 
 open import Relation.Nullary
@@ -54,7 +55,7 @@ data Split : TEnv → TEnv → TEnv → Set where
   rght : ∀ {t Φ Φ₁ Φ₂} → Split Φ Φ₁ Φ₂ → Split (t ∷ Φ) Φ₁ (t ∷ Φ₂)
 
 data Exp : TEnv → Type → Set where
-  Cst : (n : ℕ) → Exp [] Num
+  Cst : (j : ℕ) → Exp [] Num
   Var : ∀ {t} → Exp [ t ] t
   Lam : ∀ {Φ t₂} → (k : Kind) (w : Wf-env k Φ) (t₁ : Type) (e : Exp (t₁ ∷ Φ) t₂) → Exp Φ (Fun k t₁ t₂)
   App : ∀ {k t₁ t₂ Φ Φ₁ Φ₂} → (ts : Split Φ Φ₁ Φ₂) (e₁ : Exp Φ₁ (Fun k t₁ t₂)) (e₂ : Exp Φ₂ t₁) → Exp Φ t₂
@@ -81,12 +82,10 @@ nothing >>=M fb = nothing
 
 \begin{code}
 mutual
-
   UStore : ℕ → Set
   UStore n = Vec (UStorable n) n
 
   data UVal (n : ℕ) : Set where
-    UNum  : (i : ℕ) → UVal n
     UAddr : (a : Fin n) → UVal n
 
   UEnv : ℕ → Set
@@ -94,6 +93,7 @@ mutual
 
   data UStorable n : Set where
     Used : UStorable n
+    UNum : (i : ℕ) → UStorable n
     UFun : ∀ {Φ t₁ t₂} → (k : Kind) (ϱ : UEnv n) → (e : Exp (t₁ ∷ Φ) t₂) → UStorable n
 
 uhead : ∀ {A : Set} → List A → MM A
@@ -119,6 +119,19 @@ get : ∀ {A : Set} {n} → Vec A n → Fin n → A
 get (x ∷ v) zero = x
 get (x ∷ v) (suc i) = get v i
 
+vdrop : ∀ {A : Set} {n} → Vec A n → (i : Fin (suc n)) → Vec A (n ℕ-ℕ i)
+vdrop xs zero = xs
+vdrop [] (suc ())
+vdrop (x ∷ xs) (suc i) = vdrop xs i
+
+≤′-zero : ∀ n → zero ≤′ n
+≤′-zero zero = ≤′-refl
+≤′-zero (suc n) = ≤′-step (≤′-zero n)
+
+≤′-suc : ∀ {m n} → m ≤′ n → suc m ≤′ suc n
+≤′-suc ≤′-refl = ≤′-refl
+≤′-suc (≤′-step p) = ≤′-step (≤′-suc p)
+
 ≤′-trans : ∀ {l m n} → l ≤′ m → m ≤′ n → l ≤′ n
 ≤′-trans ≤′-refl ≤′-refl = ≤′-refl
 ≤′-trans ≤′-refl (≤′-step m≤n) = ≤′-step m≤n
@@ -135,24 +148,16 @@ liftAddr ≤′-refl a = a
 liftAddr (≤′-step p) a = suc (liftAddr p a)
 
 liftUVal : Lifting UVal
-liftUVal p = λ{ (UNum j) → UNum j
-               ; (UAddr a) → UAddr (liftAddr p a) }
+liftUVal p = λ{ (UAddr a) → UAddr (liftAddr p a) }
                
 liftUEnv : Lifting UEnv
 liftUEnv p = Data.List.map (liftUVal p)
 
 liftUStorable : Lifting UStorable
-liftUStorable p = λ{ Used → Used ; (UFun k ϱ e) → UFun k (liftUEnv p ϱ) e }
+liftUStorable p = λ{ Used → Used ; (UNum j) → UNum j ; (UFun k ϱ e) → UFun k (liftUEnv p ϱ) e }
 
 liftUPreStore : ∀ {m} → Lifting (λ n → (Vec (UStorable n) m))
 liftUPreStore p = Data.Vec.map (liftUStorable p)
-
-get-lift : ∀ {n m}
-  (σ' : Vec (UStorable n) m) →
-  (i : Fin m) →
-  get (liftUPreStore (≤′-step ≤′-refl) σ') i ≡ liftUStorable (≤′-step ≤′-refl) (get σ' i)
-get-lift (x ∷ σ') zero = refl
-get-lift (x ∷ σ') (suc i) = get-lift σ' i
 \end{code}
 
 There are two layers of Maybe.
@@ -169,18 +174,25 @@ n+1=suc-n {suc n} = cong suc n+1=suc-n
 up1 : ∀ {n} → n ≤′ suc n
 up1 = ≤′-step ≤′-refl
 
-nuke-if-lin : ∀ {n} → (k : Kind) → UStore n → Fin n → UStore n
+get-lift : ∀ {n m}
+  (σ' : Vec (UStorable n) m) →
+  (i : Fin m) →
+  get (liftUPreStore up1 σ') i ≡ liftUStorable up1 (get σ' i)
+get-lift (x ∷ σ') zero = refl
+get-lift (x ∷ σ') (suc i) = get-lift σ' i
+
+nuke-if-lin : ∀ {n m} → (k : Kind) → Vec (UStorable n) m → Fin m → Vec (UStorable n) m
 nuke-if-lin One σ i = σ [ i ]≔ Used
 nuke-if-lin Many σ i = σ
 
-eval : ∀ {Φ t n} → Exp Φ t → Gas → (σ : UStore n) → UEnv n 
+eval : ∀ {n Φ t} → Exp Φ t → Gas → (σ : UStore n) → UEnv n 
   → MM (∃ λ n' → n ≤′ n' × UStore n' × UVal n')
 eval e zero σ ϱ = ∅
-eval (Cst j) (suc i) σ ϱ
-  = return ( , (≤′-refl , σ , UNum j))
+eval{n} (Cst j) (suc i) σ ϱ
+  = return (suc n , up1 , UNum j ∷ Data.Vec.map (liftUStorable up1) σ , UAddr zero)
 eval Var (suc i) σ ϱ
   = uhead ϱ >>= λ v → return ( , (≤′-refl , σ , v))
-eval{n = n} (Lam k w t₁ e) (suc i) σ ϱ
+eval{n} (Lam k w t₁ e) (suc i) σ ϱ
   with UFun k (liftUEnv up1 ϱ) e
 ... | v 
   with Data.Vec.map (liftUStorable up1) σ
@@ -190,9 +202,9 @@ eval{n = n} (Lam k w t₁ e) (suc i) σ ϱ
 eval (App ts e₁ e₂) (suc i) σ ϱ
   = just (usplit-env ts ϱ) >>= λ{ (ϱ₁ , ϱ₂) →
     eval e₁ i σ ϱ₁ >>= λ{ (n₁ , n≤n₁ , σ₁ , v₁) →
-      case v₁ of λ{ (UNum j) → just ∅
-                  ; (UAddr a) →
+      case v₁ of λ{ (UAddr a) →
       case get σ₁ a of λ{ Used → just ∅ 
+                        ; (UNum j) → just ∅
                         ; (UFun k ϱ' e') →
       let σ₁' = nuke-if-lin k σ₁ a in
       eval e₂ i σ₁' (liftUEnv n≤n₁ ϱ₂) >>= λ{ (n₂ , n₁≤n₂ , σ₂ , v₂) →
@@ -204,47 +216,79 @@ eval (Weaken ts un-Φ e) (suc i) σ ϱ
 
 
 Soundness relations
+(We don't need cycles in the store)
 \begin{code}
+-- store type
+-- all values live in the store
+-- they start out as "just", but linear values degrade to "nothing" after first use
+SType = λ n → Vec (Maybe Type) n
+
 mutual
   data [_]_∈∈_ {n} (σ : UStore n) : UVal n → Type → Set where
-    in-num : ∀ {j} → [ σ ] UNum j ∈∈ Num
-    in-fun : ∀ {a k t₁ t₂} → [ σ ] get σ a ∈∈' Fun k t₁ t₂ → [ σ ] UAddr a ∈∈ Fun k t₁ t₂
+    in-addr : ∀ {a t} → [ σ ] get σ a ∈∈' just t → [ σ ] UAddr a ∈∈ t
 
-  data [_]_∈∈'_ {n} (σ : UStore n) : UStorable n → Type → Set where
-    st-fun : ∀ {k t₁ Ψ' t₂ ϱ'} 
+  data [_]_∈∈'_ {n} (σ : UStore n) : UStorable n → Maybe Type → Set where
+    st-void : [ σ ] Used ∈∈' nothing
+    st-num  : ∀ {j} → [ σ ] UNum j ∈∈' just Num
+    st-fun  : ∀ {k t₁ t₂ Ψ' ϱ'} 
       {e' : Exp (t₁ ∷ Ψ') t₂}
       (p' : [ σ ] ϱ' ⊧ Ψ')
-      → [ σ ] UFun k ϱ' e' ∈∈' Fun k t₁ t₂
+      → [ σ ] UFun k ϱ' e' ∈∈' just (Fun k t₁ t₂)
 
   data [_]_⊧_ {n} (σ : UStore n) : UEnv n → TEnv → Set where
     empty : [ σ ] [] ⊧ []
     elem  : ∀ {v t ϱ Φ} → (v∈t : [ σ ] v ∈∈ t) → (p : [ σ ] ϱ ⊧ Φ) → [ σ ] (v ∷ ϱ) ⊧ (t ∷ Φ)
 
-  data [_]_⊧'_ {n} (σ : UStore n) : ∀ {m} → Vec (UStorable n) m → TEnv → Set where
-    empty : [ σ ] [] ⊧' []
-    elem  : ∀ {m t Φ}{s : UStorable n}{σ' : Vec (UStorable n) m}
-      → [ σ ] s ∈∈' t → [ σ ] σ' ⊧' Φ → [ σ ] (s ∷ σ') ⊧' (t ∷ Φ)
+  _⊧'_ : ∀ {n} → UStore n → SType n → Set
+  σ ⊧' Ψ = All₂ ([_]_∈∈'_ σ) σ Ψ
+  
+--  data _⊧'_ : ∀ {n} → UStore n → SType n → Set where
+--    empty : ∀ {n} → _⊧'_ {p = ≤′-zero n} [] []
+--    elem  : ∀ {n m mt Ψ p}{s : UStorable (suc n)}{σ : Vec (UStorable (suc n)) m}
+--      → [ σ ] s ∈∈' mt → _⊧'_ {p = p} σ Ψ → _⊧'_ {p = ≤′-suc {!!}} (s ∷ σ) (mt ∷ Ψ)
 
   data _:∈:_ {n} : MM (∃ λ n' → n ≤′ n' × UStore n' × UVal n') → Type → Set where
     in-nogas : ∀{t} → nothing :∈: t
     in-acceptable : ∀ {n' n≤n' σ' v' t Ψ'}
-      → (ps : [ σ' ] σ' ⊧' Ψ')
+      → (ps : σ' ⊧' Ψ')
       → (pv : [ σ' ] v' ∈∈ t) 
       → just (just (n' , n≤n' , σ' , v')) :∈: t
 \end{code}
 
+%\begin{code}
+access-ustorable' : ∀ {n}{σ : UStore n}{Ψ'}{m}{σ' : Vec (UStorable n) m}
+  (ps : σ' ⊧' Ψ') (a : Fin m)
+  → ∃ λ k → ∃ λ t₁ → ∃ λ t₂ → [ σ ] get σ' a ∈∈' just (Fun k t₁ t₂)
+access-ustorable' ps a = {!!}
+
+access-ustorable : ∀ {n}{σ' : UStore n}{Ψ'}
+  (ps : σ' ⊧' Ψ') (a : Fin n)
+  → ∃ λ k → ∃ λ t₁ → ∃ λ t₂ → [ σ' ] get σ' a ∈∈' just (Fun k t₁ t₂)
+access-ustorable {σ' = σ'} ps a = access-ustorable' {σ = σ'}{σ' = σ'} ps a
+
+get-ustorable' : ∀ {n}{σ : UStore n}{Ψ'}{m}{σ' : Vec (UStorable n) m}
+  (ps : σ' ⊧' Ψ') (a : Fin m)
+  → ∃ λ k → ∃ λ ϱ' → ∃ λ e' → get σ' a ≡ UFun k ϱ' e'
+get-ustorable' ps a = {!!}
+
+get-ustorable : ∀ {n}{σ' : UStore n}{Ψ'}
+  (ps : σ' ⊧' Ψ') (a : Fin n)
+  → ∃ λ k → ∃ λ ϱ' → ∃ λ e' → get σ' a ≡ UFun k ϱ' e'
+get-ustorable {σ' = σ'} ps a = get-ustorable' {σ = σ'}{σ' = σ'} ps a
+\end{code}
+
 Lifting the soundness relations
-\begin{code}
+%\begin{code}
 mutual
   lift-∈∈' :
     ∀ {n k t₁ t₂}
     (σ' : UStore n)
     (vs' : UStorable (suc n))
     (us : UStorable n)
-    → [ σ' ] us ∈∈' Fun k t₁ t₂
+    → [ σ' ] us ∈∈' just (Fun k t₁ t₂)
     →
     [ vs' ∷ liftUPreStore up1 σ' ] 
-    liftUStorable up1 us ∈∈' Fun k t₁ t₂
+    liftUStorable up1 us ∈∈' just (Fun k t₁ t₂)
   lift-∈∈' σ' vs' Used ()
   lift-∈∈' σ' vs' (UFun k ϱ e) (st-fun p') = st-fun (lift-⊧ vs' p')
 
@@ -253,18 +297,17 @@ mutual
     (v∈t : [ σ' ] v ∈∈ t)
     → 
     [ vs' ∷ liftUPreStore up1 σ' ] liftUVal up1 v ∈∈ t
-  lift-∈∈ vs' in-num = in-num
+  lift-∈∈ vs' v∈t = {!!}
+{-
+ in-num = in-num
   lift-∈∈{n}{σ'} vs' (in-fun{a} x∈∈') 
     with get (liftUPreStore up1 σ') a
   ... | glsa
     rewrite (get-lift σ' a)
-{-
     with get σ' a | inspect (get σ') a
   lift-∈∈ {n} {σ'} vs' (in-fun {a} ()) | Used | _
   lift-∈∈ {n} {σ'} vs' (in-fun {a} (st-fun p')) | UFun k ϱ e | [[ eq ]]
--}
     = in-fun {!!}
-{-
   lift-∈∈ {zero} vs' in-num = in-num
   lift-∈∈ {zero} vs' (in-fun{a} x) 
     with invert zero a
@@ -283,18 +326,18 @@ mutual
   lift-⊧ v' empty = empty
   lift-⊧ v' (elem v∈t srf) = elem (lift-∈∈ v' v∈t) (lift-⊧ v' srf)
 
+  {-
   lift-⊧' : ∀ {n}{σ₀ : UStore n}{Ψ'}{Φ'}{ϱ' : UEnv n}
     {m}(σ : Vec (UStorable n) m)             -- the prestore
     (k : Kind) (t₁ t₂ : Type) 
     (e' : Exp (t₁ ∷ Φ') t₂) (p : [ σ₀ ] ϱ' ⊧ Φ')
-    → [ σ₀ ] σ ⊧' Ψ' → 
+    → σ ⊧' Ψ' → 
     let sv = UFun k ϱ' e' in
     let up = (≤′-step ≤′-refl) in
     let σ₀' = (liftUStorable up sv ∷ liftUPreStore up σ₀) in
-    ( [ σ₀' ] (liftUPreStore up σ) ⊧' (Fun k t₁ t₂ ∷ Ψ'))
+    ( (liftUPreStore up σ) ⊧' (just (Fun k t₁ t₂) ∷ Ψ'))
   lift-⊧' {n} {σ₀} {.[]} {Φ'} {ϱ'} .[] k t₁ t₂ e' p empty = {!elem!}
   lift-⊧' {n} {σ₀} {.(_ ∷ _)} {Φ'} {ϱ'} .(_ ∷ _) k t₁ t₂ e' p (elem x smp) = {!!}
-  {-
     = let ee = st-fun{n}{k = k}{ϱ' = ϱ'}{e' = e'} p in
       let sv = UFun k ϱ' e' in
       let up = (≤′-step{n} ≤′-refl) in
@@ -304,11 +347,125 @@ mutual
   -}
 \end{code}
 
+%\begin{code}
+nuke-ok' : ∀ {n}{m}{σ : UStore n}{Ψ'}{σ' : Vec (UStorable n) m}
+  (ps : σ' ⊧' Ψ') (a : Fin n) (a' : Fin m)
+  → nuke-if-lin One σ' a' ⊧' Ψ'
+nuke-ok' ps a a' = {!!}
+
+nuke-ok : ∀ {n} {σ' : UStore n}{Ψ'}
+  (ps : σ' ⊧' Ψ') (a : Fin n) (k' : Kind)
+  → let σ'' = nuke-if-lin k' σ' a in
+    σ'' ⊧' Ψ'
+nuke-ok ps a One = nuke-ok' ps a a
+nuke-ok ps a Many = ps
+\end{code}
+
+Lemmas
+\begin{code}
+lemma3 :
+  ∀ {n}
+  {s' : UStorable (suc n)}
+  (σ  : UStore n)
+  (u  : UVal n)
+  (t  : Type)
+  (v∈t : [ σ ] u ∈∈ t)
+  →
+  [ s' ∷ Data.Vec.map (liftUStorable up1) σ ] liftUVal up1 u ∈∈ t
+
+lemma5 :
+  ∀ {n}
+  {s' : UStorable (suc n)}
+  (σ  : UStore n)
+  (ϱ' : List (UVal n))
+  (Φ' : List Type)
+  (p'  : [ σ ] ϱ' ⊧ Φ')
+  →
+  [ s' ∷ Data.Vec.map (liftUStorable up1) σ ] liftUEnv up1 ϱ' ⊧ Φ'
+lemma5 σ [] [] empty = empty
+lemma5 σ (v ∷ ϱ') (t ∷ Φ') (elem v∈t p') = elem (lemma3 σ v t v∈t) (lemma5 σ ϱ' Φ' p')
+
+lemma4' :
+  ∀ {n m}
+  {s' : UStorable (suc n)}
+  (σ  : UStore n)
+  (σ' : Vec (UStorable n) m)
+  (t  : Type)
+  (a'  : Fin m)
+  (p  : [ σ ] get σ' a' ∈∈' just t)
+  →
+  [ s' ∷ Data.Vec.map (liftUStorable up1) σ ]
+      get (Data.Vec.map (liftUStorable up1) σ') a' ∈∈' just t
+lemma4' σ (.(UNum _) ∷ σ') .Num zero st-num = st-num
+lemma4' σ ((UFun{Φ'} k ϱ' _) ∷ σ') .(Fun _ _ _) zero (st-fun p') = st-fun (lemma5 σ ϱ' Φ' p')
+lemma4' σ (x ∷ σ') t (suc a') p = lemma4' σ σ' t a' p
+
+lemma4 :
+  ∀ {n}
+  {s' : UStorable (suc n)}
+  (σ  : UStore n)
+  (t  : Type)
+  (a  : Fin n)
+  (p  : [ σ ] get σ a ∈∈' just t)
+  →
+  [ s' ∷ Data.Vec.map (liftUStorable up1) σ ]
+      get (Data.Vec.map (liftUStorable up1) σ) a ∈∈' just t
+lemma4 σ t a p = lemma4' σ σ t a p
+
+lemma3 σ (UAddr a) t (in-addr x) = in-addr (lemma4 σ t a x)
+
+lemma2 :
+  ∀ {n}
+  {s' : UStorable (suc n)}
+  (σ  : UStore n)
+  (ϱ  : List (UVal n))
+  (Φ  : List Type)
+  (p  : [ σ ] ϱ ⊧ Φ)
+  →
+  [ s' ∷ Data.Vec.map (liftUStorable up1) σ ] liftUEnv up1 ϱ ⊧ Φ
+lemma2 σ [] [] empty = empty
+lemma2 σ (u ∷ ϱ) (t ∷ Φ) (elem v∈t p) = elem (lemma3 σ u t v∈t) (lemma2 σ ϱ Φ p)
+
+lemma1 :
+  ∀ {n}
+  {s' : UStorable (suc n)}
+  (σ  : UStore n)
+  (s  : UStorable n)
+  (mt : Maybe Type)
+  (p  : [ σ ] s ∈∈' mt)
+  →
+  [ s' ∷ Data.Vec.map (liftUStorable up1) σ ] liftUStorable up1 s ∈∈' mt
+lemma1 σ Used .nothing st-void = st-void
+lemma1 σ (UNum i) .(just Num) st-num = st-num
+lemma1 σ (UFun k ϱ e) .(just (Fun k _ _)) (st-fun p') = st-fun (lemma2 σ ϱ _ p')
+
+lemma' : 
+  ∀ {n m}
+  {s' : UStorable (suc n)}
+  (σ : UStore n)
+  (σ' : Vec (UStorable n) m) (Ψ' : SType m)
+  (σ⊧Ψ : All₂ ([_]_∈∈'_ σ) σ' Ψ')
+  →
+  All₂ ([_]_∈∈'_ (s' ∷ Data.Vec.map (liftUStorable up1) σ))
+      (Data.Vec.map (liftUStorable up1) σ') Ψ'
+lemma' σ [] [] [] = []
+lemma' σ (s ∷ σ') (mt ∷ Ψ') (x₂ ∷ σ⊧Ψ) = lemma1 σ s mt x₂ ∷ lemma' σ σ' Ψ' σ⊧Ψ
+
+lemma :
+  ∀ {n}
+  {s' : UStorable (suc n)}
+  (σ : UStore n) (Ψ : SType n)
+  (σ⊧Ψ : All₂ ([_]_∈∈'_ σ) σ Ψ)
+  →
+  All₂ ([_]_∈∈'_ (s' ∷ Data.Vec.map (liftUStorable up1) σ))
+      (Data.Vec.map (liftUStorable up1) σ) Ψ
+lemma σ Ψ σ⊧Ψ = lemma' σ σ Ψ σ⊧Ψ
+\end{code}
 
 Soundness proof
-%%\begin{code}
+\begin{code}
 sound-split : ∀ {n Φ₁ Φ₂} 
-  (σ : UStore n) (Ψ : TEnv) (σ⊧Ψ : [ σ ] σ ⊧' Ψ)
+  (σ : UStore n) (Ψ : SType n) (σ⊧Ψ : σ ⊧' Ψ)
   (ϱ : UEnv n) (Φ : TEnv) (ϱ⊧Φ : [ σ ] ϱ ⊧ Φ)
   (ts : Split Φ Φ₁ Φ₂) →
   ∃ λ ϱ₁ → ∃ λ ϱ₂ → usplit-env ts ϱ ≡ just (ϱ₁ , ϱ₂) × ([ σ ] ϱ₁ ⊧ Φ₁) × ([ σ ] ϱ₂ ⊧ Φ₂)
@@ -333,37 +490,39 @@ sound-split σ Ψ σ⊧Ψ (v ∷ _) .(_ ∷ _) (elem v∈t ϱ⊧Φ) (rght ts)
 ... | ϱ₁ , ϱ₂ , usp≡ , p₁ , p₂
   rewrite usp≡
   = ϱ₁ , ((v ∷ ϱ₂) , (refl , (p₁ , (elem v∈t p₂))))
-
 sound : ∀ {n t}
-  (σ : UStore n) (Ψ : TEnv) (σ⊧Ψ : [ σ ] σ ⊧' Ψ)
+  (σ : UStore n) (Ψ : SType n) (σ⊧Ψ : σ ⊧' Ψ)
   (ϱ : UEnv n) (Φ : TEnv) (ϱ⊧Φ : [ σ ] ϱ ⊧ Φ)
   (e : Exp Φ t)
   → ∀ i → eval e i σ ϱ :∈: t
 sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ e zero = in-nogas
-sound σ Ψ σ⊧Ψ ϱ [] ϱ⊧Φ (Cst n) (suc i) = in-acceptable σ⊧Ψ in-num
+sound σ Ψ σ⊧Ψ ϱ [] ϱ⊧Φ (Cst j) (suc i) = in-acceptable (st-num ∷ lemma σ Ψ σ⊧Ψ) (in-addr st-num)
 sound σ Ψ σ⊧Ψ .(_ ∷ _) (t ∷ []) (elem v∈t ϱ⊧Φ) Var (suc i) = in-acceptable σ⊧Ψ v∈t
 sound{n} σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (Lam{t₂ = t₂} k w t₁ e) (suc i)
-  with UFun k (liftUEnv (≤′-step ≤′-refl) ϱ) e 
-    | inspect (UFun k (liftUEnv (≤′-step ≤′-refl) ϱ)) e
-... | v | [[ v≡ ]]
-  with Data.Vec.map (liftUStorable (≤′-step ≤′-refl)) σ
-... | σ'
-  rewrite (n+1=suc-n{n}) -- (invert-0 n)
-  = in-acceptable 
-      (elem (lift-∈∈' {!σ!} v {!!} {!!}) {!lift-⊧'!}) 
-      (in-fun (gen-xx (rev-xx (st-fun (lift-⊧ {!v!} {!ϱ⊧Φ!})))))
-  where get-xx : get (v ∷ σ') (invert (suc n) (fromℕ n)) ≡ v
-        get-xx rewrite invert-0 n = refl
-        gen-xx : [ v ∷ σ' ] v ∈∈' Fun k t₁ t₂ → 
-                 [ v ∷ σ' ] get (v ∷ σ') (invert (suc n) (fromℕ n)) ∈∈' Fun k t₁ t₂
-        gen-xx r rewrite get-xx = r
-        rev-xx : let v' = UFun k (liftUEnv (≤′-step ≤′-refl) ϱ) e in 
-                 [ v' ∷ σ' ] v' ∈∈' Fun k t₁ t₂ → [ v ∷ σ' ] v ∈∈' Fun k t₁ t₂
-        rev-xx r rewrite v≡ = r
+  rewrite (n+1=suc-n{n})
+  = let σ' = Data.Vec.map (liftUStorable up1) σ in
+    let ϱ' = (liftUEnv up1 ϱ) in
+    let s' = UFun k ϱ' e in
+    let la5 = lemma5{s' = s'} σ ϱ Φ ϱ⊧Φ in
+    let la = lemma{s' = s'} σ Ψ σ⊧Ψ in
+  in-acceptable (st-fun la5 ∷ la) (in-addr (st-fun la5))
+
 sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App{k}{t₁}{t₂} ts e e₁) (suc i) 
   with sound-split σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ ts
 ... | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂
   rewrite usp≡
+  with sound σ Ψ σ⊧Ψ ϱ₁ _ ϱ₁⊧Φ₁ e i
+... | sound-e with eval e i σ ϱ₁
+sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App {k} {t₁} {t₂} ts e e₁) (suc i) | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂ | in-nogas | nothing = in-nogas
+sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App {k} {t₁} {t₂} ts e e₁) (suc i) | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂ | in-acceptable ps pv | just (just (n' , n≤n' , σ' , UAddr a))
+  with pv | get σ' a | inspect (get σ') a
+... | in-addr gsa-in | Used | [[ () ]] 
+... | in-addr gsa-in | UNum _ | [[ () ]] 
+... | in-addr gsa-in | UFun k' r' e' | [[ gsa-eq ]]
+  rewrite gsa-eq
+ = {!!}
+
+{-
   with eval e i σ ϱ₁ | inspect (eval e i σ) ϱ₁
 ... | nothing | [[ _ ]] = in-nogas
 ... | just evalei | [[ eqei ]]
@@ -371,10 +530,14 @@ sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App{k}{t₁}{t₂} ts e e₁) (suc i)
 ... | sei
   rewrite eqei
   with sei
-... | in-acceptable ps (in-fun get-inv)
-  with get-inv
-... | gi
-  = {!gi!}
+... | in-acceptable ps pv
+  with evalei
+... | nothing = {!!}
+... | just xxx
+  = {!!}
+-}
+
+
 sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (Weaken ts un-Φ e) (suc i)
   with sound-split σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ ts
 ... | ϱ₁ , ϱ₂ , ups≡ , p₁ , p₂
