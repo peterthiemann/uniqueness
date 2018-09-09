@@ -62,9 +62,9 @@ sm<sn->m<n ≤′-refl = ≤′-refl
 sm<sn->m<n {n = zero} (≤′-step ())
 sm<sn->m<n {n = suc n} (≤′-step sm<sn) = ≤′-step (sm<sn->m<n sm<sn)
 
-ssi<n->s1<n : ∀ {i n} → suc i ≤′ n → i ≤′ n
-ssi<n->s1<n {n = zero} ()
-ssi<n->s1<n {n = suc n} sin = ≤′-step (sm<sn->m<n sin)
+si<n->i<n : ∀ {i n} → suc i ≤′ n → i ≤′ n
+si<n->i<n {n = zero} ()
+si<n->i<n {n = suc n} sin = ≤′-step (sm<sn->m<n sin)
 
 n-i-not-null : ∀ {i} n → suc i ≤′ n → (n ∸ i) ≢ 0
 n-i-not-null zero () n-i=0
@@ -76,7 +76,7 @@ n-i-not-null {i} (suc n) (≤′-step si<n) n-i=0
 suc-n-i : ∀ i n → suc i ≤′ n → suc n ∸ i ≡ suc (n ∸ i)
 suc-n-i zero n si<n = refl
 suc-n-i (suc i) .(suc (suc i)) ≤′-refl = suc-n-i i (suc i) ≤′-refl
-suc-n-i (suc i) (suc n) (≤′-step si<n) = suc-n-i i n (ssi<n->s1<n si<n)
+suc-n-i (suc i) (suc n) (≤′-step si<n) = suc-n-i i n (si<n->i<n si<n)
 
 congruence-lemma : ∀ {n m j i}
   → suc m ≤′ n

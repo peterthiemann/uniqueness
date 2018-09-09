@@ -185,6 +185,13 @@ nuke-if-lin : ∀ {n m} → (k : Kind) → Vec (UStorable n) m → Fin m → Vec
 nuke-if-lin One σ i = σ [ i ]≔ Used
 nuke-if-lin Many σ i = σ
 
+nuke-if-lin2 : ∀ {n m} → (k : Kind) 
+  → Vec (UStorable n) m → Vec (Maybe Type) m → Fin m
+  → (Vec (UStorable n) m × Vec (Maybe Type) m)
+nuke-if-lin2 One σ Ψ i = (σ [ i ]≔ Used) , Ψ [ i ]≔ nothing
+nuke-if-lin2 Many σ Ψ i = σ , Ψ
+
+
 eval : ∀ {n Φ t} → Exp Φ t → Gas → (σ : UStore n) → UEnv n 
   → MM (∃ λ n' → n ≤′ n' × UStore n' × UVal n')
 eval e zero σ ϱ = ∅
@@ -229,7 +236,7 @@ mutual
 
   data [_]_∈∈'_ {n} (σ : UStore n) : UStorable n → Maybe Type → Set where
     st-void : [ σ ] Used ∈∈' nothing
-    st-num  : ∀ {j} → [ σ ] UNum j ∈∈' just Num
+    st-num  : ∀ {k} → [ σ ] UNum k ∈∈' just Num
     st-fun  : ∀ {k t₁ t₂ Ψ' ϱ'} 
       {e' : Exp (t₁ ∷ Ψ') t₂}
       (p' : [ σ ] ϱ' ⊧ Ψ')
@@ -462,6 +469,41 @@ lemma :
 lemma σ Ψ σ⊧Ψ = lemma' σ σ Ψ σ⊧Ψ
 \end{code}
 
+\begin{code}
+nuke-if-lin-aux2 : ∀ {n m}
+  → (σ₀ : UStore n) (j : Fin n)
+  → (σ : Vec (UStorable n) m) → (Ψ : Vec (Maybe Type) m)
+  → All₂ ([_]_∈∈'_ σ₀) σ Ψ → (i : Fin m)
+  → m ≤′ n → toℕ i ≤′ toℕ j
+  → n ∸ m ≡ toℕ j ∸ toℕ i
+  → All₂ ([_]_∈∈'_ (σ₀ [ j ]≔ Used)) (σ [ i ]≔ Used) (Ψ [ i ]≔ nothing)
+nuke-if-lin-aux2 {n} {suc m} σ₀ j .(_ ∷ _) .(_ ∷ _) (x₁ ∷ allin-σ-Ψ) zero m<n i<j p
+  = st-void ∷ {!!}
+nuke-if-lin-aux2 {n} {suc m} σ₀ j (_ ∷ σ) (_ ∷ Ψ) (x₁ ∷ allin-σ-Ψ) (suc i) m<n i<j p
+  = let c = congruence-lemma m<n i<j p
+    in (case x₁ of λ{ st-void → st-void
+                    ; st-num → st-num
+                    ; (st-fun p') → st-fun {!!}})
+       ∷ nuke-if-lin-aux2 σ₀ j σ Ψ allin-σ-Ψ i (si<n->i<n m<n) (si<n->i<n i<j) c
+
+nuke-if-lin-aux : ∀ {n}
+  → (σ : UStore n) → (Ψ : Vec (Maybe Type) n) → σ ⊧' Ψ → (i : Fin n)
+  → (σ [ i ]≔ Used) ⊧' (Ψ [ i ]≔ nothing)
+nuke-if-lin-aux{n} σ Ψ σ⊧'Ψ i 
+  = nuke-if-lin-aux2 σ i σ Ψ σ⊧'Ψ i ≤′-refl ≤′-refl n-n=i-i
+  where
+    n-n=i-i : n ∸ n ≡ toℕ i ∸ toℕ i
+    n-n=i-i rewrite n-n=0 n | n-n=0 (toℕ i) = refl
+  
+
+nuke-if-lin3 : ∀ {n} → (k : Kind) 
+  → (σ : UStore n) → (Ψ : Vec (Maybe Type) n) → σ ⊧' Ψ → Fin n
+  → Σ (UStore n) λ σ' → Σ (Vec (Maybe Type) n) λ Ψ' → σ' ⊧' Ψ'
+nuke-if-lin3 One σ Ψ σ⊧'Ψ i = (σ [ i ]≔ Used) , Ψ [ i ]≔ nothing , nuke-if-lin-aux σ Ψ σ⊧'Ψ i
+nuke-if-lin3 Many σ Ψ σ⊧'Ψ i = σ , Ψ , σ⊧'Ψ
+\end{code}
+
+
 Soundness proof
 \begin{code}
 sound-split : ∀ {n Φ₁ Φ₂} 
@@ -496,7 +538,7 @@ sound : ∀ {n t}
   (e : Exp Φ t)
   → ∀ i → eval e i σ ϱ :∈: t
 sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ e zero = in-nogas
-sound σ Ψ σ⊧Ψ ϱ [] ϱ⊧Φ (Cst j) (suc i) = in-acceptable (st-num ∷ lemma σ Ψ σ⊧Ψ) (in-addr st-num)
+sound σ Ψ σ⊧Ψ .[] [] empty (Cst j) (suc i) = in-acceptable (st-num ∷ lemma σ Ψ σ⊧Ψ) (in-addr st-num)
 sound σ Ψ σ⊧Ψ .(_ ∷ _) (t ∷ []) (elem v∈t ϱ⊧Φ) Var (suc i) = in-acceptable σ⊧Ψ v∈t
 sound{n} σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (Lam{t₂ = t₂} k w t₁ e) (suc i)
   rewrite (n+1=suc-n{n})
@@ -507,26 +549,34 @@ sound{n} σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (Lam{t₂ = t₂} k w t₁ e) (suc i)
     let la = lemma{s' = s'} σ Ψ σ⊧Ψ in
   in-acceptable (st-fun la5 ∷ la) (in-addr (st-fun la5))
 
-sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App{k}{t₁}{t₂} ts e e₁) (suc i) 
+sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App{k}{t₁}{t₂} ts e₁ e₂) (suc i) 
   with sound-split σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ ts
 ... | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂
   rewrite usp≡
-  with sound σ Ψ σ⊧Ψ ϱ₁ _ ϱ₁⊧Φ₁ e i
-... | sound-e with eval e i σ ϱ₁
-sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App {k} {t₁} {t₂} ts e e₁) (suc i) | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂ | in-nogas | nothing = in-nogas
-sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App {k} {t₁} {t₂} ts e e₁) (suc i) | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂ | in-acceptable ps pv | just (just (n' , n≤n' , σ' , UAddr a))
+  with sound σ Ψ σ⊧Ψ ϱ₁ _ ϱ₁⊧Φ₁ e₁ i
+... | sound-e with eval e₁ i σ ϱ₁
+sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App {k} {t₁} {t₂} ts e₁ e₂) (suc i) | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂ | in-nogas | nothing = in-nogas
+sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App {k} {t₁} {t₂} ts e₁ e₂) (suc i) | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂ | in-acceptable ps pv | just (just (n' , n≤n' , σ' , UAddr a))
   with pv | get σ' a | inspect (get σ') a
-... | in-addr gsa-in | Used | [[ () ]] 
-... | in-addr gsa-in | UNum _ | [[ () ]] 
-... | in-addr gsa-in | UFun k' r' e' | [[ gsa-eq ]]
+sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App {k} {t₁} {t₂} ts e₁ e₂) (suc i) | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂ | in-acceptable ps pv | just (just (n' , n≤n' , σ' , UAddr a)) | in-addr gsa-in | UNum _ | [[ gsa-eq ]]
   rewrite gsa-eq
- = {!!}
+  with gsa-in
+... | ()
+sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App {k} {t₁} {t₂} ts e₁ e₂) (suc i) | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂ | in-acceptable ps pv | just (just (n' , n≤n' , σ' , UAddr a)) | in-addr gsa-in | Used | [[ gsa-eq ]] 
+  rewrite gsa-eq 
+  with gsa-in
+... | ()
+sound σ Ψ σ⊧Ψ ϱ Φ ϱ⊧Φ (App {k} {t₁} {t₂} ts e₁ e₂) (suc i) | ϱ₁ , ϱ₂ , usp≡ , ϱ₁⊧Φ₁ , ϱ₂⊧Φ₂ | in-acceptable ps pv | just (just (n' , n≤n' , σ' , UAddr a)) | in-addr gsa-in | UFun k' r' e' | [[ gsa-eq ]]
+  rewrite gsa-eq
+  with gsa-in
+... | st-fun p'
+  = {!!}
 
 {-
-  with eval e i σ ϱ₁ | inspect (eval e i σ) ϱ₁
+  with eval e₁ i σ ϱ₁ | inspect (eval e₁ i σ) ϱ₁
 ... | nothing | [[ _ ]] = in-nogas
 ... | just evalei | [[ eqei ]]
-  with sound σ Ψ σ⊧Ψ ϱ₁ _ ϱ₁⊧Φ₁ e i
+  with sound σ Ψ σ⊧Ψ ϱ₁ _ ϱ₁⊧Φ₁ e₁ i
 ... | sei
   rewrite eqei
   with sei
