@@ -1,28 +1,26 @@
 \begin{subfigure}[t]{0.45\linewidth}
 \begin{align*}
   \htag{Expressions}
-  e ::=&\ c\tag{Constant}\\
-  |&\ x\ \tag{Variables}\\
-  |&\ \fix{e}\tag{Fixpoint}\\
-  |&\ \app{e}{e'} \tag{Application}\\
-  |&\ \lam{x}{e} \tag{Function}\\
+  e ::=&\ c\ |\ x\ |\ \app{e}{e'}\ |\ \lam{x}{e}\\
+  % |&\ \fix{e}\tag{Fixpoint}\\
   |&\ \letin{x}{e}{e'}\tag{Let binding}\\
+  |&\ \app{C}{x}\tag{Data Constructor}\\
+  |&\ \matchin{C}{x}{e}{e'}\tag{Match}\\
   \htag{Environments}
   \E ::=&\ b^*\\
-  b ::=&\ \bvar{x}{\tau}\tag{Variable bindings}\\
-  |&\ \bvar{\tvar}{k}\tag{Type variable bindings}\\
-  |&\ \bty{\T{t}}{k}{\tau}\tag{Type bindings}
+  b ::=&\ \bvar{x}{\schm}\tag{Variable bindings}\\
+  |&\ \bvar{\tvar}{\kschm}\tag{Type bindings}\\
 \end{align*}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.5\linewidth}
 \begin{align*}
   \htag{Type and kind Schemes}
-  \sigma ::=&\ \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau})\\
-  \theta ::=&\ \forall\kvar^*.(\qual{C}{k_i^* \karr k})\\
+  \schm ::=&\ \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau})\\
+  \kschm ::=&\ \forall\kvar^*.(\qual{C}{k_i^* \karr k})\\
   \htag{Type Expressions}
   \tau ::=&\ \alpha\tag{Type variables}\\
   |&\ \tau\tarr{k}\tau\tag{Function types}\\
-  |&\ \tapp{t}{k^* \tau^*}\tag{Type constructors}\\
+  |&\ \tapp{t}{\tau^*}\tag{Type constructors}\\
   \htag{Kinds}
   k ::=&\ \kvar\tag{Kind variables}\\
   |&\ \kaff\tag{Affine kind}\\
@@ -30,7 +28,6 @@
   \htag{Constraints}
   C ::=&\ \Ceq{\tau_1}{\tau_2}\\
   |&\ \Cleq{k_1}{k_2}\\
-  |&\ \Ckind{\tau}{k}\\
   |&\ C_1 \Cand C_2\\
   |&\ \Cproj{\alpha}{C}
 \end{align*}

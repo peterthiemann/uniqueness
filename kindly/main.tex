@@ -39,60 +39,11 @@
 \title{Kindly Bent to Free Us}
 \maketitle
 
-\begin{figure*}[h]
-  \centering
-  \input{syntax}
-  \caption{Syntax}
-\end{figure*}
-\begin{figure*}[h]
-  \input{kinds}
-  \caption{Constraint rules -- $\entail{C}{k}$ }
-\end{figure*}
-\begin{figure*}[h]
-  \input{types}
-  \caption{Type validity rules -- $\tyval{C}{\E}{\tau}$ }
-  \input{inference}
-  \caption{Inference rules -- $\inferW{\Sigma}{(C,\psi)}{\bf{\E}}{\bf{e}}{\tau}$ }
-\end{figure*}
-% \begin{figure*}[h]
-%   \input{semantics}
-%   \caption{Reduction rules -- $\ered{I}{E}{e}{v}$ }
-  
-% \end{figure*}
+\input{intro}
+\input{lang}
 
-\section*{Todo}
-
-\begin{itemize}
-\item Add type constructors
-\item Properly ensure that it respects HM(X) (cylindric, \dots)
-\item Show principal type inference:
-  \begin{itemize}
-  \item Principal constraint system
-  \item Regular constraint system: $\Ceq{\tau}{\tau'} \implies \fv{\tau} = \fv{\tau'}$.
-  \item Solved forms are in simplified form.
-    $C\in S, \entail{C}{\Ceq{\tau}{\tau'}} \implies \entail{}{\Ceq{\tau}{\tau'}}$.
-  \end{itemize}
-\item Show equivalence with the logic-based system.
-
-\end{itemize}
-
-
-\begin{lemma}
-  Without loss of generality, we can consider that
-  kind inequalities in satisfiable constraints
-  are only done on kind variables. 
-
-  \begin{proof}
-    Consider the constraint $\Cleq{k}{k'}\Cand C$.
-    \begin{itemize}
-    \item If $k$ and $k'$ are both constants, it can be removed.
-    \item If the constraint is $\Cleq{\kvar}{\kaff}$ or $\Cleq{\kun}{\kvar}$, it can be removed.
-    \item If the constraint is $\Cleq{\kvar}{\kun}$ or $\Cleq{\kaff}{\kvar}$, we
-      can substitute $\kvar$ by its value in $C$.
-    \end{itemize}
-  \end{proof}
-\end{lemma}
-
+\input{infer/infer}
+\input{soa}
 
 \end{document}
 

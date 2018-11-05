@@ -108,8 +108,8 @@ module LinArray : sig
   type +'a r : un
   val freeze : 'a w -> 'a r
   val create : 'a ≤ un => int -> 'a -> 'a w
-  val get : 'a r -> 'a 
-  val set : 'a w -> 'a -> 'a w
+  val get : int -> 'a r -> 'a 
+  val set : 'a w -> int ->. 'a ->. 'a w
 end
 ```
 
