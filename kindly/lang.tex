@@ -1,16 +1,40 @@
 \section{The \lang language}
 
+\subsection{Syntax}
+
+The syntax of \lang is presented in \cref{grammar} and follows
+traditional ML languages with let bindings.
+Data constructors are introduced by $\app{C}{x}$ and eliminated
+with by $\matchin{C}{x}{e}{e'}$.
+Types are composed of type variable $\tvar$, parameterized type constructors
+$\T{t}$ and arrow types annotated with a kind, noted $\tau \tarr{k} \tau$.
+Kinds can be either a kind variable $\kvar$, affine $\kaff$ or unrestricted $kun$.
+Type schemes and kind schemes are guarded by a set of constraints.
+
+Environments are composed of value and type bindings, along with type
+declarations. Type declarations, of the form
+$\tydecl{t}{\kschm}{C}{\tau}$, introduce both a new type constructor $\T{t}$ and
+a data constructor $C$.
+
 \begin{figure*}[h]
   \centering
-  \input{syntax}
+  \input{grammar}
   \caption{Syntax}
+  \label{grammar}
 \end{figure*}
+
+\subsection{Semantics}
+
+\TODO{}
 % \begin{figure*}[h]
 %   \input{semantics}
 %   \caption{Reduction rules -- $\ered{I}{E}{e}{v}$ }
-  
 % \end{figure*}
 
+
+\subsection{Typing}
+
+\TODO{Add system-F like type rules}
 
 %%% Local Variables:
 %%% mode: latex

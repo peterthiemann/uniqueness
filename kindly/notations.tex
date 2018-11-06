@@ -1,12 +1,12 @@
-\newcommand\lang{Kaff}
+\newcommand\lang{Affe\xspace}
 
 %% Syntax
 
 % Kinds
 \newcommand\lk{\leq}
 \newcommand\klin{\mathbf{lin}}
-\newcommand\kaff{\mathbf{aff}}
-\newcommand\kun{\mathbf{un}}
+\newcommand\kaff{\mathbf{A}}
+\newcommand\kun{\mathbf{U}}
 \newcommand\karr{\operatorname{\rightarrow}}
 \newcommand\kvar{\kappa}
 \newcommand\K[1]{\mathrm{#1}}
@@ -17,7 +17,7 @@
 \newcommand\schm{\sigma}
 \newcommand\kschm{\theta}
 \newcommand\tarr[1]{\operatorname{\xrightarrow{#1}}}
-\newcommand\tapp[2]{\T{#1}\ #2}
+\newcommand\tapp[2]{#2\ \T{#1}}
 \newcommand\qual[2]{#1 \operatorname{\Rightarrow} #2}
 
 \newcommand\instanciate[2]{#1 \operatorname{\succ} #2}
@@ -25,6 +25,8 @@
 
 \newcommand\unif{\mathrm{\psi}}
 \newcommand\mostgeneral{\operatorname{\sqcup}}
+
+\newcommand\tydecl[4]{(\T{#1} : #2 = #3\ \mathtt{of}\ #4)}
 
 % Expressions
 \newcommand\lam[2]{\lambda #1 . #2}
