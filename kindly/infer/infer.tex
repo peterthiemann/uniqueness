@@ -1,9 +1,61 @@
 \section{Type inference}
 
+We now formulate type inference for the \lang language. Our inference technique is based on the HM(X) framework~\citep{DBLP:journals/tapos/OderskySW99} which
+presents how to merge Hindley-Milner type inference for let-polymorphism and
+constraint solving. We first present our constraint language, we then show
+our slight extension of HM(X) that support a kind system and affine types.
+
+\subsection{Constraint language}
+
+We consider $\mathcal C$ the set of constrains.
+The grammar of constrains, presented
+in \cref{grammar:constraint}, follows the traditional HM(X) formulation
+with conjunctions,projections and type inequalities. The only new
+element specific to our approach are kind equalities.
+Entailment is noted $\entail{C}{D}$, where $D$ is a consequence of the
+constraints $C$. The entailment rules are provided in \cref{rules:entail}.
+
+\begin{figure}[h]
+  \centering
+  \begin{align*}
+    C ::=&\ \Cleq{\tau_1}{\tau_2}\ |\ \Cleq{k_1}{k_2}\ |\ C_1 \Cand C_2\ |\ \Cproj{\alpha}{C}
+  \end{align*}
+  \caption{The constraint language}
+  \label{grammar:constraint}
+\end{figure}
+
 \begin{figure*}[h]
-  \input{infer/kinds}
-  \caption{Constraint rules -- $\entail{C}{k}$ }
+  \input{infer/entails}
+  \caption{Entailment rules -- $\entail{C}{D}$ }
+  \label{rules:entail}
 \end{figure*}
+
+
+\paragraph{Solved forms}
+
+The set of solved forms, noted $\mathcal S$,
+is the set of constraints than can be used inside
+type and kind schemes. $\mathcal S$ is composed only of kind
+inequalities \emph{over variables}. For convenience, if $C\in\mathcal S$, we
+note $C$ as a list of kind inequalities: $\Cleq{\kvar_i}{\kvar_{i'}}^n$.
+\TODO{Extend the properties of solved forms}
+
+
+We consider the existence of a function $\normalize$ which takes
+a constraint in $\mathcal C$ and a unifier $\psi$ and returns a constraint
+in solved form $C'$, and an updated unifier.
+
+
+\subsection{Kind inference}
+
+We note $\inferK{(\unif,C)}{\E}{\tau}{k}$ the fact that type $\tau$ has kind $k$
+in environment $\E$ with constraints $C$ and unifier $\unif$. From an
+algorithmic point of view, $\E$ and $\tau$ are the input parameters of
+our inference procedure.
+
+
+\subsection{Type inference}
+
 \begin{figure*}[h]
   \input{infer/validity}
   \caption{Type validity rules -- $\tyval{C}{\E}{\tau}$ }

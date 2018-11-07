@@ -1,0 +1,22 @@
+\begin{mathpar}
+  \inferrule
+  { }
+  { \entail{C}{\Cleq{\kun}{\kaff}} }
+  \and
+  \inferrule
+  { \entail{C}{\Cleq{\kvar_1}{\kvar}}\\
+    \entail{C}{\Cleq{\kvar}{\kvar_2}}
+  }
+  { \entail{C}{\Cleq{\kvar_1}{\kvar_2}} }
+  % \and
+  % \inferrule
+  % { \entail{C}{\Cleq{k}{k'}} \\
+  %   \entail{C}{\Cleq{k'}{k}} }
+  % { \entail{C}{\Ceq{k}{k'}} }
+  % \and
+  % \inferrule
+  % { \entail{C}{\Cleq{k}{k'}} }
+  % { \entail{C}{\Ckind{\tau_0\tarr{k}\tau_1}}{k'}}
+  \and
+  \text{D1-D6}
+\end{mathpar}
