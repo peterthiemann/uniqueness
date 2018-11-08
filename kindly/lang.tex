@@ -4,8 +4,8 @@
 
 The syntax of \lang is presented in \cref{grammar} and follows
 traditional ML languages with let bindings.
-Data constructors are introduced by $\app{C}{x}$ and eliminated
-with by $\matchin{C}{x}{e}{e'}$.
+Data constructors are introduced by $\introK{K}{e}$ and eliminated
+with by $\elimK{K}{e}$.
 Types are composed of type variable $\tvar$, parameterized type constructors
 $\T{t}$ and arrow types annotated with a kind, noted $\tau \tarr{k} \tau$.
 Kinds can be either a kind variable $\kvar$, affine $\kaff$ or unrestricted $kun$.
@@ -13,8 +13,8 @@ Type schemes and kind schemes are guarded by a set of constraints.
 
 Environments are composed of value and type bindings, along with type
 declarations. Type declarations, of the form
-$\tydecl{t}{\kschm}{C}{\tau}$, introduce both a new type constructor $\T{t}$ and
-a data constructor $C$.
+$\tydecl{t}{\kschm}{K}{\tau}$, introduce both a new type constructor $\T{t}$ and
+a data constructor $K$.
 
 \begin{figure*}[h]
   \centering

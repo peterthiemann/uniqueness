@@ -4,13 +4,13 @@
   e ::=&\ c\ |\ x\ |\ \app{e}{e'}\ |\ \lam{x}{e}\\
   % |&\ \fix{e}\tag{Fixpoint}\\
   |&\ \letin{x}{e}{e'}\tag{Let binding}\\
-  |&\ \app{C}{x}\tag{Data Constructor}\\
-  |&\ \matchin{C}{x}{e}{e'}\tag{Match}\\
+  |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
+  |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
   \htag{Environments}
   \E ::=&\ b^*\\
   b ::=&\ \bvar{x}{\schm}\tag{Variable bindings}\\
   |&\ \bvar{\tvar}{\kschm}\tag{Type bindings}\\
-  |&\ \tydecl{t}{\kschm}{C}{\tau}\tag{Type Declaration}\\
+  |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
   \htag{Type and kind Schemes}
   \schm ::=&\ \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau})\\
   \kschm ::=&\ \forall\kvar^*.(\qual{C}{k_i^* \karr k})\\
@@ -19,7 +19,7 @@
 \begin{subfigure}[t]{0.5\linewidth}
 \begin{align*}
   \htag{Type Expressions}
-  \tau ::=&\ \alpha\tag{Type variables}\\
+  \tau ::=&\ \tvar\tag{Type variables}\\
   |&\ \tau\tarr{k}\tau\tag{Function types}\\
   |&\ \tapp{t}{\tau^*}\tag{Type constructors}\\
   \htag{Kinds}

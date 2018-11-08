@@ -5,7 +5,9 @@ presents how to merge Hindley-Milner type inference for let-polymorphism and
 constraint solving. We first present our constraint language, we then show
 our slight extension of HM(X) that support a kind system and affine types.
 
-\subsection{Constraint language}
+\subsection{Preliminaries}
+
+\subsubsection{Constraint language}
 
 We consider $\mathcal C$ the set of constrains.
 The grammar of constrains, presented
@@ -31,7 +33,7 @@ constraints $C$. The entailment rules are provided in \cref{rules:entail}.
 \end{figure*}
 
 
-\paragraph{Solved forms}
+\subsubsection{Solved forms}
 
 The set of solved forms, noted $\mathcal S$,
 is the set of constraints than can be used inside
@@ -46,27 +48,64 @@ a constraint in $\mathcal C$ and a unifier $\psi$ and returns a constraint
 in solved form $C'$, and an updated unifier.
 
 
+\subsubsection{Usage maps}
+
+\TODO{Explain $\Sigma$}
+
 \subsection{Kind inference}
 
-We note $\inferK{(\unif,C)}{\E}{\tau}{k}$ the fact that type $\tau$ has kind $k$
-in environment $\E$ with constraints $C$ and unifier $\unif$. From an
+We note $\inferK{(C,\unif)}{\bf{\E}}{\bf{\tau}}{k}$ when type $\tau$ has kind $k$
+in environment $\E$ under constraints $C$ and unifier $\unif$. From an
 algorithmic point of view, $\E$ and $\tau$ are the input parameters of
 our inference procedure.
+We present the kind inference algorithm as a set of syntax-directed rules in
+\cref{rules:kinding}.
+Since higher-kinded types are not supported, the type application
+rule and the type constructor rule are merged in {\sc KApp}.
+Additionally, type variables must be of a simple kind in rule {\sc KVar}.
+Note that in the case of a type constructor with no argument, the {\sc KApp}
+rule degenerates to a simpler form which is similar to the {\sc KVar} rule.
+Kind schemes are instantiated in the {\sc KApp} and {\sc KVar} rules by creating
+fresh kind variables and the associated substitution.
+
+
+\TODO{Explain more?} 
+
+
+\begin{figure}[h]
+  \centering
+  \input{infer/kinds}
+  \caption{Kind inference rules -- $\inferK{(C,\unif)}{\E}{\tau}{k}$}
+  \label{rules:kinding}
+\end{figure}
 
 
 \subsection{Type inference}
 
+We reformulate the HM(X) type inference in the context of our affine type
+system. The main difference compared to HM(X) are noted in \addlin{blue}.
+We note $\inferW{\addlin{\Sigma}}{(C,\unif)}{\bf{\E}}{\bf{e}}{\tau}$ when
+$e$\ as type $\tau$ in $\E$ under the constraints $C$ and unifier $\unif$.
+$\Sigma$ is a map which associates free variables in $e$ to
+their kinds.
+As before, $\E$ and $e$ are the input parameters of the inference
+algorithm. The syntax-directed rules are shown in \cref{rules:typing}.
+
 \begin{figure*}[h]
-  \input{infer/validity}
-  \caption{Type validity rules -- $\tyval{C}{\E}{\tau}$ }
-  \input{infer/rules}
-  \caption{Inference rules -- $\inferW{\Sigma}{(C,\psi)}{\bf{\E}}{\bf{e}}{\tau}$ }
+  \input{infer/typing}
+  \caption{Type Inference rules -- $\inferW{\Sigma}{(C,\psi)}{\bf{\E}}{\bf{e}}{\tau}$ }
+  \label{rules:typing}
 \end{figure*}
 
-\section*{Todo}
+\subsection{Constraint normalization and generalization}
+
+\TODO{}
+
+\subsection{Principality}
+
+\TODO{}
 
 \begin{itemize}
-\item Add type constructors
 \item Properly ensure that it respects HM(X) (cylindric, \dots)
 \item Show principal type inference:
   \begin{itemize}

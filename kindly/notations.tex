@@ -24,7 +24,9 @@
 \newcommand\generalize[3]{\operatorname{\text{gen}}(#1,#2,#3)}
 
 \newcommand\unif{\mathrm{\psi}}
-\newcommand\mostgeneral{\operatorname{\sqcup}}
+\newcommand\meet{\sqcup}
+\newcommand\meeti{\bigsqcup}
+\newcommand\mostgeneral{\sqcup}
 
 \newcommand\tydecl[4]{(\T{#1} : #2 = #3\ \mathtt{of}\ #4)}
 
@@ -33,11 +35,13 @@
 \newcommand\elet{\mathtt{let}}
 \newcommand\ein{\mathtt{in}}
 \newcommand\letin[3]{\elet\ #1 = #2\ \ein\ #3}
-\newcommand\matchin[4]{\elet\ #1\ #2 = #3\ \ein\ #4}
+\newcommand\introK[2]{\app{#1}{#2}}
+\newcommand\elimK[2]{\mathtt{elim}_{#1}\ #2}
 \newcommand\fix[1]{\mathtt{fix}\ #1}
 \newcommand\app[2]{(#1\ #2)}
 
 %% Constraints
+\newcommand\Ctrue{\operatorname{True}}
 \newcommand\Cempty{\emptyset}
 \newcommand\Ckind[2]{(#1 : #2)}
 \newcommand\Cleq[2]{(#1 \leq #2)}
@@ -57,17 +61,18 @@
 \newcommand\fv[1]{\operatorname{fv}(#1)}
 
 %% Sets
-\newcommand\Sone[1]{\{#1\}}
+\newcommand\Sone[2]{\{#1 \to #2\}}
 \newcommand\Sunion{\operatorname{\cup}}
 \newcommand\Sinter{\operatorname{\cap}}
 \newcommand\Sv{\Sigma}
+\newcommand\Sdel[1]{\setminus \{#1\}}
 
 %% Judgements
 \newcommand\BAR{\operatorname{|}}
 \newcommand\dash{\operatorname{\vdash}}
 \newcommand\entail[2]{#1 \operatorname{\vdash_e} #2}
-\newcommand\inferW[5]{#1 \BAR #2 \BAR #3 \dash_{*} #4 : #5}
-\newcommand\inferK[4]{#1 \BAR #2 \dash_{*} #3 : #4}
+\newcommand\inferW[5]{#1 \BAR #2 \BAR #3 \operatorname{\vdash_w} #4 : #5}
+\newcommand\inferK[4]{#1 \BAR #2 \operatorname{\vdash_w} #3 : #4}
 
 \newcommand\tyval[3]{#1 \BAR #2 \operatorname{\vdash_t} #3}
 \newcommand\schval[3]{#1 \BAR #2 \operatorname{\vdash_t} #3}
@@ -82,7 +87,7 @@
 \newcommand\ered[4]{#3\ \operatorname{\Downarrow^{#1}_{#2}}\ #4}
 
 %% Misc
-\newcommand\addlin[1]{\color{blue}{#1}}
+\newcommand\addlin[1]{{\color{blue}{#1}}}
 
 %%% Local Variables:
 %%% mode: latex
