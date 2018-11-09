@@ -1,9 +1,10 @@
 \section{Type inference}
 
 We now formulate type inference for the \lang language. Our inference technique is based on the HM(X) framework~\citep{DBLP:journals/tapos/OderskySW99} which
-presents how to merge Hindley-Milner type inference for let-polymorphism and
-constraint solving. We first present our constraint language, we then show
-our slight extension of HM(X) that support a kind system and affine types.
+presents how to implement Hindley-Milner type inference in a language
+with qualified types. We first present various preliminaries definitions,
+we then show our extension of HM(X) that support a kind system and affine
+types.
 
 \subsection{Preliminaries}
 
@@ -15,7 +16,13 @@ in \cref{grammar:constraint}, follows the traditional HM(X) formulation
 with conjunctions,projections and type inequalities. The only new
 element specific to our approach are kind equalities.
 Entailment is noted $\entail{C}{D}$, where $D$ is a consequence of the
-constraints $C$. The entailment rules are provided in \cref{rules:entail}.
+constraints $C$.
+The base entailment rules are shown in \cref{rules:entail}, we consider
+the completion of that system to form a cylindric constraint system.
+\TODO{Give the properties}
+
+We say that $C$ and $D$ are equivalent, noted $C \equivC D$,
+when $\entail{C}{D}$ and $\entail{D}{C}$.
 
 \begin{figure}[h]
   \centering
@@ -28,29 +35,62 @@ constraints $C$. The entailment rules are provided in \cref{rules:entail}.
 
 \begin{figure*}[h]
   \input{infer/entails}
-  \caption{Entailment rules -- $\entail{C}{D}$ }
+  \caption{Base entailment rules -- $\entail{C}{D}$ }
   \label{rules:entail}
 \end{figure*}
 
 
-\subsubsection{Solved forms}
-
-The set of solved forms, noted $\mathcal S$,
-is the set of constraints than can be used inside
-type and kind schemes. $\mathcal S$ is composed only of kind
-inequalities \emph{over variables}. For convenience, if $C\in\mathcal S$, we
-note $C$ as a list of kind inequalities: $\Cleq{\kvar_i}{\kvar_{i'}}^n$.
-\TODO{Extend the properties of solved forms}
-
-
+We note $\mathcal S$ the set of solved forms
+which can be used inside type and kind schemes.
+We define $\mathcal S$ as $\mathcal C$ quotiented by the relation $\equivC$.
+%
 We consider the existence of a function $\normalize$ which takes
 a constraint in $\mathcal C$ and a unifier $\psi$ and returns a constraint
-in solved form $C'$, and an updated unifier.
+in solved form $C' \in \mathcal S$,
+and an updated unifier. We detail the implementation
+of the normalization function in \cref{sec:normalize}
+
+% $\mathcal S$ is composed only of kind
+% inequalities \emph{over variables}. For convenience, if $C\in\mathcal S$, we
+% note $C$ as a list of kind inequalities: $\Cleq{\kvar_i}{\kvar_{i'}}^n$.
+% \TODO{Extend the properties of solved forms}
+
 
 
 \subsubsection{Usage maps}
 
-\TODO{Explain $\Sigma$}
+In order to determine if a variable is used in an affine manner, we must track
+it's uses and the associated kinds. For instance, in the expression
+$(x,x)$, $x$ is used twice. If $x$ is of type $\tau$, which is of kind $k$,
+we must add the constraint $\Cleq{k}{\kun}$. In order to record uses and kinds,
+our type inference relation will return a ``usage map'', noted $\Sv$,
+which associates each variable to a list of kinds corresponding to each use site
+of the variable.
+We note $\Sone{x}{k_1,\dots,k_n}$ the singleton usage map.
+Common operations on usages maps are defined in \cref{op:usgmap}. We define
+regular set operations such as union
+($\Sv\cup\Sv'$) and intersection ($\Sv\cap\Sv'$), along
+with constraint creation $\Cleq{\Sv}{k_0}$ which indicates that all the kinds
+presents in the usage map $\Sv$ are constrained by the kind $k_0$.
+These operations corresponds roughly to the various parts of the join
+operator on sets $\esplit{}{}$.
+
+\begin{figure}[h]\centering
+\begin{align*}
+  \Sv\cap\Sv'
+  &= \left\{ x \to l,l'
+    \mid \Sone{x}{l}\in\Sv \text{ and } \Sone{x}{l'}\in\Sv' \right\} \\
+  \Sv\cup\Sv'
+  &= \Sv\cap\Sv' \sqcup
+    (\Sv\Sdel{x' \mid x'\in\Sv'}) \sqcup
+    (\Sv'\Sdel{x \mid x\in\Sv})
+  &\text{where $\sqcup$ is the disjoint union}\\
+  \Cleq{\Sv}{k_0}
+  &= \bigwedge_{\Sone{x}{l_x}\in\Sv} \bigwedge_{k\in l_x} \Cleq{k}{k_0}
+\end{align*}
+\caption{Operation on usage maps $\Sv$}
+\label{op:usgmap}
+\end{figure}
 
 \subsection{Kind inference}
 
@@ -67,10 +107,6 @@ Note that in the case of a type constructor with no argument, the {\sc KApp}
 rule degenerates to a simpler form which is similar to the {\sc KVar} rule.
 Kind schemes are instantiated in the {\sc KApp} and {\sc KVar} rules by creating
 fresh kind variables and the associated substitution.
-
-
-\TODO{Explain more?} 
-
 
 \begin{figure}[h]
   \centering
@@ -97,9 +133,112 @@ algorithm. The syntax-directed rules are shown in \cref{rules:typing}.
   \label{rules:typing}
 \end{figure*}
 
-\subsection{Constraint normalization and generalization}
+\subsection{Normal forms and generalization}
+\label{sec:normalize}
 
-\TODO{}
+\newcommand\lub\bigvee
+\newcommand\glb\bigwedge
+
+We now place ourselves in a more general context where kinds are either variables
+or constants belonging to a total bounded lattice $(\mathcal L, \leq)$ ie.,
+a lattice which admits a total order and upper and lower bounds.
+We note lattice elements $l$ and $\glb_i l_i$ (resp. $\lub_i l_i$)
+the greatest lower bound (resp. least upper bound) in $\mathcal L$.
+
+The normalization procedure is noted $\normalize{C_0}{\unif_0}$ where
+$C_0\in \mathcal C$ is a set of constraints and $\unif_0$ is a unifier.
+It returns a constraint $C \in \mathcal S$ in
+solved form and a unifier $\unif$.
+Our unification algorithm proceed as follows:
+\begin{enumerate}
+\item Solve all type equality constraints through Herband unification and
+  gather all existential quantifications at the front of the constraint.
+  We obtain a constraint $C = \exists \kvar_i,\ \Cleq{k_j}{k'_j}_j$ and
+  a unifier $\unif$.
+  
+  We note $\mathcal R$ the relation $\Cleq{k_j}{k'_j}_j$,
+  $\mathcal G$ the underlying directed graph and $V$ its vertices.
+
+\item Saturate the lattice equalities in $\mathcal R$.
+  
+  More precisely, for each kind variable $\kvar \in V$,
+  for each constant $l_i$ (resp. $l_j$) such that
+  there is a path from $l_i$ to $\kvar$ (resp. from $\kvar$ to $l_j$) in $\mathcal G$,
+  add an edge from $\lub l_i$ to $\kvar$
+  (resp. from $\kvar$ to $\glb l_j$).
+  This step is well defined since
+  our lattice is bounded and $\lub\emptyset$ and $\glb\emptyset$ are well defined.
+
+  We also complement $\mathcal R$ with $(\leq)$ by adding an edge
+  between related constants.
+\item For each strongly connected component in $\mathcal G$, unify all its vertices and replace it by a representative and complete the unifier accordingly.
+  The representative of a strongly connected component $g$ can be determined as follows:
+  \begin{itemize}
+  \item If $g$ does not contain any constant, then the representative
+    is a fresh kind variable.
+  \item If $g$ contains exactly one constant, it is the representative.
+  \item Otherwise, the initial constraint $C_0$ is not satisfiable.
+  \end{itemize}
+  Note that this step will also detect all unsatisfiable constraints.
+\item Take the transitive closure of $\mathcal R$.
+\item Remove all the vertices corresponding to the kind variables $\kvar_i$
+  that are existentially quantified in $C$.
+\item Remove the extremums of $\mathcal L$ and the edges of $(\leq)$
+  from $\mathcal R$.
+\item Take the transitive reduction of $\mathcal R$.
+  % Return $C = \left\{ k \leq k' \mid k \operatorname{\mathcal R}k' \right\}$
+\end{enumerate}
+
+\TODO{Add an example}
+
+\begin{lemma}
+  Given a constraint $C\in\mathcal C$, a substitution $\unif$ and
+  $(C',\unif') = \normalize{C}{\unif}$, we have the following properties:
+  \begin{enumerate}
+  \item $C'$ is of the form $\{ k_i \leq k'_i\}_i$.
+  \item For any disjoint subformulas $C_1$ and $C_2$ of $C'$,
+    then $C_1 \operatorname{\nvdash_e} C_2$ and $C_2 \operatorname{\nvdash_e} C_1$
+  \item For each $\kvar \in \operatorname{fv}(C)$,
+    there exists two constants $l_\bot,l_\top \in \mathcal L$  such that
+    $\entail{C}{\Cleq{l_\bot}{\kvar}}$ and $\entail{C}{\Cleq{\kvar}{l_\top}}$.
+  \end{enumerate}
+\end{lemma}
+% \begin{proof}
+  
+%   \begin{enumerate}
+%   \item Directly follows from step (1) and (5).
+%   \end{enumerate}
+%   (1) is a direct consequence of step 
+% \end{proof}
+
+
+\begin{lemma}[Normal form]
+  Given a constraint $D\in\mathcal C$, a substitution $\phi$ and
+  $(C,\unif) = \normalize{D}{\phi}$,
+  then $\phi\leq\unif$,
+  $C \equivC \unif D$ and
+  $\unif C = C$.
+\end{lemma}
+\begin{proof}
+  \TODO{}
+\end{proof}
+
+\begin{lemma}[Uniqueness]
+  Given $(C_1,\unif_1)$ and $(C_2,\unif_2)$ such that
+  $\unif_1 C_1 \equivC \unif_2 C_2$, then
+  $\normalize{C_1}{\unif_1}$ and $\normalize{C_2}{\unif_2}$
+  are identical up to $\alpha$-renaming.
+\end{lemma}
+\begin{proof}
+  \TODO{}
+\end{proof}
+
+
+\begin{theorem}
+  The procedure $\operatorname{normalize}$ is complete and computes
+  unique principal normal forms for our constraint system.
+\end{theorem}
+
 
 \subsection{Principality}
 

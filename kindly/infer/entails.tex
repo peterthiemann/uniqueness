@@ -1,13 +1,34 @@
 \begin{mathpar}
   \inferrule
-  { }
-  { \entail{C}{\Cleq{\kun}{\kaff}} }
+  {}{ \entail{}{\Cleq{\kun}{\kaff}} }
   \and
   \inferrule
-  { \entail{C}{\Cleq{\kvar_1}{\kvar}}\\
-    \entail{C}{\Cleq{\kvar}{\kvar_2}}
+  {}{ \entail{}{\Cleq{\tvar}{\tvar}} }
+  \and
+  % \inferrule
+  % {\Cleq{k}{k'} \in C}{ \entail{C}{\Cleq{k}{k'}} }
+  % \and
+  % \inferrule
+  % { \entail{C}{\Cleq{x_1}{x}}\\
+  %   \entail{C}{\Cleq{x}{x_2}}
+  % }
+  % { \entail{C}{\Cleq{x_1}{x_2}} }
+  % \and
+  % \inferrule
+  % { \entail{C}{D} }
+  % { \entail{C}{\Cproj{x}{D}} }
+  % \\
+  \inferrule
+  { \entail{C}{\Cleq{\tau'_1}{\tau_1}}\\
+    \entail{C}{\Cleq{\tau_2}{\tau'_2}}\\
+    \entail{C}{\Cleq{k}{k'}}
   }
-  { \entail{C}{\Cleq{\kvar_1}{\kvar_2}} }
+  { \entail{C}{\Cleq{\tau_1\tarr{k}\tau_2}{\tau'_1\tarr{k'}\tau'_2}} }
+  \and
+  \inferrule
+  { \forall i,\ \entail{C}{\Cleq{\tau_i}{\tau_i}}\\
+  }
+  { \entail{C}{\Cleq{\tapp{t}{(\tau_i)}}{\tapp{t}{(\tau'_i)}}} }
   % \and
   % \inferrule
   % { \entail{C}{\Cleq{k}{k'}} \\
@@ -17,6 +38,11 @@
   % \inferrule
   % { \entail{C}{\Cleq{k}{k'}} }
   % { \entail{C}{\Ckind{\tau_0\tarr{k}\tau_1}}{k'}}
-  \and
-  \text{D1-D6}
+  % \and
+  % \text{Completion to form a cylindric constraint system.}
 \end{mathpar}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:
