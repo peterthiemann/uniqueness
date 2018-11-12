@@ -141,15 +141,38 @@ algorithm. The syntax-directed rules are shown in \cref{rules:typing}.
 
 We now place ourselves in a more general context where kinds are either variables
 or constants belonging to a total bounded lattice $(\mathcal L, \leq)$ ie.,
-a lattice which admits a total order and upper and lower bounds.
+a lattice which admits a total order and upper and lower bounds ($l^\top$ and $l^\bot$).
 We note lattice elements $l$ and $\glb_i l_i$ (resp. $\lub_i l_i$)
 the greatest lower bound (resp. least upper bound) in $\mathcal L$.
+%
+Let $\mathcal C_{\mathcal L}$ the set of constraints in this lattice. We consider the
+following base entailment rules in this system:
+\begin{center}
+  \begin{mathpar}
+    \inferrule{l \leq l'}{\entail{}{\Cleq{l}{l'}}}
+    \and
+    \inferrule{}{\entail{}{\Cleq{k}{l^\top}}}
+    \and
+    \inferrule{}{\entail{}{\Cleq{l^\bot}{k}}}
+  \end{mathpar}
+\end{center}
+
+
 
 The normalization procedure is noted $\normalize{C_0}{\unif_0}$ where
-$C_0\in \mathcal C$ is a set of constraints and $\unif_0$ is a substitution.
+$C_0\in \mathcal C_{\mathcal L}$ is a set of constraints and $\unif_0$ is a substitution.
 It returns a constraint $C \in \mathcal S$ in
 solved form and a unifier $\unif$.
-Our unification algorithm proceed as follows:
+The main idea of the algorithm is to first remove all the type equalities
+by using regular Herbrand unification. After that, we only have
+a set of inequalities among kinds, which we can consider as a relation.
+We can then saturate the relation,
+unify all kinds that in the same equivalence classes to obtain
+a most general unifier on kind variables,
+remove all existentially quantified variables and
+then minimize back the relation.
+
+More precisely, we apply the following steps:
 \begin{enumerate}
 \item Solve all type equality constraints through Herband unification and
   gather all existential quantifications at the front of the constraint.
@@ -228,8 +251,8 @@ Our unification algorithm proceed as follows:
   we have that $\phi_k\leq\unif_k$.
 
   Let $\unif = \unif_\tau \meet \unif_k$. Since $\unif_\tau$ and $\unif_k$
-  ave disjoint supports,
-  we have $C^{A} = \unif_\tau C^{A} \equivC \unif C^{k+} \equivC \unif C^{k} \equivC \unif D$
+  have disjoint supports,
+  we have $C^{A} = \unif_\tau C^{A} \equivC \unif C^{k+} \equivC \unif D$
   and $\unif C^{A} = C^{A}$.
   Furthermore, $\phi_\tau \meet \phi_k \leq \unif_\tau \meet \unif_k$.
   
