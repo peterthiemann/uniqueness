@@ -39,6 +39,27 @@
 \begin{document}
 
 \title{Kindly Bent to Free Us}
+\begin{abstract}
+  System programming often requires to manipulate resources that
+  cannot be duplicated such as file system handles, network connections
+  or even globally allocated memory.
+  Unfortunately such resources are often the root of bugs and security issues
+  through use-after-free errors or data races, even in the context
+  of programming language traditionally considered safe, such as statically typed
+  functional languages.
+  Linear and affine type systems propose to forbid such erroneous programming
+  patterns by tracking usage of variables through types.
+
+  We present \lang, an extension of ML with a kind system and qualified
+  types that allows to track affine types.
+  This language supports the defining features of ML family languages:
+  an impure, strict functional expression language with complete principal type
+  inference and type abstraction through modules.
+  Our language do not require any linearity annotation in
+  expressions and support common functional idioms.
+\end{abstract}
+
+
 \maketitle
 
 \input{intro}
