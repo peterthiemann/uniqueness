@@ -146,15 +146,15 @@ We note lattice elements $l$ and $\glb_i l_i$ (resp. $\lub_i l_i$)
 the greatest lower bound (resp. least upper bound) in $\mathcal L$.
 
 The normalization procedure is noted $\normalize{C_0}{\unif_0}$ where
-$C_0\in \mathcal C$ is a set of constraints and $\unif_0$ is a unifier.
+$C_0\in \mathcal C$ is a set of constraints and $\unif_0$ is a substitution.
 It returns a constraint $C \in \mathcal S$ in
 solved form and a unifier $\unif$.
 Our unification algorithm proceed as follows:
 \begin{enumerate}
 \item Solve all type equality constraints through Herband unification and
   gather all existential quantifications at the front of the constraint.
-  We obtain a constraint $C = \exists \kvar_i,\ \Cleq{k_j}{k'_j}_j$ and
-  a unifier $\unif$.
+  We obtain a constraint $C^k = \exists \kvar_i,\ \Cleq{k_j}{k'_j}_j$ and
+  a substitution $\unif_\tau$.
   
   We note $\mathcal R$ the relation $\Cleq{k_j}{k'_j}_j$,
   $\mathcal G$ the underlying directed graph and $V$ its vertices.
@@ -166,12 +166,14 @@ Our unification algorithm proceed as follows:
   there is a path from $l_i$ to $\kvar$ (resp. from $\kvar$ to $l_j$) in $\mathcal G$,
   add an edge from $\lub l_i$ to $\kvar$
   (resp. from $\kvar$ to $\glb l_j$).
-  This step is well defined since
-  our lattice is bounded and $\lub\emptyset$ and $\glb\emptyset$ are well defined.
+  This step is well defined since $\mathcal L$ is a bounded lattice
+  and $\lub\emptyset$ and $\glb\emptyset$ are well defined.
 
   We also complement $\mathcal R$ with $(\leq)$ by adding an edge
   between related constants.
-\item For each strongly connected component in $\mathcal G$, unify all its vertices and replace it by a representative and complete the unifier accordingly.
+\item For each strongly connected component in $\mathcal G$, unify all its vertices and replace it by a representative.
+  We note $\unif_k$ the substitution that replaces a kind variable by
+  its representative.
   The representative of a strongly connected component $g$ can be determined as follows:
   \begin{itemize}
   \item If $g$ does not contain any constant, then the representative
@@ -182,11 +184,12 @@ Our unification algorithm proceed as follows:
   Note that this step will also detect all unsatisfiable constraints.
 \item Take the transitive closure of $\mathcal R$.
 \item Remove all the vertices corresponding to the kind variables $\kvar_i$
-  that are existentially quantified in $C$.
+  that are existentially quantified in $C^k$.
+\item Take the transitive reduction of $\mathcal R$.
 \item Remove the extremums of $\mathcal L$ and the edges of $(\leq)$
   from $\mathcal R$.
-\item Take the transitive reduction of $\mathcal R$.
-  % Return $C = \left\{ k \leq k' \mid k \operatorname{\mathcal R}k' \right\}$
+\item Return $C = \left\{ k \leq k' \mid k \operatorname{\mathcal R}k' \right\}$
+  and $\unif =  \unif_\tau \meet \unif_k$.
 \end{enumerate}
 
 \TODO{Add an example}
@@ -213,6 +216,7 @@ Our unification algorithm proceed as follows:
 
 
 \begin{lemma}[Normal form]
+  \label{lemma:normalform}
   Given a constraint $D\in\mathcal C$, a substitution $\phi$ and
   $(C,\unif) = \normalize{D}{\phi}$,
   then $\phi\leq\unif$,
@@ -220,7 +224,38 @@ Our unification algorithm proceed as follows:
   $\unif C = C$.
 \end{lemma}
 \begin{proof}
-  \TODO{}
+  % For simplicity, we assume that any substitution has been already applied
+  % to $D$ and that $\phi = id$.
+  Let us partition $\phi$ into a part which affects type variables,
+  $\phi_\tau$, and a part which affects kind variables, $\phi_k$.
+  
+  We note $(C^k,\unif_\tau)$ the result of
+  the modified Herbrand unification on $(D,\phi)$ in step (1).
+  Herbrand unification computes the most general
+  unifier. Our modified Herbrand unification only output additional
+  kind constraints for kind on the arrows and does not change
+  the result of the unification. Thus, we have
+  $\phi_\tau\leq\unif_\tau$,
+  $C^k \equivC \unif_\tau D$ and
+  $\unif_\tau C^k = C^k$.
+  
+  Let $C^{k+}$ be the result after step (2), we trivially have that
+  $\fv{C^{k+}} = \fv{C^k}$ and that $C^{k+} \equivC C^k$.
+
+  Let $C^{A}$ and $\unif_k$ be the results after step (3).
+  By definition, we have $\unif_k C^{k+} \equivC C^{A}$ and
+  $\unif_k C^{A} = C^{A}$. Since $\phi_k$ has already be applied to $C$ before
+  unifying the strongly connected components,
+  we have that $\phi_k\leq\unif_k$.
+
+  Let $\unif = \unif_\tau \meet \unif_k$. Since $\unif_\tau$ and $\unif_k$
+  ave disjoint supports,
+  we have $C^{A} = \unif_\tau C^{A} \equivC \unif C^{k+} \equivC \unif C^{k} \equivC \unif D$
+  and $\unif C^{A} = C^{A}$.
+  Furthermore, $\phi_\tau \meet \phi_k \leq \unif_\tau \meet \unif_k$.
+  
+  Steps (4) to (8) all preserve the free variables and the equivalence
+  of constraints, which concludes.
 \end{proof}
 
 \begin{lemma}[Uniqueness]
@@ -230,12 +265,53 @@ Our unification algorithm proceed as follows:
   are identical up to $\alpha$-renaming.
 \end{lemma}
 \begin{proof}
-  \TODO{}
+  In \cref{lemma:normalform}, we have showed that all the steps of the
+  normalization procedure preserve equivalence.
+  Since $\unif_1 C_1 \equivC \unif_2 C_2$, equivalence between
+  the two results of the normalization procedures is preserved for all steps.
+
+  We note $P(C_a)$ if for all $C = (k, k)'$
+  such that $\entail{C_a}{C}$ and $\nvdash_eC$,
+  we have $C \in {\mathcal R}_a$. 
+
+  Let us note $C_1'$ and $C_2'$ the constraints after step (4). $P(C_1')$ and
+  $P(C_2')$ hold. Indeed, since $C_1'$ and $C_2'$ are only composed
+  of existential quantifications and kind inequalities, the only rules
+  that applies are transitivity and lattice inequalities.
+  After step (2) and (4), the associated relations are fully saturated for these
+  two rules, hence all inequalities that can be deduced from $C_a'$ are already
+  present in the relation.
+
+  The property $P$ is preserved by step (5) since we only remove
+  inequalities that involve existentially quantified variables. Such
+  inequalities could not be picked in $P$.
+  % In (6) we only remove
+  % trivial lattice inequalities.
+
+  Let us note $C''_a$ for $a\in\{1,2\}$ the constraints after step (5).
+  Since there are no more existential variables,
+  we have $C''_a=(k_i,k'_i)_i=\mathcal R''_a$.
+  For any $C=(k,k')$ such that $\entail{}{C}$ and $\entail{C''_a}{C}$,
+  then $C \in (\leq) \subset {\mathcal R}''_a$.
+  Indeed, the only trivial inequalities in our system are equalities of the form
+  $(\kvar, \kvar)$, which were removed in step (3) and the lattice inequalities.
+
+  Let us consider $C = (k,k') \in \mathcal R''_1$.
+  Since $C''_1\equivC C''_2$, we have $\entail{C''_2}{C}$.
+  If $\nvdash_e{C}$, by $P(C''_2)$ we have that
+  $C\in R''_2$.
+  If $\entail{}{C}$, then $C\in (\leq) \subset R''_2$.
+  We conclude that $R''_1 \subset R''_2$.
+  By symmetry, $R''_1 = R''_2$ and $C''_1 = C''_2$.
+
+  This equality is preserved by step (6) and (7)
+  since the transitive reduction of a directed acyclic graph is unique,
+  which concludes.
 \end{proof}
 
 
 \begin{theorem}
-  The procedure $\operatorname{normalize}$ is complete and computes
+  The $\operatorname{normalize}$ procedure is complete and computes
   unique principal normal forms for our constraint system.
 \end{theorem}
 
