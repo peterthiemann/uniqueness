@@ -194,27 +194,6 @@ Our unification algorithm proceed as follows:
 
 \TODO{Add an example}
 
-\begin{lemma}
-  Given a constraint $C\in\mathcal C$, a substitution $\unif$ and
-  $(C',\unif') = \normalize{C}{\unif}$, we have the following properties:
-  \begin{enumerate}
-  \item $C'$ is of the form $\{ k_i \leq k'_i\}_i$.
-  \item For any disjoint subformulas $C_1$ and $C_2$ of $C'$,
-    then $C_1 \operatorname{\nvdash_e} C_2$ and $C_2 \operatorname{\nvdash_e} C_1$
-  \item For each $\kvar \in \operatorname{fv}(C)$,
-    there exists two constants $l_\bot,l_\top \in \mathcal L$  such that
-    $\entail{C}{\Cleq{l_\bot}{\kvar}}$ and $\entail{C}{\Cleq{\kvar}{l_\top}}$.
-  \end{enumerate}
-\end{lemma}
-% \begin{proof}
-  
-%   \begin{enumerate}
-%   \item Directly follows from step (1) and (5).
-%   \end{enumerate}
-%   (1) is a direct consequence of step 
-% \end{proof}
-
-
 \begin{lemma}[Normal form]
   \label{lemma:normalform}
   Given a constraint $D\in\mathcal C$, a substitution $\phi$ and
