@@ -1,9 +1,12 @@
 \begin{mathpar}
   \inferrule
-  {}{ \entail{}{\Cleq{\kun}{\kaff}} }
+  {}{ \entail{}{\Cleq{\kvar}{\kaff}} }
   \and
   \inferrule
-  {}{ \entail{}{\Cleq{\tvar}{\tvar}} }
+  {}{ \entail{}{\Cleq{\kun}{\kvar}} }
+  \and
+  \inferrule
+  {}{ \entail{}{\Cleq{\kvar}{\kvar}} }
   \and
   % \inferrule
   % {\Cleq{k}{k'} \in C}{ \entail{C}{\Cleq{k}{k'}} }
@@ -29,6 +32,8 @@
   { \forall i,\ \entail{C}{\Cleq{\tau_i}{\tau_i}}\\
   }
   { \entail{C}{\Cleq{\tapp{t}{(\tau_i)}}{\tapp{t}{(\tau'_i)}}} }
+  \and
+  
   % \and
   % \inferrule
   % { \entail{C}{\Cleq{k}{k'}} \\
