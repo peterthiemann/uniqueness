@@ -28,7 +28,7 @@ when $\entail{C}{D}$ and $\entail{D}{C}$.
 \TODO{Give the cylindric properties ?}
 
 
-\begin{figure}[h]
+\begin{figure}[tp]
   \centering
   \begin{align*}
     C ::=&\ \Cleq{\tau_1}{\tau_2}\ |\ \Cleq{k_1}{k_2}\ |\ C_1 \Cand C_2\ |\ \Cproj{\alpha}{C}
@@ -37,7 +37,7 @@ when $\entail{C}{D}$ and $\entail{D}{C}$.
   \label{grammar:constraint}
 \end{figure}
 
-\begin{figure*}[h]
+\begin{figure*}[tp]
   \input{infer/entails}
   \caption{Base entailment rules -- $\entail{C}{D}$ }
   \label{rules:entail}
@@ -64,14 +64,14 @@ of the normalization function in \cref{sec:normalize}
 \subsubsection{Usage maps}
 
 In order to determine if a variable is used in an affine manner, we must track
-it's uses and the associated kinds. For instance, in the expression
+its uses and the associated kinds. For instance, in the expression
 $(x,x)$, $x$ is used twice. If $x$ is of type $\tau$, which is of kind $k$,
 we must add the constraint $\Cleq{k}{\kun}$. In order to record uses and kinds,
 our type inference relation will return a ``usage map'', noted $\Sv$,
 which associates each variable to a list of kinds corresponding to each use site
 of the variable.
 We note $\Sone{x}{k_1,\dots,k_n}$ the singleton usage map.
-Common operations on usages maps are defined in \cref{op:usgmap}. We define
+Common operations on usage maps are defined in \cref{op:usgmap}. We define
 regular set operations such as union
 ($\Sv\cup\Sv'$) and intersection ($\Sv\cap\Sv'$), along
 with constraint creation $\Cleq{\Sv}{k_0}$ which indicates that all the kinds
@@ -79,7 +79,7 @@ presents in the usage map $\Sv$ are constrained by the kind $k_0$.
 These operations corresponds roughly to the various parts of the join
 operator on sets $\esplit{}{}$.
 
-\begin{figure}[h]\centering
+\begin{figure}[tp]\centering
 \begin{align*}
   \Sv\cap\Sv'
   &= \left\{ x \to l,l'
