@@ -1,11 +1,11 @@
 \begin{mathpar}
   \inferrule[Var]
   { \bvar{x}{
-      \forall \kvar_i \forall (\tvar_j:\kvar_j).\ \qual{C_x}{\tau}}
+      \forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}
     \in \E \\
     (\kvar'_i),(\tvar'_j) \text{ new} \\
     \addlin{
-      \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{\kvar_j}}{\tau}{k_\tau}
+      \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{k_j}}{\tau}{k_\tau}
     }\\
     D = C_x\Cand C_\tau \\
     \unif' =
@@ -14,7 +14,9 @@
     (C,\unif) =
     \normalize{D}{\unif'}
   }
-  { \inferW{\addlin{\Sone{x}{\unif k_x}}}{(C,\unif|_{\fv{\E}})}{\E}{x}{\unif\tau} }
+  { \inferW
+    {\addlin{\Sone{x}{\unif k_\tau}}}
+    {(C,\unif|_{\fv{\E}})}{\E}{x}{\unif\tau} }
   \and
   \inferrule[Abs]
   { \tvar,\kvar_\tvar,\kvar\text{ new}\\
