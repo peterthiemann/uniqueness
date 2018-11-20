@@ -1,0 +1,533 @@
+
+\documentclass[xcolor=svgnames,11pt]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french, english]{babel}
+\selectlanguage{english}
+
+\usepackage{graphicx}
+
+% Math
+\usepackage{amsmath}
+% \usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+% \usepackage{mathrsfs}
+\usepackage{mathtools}
+\usepackage{textcomp}
+% \usepackage{textgreek}
+
+% Specialized packages
+% \usepackage{syntax} % Grammar definitions
+\usepackage{verbatim}
+\usepackage{listings} % Code
+\usepackage{xspace} % Useful for macros
+\usepackage{natbib}% Good citations and bibliography
+\usepackage{mathpartir} % Syntax trees
+\usepackage{colortbl}
+\usepackage{hhline}
+\usepackage{multicol}%multicolumn lists
+\usepackage{pifont}%% check mark
+
+% \usepackage{mathptmx}
+% \usepackage[scaled=0.9]{helvet}
+\usepackage{beramono}
+
+\bibliographystyle{ACM-Reference-Format}
+\citestyle{acmauthoryear}
+\usepackage{appendixnumberbeamer}
+
+\usetheme{metropolis}
+\beamertemplatenavigationsymbolsempty
+\setbeamercovered{transparent=20}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.text,backgrounds,positioning,shapes,
+  shadings,shadows,arrows,decorations.markings,calc,fit,fadings}
+
+\def\HUGE{\fontsize{35pt}{15pt}\selectfont}
+
+\input{prelude}
+\input{notations}
+
+
+\lstset{
+  tabsize=4,
+  aboveskip={0.5\baselineskip},
+  belowcaptionskip=0.5\baselineskip,
+  columns=fixed,
+  showstringspaces=false,
+  extendedchars=true,
+  breaklines=true,
+  frame=none,
+  basicstyle=\small\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\color{gray},
+  % identifierstyle=\color{blue!80!black},
+  stringstyle=\color{purple},
+  numbersep=5pt,
+  numberstyle=\tiny\color{gray},
+  escapeinside={(*@}{@*)},
+  emphstyle=\color{green!60!black}\bfseries,
+  emphstyle={[2]\color{blue!60!black}\bfseries},
+  language=[Objective]Caml,
+  % numbers=left,
+}
+
+\title{Kindly Bent To Free Us}
+\author{Gabriel \textsc{Radanne} \and Peter \textsc{Thiemann}}
+
+\begin{document}
+
+\frame[plain]{\titlepage}
+
+\begin{frame}
+  \TODO{Example of wrong code in dear need of linearity}
+\end{frame}
+
+\begin{frame}
+  Many partial solutions
+  \begin{itemize}
+  \item Closures
+  \item Monads
+  \item Existential types
+  \item \dots
+  \end{itemize}
+  \pause
+
+  What we really need is to enforce linearity.
+\end{frame}
+
+\begin{frame}
+  Many places in \ocaml where enforcing linearity is useful:
+  \begin{itemize}
+  \item IO (File handle, channels, network connections, \dots)
+  \item Protocols (With session types! Mirage libraries)
+  \item One-shot continuations (effects!)
+  \item \dots
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  Which kind of linearity?
+  \begin{itemize}
+  \item \alert<2>{Ownership approaches}
+    
+    \only<2>{
+      Suitable to imperative languages (Rust, \dots).
+    }
+  \item \alert<3>{Capabilities and typestates}
+    
+    \only<3>{
+      Often use in Object-Oriented contexts (Wyvern, Plaid, Hopkins Objects Group, \dots).
+    }
+  \item \alert<4,6>{Substructural type systems}
+    
+    \only<4>{
+      Many variations, mostly in functional languages:
+      \begin{itemize}
+      \item Inspired directly from linear logic (Linear Haskell, Walker, \dots)
+      \item Uniqueness (Clean)
+      \item Kinds (Alms, Clean, F$^\circ$)
+      \item Constraints (Quill)
+      \end{itemize}
+    }
+  \item \alert<5>{\dots}
+    
+    \only<5>{Mix of everything: Mezzo}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  Goals:
+  \begin{itemize}
+  \item Complete and principal type inference
+  \item Impure strict context
+  \item Works well with type abstraction
+  \item Play balls with various other ongoing works (Effects, Resource polymorphism, \dots)
+  \end{itemize}
+
+  \pause
+  Non Goals:
+  \begin{itemize}
+  \item Support every linear pattern under the sun
+  \item Design associated compiler optimisations (yet)
+  \end{itemize}
+\end{frame}
+
+
+\section{The \lang language}
+
+\begin{frame}[fragile]{Types and Behaviors}
+  In \lang, the behavior of a variable is determined
+  by its type:
+\begin{lstlisting}
+type channel : A (* channel is Affine! *)
+\end{lstlisting}\pause
+\begin{lstlisting}
+let with_file s f = 
+  let c = open_channel s
+  let c = f c in
+  close_channel c
+val with_file : string -> (channel -> channel)
+\end{lstlisting}\pause
+\begin{lstlisting}
+let () = 
+  let r = ref None in
+  with_file "thing"
+    (fun c -> r := Some c ; c) (* (*@\color{red} \ding{56}  No!@*) *)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Inference at work}
+  Infer unrestricted in case of duplication:
+\begin{lstlisting}
+let f = fun c -> r := Some c ; c
+val f : ('a : U) . 'a -> 'a
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{The kinds so far}
+
+  So far, two kinds:
+  \begin{description}
+  \item[A] Affine types: can be used at most once
+  \item[U] Unrestricted types
+  \end{description}
+
+  Additionally, we have:
+  \begin{align*}
+    \kun &\leq \kaff
+  \end{align*}
+\end{frame}
+
+\defverbatim{\KA}{
+\begin{lstlisting}
+let f = fun a -> fun b -> (a, b)
+val f : 'a -> 'b -> 'a * 'b (* ? *)
+\end{lstlisting}
+}
+\defverbatim{\KB}{
+\begin{lstlisting}
+let f = fun a -> fun b -> (a, b)
+val f : ('a : 'k) => 'a -> 'b -{'k}> 'a * 'b
+\end{lstlisting}
+}
+
+\begin{frame}[fragile]{Inference at work}
+  What about closures?
+  \alt<2>{\KB}{\KA}
+\end{frame}
+
+
+\defverbatim{\AppA}{
+\begin{lstlisting}
+let app f x = f x
+val app :
+  'k1 < 'k2 =>
+  ('a -{'k1}> 'b) -> 'a -{'k2}> 'b
+\end{lstlisting}
+}
+\defverbatim{\AppB}{
+\begin{lstlisting}
+let app f x = f x
+val app :
+  ('a -{'k}> 'b) -> 'a -{'k}> 'b
+\end{lstlisting}
+}
+
+\begin{frame}[fragile]{Inference at work}
+  \alt<2>{\AppB}{\AppA}
+\end{frame}
+
+
+\defverbatim{\Comp}{
+\begin{lstlisting}
+let compose f g x = f (g x)
+val compose : 
+  ('b -{?}> 'a) -> ('c -{?}> 'b) -{?}> 'c -{?}> 'a
+\end{lstlisting}
+}
+\defverbatim{\CompA}{
+\begin{lstlisting}
+let compose f g x = f (g x)
+val compose : 
+  ('k2 < 'k) & ('k1 < 'k) & ('k1 < 'k3) =>
+  ('b -{'k1}> 'a) -> ('c -{'k2}> 'b) -{'k3}> 
+  'c -{'k}> 'a
+\end{lstlisting}
+}
+\defverbatim{\CompB}{
+\begin{lstlisting}
+let compose f g x = f (g x)
+val compose : 
+  ('k1 < 'k) =>
+  ('b -{'k1}> 'a) -> ('c -{'k}> 'b) -{'k1}> 
+  'c -{'k}> 'a
+\end{lstlisting}
+}
+
+\begin{frame}[fragile]{Inference at work}
+  What about more complicated cases ?
+  \only<1>{\Comp}
+  \only<2>{\CompA}
+  \only<3>{\CompB}
+\end{frame}
+
+
+\defverbatim{\RefA}{
+\begin{lstlisting}
+type ('a : U) ref : U = ...
+\end{lstlisting}
+}
+\defverbatim{\RefB}{
+\begin{lstlisting}
+type ref : U -> U = ...
+\end{lstlisting}
+}
+
+\begin{frame}[fragile]{Closer look at type declarations}
+  You can annotate the kinds on type declarations.
+
+  Vanilla OCaml references are fully unrestricted:
+  \only<1>{\RefA}
+  \only<2-3>{\RefB}
+  \pause\pause
+
+  We can also have constraints on kinds. The pair type operator:
+\begin{lstlisting}
+type * : (k1 < k) & (k2 < k) => k1 -> k2 -> k
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{More interesting example}
+
+  Mixing with abstraction:
+\begin{lstlisting}
+module LinArray : sig
+  type -'a w : A
+  val create :
+    ('a : U) . int -> 'a -> 'a w
+  val set : 'a w -> int -{A}> 'a -{A}> 'a w
+
+  type +'a r : U
+  val freeze : 'a w -> 'a r
+  val get : int -> 'a r -> 'a 
+end
+\end{lstlisting}
+\end{frame}
+
+\section{The calculus}
+
+\begin{frame}
+  \frametitle{The calculus}
+  \begin{columns}[t]
+    \column{0.5\textwidth}
+    \begin{align*}
+      \htag{Expressions}
+      e ::=&\ c\ |\ x\ |\ \app{e}{e'}\ |\ \lam{x}{e}\\
+      % |&\ \fix{e}\tag{Fixpoint}\\
+      |&\ \letin{x}{e}{e'}\\
+      |&\ \introK{K}{e}\ |\ \elimK{K}{e}\\
+    \end{align*}
+    \column{0.5\textwidth}
+    \begin{align*}
+      \htag{Type Expressions}
+      \tau ::=&\ \tvar\ |\ \tau\tarr{k}\tau\ |\ \tapp{t}{(\tau^*)}\\
+      k ::=&\ \kvar\ |\ \ell \in {\mathcal L}
+    \end{align*}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The calculus \hfill Constraints}
+
+  Constraints are only acceptable in schemes:
+  \begin{align*}
+    \schm ::=&\ \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau})\\
+    \kschm ::=&\ \forall\kvar^*.(\qual{C}{k_i^* \karr k})\\
+  \end{align*}
+  The constraint language in schemes is limited to list of inequalities:
+  \begin{align*}
+    C ::=&\ \Cleq{k}{k'}^*
+  \end{align*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The HM(X) framework}
+  HM(X) \citep{DBLP:journals/tapos/OderskySW99} is a framework
+  to build an HM type system (with inference) based on a given constraint system.
+
+  We provide two additions:
+  \begin{itemize}
+  \item A small extension of HM(X) that tracks kinds and linearity
+  \item An appropriate constraint system
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Typing}
+  \TODO{Add pointers}
+
+  \centering
+  \begin{tikzpicture}
+    \node[scale=2] (Eq) {
+      $\inferW{\addlin{\Sigma}}{(C,\psi)}{\Gamma}{e}{\tau}$
+    };
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Typing \hfill Tracking linearity}
+
+  Variables can be kind-polymorphic and all their instances might not have the same kinds.
+
+  $\implies$ We must track the kinds of all use-sites for each variable.\pause
+
+  Use maps ($\Sv$) associates variables to multisets of kinds
+  and are equipped with three operations:
+  \begin{align*}
+    \Sv&\cap\Sv'& \Sv&\cup\Sv' & \Sv &\leq k
+  \end{align*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Typing \hfill Tracking linearity}
+  
+  When typechecking (e1; e2):
+  \begin{itemize}[<+->]
+  \item $\inferW{\Sv_1}{(C_1,\psi_1)}{\Gamma}{e_1}{\tau_1}$
+  \item $\inferW{\Sv_2}{(C_2,\psi_2)}{\Gamma}{e_2}{\tau_2}$
+  \item Add  $(\Sv_1\cap\Sv_2\leq \kun)$ to the constraints
+  \item \dots
+  \item Return $\Sv_1\cup\Sv_2$
+  \end{itemize}
+
+\end{frame}
+
+
+\newcommand\lub\bigvee
+\newcommand\glb\bigwedge
+\newcommand\CL{{\mathcal C_{\mathcal L}}}
+
+\begin{frame}
+  \frametitle{Constraints}
+
+  A slightly more general context: $\CL$ is the constraint system:
+  \begin{align*}
+    C ::=&\ \Cleq{\tau_1}{\tau_2}\ |\ \Cleq{k_1}{k_2}\ |\ C_1 \Cand C_2\ |\ \Cproj{\alpha}{C}
+  \end{align*}
+
+  where $k ::=\kvar\ |\ \ell \in {\mathcal L}$ and
+  $(\mathcal L, \leq_{\mathcal L})$ is a complete lattice.
+  \pause
+
+  Respect, among other things:
+  \begin{mathpar}
+    \inferrule{\ell \leq_{\mathcal L} \ell'}{\entail{}{\Cleq{\ell}{\ell'}}}
+    \and
+    \inferrule{}{\entail{}{\Cleq{k}{\ell^\top}}}
+    \and
+    \inferrule{}{\entail{}{\Cleq{\ell^\bot}{k}}}
+  \end{mathpar}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Constraints \hfill Normalization}
+  Normalization is complete and principal!
+
+  \TODO{Example}
+\end{frame}
+
+\defverbatim{\CompAA}{
+\begin{lstlisting}
+let compose f g x = f (g x)
+val compose : 
+  ('k1 < 'k) & ('k1 < 'k3) =>
+  ('b -{'k1}> 'a) -> ('c -{'k}> 'b) -{'k3}> 
+  'c -{'k}> 'a
+\end{lstlisting}
+}
+
+
+\begin{frame}[fragile]
+  \frametitle{Constraints \hfill Simplification rules}
+
+  Well known simplifications on constraints:
+  \begin{itemize}
+  \item Replace variable in covariant position by their lower bound
+  \item Replace variable in contravariant position by their upper bound
+  \end{itemize}
+
+  \only<2>{\CompA}
+  \only<3>{\CompAA}
+  \only<4->{\CompB}
+  \visible<5>{
+    $\implies$ Unfinished, need to investigate principality
+  }
+\end{frame}
+
+\begin{frame}
+  \frametitle{Constraints}
+  We only have to pick $\ell^\bot = \kun$.\pause
+
+  \begin{itemize}
+  \item $\kaff$ doesn't appear in the typing rules.
+
+    It only comes from the buitins and/or the type declarations.
+  \item The lattice doesn't have to be finite.
+  \item The constraint language can be expanded further.
+  \end{itemize}
+\end{frame}
+
+\section{Going further}
+
+\begin{frame}{Current area of work}
+
+  \begin{itemize}
+  \item Modules
+  \item Borrowing
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Modules}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Borrowing}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Really??}
+
+  \begin{quote}
+    Do you really think adding kinds and qualified types to \ocaml is a good idea?
+  \end{quote}\pause
+  Yes, I do!\pause
+  \begin{itemize}
+  \item Qualified types are coming for modular implicits anyway!
+  \item Actually having kinds would fix many weirdness (rows, \dots) and
+    enable nice extensions (units of measures).\pause
+  \item I could make Eliom even better with them! :)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[standout]
+  \Huge{\texttt{Close(Talk)}}
+\end{frame}
+
+\bibliography{biblio}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

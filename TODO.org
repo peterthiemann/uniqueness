@@ -104,12 +104,13 @@ k ≤ k'' && k' ≤ k''
 ** Mutable manually allocated arrays
 ```
 module LinArray : sig
-  type -'a w : lin
-  type +'a r : un
-  val freeze : 'a w -> 'a r
-  val create : 'a ≤ un => int -> 'a -> 'a w
-  val get : int -> 'a r -> 'a 
+  type -'a w : A
+  val create : 'a ≤ un => int -> 'a w
   val set : 'a w -> int ->. 'a ->. 'a w
+
+  type +'a r : U
+  val freeze : 'a w -> 'a r
+  val get : int -> 'a r -> 'a 
 end
 ```
 
