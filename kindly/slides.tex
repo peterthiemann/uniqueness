@@ -42,6 +42,8 @@
 \beamertemplatenavigationsymbolsempty
 \setbeamercovered{transparent=20}
 
+\usepackage{wasysym}
+
 \usepackage{tikz}
 \usetikzlibrary{decorations.text,backgrounds,positioning,shapes,
   shadings,shadows,arrows,decorations.markings,calc,fit,fadings}
@@ -105,6 +107,7 @@
   \item IO (File handle, channels, network connections, \dots)
   \item Protocols (With session types! Mirage libraries)
   \item One-shot continuations (effects!)
+  \item Transient data-structures
   \item \dots
   \end{itemize}
 \end{frame}
@@ -151,8 +154,8 @@
   \pause
   Non Goals:
   \begin{itemize}
-  \item Support every linear pattern under the sun
-  \item Design associated compiler optimisations (yet)
+  \item Support every linear code pattern under the sun
+  \item Design associated compiler optimisations/GC integration (yet)
   \end{itemize}
 \end{frame}
 
@@ -485,37 +488,124 @@ val compose :
 
 \section{Going further}
 
+
 \begin{frame}{Current area of work}
 
-  \begin{itemize}
+  \begin{enumerate}
+  \item Richer type system
   \item Modules
   \item Borrowing
-  \end{itemize}
+  \item Prototype cool APIs with it
+  \end{enumerate}
   
+\end{frame}
+
+\begin{frame}
+  \frametitle{Constraints \hfill Extensions}
+  Constraints in a similar style have been applied to:
+  \begin{itemize}
+  \item (Relaxed) value restriction
+  \item GADTs
+  \item Rows
+  \item Type elaboration
+  \item \dots
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Modules}
+
+  Several distinct problematic:
+  \begin{itemize}
+  \item \alert<2>{Type abstraction} \only<2>{{\color{green}\ding{52}}
+      
+      Can declare unrestricted types and expose them as Affine.
+    }
+  \item \alert<3>{Linear/affine values in modules} \only<3>{
+
+      Behave like tuples: take the LUB of the kinds of the exposed values.
+
+      What about values that are not exposed? They don't matter!
+    }
+  \item \alert<4>{Functors}\only<4>{
+
+      What happens if a functor takes a module containing affine values?
+      
+      $\implies$ We need kind annotation on the functor arrow\dots \frownie{}
+    }
+  \item \alert<5->{Separate compilation}\only<5->{
+
+      What about linear/affine constants?
+
+      $\implies$ Should probably be forbidden\dots
+
+      \visible<6>{But what about \lstinline{stdout} ?}
+    }
+  \end{itemize}
   
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile,fragile]
   \frametitle{Borrowing}
+
+  Borrowing seem essential to express many patterns found in \ocaml.
+
+%   Read-only borrows, in \texttt{duff}
+% \begin{lstlisting}
+% val make: ?copy:bool -> Cstruct.t -> t
+% (* [make ?copy raw] returns a Rabin's fingerprint of [raw]. [make] expects to take the
+%    ownership of [raw]. *)
+% \end{lstlisting}
+
+  Mutable borrows, in \texttt{lacaml}
+\begin{lstlisting}
+val Lacaml.D.sycon : 
+  ... -> ?iwork:Common.int32_vec -> mat -> float
+(* iwork is an optional preallocated work buffer *)
+\end{lstlisting}
   
 \end{frame}
+
+\begin{frame}[fragile]
+
+  Guillaume Munch-Maccagnoni has the following lattice, for $r$ a region:
+\begin{lstlisting}
+       Own@r
+        / \
+       /   \
+    Seq@r   \
+     /      Own
+    /       /
+  Copy@r   /
+     \    /
+      \  /
+       \/
+      Copy
+\end{lstlisting}
+
+  % \pause
+  It would requires:
+  \begin{itemize}
+  \item More syntactic annotations
+  \item Regions
+  \end{itemize}
+  
+\end{frame}
+
+
 
 \begin{frame}
   \frametitle{Really??}
 
   \begin{quote}
-    Do you really think adding kinds and qualified types to \ocaml is a good idea?
+    Do you really think adding kinds, subkinding and qualified types to \ocaml is a good idea?
   \end{quote}\pause
   Yes, I do!\pause
   \begin{itemize}
-  \item Qualified types are coming for modular implicits anyway!
-  \item Actually having kinds would fix many weirdness (rows, \dots) and
+  \item Qualified types are coming for modular implicits anyway.
+  \item Having proper kinds would fix many weirdness (rows, \dots) and
     enable nice extensions (units of measures).\pause
-  \item I could make Eliom even better with them! :)
+  \item I could make Eliom even better with them! \smiley{}
   \end{itemize}
 \end{frame}
 
