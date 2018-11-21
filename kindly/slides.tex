@@ -46,7 +46,9 @@
 
 \usepackage{tikz}
 \usetikzlibrary{decorations.text,backgrounds,positioning,shapes,
-  shadings,shadows,arrows,decorations.markings,calc,fit,fadings}
+  shadings,shadows,arrows,decorations.markings,calc,fit,fadings,
+  tikzmark
+}
 
 \def\HUGE{\fontsize{35pt}{15pt}\selectfont}
 
@@ -241,7 +243,7 @@ val app :
 }
 
 \begin{frame}[fragile]{Inference at work}
-  \alt<2>{\AppB}{\AppA}
+  \AppA
 \end{frame}
 
 
@@ -370,15 +372,41 @@ end
   \end{itemize}
 \end{frame}
 
+\newcommand\tikzcoord[2]%
+{\tikz[remember picture,baseline=(#1.base)]{\node[coordinate] (#1) {#2};}}
 \begin{frame}
   \frametitle{Typing}
-  \TODO{Add pointers}
-
   \centering
-  \begin{tikzpicture}
-    \node[scale=2] (Eq) {
-      $\inferW{\addlin{\Sigma}}{(C,\psi)}{\Gamma}{e}{\tau}$
-    };
+
+  \begin{align*}
+    \inferW
+      {\tikzmark{Sv}{\addlin{\Sv}}}
+      {(\tikzmark{C}{C},\tikzmark{psi}{\psi})}
+      {\tikzmark{E}{\Gamma}}
+      {\tikzmark{e}{e}}
+      {\tikzmark{t}{\tau}}
+  \end{align*}
+
+  \tikzstyle{link}=[->, >=latex, thick]
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[above right=1.2 and 1.2 of pic cs:e, anchor=south] (expr)
+    {\bf Expression};
+    \draw[link] (expr) to[out=-100,in=80] ([shift={(0.8ex,1.2ex)}]pic cs:e);
+    
+    \node[above left=1.2 and 0.2 of pic cs:E] (env) {\bf Environment};
+    \draw[link] (env) to[out=-80,in=100] ([shift={(0.8ex,1.9ex)}]pic cs:E);
+    
+    \node[below right=0.6 and 0.8 of pic cs:t] (ty) {Type};
+    \draw[link] (ty) to[out=170,in=-70] ([shift={(0.8ex,-0.4ex)}]pic cs:t);
+    
+    \node[below right=1.2 and 0.8 of pic cs:psi] (psi) {Unifier};
+    \draw[link] (psi) to[out=100,in=-80] ([shift={(0.8ex,-0.4ex)}]pic cs:psi);
+    
+    \node[below left=1.2 and 0 of pic cs:C] (C) {Constraints};
+    \draw[link] (C) to[out=100,in=-80] ([shift={(0.8ex,-0.4ex)}]pic cs:C);
+    
+    \node[below left=0 and 0.9 of pic cs:Sv] (Sv) {\addlin{Usage Map}};
+    \draw[link,blue] (Sv) to[out=20,in=180] ([shift={(0ex,0.6ex)}]pic cs:Sv);
   \end{tikzpicture}
 \end{frame}
 
@@ -399,7 +427,7 @@ end
 \begin{frame}
   \frametitle{Typing \hfill Tracking linearity}
   
-  When typechecking (e1; e2):
+  When typechecking (e1, e2):
   \begin{itemize}[<+->]
   \item $\inferW{\Sv_1}{(C_1,\psi_1)}{\Gamma}{e_1}{\tau_1}$
   \item $\inferW{\Sv_2}{(C_2,\psi_2)}{\Gamma}{e_2}{\tau_2}$
@@ -440,9 +468,140 @@ end
 
 \begin{frame}
   \frametitle{Constraints \hfill Normalization}
-  Normalization is complete and principal!
 
-  \TODO{Example}
+  Example : $\lam{f}{\lam{x}{(\app{f}{x},x)}}$
+
+  Raw constraints:
+  \begin{gather*}
+    (\tvar_f : \kvar_f)
+    (\tvar_x : \kvar_x)\dots\\
+    (\tvar_f \leq \gamma \tarr{\kvar_1} \beta )
+    \Cand
+    (\gamma \leq \tvar_x)
+    \Cand
+    (\beta * \tvar_x \leq \alpha_r)
+    \Cand
+    (\kvar_x \leq un)
+  \end{gather*}\pause
+
+  We unify the types and discover new constraints:
+  \begin{gather*}
+    \alpha_r =
+    (\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma\\
+    (\kvar_x \leq \kun)
+    \Cand
+    (\kvar_\gamma \leq \kvar_x)
+    \Cand
+    (\kvar_x \leq \kvar_r)
+    \Cand
+    (\kvar_\beta \leq \kvar_r)
+    \Cand
+    (\kvar_3 \leq \kvar_f)
+    \Cand
+    (\kvar_f \leq \kvar_1)
+  \end{gather*}
+\end{frame}
+
+\begin{frame}[plain]
+  \centering
+  \begin{gather*}
+    (\gamma : \kvar_\gamma) (\beta : \kvar_\beta).\ 
+    (\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma\\
+    \visible<7->{\kvar_\gamma = \kvar_x = \kun}
+    \visible<13>{\Cand \kvar_3 \leq \kvar_1}
+  \end{gather*}
+  \begin{tikzpicture}[every edge/.style=[link,->,>=latex,thick]]
+    \node<-11> (U) {$\kun$} ;
+    \node<-7>[above left=of U] (x) {$\kvar_x$} ;
+    \node<-10>[above=of x] (r) {$\kvar_r$};
+    \node<-7>[left=of x] (g) {$\kvar_\gamma$} ;
+    \node[right=of x] (b) {$\kvar_\beta$} ;
+    \node[right=of b] (3) {$\kvar_3$} ;
+    \node<-10>[above=of 3] (f) {$\kvar_f$} ;
+    \node[above=of f] (1) {$\kvar_1$} ;
+
+    \draw<1> (x) -> (U) ;
+    \draw<2-7> (x) to[bend right] (U) ;
+    \draw<-7> (x) -> (r) ;
+    \draw<-10> (b) -> (r) ;
+    \draw<-7> (g) -> (x) ;
+    \draw<-10> (3) -> (f) ;
+    \draw<-10> (f) -> (1) ;
+
+    \only<2-11>{\begin{scope}[dashed,gray]
+        \draw<-7> (U) to[bend right] (x) ;
+        \draw (U) to (b) ;
+        \draw<-7> (U) to[bend left] (g) ;
+        \draw<-10> (U) to (r) ;
+        \draw (U) to (1) ;
+        \draw (U) to (3) ;
+        \draw<-10> (U) to (f) ;
+      \end{scope}}
+    \visible<3-11>{\begin{scope}[dashed,gray]
+      \node[above left= 0.2 and 1 of 1] (A) {$\kaff$} ;
+      \draw<-7> (x) to (A) ;
+      \draw (b) to (A) ;
+      \draw<-7> (g) to (A) ;
+      \draw<-10> (r) to (A) ;
+      \draw (1) to (A) ;
+      \draw (3) to (A) ;
+      \draw<-10> (f) to (A) ;
+      \draw (U) to[out=0,in=0,looseness=1.5] (A) ;
+    \end{scope}}
+
+  \visible<4-5>{
+    \begin{scope}[scale=0.7,xscale=0.9,transform shape, xshift=6.5cm,yshift=2cm]
+      \node (a1) {$\kvar$};
+      \node[above right=of a1] (a2) {$\kvar_1$};
+      \node[above left=of a1] (a3) {$\kvar_2$};
+      \node[above=of a2] (l2) {$\ell_1$};
+      \node[above=of a3] (l3) {$\ell_2$};
+      \draw (a1) to (a2) ;
+      \draw (a1) to (a3) ;
+      \draw (a2) to (l2) ;
+      \draw (a3) to (l3) ;
+    \visible<5>{\begin{scope}[dashed,gray]
+      \node[above=of a1] (l1) {$\ell_1 \sqcup \ell_2$};
+      \draw (a1) to (l1) ;
+      \draw (l1) to (l2) ;
+      \draw (l1) to (l3) ;
+    \end{scope}}
+      \node[scale=1.3, xscale=1.1,draw=Grey, rectangle, rounded corners=10pt, fit=(a1) (l2) (l3)] {};
+    \end{scope}
+  }
+
+  \begin{scope}[on background layer]
+    \visible<6-7>{
+      \node[fill=green!20,draw=green,
+      inner sep=-1mm,ellipse,rotate fit=-20,fit=(U) (x) (g)] {};
+    }
+    \visible<9-10>{
+      \node[fill=red!20,draw=red, inner sep=-2pt, circle,fit=(r)] {};
+      \node[fill=red!20,draw=red, inner sep=-2pt, circle,fit=(f)] {};
+    }
+  \end{scope}
+
+  \draw<10-13> (3) to[bend right] (1) ;
+
+  \end{tikzpicture}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Constraints \hfill Normalization}
+
+  Normalization is complete and principal.
+  \begin{gather*}
+    \lam{f}{\lam{x}{(\app{f}{x},x)}}: \\
+    \forall \kvar_\beta \kvar_1 \kvar_2 \kvar_3
+    (\gamma : \kun) (\beta : \kvar_\beta).\ %
+    \qual
+    {\Cleq{\kvar_3}{\kvar_1}}
+    {(\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma}
+  \end{gather*}
+  
+
+  
 \end{frame}
 
 \defverbatim{\CompAA}{
@@ -465,9 +624,24 @@ val compose :
   \item Replace variable in contravariant position by their upper bound
   \end{itemize}
 
-  \only<2>{\CompA}
-  \only<3>{\CompAA}
-  \only<4->{\CompB}
+  \begin{align*}
+    \only<2>{
+      \forall \kvar_\beta \kvar_1 \kvar_2 \kvar_3
+      (\gamma : \kun) (\beta : \kvar_\beta).&
+      \qual
+      {\Cleq{\kvar_3}{\kvar_1}}
+      {(\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma}}
+    \only<3>{
+      \forall \kvar_\beta \kvar_1 \kvar_3
+      (\gamma : \kun) (\beta : \kvar_\beta).&
+      \qual
+      {\Cleq{\kvar_3}{\kvar_1}}
+      {(\gamma \tarr{\kvar_3} \beta) \tarr{} \gamma \tarr{\kvar_1} \beta * \gamma}}
+    \only<4->{
+      \forall \kvar_\beta \kvar
+      (\gamma : \kun) (\beta : \kvar_\beta).&
+      {(\gamma \tarr{\kvar} \beta) \tarr{} \gamma \tarr{\kvar} \beta * \gamma}}
+  \end{align*}
   \visible<5>{
     $\implies$ Unfinished, need to investigate principality
   }
@@ -475,7 +649,7 @@ val compose :
 
 \begin{frame}
   \frametitle{Constraints}
-  We only have to pick $\ell^\bot = \kun$.\pause
+  The only requirement is that $\ell^\bot = \kun$.\pause
 
   \begin{itemize}
   \item $\kaff$ doesn't appear in the typing rules.
@@ -545,11 +719,18 @@ val compose :
   
 \end{frame}
 
-\begin{frame}[fragile,fragile]
+\begin{frame}[fragile,fragile,fragile]
   \frametitle{Borrowing}
 
-  Borrowing seem essential to express many patterns found in \ocaml.
+  Borrowing seem essential to express many patterns found in \ocaml.\pause
 
+  Read-only borrows, in \texttt{CCHashTrie}:
+\begin{lstlisting}
+val add_mut : id -> key -> 'a -> 'a t -> 'a t
+(* add_mut ~id k v m behaves like add k v m, except
+   it will mutate in place whenever possible. *)
+\end{lstlisting}
+  \pause
 %   Read-only borrows, in \texttt{duff}
 % \begin{lstlisting}
 % val make: ?copy:bool -> Cstruct.t -> t
@@ -557,7 +738,7 @@ val compose :
 %    ownership of [raw]. *)
 % \end{lstlisting}
 
-  Mutable borrows, in \texttt{lacaml}
+  Mutable borrows, in \texttt{lacaml}:
 \begin{lstlisting}
 val Lacaml.D.sycon : 
   ... -> ?iwork:Common.int32_vec -> mat -> float
@@ -566,23 +747,20 @@ val Lacaml.D.sycon :
   
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}[fragile]{Borrowing}
 
-  Guillaume Munch-Maccagnoni has the following lattice, for $r$ a region:
-\begin{lstlisting}
-       Own@r
-        / \
-       /   \
-    Seq@r   \
-     /      Own
-    /       /
-  Copy@r   /
-     \    /
-      \  /
-       \/
-      Copy
-\end{lstlisting}
+  ``Resource Polymorphism'' has the following lattice:
+  \begin{center}
+  \begin{tikzpicture}
+    \node (Copy) {Copy};
+    \node (Own) at (2,2) {Own};
+    \node (Copy@r) at (-2,1) {Copy@r};
+    \node (Seq@r) at (-1,2) {Seq@r};
+    \node (Own@r) at (0,3) {Own@r};
 
+    \draw (Copy) -- (Own) -- (Own@r) -- (Seq@r) -- (Copy@r) -- (Copy) ;
+  \end{tikzpicture}
+\end{center}
   % \pause
   It would requires:
   \begin{itemize}
@@ -592,7 +770,20 @@ val Lacaml.D.sycon :
   
 \end{frame}
 
+\begin{frame}
+  \frametitle{Conclusion}
 
+  I presented a somewhat minimalistic approach to add linear types to an existing ML language (like \ocaml).
+
+  \begin{itemize}
+  \item Based on kinds and constraints
+  \item Works with type abstraction and modules
+  \item Support type inference
+  \item Doesn't break the whole ecosystem
+  \end{itemize}
+
+  The system is still small. We must look at concrete code pattern used in \ocaml and decide how to support them.
+\end{frame}
 
 \begin{frame}
   \frametitle{Really??}
@@ -609,7 +800,7 @@ val Lacaml.D.sycon :
   \end{itemize}
 \end{frame}
 
-\begin{frame}[standout]
+\begin{frame}[plain,standout]
   \Huge{\texttt{Close(Talk)}}
 \end{frame}
 
