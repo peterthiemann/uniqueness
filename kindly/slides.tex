@@ -86,8 +86,24 @@
 
 \frame[plain]{\titlepage}
 
-\begin{frame}
-  \TODO{Example of wrong code in dear need of linearity}
+\begin{frame}[fragile,fragile]
+
+\begin{lstlisting}
+val Tls_lwt.of_t : Tls_lwt.Unix.t -> in * out
+(* Turn a file descr into input/output channels *)
+\end{lstlisting}\pause
+\begin{lstlisting}
+let fd : Tls_lwt.Unit.t = .....
+let input, output = Tls_lwt.of_t fd
+... (* read some things *)
+let%lwt () = Lwt_io.close input in (*@\pause@*)
+...
+let%lwt c = Lwt_io.write output "thing" in (*Oups*)
+...
+\end{lstlisting}
+  \pause
+
+  The default behavior is to close the underlying file description when a channel is closed.
 \end{frame}
 
 \begin{frame}
@@ -110,6 +126,7 @@
   \item Protocols (With session types! Mirage libraries)
   \item One-shot continuations (effects!)
   \item Transient data-structures
+  \item C-style ``struct parsing''
   \item \dots
   \end{itemize}
 \end{frame}
@@ -481,7 +498,7 @@ end
     \Cand
     (\beta * \tvar_x \leq \alpha_r)
     \Cand
-    (\kvar_x \leq un)
+    (\kvar_x \leq \kun)
   \end{gather*}\pause
 
   We unify the types and discover new constraints:
@@ -620,8 +637,8 @@ val compose :
 
   Well known simplifications on constraints:
   \begin{itemize}
-  \item Replace variable in covariant position by their lower bound
-  \item Replace variable in contravariant position by their upper bound
+  \item Replace variable in positive position by their lower bound
+  \item Replace variable in negative position by their upper bound
   \end{itemize}
 
   \begin{align*}
