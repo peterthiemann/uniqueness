@@ -4,6 +4,8 @@
 \usepackage{amsthm}
 \usepackage{mathpartir}
 
+\newcommand{\Addr}{a}
+
 \newcommand{\KVAR}{\kappa}
 \newcommand{\ONE}{\circ}
 \newcommand{\MANY}{\ast}
@@ -14,11 +16,11 @@
 \newcommand{\TALL}[2]{\forall\TASS{#1}#2.}
 \newcommand{\KALL}[1]{\forall#1.}
 
-\newcommand{\LAM}[2]{\lambda\TASS{#1}#2.}
+\newcommand{\LAM}[3][{}]{\lambda^{#1}\TASS{#2}#3.}
 \newcommand{\APP}[1]{#1\,}
-\newcommand{\TLAM}[2]{\Lambda\TASS{#1}#2.}
+\newcommand{\TLAM}[3][{}]{\Lambda^{#1}\TASS{#2}#3.}
 \newcommand{\TAPP}[2]{#1\,[#2]}
-\newcommand{\KLAM}[1]{\Lambda#1.}
+\newcommand{\KLAM}[2][{}]{\Lambda^{#1}#2.}
 \newcommand{\KAPP}[2]{#1\,\{#2\}}
 
 \newcommand{\KENV}{\Delta}
@@ -37,16 +39,19 @@
 
 \begin{document}
 \maketitle
+Syntax and rules updated --- possibly inconsistent
+
 Syntax (perhaps more expressions are needed)
 \begin{align*}
   k &::= \KVAR \mid \ONE \mid \MANY & \text{kinds, where }  \MANY \sqsubseteq \ONE \\
     &\mid k \to k & \text{constructor kinds}\\
+    &\mid k \le k \Rightarrow k & \text{constrained kinds}\\
     &\mid \KALL\KVAR k & \text{universal kinds}\\
     % &\mid k \le k \Rightarrow k & \text{constrained kinds}\\
   t &::= \TVAR \mid t \stackrel{k}{\to} t \mid \TALL\TVAR k t \mid \KALL\KVAR t \mid k \le k \Rightarrow t & \text{types} \\
     & \mid \LAM\TVAR k t \mid \APP tt \mid \KLAM\KVAR t \mid \KAPP t k  & \text{constructors} \\
-  e &::= x \mid \LAM x t e \mid \APP ee \mid \TLAM \TVAR k v \mid \TAPP et \mid \KLAM \KVAR v \mid \KAPP ek & \text{expressions} \\
-  v &::=  \LAM x t e \mid  \TLAM \TVAR k v \mid \KLAM\KVAR v & \text{values}
+  e &::= x \mid \LAM[k] x t e \mid \APP ee \mid \TLAM[k] \TVAR k v \mid \TAPP et \mid \KLAM[k] \KVAR v \mid \KAPP ek & \text{expressions} \\
+  v &::=  \LAM[k] x t e \mid  \TLAM[k] \TVAR k v \mid \KLAM[k]\KVAR v & \text{values}
   \\
   \TENV &::=
           \TENVEMPTY
@@ -165,38 +170,41 @@ Type environment splitting
 Typing rules
 \begin{mathpar}
   \inferrule[Conv]{
-    \KENV; \TENV \vdash e:t \\ \KENV \vdash t = t' : k }{\KENV; \TENV \vdash e : t'}
+    \KENV; \TENV \vdash e:t:k \\ \KENV \vdash t = t' : k
+  }{\KENV; \TENV \vdash e : t': k}
 
-  \inferrule[Var]{ \KENV; \TENV, \TENV' \models \MANY \\ \KENV \vdash t : k \\ \KENV \vdash k \le \ONE }{\KENV; \TENV, x:t, \TENV' \vdash x:t }
+  \inferrule[Var]{ \KENV; \TENV, \TENV' \models \MANY \\ \KENV \vdash t : k \\ \KENV \vdash k \le \ONE }{\KENV; \TENV, x:t, \TENV' \vdash x:t:k }
 
   \inferrule[Lam]
-  {\KENV; \TENV \models k \\ \KENV; \TENV, x:t \vdash e : t'}
-  {\KENV;\TENV \vdash \LAM xte : t \stackrel{k}\to t'}
+  {\KENV; \TENV \models k \\ \KENV; \TENV, x:t \vdash e : t':k'}
+  {\KENV;\TENV \vdash \LAM[k] xte : t \stackrel{k}\to t':k}
 
   \inferrule[App]
   { \KENV \vdash \SPLIT{\TENV_1}{\TENV_2}{\TENV} \\
-    \KENV;\TENV_1 \vdash e : t' \stackrel{k}\to t \\
-    \KENV; \TENV_2 \vdash e' : t'}
-  { \KENV; \TENV \vdash \APP ee' : t}
+    \KENV;\TENV_1 \vdash e : t' \stackrel{k}\to t:k \\
+    \KENV; \TENV_2 \vdash e' : t':k' \\
+    \KENV \vdash t:k''
+  }
+  { \KENV; \TENV \vdash \APP ee' : t : k''}
 
   \inferrule[TLam]
-  {\KENV, \TASS\TVAR k; \TENV \vdash v : t \\ \TVAR \notin \KENV}
-  {\KENV; \TENV \vdash \TLAM\TVAR k v : \TALL \TVAR k t}
+  {\KENV, \TASS\TVAR k; \TENV \vdash v : t : k' \\ \TVAR \notin \KENV}
+  {\KENV; \TENV \vdash (\TLAM[k']\TVAR k v) : (\TALL \TVAR k t) : k'}
 
   \inferrule[TApp]
   {
-    \KENV; \TENV \vdash e : \TALL \TVAR k t' \\
-    \KENV \vdash t : k     
+    \KENV; \TENV \vdash e : (\TALL \TVAR k t') : k' \\
+    \KENV \vdash t : k 
   }
-  { \KENV; \TENV \vdash \TAPP e t : t'[\TVAR \mapsto t]}
+  { \KENV; \TENV \vdash \TAPP e t : t'[\TVAR \mapsto t] : k' }
 
   \inferrule[KLam]
-  { \KENV, \KVAR; \TENV \vdash e : t \\ \KVAR \notin \KENV}
-  { \KENV; \TENV \vdash \KLAM\KVAR e : \KALL\KVAR t}
+  { \KENV, \KVAR; \TENV \vdash e : t : k \\ \KVAR \notin \KENV}
+  { \KENV; \TENV \vdash \KLAM[k]\KVAR e : \KALL\KVAR t : k}
 
   \inferrule[KApp]
-  { \KENV; \TENV \vdash e : \KALL\KVAR t \\ \KENV \vdash k}
-  { \KENV; \TENV \vdash \KAPP e k : t[\KVAR \mapsto k]}
+  { \KENV; \TENV \vdash e : \KALL\KVAR t : k' \\ \KENV \vdash k}
+  { \KENV; \TENV \vdash \KAPP e k : t[\KVAR \mapsto k] : k'[\KVAR \mapsto k]}
 
   \inferrule[CIntro]
   { \KENV,   k_1 \le k_2; \TENV \vdash e : t}
@@ -211,9 +219,9 @@ Simple small-step semantics (for type preservation) with
 $e[x \mapsto v]$ standing for capture-avoiding substitution of $v$ for
 $x$ in $e$. Call-by-value as in $F^{\ONE}$.
 \begin{mathpar}
-  \inferrule[V-Beta]{}{\APP{(\LAM x t e)}v \stepsto e[x \mapsto v]}
+  \inferrule[V-Beta]{}{\APP{(\LAM[k] x t e)}v \stepsto e[x \mapsto v]}
 
-  \inferrule[T-Beta]{}{\TAPP{(\TLAM \TVAR k v)}t \stepsto v[\TVAR \mapsto t]}
+  \inferrule[T-Beta]{}{\TAPP{(\TLAM[k'] \TVAR k v)}t \stepsto v[\TVAR \mapsto t]}
 
   \inferrule[K-Beta]{}{\KAPP{(\KLAM \KVAR v)}k \stepsto v[\KVAR \mapsto k]}
   \\
@@ -577,8 +585,55 @@ eliminated by \TirName{CElim}!
   immediate by inversion of the respective rule and then by appeal to the inductive hypothesis.
 \end{proof}
 
-TODO: More elaborate semantics that tracks linearity.
+TODO: 
 Templates in $F^{\ONE}$, work by Morris, Bernardi, and others.
+
+\section{Allocating Semantics}
+
+A more elaborate big-step semantics that allocates all values on the
+heap and removes linear values after they are used.  The evaluation
+judgement is thus $H, e \Downarrow H, \Addr$ where $H$ is a heap that
+binds addresses $\Addr$ to values, which are abstractions that may
+contain addresses themselves, but no free variables.
+
+\begin{mathpar}
+  \inferrule{}{H, \LAM[k] x t e \Downarrow H+ (\Addr \mapsto \LAM[k] x t e), \Addr}
+
+  \inferrule{
+    H_1, e_1 \Downarrow H_2, \Addr_1 \\
+    H_2 (\Addr_1) = \LAM[k]x t e \\
+    H_2' = H_2 \text{ if $k=\MANY$ else } H_2 \setminus \Addr_1
+    \\\\
+    H_2', e_2 \Downarrow H_3, \Addr_2 \\
+    H_3, e[x \mapsto \Addr_2] \Downarrow H_4, \Addr
+  }{H_1, \APP{e_1}{e_2} \Downarrow H_4, \Addr}
+
+  \inferrule{}{
+    H, \TLAM[k']\TVAR k v \Downarrow H+ (\Addr \mapsto \TLAM[k']\TVAR k v), \Addr
+  }
+
+  \inferrule{
+    H, e \Downarrow H', \Addr' \\
+    H' (\Addr') = \TLAM[k']\TVAR k v \\
+    H'' = H' \text{ if $k'=\MANY$ else } H' \setminus \Addr'
+  }{
+    H, \TAPP e t \Downarrow H''+ (\Addr \mapsto v[\TVAR \mapsto t]), \Addr
+  }
+
+  \inferrule{}{
+    H, \KLAM[k]\KVAR v \Downarrow H+ (\Addr \mapsto \KLAM[k]\KVAR v), \Addr
+  }
+
+  \inferrule{
+    H, e \Downarrow H', \Addr' \\
+    H' (\Addr') = \KLAM[k']\KVAR v \\
+    H'' = H' \text{ if $k'=\MANY$ else } H' \setminus \Addr'
+  }{
+    H, \KAPP e k \Downarrow H''+ (\Addr\mapsto v[\KVAR\mapsto k]),
+    \Addr
+  }
+\end{mathpar}
+
 \end{document}
 
 %%% Local Variables:
