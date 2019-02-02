@@ -95,6 +95,28 @@ a ->. b     ≃      t -{un}-> t' where t,t' : uniq    and uniq ≤ un
 
 * Examples
 
+** Disjunction in if/patterns
+
+```
+let (x1,y1) = p1 in
+let (x2, y2) = p2 in
+if Random.bool () 
+then (x1 + y1, p2) 
+else (x2 + y2, p1) 
+```
+
+** Read-only borrow
+
+```
+let (x1,y1) = p1 in
+let (x2, y2) = p2 in
+if x1 < x2 
+then (x1 + y1, p2) 
+else (x2 + y2, p1) 
+```
+
+
+
 ** Composition
 ```
 o : ('a -{k}-> 'b) -> ('b -{k'}-> 'c) -> ('a -{k''}-> 'c)
