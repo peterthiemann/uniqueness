@@ -10,6 +10,11 @@
 \newcommand{\ONE}{\circ}
 \newcommand{\MANY}{\ast}
 
+\newcommand{\KINDU}{\textbf{U}}
+\newcommand{\KINDA}{\textbf{A}}
+
+\newcommand{\BORROW}[1][\iota]{\&^{#1}\,}
+
 \newcommand{\TASS}[1]{#1\colon\!}
 
 \newcommand{\TVAR}{\alpha}
@@ -28,7 +33,7 @@
 \newcommand{\TENV}{\Gamma}
 \newcommand{\TENVEMPTY}{\Diamond}
 
-\newcommand{\SPLIT}[3]{#1 \Join #2 = #3}
+\newcommand{\SPLIT}[3]{#1 \ltimes #2 = #3} % used to be \bowtie
 
 \newcommand\stepsto{\longrightarrow}
 
@@ -145,27 +150,49 @@ Type conversion (congruence rules omitted)
   }{
     \KENV \vdash \KAPP{(\KLAM\KVAR t)}{k'} = t[\KVAR \mapsto k'] : k[\KVAR \mapsto k']}
 \end{mathpar}
-Type environment splitting
+Type environment splitting (sequential)
 \begin{mathpar}
   \inferrule{}{
     \KENV \vdash \SPLIT{\TENVEMPTY}{\TENVEMPTY}{\TENVEMPTY}}
 
   \inferrule{
     \KENV \vdash \SPLIT{\TENV_1}{\TENV_2}{\TENV} \\
+    \KENV \vdash \SPLIT{t_1}{t_2}{t} \\
+  }{
+    \KENV \vdash \SPLIT{(\TENV_1, \TASS x t_1)}{(\TENV_2, \TASS x t_1)}{(\TENV, \TASS x t)}}
+
+  \inferrule{
+    \KENV \vdash \SPLIT{\TENV_1}{\TENV_2}{\TENV} 
+  }{
+    \KENV \vdash \SPLIT{(\TENV_1, \TASS x t)}{\TENV_2}{(\TENV, \TASS x t)}}
+
+  \inferrule{
+    \KENV \vdash \SPLIT{\TENV_1}{\TENV_2}{\TENV} 
+  }{
+    \KENV \vdash \SPLIT{\TENV_1}{(\TENV_2, \TASS x t)}{(\TENV, \TASS x t)}}
+\end{mathpar}
+Type splitting
+\begin{mathpar}
+  \inferrule{
     \KENV \vdash t : k \\
-    \KENV \vdash k \le \MANY
+    \KENV \vdash k \le \KINDU_\infty
   }{
-    \KENV \vdash \SPLIT{\TENV_1, \TASS x t}{\TENV_2, \TASS x t}{\TENV, \TASS x t}}
+    \KENV \vdash \SPLIT{t}{t}{t}
+  }
 
   \inferrule{
-    \KENV \vdash \SPLIT{\TENV_1}{\TENV_2}{\TENV} 
+    \KENV \vdash t : k \\
+    \KENV \vdash k \le \KINDA
   }{
-    \KENV \vdash \SPLIT{\TENV_1, \TASS x t}{\TENV_2}{\TENV, \TASS x t}}
+    \KENV \vdash \SPLIT{\BORROW t}{t}{t}
+  }
 
   \inferrule{
-    \KENV \vdash \SPLIT{\TENV_1}{\TENV_2}{\TENV} 
+    \KENV \vdash t : k \\
+    \KENV \vdash k \le \KINDA
   }{
-    \KENV \vdash \SPLIT{\TENV_1}{\TENV_2, \TASS x t}{\TENV, \TASS x t}}
+    \KENV \vdash \SPLIT{\BORROW[i] t}{\BORROW[!]t}{\BORROW[!]t}
+  }
 \end{mathpar}
 Typing rules
 \begin{mathpar}
