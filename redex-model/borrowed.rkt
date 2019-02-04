@@ -10,9 +10,10 @@
      )
   (p ::= + - * / = < > <= >=)
   (m ::= aff unr)
+  (I ::= imm mut)
   (e ::=
-     x (λ m (x ...) T e) (λ& m (x ...) T e) (app e e ...)
-     (let x e e) (let& x e e)
+     x (λ m (x ...) T e) (λ& I m (x ...) T e) (app e e ...)
+     (let x e e) (let& I x e e)
      c (p e e) (if e e e)
      (record m e ...)
      (elim-record (x ...) e e)
@@ -25,11 +26,11 @@
   (V ::=
      c
      A
-     (& A)
+     (& I A)
      init observe update close)
   (E ::=
      (app E e ...) (app V V ... E e ...)
-     (let x E e) (let& x E e)
+     (let x E e) (let& I x E e)
      (p E e) (p V E)
      (if E e e)
      (record m V ... E e ...)
@@ -37,7 +38,7 @@
      hole)
   (e ::=
      ....
-     (& A))
+     (& I A))
   (A ::=
      (variable-prefix res:)
      (variable-prefix loc:)
@@ -45,7 +46,7 @@
   (R ::=
      (record m V ...)
      (closure m xs T e)
-     (closure& m xs T e)
+     (closure& I m xs T e)
      initialized closed)
   (ϱ ::=
      ((x V) ...))
@@ -113,6 +114,13 @@
    (side-condition (equal? (term A_1) (term A_9)))])
 
 (define-metafunction lam-borrow-runtime
+  remove-if-aff : m Σ A -> Σ
+  [(remove-if-aff aff Σ_0 A_0)
+   (remove Σ_0 A_0)]
+  [(remove-if-aff unr Σ_0 A_0)
+   Σ_0])
+
+(define-metafunction lam-borrow-runtime
   lookup : Σ A -> R
   [(lookup ((A_0 R_0) (A R) ...) A_0)
    R_0]
@@ -133,10 +141,21 @@
    (zip-helper xs_0 Vs_0 ())])
 
 (define-metafunction lam-borrow-runtime
-  amp : V -> V
-  [(amp A_0)
-   (& A_0)]
-  [(amp c)
+  I-restrict : I I -> I
+  [(I-restrict imm imm)
+   imm]
+  [(I-restrict mut mut)
+   mut]
+  [(I-restrict imm mut)
+   imm])
+
+(define-metafunction lam-borrow-runtime
+  amp : I V -> V
+  [(amp I_0 (& I_1 A_0))
+   (& (I-restrict I_0 I_1) A_0)]
+  [(amp I_0 A_0)
+   (& I_0 A_0)]
+  [(amp I_0 c)
    c])
 
 ;     x (λ m (x ...) T e) (app e e ...) (let x e e)
@@ -153,14 +172,14 @@
     (Σ (in-hole E (λ m_0 xs_0 T e_0)))
     ((insert Σ cls:0 (closure m_0 xs_0 T e_0)) (in-hole E cls:0))
     (fresh cls:0))
+;   (-->
+;    (Σ (in-hole E (app A_0 V_1 ...)))
+;    (Σ (in-hole E (subst (zip xs_0 (V_1 ...)) e_0)))
+;    (where (closure unr xs_0 T e_0) (lookup Σ A_0)))
    (-->
-    (Σ (in-hole E (app A_0 V_1 ...)))
-    (Σ (in-hole E (subst (zip xs_0 (V_1 ...)) e_0)))
-    (where (closure unr xs_0 T e_0) (lookup Σ A_0)))
-   (-->
-    (Σ (in-hole E (app A_0 V_1 ...)))
-    ((remove Σ A_0) (in-hole E (subst (zip xs_0 (V_1 ...)) e_0)))
-    (where (closure aff xs_0 T e_0) (lookup Σ A_0)))
+    (Σ_0 (in-hole E (app A_0 V_1 ...)))
+    ((remove-if-aff m_0 Σ_0 A_0) (in-hole E (subst (zip xs_0 (V_1 ...)) e_0)))
+    (where (closure m_0 xs_0 T e_0) (lookup Σ_0 A_0)))
    (-->
     (Σ (in-hole E (p_0 V_1 V_2)))
     (Σ (in-hole E ,(apply (eval (term p_0)) (term (V_1 V_2))))))
@@ -175,32 +194,32 @@
     (Σ (in-hole E e_2)))
    ;; borrowing
    (-->
-    (Σ (in-hole E (let& x_0 A_0 e_0)))
-    (Σ (in-hole E (subst ((x_0 (& A_0))) e_0))))
+    (Σ (in-hole E (let& I_0 x_0 V_0 e_0)))
+    (Σ (in-hole E (subst ((x_0 (amp I_0 V_0))) e_0))))
    (-->
-    (Σ (in-hole E (let& x_0 (& A_0) e_0)))
-    (Σ (in-hole E (subst ((x_0 (& A_0))) e_0))))
-   (-->
-    (Σ (in-hole E (elim-record xs_0 (& A_0) e_0)))
+    (Σ (in-hole E (elim-record xs_0 (& I_0 A_0) e_0)))
     (Σ (in-hole E (subst ϱ_0 e_0)))
     (where (record m_0 V_0 ...) (lookup Σ A_0))
-    (where ϱ_0 (zip xs_0 ((amp V_0) ...)))
+    (where ϱ_0 (zip xs_0 ((amp I_0 V_0) ...)))
     )
    (-->
-    (Σ (in-hole E (app observe (& A_0))))
+    (Σ (in-hole E (app observe (& I_0 A_0))))
     (Σ (in-hole E (app observe A_0))))
    (-->
-    (Σ (in-hole E (λ& m_0 xs_0 T e_0)))
-    ((insert Σ cls:0 (closure& m_0 xs_0 T e_0)) (in-hole E cls:0))
+    (Σ (in-hole E (app update (& mut A_0) V_0)))
+    (Σ (in-hole E (app update A_0 V_0))))
+   (-->
+    (Σ (in-hole E (λ& I_0 m_0 xs_0 T e_0)))
+    ((insert Σ cls:0 (closure& I_0 m_0 xs_0 T e_0)) (in-hole E cls:0))
     (fresh cls:0))
    (-->
     (Σ (in-hole E (app A_0 V_1 ...)))
-    (Σ (in-hole E (subst (zip xs_0 ((amp V_1) ...)) e_0)))
-    (where (closure& unr xs_0 T e_0) (lookup Σ A_0)))
+    (Σ (in-hole E (subst (zip xs_0 ((amp imm V_1) ...)) e_0)))
+    (where (closure& I_0 unr xs_0 T e_0) (lookup Σ A_0)))
    (-->
     (Σ (in-hole E (app A_0 V_1 ...)))
-    ((remove Σ A_0) (in-hole E (subst (zip xs_0 ((amp V_1) ...)) e_0)))
-    (where (closure& aff xs_0 T e_0) (lookup Σ A_0)))
+    ((remove Σ A_0) (in-hole E (subst (zip xs_0 ((amp imm V_1) ...)) e_0)))
+    (where (closure& I_0 aff xs_0 T e_0) (lookup Σ A_0)))
    ;; memory reductions
    (-->
     (Σ (in-hole E (record m_0 V_0 ...)))
