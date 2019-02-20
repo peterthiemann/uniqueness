@@ -18,42 +18,62 @@
     {\addlin{\Sone{x}{\unif k_\tau}}}
     {(C,\unif|_{\fv{\E}})}{\E}{x}{\unif\tau} }
   \and
+  \inferrule[Borrow]
+  { \inferW{\Sv'}{(C,\unif)}{\E}{x}{\tau} \\
+    k = \operatorname{kind}(\iota)\\
+    \Sv = \Sv \Sdel{x} \Sunion \Sone{\borrow{x}}{k} \\
+  }
+  { \inferW{\Sv}{(C,\unif)}{\E}{\borrow{x}}{\borrow{\tau}} }
+  \and
   \inferrule[Abs]
   { \tvar,\kvar_\tvar,\kvar\text{ new}\\
-    \inferW{\Sv}{(C',\unif')}
+    \inferW{\Sv'}{(C',\unif')}
     {\E;\bvar{x}{\alpha};\bvar{\tvar}{\kvar_\tvar}}{e}{\tau} \\\\
-    \addlin{ \Sv' = \Sv \Sdel{x} }\\
-    D = C'\Cand\addlin{\Cleq{\Sv'}{\kvar}} \\
+    \addlin{ \Sv = \Sv' \Sdel{x} }\\
+    D = C'\Cand\addlin{\Cleq{\Sv}{\kvar}} \\
     (C,\unif) = \normalize{D}{\unif'}
   }
-  { \inferW{\addlin{\Sv'}}{(C,\unif\Sdel{\tvar})}{\E}
+  { \inferW{\addlin{\Sv}}{(C,\unif\Sdel{\tvar})}{\E}
     {\lam{x}{e}}{\unif(\tvar)\tarr{\kvar}\tau} }
   \and
   \inferrule[App]
   { \tvar,\kvar\text{ new}\\
     \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
-    \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\\\
+    \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\
+    \addlin{\tsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
     D =
     C_1 \Cand C_2 \Cand \Cleq{\tau_1}{\tau_2\tarr{\kvar}\tvar}
-    \Cand \addlin{\Cleq{\Sv_1 \Sinter \Sv_2}{\kun}} \\
+    \Cand \addlin{C_s} \\
     \unif' = \unif_1 \mostgeneral \unif_2 \\
     (C,\unif) = \normalize{D}{\unif'}\\
   }
-  { \inferW{\addlin{\Sv_1 \Sunion \Sv_2}}{(C,\unif)}
+  { \inferW{\addlin{\Sv}}{(C,\unif)}
     {\E}{\app{e_1}{e_2}}{\unif(\tvar)} }
   \and
   \inferrule[Let]
   { \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
     (C'_1,\sigma) = \generalize{C_1}{\unif_1\E}{\tau_1} \\
-    \inferW{\Sv_2}{(C_2,\unif_2)}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\\\
+    \inferW{\Sv_2}{(C_2,\unif_2)}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\
     \unif' = \unif_1 \mostgeneral \unif_2 \\
+    \addlin{\tsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
     D =
-    C'_1 \Cand C_2 \Cand \addlin{\Cleq{\Sv_1 \Sinter \Sv_2}{\kun}} \\
+    C'_1 \Cand C_2 \Cand \addlin{C_s} \\
     (C,\unif) = \normalize{D}{\unif'}\\
   }
-  { \inferW{\addlin{\Sv_1 \Sunion \Sv_2}}{(C,\unif|_{\fv{\E}})}
+  { \inferW{\addlin{\Sv}}{(C,\unif|_{\fv{\E}})}
     {\E}{\letin{x}{e_1}{e_2}}{\unif\tau_2} }
   \and
+  %
+  \inferrule[Region]
+  { \inferW{\addlin{\Sv'}}{(C',\unif')}{\E}{e}{\tau} \\
+    \inferK{(C_\tau,\unif_\tau)}{\E}{\tau}{k_\tau}\\
+    \addlin{ \Sv = \Sv' \Sdel{\borrow{x}} }\\
+    D = C' \Cand C_\tau \Cand \Cleq{k_\tau}{\klin}\\
+    (C,\unif) = \normalize{D}{\unif' \mostgeneral \unif_\tau}\\    
+  }
+  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{x}{e}}{\tau} }
+  \and
+  %
   \inferrule[Elim]
   { \tvar,(\kvar'_i),(\tvar'_j)\text{ new}\\
     \bvar{K}{
