@@ -1,12 +1,15 @@
 \begin{subfigure}[t]{0.45\linewidth}
 \begin{align*}
   \htag{Expressions}
-  e ::=&\ c\ |\ x\ |\ \app{e}{e'}\ |\ \lam{x}{e}\\
+  e ::=&\ c \mid x \mid \app{e}{e'} \mid \lam{x}{e}\\
   % |&\ \fix{e}\tag{Fixpoint}\\
-  |&\ \borrow{x}\tag{Borrows}\\
   |&\ \letin{x}{e}{e'}\tag{Let binding}\\
-  |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
-  |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
+  |&\ \introPair{e}{e'}\tag{Pair introduction}\\
+  |&\ \letin{x,y}{e}{e'}\tag{Pair elimination}\\
+  |&\ \region{x}{e}\tag{Region}\\
+  |&\ \borrow{x}\tag{Borrows}\\
+  % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
+  % |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
   \htag{Environments}
   \E ::=&\ b^*\\
   b ::=&\ \bvar{x}{\schm}\tag{Variable bindings}\\

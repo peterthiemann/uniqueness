@@ -36,11 +36,13 @@
 \newcommand\elet{\mathtt{let}}
 \newcommand\ein{\mathtt{in}}
 \newcommand\letin[3]{\elet\ #1 = #2\ \ein\ #3}
+\newcommand\introPair[2]{({#1},{#2})}
 \newcommand\introK[2]{\app{#1}{#2}}
 \newcommand\elimK[2]{\mathtt{elim}_{#1}\ #2}
 \newcommand\fix[1]{\mathtt{fix}\ #1}
 \newcommand\app[2]{(#1\ #2)}
 \newcommand\borrow[2][b]{{\&}^{#1}#2}
+\newcommand\region[3][b]{\ensuremath{\mathtt{region}\ (\borrow[#1]{#2})\ \{#3\}}}
 
 %% Constraints
 \newcommand\Ctrue{\operatorname{True}}
