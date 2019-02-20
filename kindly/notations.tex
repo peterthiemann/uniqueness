@@ -41,8 +41,8 @@
 \newcommand\elimK[2]{\mathtt{elim}_{#1}\ #2}
 \newcommand\fix[1]{\mathtt{fix}\ #1}
 \newcommand\app[2]{(#1\ #2)}
-\newcommand\borrow[2][b]{{\&}^{#1}#2}
-\newcommand\region[3][b]{\ensuremath{\mathtt{region}\ (\borrow[#1]{#2})\ \{#3\}}}
+\newcommand\borrow[2][\iota]{{\&}^{#1}#2}
+\newcommand\region[3][\iota]{\ensuremath{\mathtt{region}\ (\borrow[#1]{#2})\ \{#3\}}}
 
 %% Constraints
 \newcommand\Ctrue{\operatorname{True}}
@@ -62,6 +62,8 @@
 \newcommand\bineq[2]{(#1 \lk #2)}
 
 \newcommand\esplit[2]{#1 \operatorname{\Join} #2}
+\newcommand\tsplit[4]{#1 \Leftarrow #2 = #3 \Join #4}
+\newcommand\tregion[3]{#1 \Leftarrow #2 \rightsquigarrow #3}
 \newcommand\fv[1]{\operatorname{fv}(#1)}
 
 %% Sets

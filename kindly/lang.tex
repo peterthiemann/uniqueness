@@ -36,6 +36,26 @@ a data constructor $K$.
 
 \TODO{Add system-F like type rules}
 
+\begin{figure*}[!h]
+  \centering
+  \begin{align*}
+    \tsplit{&}{\bvar{x}{\kvar}}{\bvar{x}{\kvar}}{\Cempty}\\
+    \tsplit{&}{\bvar{x}{\kvar}}{\Cempty}{\bvar{x}{\kvar}}\\
+    \tsplit{&}{\bvar{\borrow[i]{x}}{k}}
+              {\bvar{\borrow[i]{x}}{k}}{\bvar{\borrow[i]{x}}{k}}\\
+    \tsplit{\Cleq{k}{\kun_\infty}&}{\bvar{x}{k}}{\bvar{x}{k}}{\bvar{x}{k}}
+  \end{align*}
+  \caption{Type splitting}
+  \label{typesplit}
+  \begin{align*}
+    \tregion{&}{\bvar{x}{\kvar}}{\bvar{x}{\kvar}}\\
+    \tregion{&}{\bvar{x}{\kvar}}{\bvar{\borrow{x}}{\kvar}}\\
+    \tregion{&}{\bvar{\borrow{x}}{\kvar}}{\bvar{\borrow[i]{x}}{\kvar}}
+  \end{align*}
+  \caption{Borrowing}
+  \label{typesplit}
+\end{figure*}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"
