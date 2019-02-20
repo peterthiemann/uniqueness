@@ -44,6 +44,12 @@
 \newcommand\borrow[2][b]{{\&}^{#1}#2}
 \newcommand\region[3][b]{\ensuremath{\mathtt{region}\ (\borrow[#1]{#2})\ \{#3\}}}
 
+\newcommand\create[1]{\ensuremath{\mathtt{create}\ #1}}
+\newcommand\rss[1]{[#1]}
+\newcommand\observe[1]{\ensuremath{\mathtt{observe}\ #1}}
+\newcommand\update[2]{\ensuremath{\mathtt{update}\ #1\ #2}}
+\newcommand\destroy[1]{\ensuremath{\mathtt{destroy}\ #1}}
+
 %% Constraints
 \newcommand\Ctrue{\operatorname{True}}
 \newcommand\Cempty{\emptyset}
@@ -83,6 +89,8 @@
 \newcommand\schval[3]{#1 \BAR #2 \operatorname{\vdash_t} #3}
 
 \newcommand\normalize[2]{\operatorname{normalize}(#1,#2)}
+
+\newcommand\Dom[1]{\operatorname{dom} (#1)}
 
 %% Reductions
 

@@ -1,11 +1,9 @@
 \begin{subfigure}[t]{0.45\linewidth}
 \begin{align*}
   \htag{Expressions}
-  e ::=&\ c \mid x \mid \app{e}{e'} \mid \lam{x}{e}\\
+  e ::=&\ c \mid x \mid \app{e}{e'} \mid \lam{x}{e} \mid \letin{x}{e}{e'}\\
   % |&\ \fix{e}\tag{Fixpoint}\\
-  |&\ \letin{x}{e}{e'}\tag{Let binding}\\
-  |&\ \introPair{e}{e'}\tag{Pair introduction}\\
-  |&\ \letin{x,y}{e}{e'}\tag{Pair elimination}\\
+  |&\ \introPair{e}{e'} \mid \letin{x,y}{e}{e'}\tag{Pairs}\\
   |&\ \region{x}{e}\tag{Region}\\
   |&\ \borrow{x}\tag{Borrows}\\
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
