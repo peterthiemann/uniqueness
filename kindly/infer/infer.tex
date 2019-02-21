@@ -38,6 +38,8 @@ when $\entail{C}{D}$ and $\entail{D}{C}$.
 \end{figure}
 
 \begin{figure*}[tp]
+  \input{infer/lattice}
+  \caption{Lattice inequalities -- $k \lk_\Lat k'$}
   \input{infer/entails}
   \caption{Base entailment rules -- $\entail{C}{D}$ }
   \label{rules:entail}
@@ -80,18 +82,25 @@ These operations corresponds roughly to the various parts of the join
 operator on sets $\esplit{}{}$.
 
 \begin{figure}[tp]\centering
-\begin{align*}
-  \Sv\cap\Sv'
-  &= \left\{ x \to l,l'
-    \mid \Sone{x}{l}\in\Sv \text{ and } \Sone{x}{l'}\in\Sv' \right\} \\
-  \Sv\cup\Sv'
-  &= \Sv\cap\Sv' \sqcup
-    (\Sv\Sdel{x' \mid x'\in\Sv'}) \sqcup
-    (\Sv'\Sdel{x \mid x\in\Sv})
-  &\text{where $\sqcup$ is the disjoint union}\\
-  \Cleq{\Sv}{k_0}
-  &= \bigwedge_{\Sone{x}{l_x}\in\Sv} \bigwedge_{k\in l_x} \Cleq{k}{k_0}
-\end{align*}
+\begin{mathpar}
+  % \Sv\cap\Sv'
+  % &= \left\{ x \to l,l'
+  %   \mid \Sone{x}{l}\in\Sv \text{ and } \Sone{x}{l'}\in\Sv' \right\} \\
+  \infer
+  { \forall x \in \Dom{\Sv_1}\cup\Dom{\Sv_2}.\quad
+    \tsplit{C_x}{\Sv(x)}{\Sv_1(x)}{\Sv_2(x)}
+  } 
+  { \tsplit{\bigwedge C_x}{\Sv}{\Sv_1}{\Sv_2} }
+  % &= \Sv\cap\Sv' \sqcup
+  %   (\Sv\Sdel{x' \mid x'\in\Sv'}) \sqcup
+  %   (\Sv'\Sdel{x \mid x\in\Sv})
+  %   &\text{where $\sqcup$ is the disjoint union}\\
+  \and
+  \inferrule{}
+  { \Cleq{\Sv}{k_0}
+    = \bigwedge_{\Sone{x}{l_x}\in\Sv} \bigwedge_{k\in l_x} \Cleq{k}{k_0}
+  }
+\end{mathpar}
 \caption{Operation on usage maps $\Sv$}
 \label{op:usgmap}
 \end{figure}
@@ -140,12 +149,9 @@ algorithm. The syntax-directed rules are shown in \cref{rules:typing}.
 \subsection{Normal forms and generalization}
 \label{sec:normalize}
 
-\newcommand\lub\bigvee
-\newcommand\glb\bigwedge
-\newcommand\CL{{\mathcal C_{\mathcal L}}}
 
 We now place ourselves in a more general context where kinds are either variables
-or constants belonging to a total bounded lattice $(\mathcal L, \leq_{\mathcal L})$ ie.,
+or constants belonging to a total bounded lattice $(\mathcal L, \lk_\Lat)$ ie.,
 a lattice which admits a total order and upper and lower bounds ($l^\top$ and $l^\bot$).
 We note lattice elements $l$ and $\glb_i l_i$ (resp. $\lub_i l_i$)
 the greatest lower bound (resp. least upper bound) in $\mathcal L$.
@@ -154,7 +160,7 @@ Let $\CL$ the set of constraints in this lattice. We consider the
 following base entailment rules in this system:
 \begin{center}
   \begin{mathpar}
-    \inferrule{l \leq_{\mathcal L} l'}{\entail{}{\Cleq{l}{l'}}}
+    \inferrule{l \lk_\Lat l'}{\entail{}{\Cleq{l}{l'}}}
     \and
     \inferrule{}{\entail{}{\Cleq{k}{l^\top}}}
     \and

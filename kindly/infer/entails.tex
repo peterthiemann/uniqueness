@@ -1,13 +1,13 @@
 \begin{mathpar}
-  \inferrule
-  {}{ \entail{}{\Cleq{\kvar}{\kaff}} }
+  \inferrule{l \leq_{\mathcal L} l'}{\entail{}{\Cleq{l}{l'}}}
   \and
-  \inferrule
-  {}{ \entail{}{\Cleq{\kun}{\kvar}} }
+  \inferrule{}{\entail{}{\Cleq{k}{\klin_\infty}}}
+  \and
+  \inferrule{}{\entail{}{\Cleq{\kun_0}{k}}}
   \and
   \inferrule
   {}{ \entail{}{\Cleq{\kvar}{\kvar}} }
-  \and
+  % \and
   % \inferrule
   % {\Cleq{k}{k'} \in C}{ \entail{C}{\Cleq{k}{k'}} }
   % \and
@@ -20,7 +20,7 @@
   % \inferrule
   % { \entail{C}{D} }
   % { \entail{C}{\Cproj{x}{D}} }
-  % \\
+  \\
   \inferrule
   { \entail{C}{\Cleq{\tau'_1}{\tau_1}}\\
     \entail{C}{\Cleq{\tau_2}{\tau'_2}}\\
@@ -32,8 +32,6 @@
   { \forall i,\ \entail{C}{\Cleq{\tau_i}{\tau_i}}\\
   }
   { \entail{C}{\Cleq{\tapp{t}{(\tau_i)}}{\tapp{t}{(\tau'_i)}}} }
-  \and
-  
   % \and
   % \inferrule
   % { \entail{C}{\Cleq{k}{k'}} \\

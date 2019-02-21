@@ -12,6 +12,12 @@
 \newcommand\K[1]{\mathrm{#1}}
 \newcommand\loc{\ell}
 
+% Latice
+\newcommand\lub\bigvee
+\newcommand\glb\bigwedge
+\newcommand\Lat{\mathcal L}
+\newcommand\CL{{\mathcal C_{\Lat}}}
+
 % Types
 \newcommand\T[1]{\mathrm{#1}}
 \newcommand\tvar{\alpha}
@@ -20,6 +26,7 @@
 \newcommand\tarr[1]{\operatorname{\xrightarrow{#1}}}
 \newcommand\tapp[2]{#2\ \T{#1}}
 \newcommand\qual[2]{#1 \operatorname{\Rightarrow} #2}
+\newcommand\tyPair[2]{#1 * #2}
 
 \newcommand\instanciate[2]{#1 \operatorname{\succ} #2}
 \newcommand\generalize[3]{\operatorname{\text{gen}}(#1,#2,#3)}
@@ -34,8 +41,10 @@
 % Expressions
 \newcommand\lam[2]{\lambda #1 . #2}
 \newcommand\elet{\mathtt{let}}
+\newcommand\ematch{\mathtt{match}}
 \newcommand\ein{\mathtt{in}}
 \newcommand\letin[3]{\elet\ #1 = #2\ \ein\ #3}
+\newcommand\matchin[3]{\ematch\ #1 = #2\ \ein\ #3}
 \newcommand\introPair[2]{({#1},{#2})}
 \newcommand\introK[2]{\app{#1}{#2}}
 \newcommand\elimK[2]{\mathtt{elim}_{#1}\ #2}
@@ -64,12 +73,13 @@
 \newcommand\E{\Gamma}
 \newcommand\bkind[1]{(#1)}
 \newcommand\bvar[2]{(#1 : #2)}
+\newcommand\bvark[3]{(#1 : #2 : #3)}
 \newcommand\bty[3]{(\T{#1} : #2 = #3)}
 \newcommand\bineq[2]{(#1 \lk #2)}
 
 \newcommand\esplit[2]{#1 \operatorname{\Join} #2}
 \newcommand\tsplit[4]{#1 \Leftarrow #2 = #3 \Join #4}
-\newcommand\tregion[3]{#1 \Leftarrow #2 \rightsquigarrow #3}
+\newcommand\tregion[2]{#1 \rightsquigarrow #2}
 \newcommand\fv[1]{\operatorname{fv}(#1)}
 
 %% Sets
