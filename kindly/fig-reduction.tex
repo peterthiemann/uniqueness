@@ -66,7 +66,7 @@
     }
     \\
     \inferrule{
-      \Sigma, \rho \vdash e \Downarrow \Sigma', v
+      \Sigma, \rho \vdash e \Downarrow \Sigma', v\\
       \ell\notin \Dom\Sigma' }{
       \Sigma,\rho \vdash \create e \Downarrow \Sigma'[\ell \mapsto \rss{v}], \ell
     }
