@@ -51,7 +51,8 @@
 \newcommand\fix[1]{\mathtt{fix}\ #1}
 \newcommand\app[2]{(#1\ #2)}
 \newcommand\borrow[2][\iota]{{\&}^{#1}#2}
-\newcommand\region[3][\iota]{\ensuremath{\mathtt{region}\ (\borrow[#1]{#2})\ \{#3\}}}
+\newcommand\borrowty[3][\iota]{{\&}^{#1}(#2,#3)}
+\newcommand\region[2]{\ensuremath{\mathtt{region}_n\ (#1)\ \{#2\}}}
 
 \newcommand\create[1]{\ensuremath{\mathtt{create}\ #1}}
 \newcommand\rss[1]{[#1]}
@@ -73,13 +74,14 @@
 \newcommand\E{\Gamma}
 \newcommand\bkind[1]{(#1)}
 \newcommand\bvar[2]{(#1 : #2)}
+\newcommand\bshadow[2][\iota]{(#2)_{#1}}
 \newcommand\bvark[3]{(#1 : #2 : #3)}
 \newcommand\bty[3]{(\T{#1} : #2 = #3)}
 \newcommand\bineq[2]{(#1 \lk #2)}
 
 \newcommand\esplit[2]{#1 \operatorname{\Join} #2}
 \newcommand\tsplit[4]{#1 \Leftarrow #2 = #3 \Join #4}
-\newcommand\tregion[2]{#1 \rightsquigarrow #2}
+\newcommand\tregion[4]{#1 \Leftarrow #3 \rightsquigarrow_n^{#2} #4}
 \newcommand\fv[1]{\operatorname{fv}(#1)}
 
 %% Sets

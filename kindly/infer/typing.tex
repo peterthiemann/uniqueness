@@ -23,7 +23,8 @@
     \inferW{\Sv'}{(C',\unif')}
     {\E;\bvark{x}{\tvar}{\kvar_\tvar}}{e}{\tau} \\\\
     \addlin{ \Sv = \Sv' \Sdel{x} }\\
-    D = C'\Cand\addlin{\Cleq{\Sv}{\kvar}} \\
+    D = C'\Cand
+    \addlin{\Cleq{\Sv}{\kvar} \Cand \Weaken_{(x,\kvar_\tvar)}(\Sv')} \\
     (C,\unif) = \normalize{D}{\unif'}
   }
   { \inferW{\addlin{\Sv}}{(C,\unif\Sdel{\tvar})}{\E}
@@ -84,20 +85,20 @@
   \and
   %
   \inferrule[Borrow]
-  { \inferW{\Sv'}{(C,\unif)}{\E}{x}{\tau} \\
-    k = \operatorname{kind}(\iota)\\
-    \Sv = \Sv \Sdel{x} \Sunion \Sone{\borrow{x}}{k} \\
+  { \kvar \text{ new}\\
+    \inferW{\Sv'}{(C,\unif)}{\E}{x}{\tau} \\
+    % k = \operatorname{kind}(\iota)\\
+    \Sv = \Sv \Sdel{x} \Sunion \Sone{\borrow{x}}{\kvar} \\
   }
-  { \inferW{\Sv}{(C,\unif)}{\E}{\borrow{x}}{\borrow{\tau}} }
+  { \inferW{\Sv}{(C,\unif)}{\E}{\borrow{x}}{\borrowty{\kvar}{\tau}} }
   \and
   \inferrule[Region]
   { \inferW{\addlin{\Sv'}}{(C',\unif')}{\E}{e}{\tau} \\
     \inferK{(C_\tau,\unif_\tau)}{\E}{\tau}{k_\tau}\\
-    \addlin{ \Sv = \Sv' \Sdel{\borrow{x}} }\\
-    D = C' \Cand C_\tau \Cand \Cleq{k_\tau}{\top_0}\\
+    \addlin{ \tregion{C_r}{x}{\Sv}{\Sv'} }\\
+    D = C' \Cand C_\tau \Cand \Cleq{k_\tau}{\klin_{n-1}} \Cand C_r\\
     (C,\unif) = \normalize{D}{\unif' \mostgeneral \unif_\tau}\\    
-  }
-  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{x}{e}}{\tau} }
+  }  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{x}{e}}{\tau} }
   \and
   %
   % \inferrule[Elim]

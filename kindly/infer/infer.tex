@@ -90,7 +90,7 @@ operator on sets $\esplit{}{}$.
   { \forall x \in \Dom{\Sv_1}\cup\Dom{\Sv_2}.\quad
     \tsplit{C_x}{\Sv(x)}{\Sv_1(x)}{\Sv_2(x)}
   } 
-  { \tsplit{\bigwedge C_x}{\Sv}{\Sv_1}{\Sv_2} }
+  { \tsplit{(\bigwedge C_x)}{\Sv}{\Sv_1}{\Sv_2} }
   % &= \Sv\cap\Sv' \sqcup
   %   (\Sv\Sdel{x' \mid x'\in\Sv'}) \sqcup
   %   (\Sv'\Sdel{x \mid x\in\Sv})
@@ -99,6 +99,21 @@ operator on sets $\esplit{}{}$.
   \inferrule{}
   { \Cleq{\Sv}{k_0}
     = \bigwedge_{\Sone{x}{l_x}\in\Sv} \bigwedge_{k\in l_x} \Cleq{k}{k_0}
+  }
+  \and
+  \inferrule
+  { \forall \bshadow{x} \in \Sv, b'\in\Sv'.\quad
+    \tregion{C_x}{y}{\bshadow{x}}{b'} }
+  { \tregion{(\bigwedge C_x)}{y}{\Sv}{\Sv'} }
+  \and
+  % \inferrule
+  % { \text{if } \operatorname{lenght}(\Sv(x))  = \Cempty{} \wedge  }
+  { \Weaken_{(x,k)}(\Sv) =
+    \begin{dcases}
+      \Ctrue& \operatorname{length}(\Sv(x)) = 1\\
+      {k}\lk\kaff_\infty& \text{ otherwise}\\
+    \end{dcases}
+
   }
 \end{mathpar}
 \caption{Operation on usage maps $\Sv$}
