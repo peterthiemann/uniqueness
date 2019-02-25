@@ -1,0 +1,4 @@
+(executable
+  (name sudoku)
+  (libraries bitv)
+)
