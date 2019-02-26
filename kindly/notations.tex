@@ -102,8 +102,14 @@
 \newcommand\dash{\operatorname{\vdash}}
 \newcommand\entail[2]{#1 \operatorname{\vdash_e} #2}
 \newcommand\equivC{\operatorname{=_e}}
+\newcommand\inferS[4]{#1 \BAR #2 \operatorname{\vdash_s} #3 : #4}
 \newcommand\inferW[5]{#1 \BAR #2 \BAR #3 \operatorname{\vdash_w} #4 : #5}
+\newcommand\inferSK[4]{#1 \BAR #2 \operatorname{\vdash_s} #3 : #4}
 \newcommand\inferK[4]{#1 \BAR #2 \operatorname{\vdash_w} #3 : #4}
+
+% subkinding
+\newcommand\inferSS[4]{#1 \BAR #2 \operatorname{\vdash_s} #3 \le #4}
+
 
 \newcommand\tyval[3]{#1 \BAR #2 \operatorname{\vdash_t} #3}
 \newcommand\schval[3]{#1 \BAR #2 \operatorname{\vdash_t} #3}

@@ -1,0 +1,29 @@
+\begin{mathpar}
+  \inferrule[KCons]
+  { \bvar{\T{t}}{
+      \forall \kvar_i.\ \qual{D}{k}}
+    \in \E \\
+    \unif = \subst{\kvar_i}{k_i}{} \\
+    \entail C {\unif D}
+  }
+  { \inferSK{C}{\E}{\T{t}}{\unif k}
+  }
+  \and
+  \inferrule[KArr]
+  { }
+  { \inferSK{C}{\E}{\tau_1 \tarr{k} \tau_2}{k} }
+  \and
+  \inferrule[KApp]
+  { \forall j,\
+    \inferSK{C}{\E}{\tau_j}{k'_j} \\
+    \inferSK{C}{\E}{\T{t}}{(k_j) \karr k} \\
+    \inferSS{C}{\E}{k'_j}{k_j}
+  }
+  { \inferSK{C}{\E}{\tapp{t}{(\tau_j)}}{k} }
+\end{mathpar}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:

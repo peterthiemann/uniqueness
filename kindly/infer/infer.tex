@@ -136,11 +136,18 @@ rule degenerates to a simpler form which is similar to the {\sc KVar} rule.
 Kind schemes are instantiated in the {\sc KApp} and {\sc KVar} rules by creating
 fresh kind variables and the associated substitution.
 
-\begin{figure}[h]
+\begin{figure}[ht]
   \centering
   \input{infer/kinds}
-  \caption{Kind inference rules -- $\inferK{(C,\unif)}{\E}{\tau}{k}$}
+  \caption{Kind inference algorithm -- $\inferK{(C,\unif)}{\E}{\tau}{k}$}
   \label{rules:kinding}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \input{infer/sd-kinds}
+  \caption{Syntax-directed kind inference -- $\inferSK{C}{\E}{\tau}{k}$}
+  \label{rules:sd-kinding}
 \end{figure}
 
 
@@ -157,10 +164,15 @@ algorithm. The syntax-directed rules are shown in \cref{rules:typing}.
 
 \begin{figure*}[h]
   \input{infer/typing}
-  \caption{Type Inference rules -- $\inferW{\Sigma}{(C,\psi)}{\bf{\E}}{\bf{e}}{\tau}$ }
+  \caption{Type inference algorithm -- $\inferW{\Sigma}{(C,\psi)}{\bf{\E}}{\bf{e}}{\tau}$ }
   \label{rules:typing}
 \end{figure*}
 
+\begin{figure*}[ht]
+  \input{infer/sd-typing}
+  \caption{Syntax-directed typing rules}
+  \label{fig:syntax-directed-typing}
+\end{figure*}
 \subsection{Normal forms and generalization}
 \label{sec:normalize}
 
