@@ -37,19 +37,25 @@ a data constructor $K$.
   \begin{minipage}{0.45\linewidth}
     \begin{align*}
       \tsplit{\Ctrue&}{\bvar{x}{k}}{\bvar{x}{k}}{\Cempty}\\
-      \tsplit{\Ctrue&}{\bvar{x}{k}}{\Cempty}{\bvar{x}{k}}\\
+      \tsplit{\Ctrue&}{\bvar{x}{k}}{\Cempty}{\bvar{x}{k}}\\[4pt]
       \tsplit{\Ctrue&}{\bvar{\borrow[i]{x}}{k}}
                       {\bvar{\borrow[i]{x}}{k}}{\bvar{\borrow[i]{x}}{k}}\\
-      \tsplit{\Cleq{k}{\kun_\infty}&}{\bvar{x}{k}}{\bvar{x}{k}}{\bvar{x}{k}}
+      \tsplit{\Cleq{k}{\kun_\infty}&}{\bvar{x}{k}}{\bvar{x}{k}}{\bvar{x}{k}}\\[4pt]
+      \tsplit{\Ctrue&}{\bvar{x}{k}}{\bshadow{x}}{\bvar{x}{k}}\\
+      \tsplit{\Ctrue&}{\bvar{x}{k}}{\bshadow[i]{x}}{\bvar{\borrow{x}}{k}}
     \end{align*}
     \caption{Type splitting}
     \label{typesplit}
   \end{minipage}\quad
   \begin{minipage}{0.45\linewidth}
     \begin{align*}
-      \tregion{\bvar{x}{\kvar}&}{\bvar{x}{\kvar}}\\
-      \tregion{\bvar{x}{\kvar}&}{\bvar{\borrow{x}}{\kvar}}\\
-      \tregion{\bvar{\borrow{x}}{\kvar}&}{\bvar{\borrow[i]{x}}{\kvar}}
+      % \tregion{\Ctrue&}{y}{\bvar{x}{\kvar}}{\bvar{x}{\kvar}}&\text{ when } x \neq y\\
+      \tregion{\Ctrue&}{y}
+        {\bshadow{x}}{\bshadow{x}}&\text{ when } x \neq y\\
+      \tregion{(\kun_n\lk\kvar\lk\kun_\infty)&}{x}
+        {\bshadow[i]{x}}{\bvar{\borrow[i]{x}}{\kvar}}\\
+      \tregion{(\kaff_n\lk\kvar\lk\kaff_\infty)&}{x}
+        {\bshadow[m]{x}}{\bvar{\borrow[m]{x}}{\kvar}}
     \end{align*}
     \caption{Borrowing}
     \label{typesplit}
