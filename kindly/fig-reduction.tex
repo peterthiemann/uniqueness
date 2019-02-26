@@ -1,42 +1,34 @@
 \begin{figure*}[ht]
   % \input{semantics}
-  \begin{minipage}[t]{0.48\linewidth}
-  \begin{align*}
-    \htag{Addresses}
-    \alpha &::= \ell \tag{Locations}\\
-           &\mid \borrow{\alpha} \tag{Borrowed Locations}
-    \\
-    \htag{Results}
-    r &::= \alpha \mid c
-  \end{align*}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{0.48\linewidth}
-\begin{align*}
-    \htag{Storables}
-    W &::= (\rho, \closure{k}{x}{e}) \tag{Closures} \\
-           &\mid (r, r) \tag{Pairs} \\
-    & \mid [r] \tag{Resources}
-  \end{align*}
-  \end{minipage}
     \begin{mathpar}
     \inferrule{}{ \Sigma, \rho \vdash c \Downarrow \Sigma, c}
 
     \inferrule{}{\Sigma, \rho \vdash x \Downarrow \Sigma, \rho(x)}
 
     \inferrule{
-      \ell\notin\Dom\Sigma \\
-      \Sigma' = \Sigma[\ell \mapsto (\rho, \closure{}{x}{e})]
+      \Sigma, \rho \vdash e \Downarrow \Loc \\
+      \Sigma (\Loc) = (\rho, \ilam {\kvar^*}{\tvar^*}Ckx{e}) \\\\
+      \Sigma' =  \entail C {(\kaff \le k)} \Rightarrow
+      \Sigma[\Loc\mapsto\blob] ; \Sigma \\
+      \Loc'\notin\Dom\Sigma'  \\
+      \Sigma'' = \Sigma[\Loc' \mapsto (\rho,\lam[{k[\kvar^*\mapsto k^*]}]xe) ]
+    }{\Sigma, \rho \vdash  \ivar e{k^*}{\tau^*}  \Downarrow \Sigma'', \Loc'
+    }
+
+    \inferrule{
+      \Loc\notin\Dom\Sigma \\
+      \Sigma' = \Sigma[\Loc \mapsto (\rho, \ilam  {\kvar^*}{\tvar^*}Ck xe)]
     }{
-      \Sigma, \rho \vdash \lam xe \Downarrow \Sigma', \ell
+      \Sigma, \rho \vdash \ilam  {\kvar^*}{\tvar^*}Ck xe \Downarrow \Sigma', \Loc
     }
     
     \inferrule{
-      \Sigma, \rho \vdash e \Downarrow \Sigma', \ell \\
-      \Sigma' (\ell) = (\rho'',\closure{}{x}{e''}) \\
-      \Sigma', \rho \vdash e' \Downarrow \Sigma'', r' \\
-      \Sigma'', \rho''[x\mapsto r'] \vdash e'' \Downarrow \Sigma''', r
-    }{\Sigma, \rho \vdash \app{e}{e'} \Downarrow \Sigma''', r}
+      \Sigma, \rho \vdash e \Downarrow \Sigma', \Loc \\
+      \Sigma' (\Loc) = (\rho'',\lam[k]{x}{e''}) \\
+      \Sigma'' = \entail {} {(\kaff \le k)} \Rightarrow \Sigma'[\Loc\mapsto\blob];\Sigma'\\
+      \Sigma'', \rho \vdash e' \Downarrow \Sigma''', r' \\
+      \Sigma''', \rho''[x\mapsto r'] \vdash e'' \Downarrow \Sigma'''', r
+    }{\Sigma, \rho \vdash \app{e}{e'} \Downarrow \Sigma'''', r}
 
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', r \\
@@ -48,15 +40,15 @@
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', r \\
       \Sigma', \rho \vdash e' \Downarrow \Sigma'', r' \\
-      \ell\notin\Dom{\Sigma''} \\
-      \Sigma''' = \Sigma''[\ell \mapsto (r, r')]
+      \Loc\notin\Dom{\Sigma''} \\
+      \Sigma''' = \Sigma''[\Loc \mapsto (r, r')]
     }{
-      \Sigma, \rho \vdash \introPair{e}{e'} \Downarrow \Sigma''', \ell
+      \Sigma, \rho \vdash \introPair{e}{e'} \Downarrow \Sigma''', \Loc
     }
 
     \inferrule{
-      \Sigma, \rho \vdash e \Downarrow \Sigma', \ell \\
-      \Sigma' (\ell) = (r, r') \\
+      \Sigma, \rho \vdash e \Downarrow \Sigma', \Loc \\
+      \Sigma' (\Loc) = (r, r') \\
       \Sigma', \rho[x,y \mapsto r, r'] \vdash e' \Downarrow \Sigma'', r''
     }{
       \Sigma, \rho \vdash \matchin{x,y}{e}{e'} \Downarrow  \Sigma'', r''
@@ -78,15 +70,15 @@
     \\
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', r\\
-      \ell\notin \Dom\Sigma' }{
-      \Sigma,\rho \vdash \create e \Downarrow \Sigma'[\ell \mapsto \rss{r}], \ell
+      \Loc\notin \Dom\Sigma' }{
+      \Sigma,\rho \vdash \create e \Downarrow \Sigma'[\Loc \mapsto \rss{r}], \Loc
     }
 
     \inferrule{
-      \Sigma, \rho \vdash e \Downarrow \Sigma', \ell \\
-      \Sigma' (\ell) = \rss{r}
+      \Sigma, \rho \vdash e \Downarrow \Sigma', \Loc \\
+      \Sigma' (\Loc) = \rss{r}
     }{
-      \Sigma, \rho \vdash \destroy e \Downarrow \Sigma'\setminus\ell, ()
+      \Sigma, \rho \vdash \destroy e \Downarrow \Sigma'[\Loc\mapsto \blob], ()
     }
 
     \inferrule{
@@ -106,7 +98,7 @@
     }
 
   \end{mathpar}
-  \caption{Reduction rules -- $\Sigma, \rho, \vdash e \Downarrow
+  \caption{Reduction rules -- $\Sigma, \rho \vdash e \Downarrow
     \Sigma', r$ }
   \label{fig:reduction}
 \end{figure*}

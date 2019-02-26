@@ -2,11 +2,32 @@
 \begin{align*}
   \htag{Internal expressions}
   e ::=&\dots \\
-  |&\ \lam[k]xe \tag{Kind annotated abstraction} \\
-  |&\ \APP e \tau \mid \LAM\tvar v \tag{Type
-         application and abstraction}\\
-  |&\ \APP ek \mid \LAM\kvar v \tag{Kind application and abstraction}
+  |&\ \ilam{\kvar^*}{\tvar^*}Ckxe \tag{Generalized abstraction} \\
+  |&\ \ivar x {k^*} {\tau^*} \tag{Generalized application}
 \end{align*}
+  \begin{minipage}[t]{0.38\linewidth}
+  \begin{align*}
+    \htag{Addresses}
+    \Addr &::= \Loc \tag{Locations}\\
+           &\mid \borrow{\Addr} \tag{Borrows}
+    \\
+    \htag{Results}
+    r &::= \Addr \mid c
+  \end{align*}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.58\linewidth}
+\begin{align*}
+    \htag{Storables}
+    W &::= (\rho, \ilam {\kvar^*}{\tvar^*}Ckx{e}) \tag{Poly Closures}
+  \\
+  &\mid (\rho, \lam[k]xe) \tag{Closures} \\
+           &\mid (r, r) \tag{Pairs} \\
+      & \mid [r] \tag{Resources} \\
+      & \mid \blob \tag{Freed Resource}
+  \end{align*}
+  \end{minipage}
+
 \caption{Syntax of internal language}
 \label{fig:syntax-internal-language}
 \end{figure*}
