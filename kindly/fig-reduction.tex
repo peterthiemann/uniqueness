@@ -1,21 +1,32 @@
 \begin{figure*}[ht]
   % \input{semantics}
+  \begin{minipage}[t]{0.48\linewidth}
   \begin{align*}
     \htag{Addresses}
     \alpha &::= \ell \tag{Locations}\\
            &\mid \borrow{\alpha} \tag{Borrowed Locations}
     \\
-    \htag{Values}
-    v &::= \alpha \mid c
+    \htag{Results}
+    r &::= \alpha \mid c
   \end{align*}
-  \begin{mathpar}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.48\linewidth}
+\begin{align*}
+    \htag{Storables}
+    W &::= (\rho, \closure{k}{x}{e}) \tag{Closures} \\
+           &\mid (r, r) \tag{Pairs} \\
+    & \mid [r] \tag{Resources}
+  \end{align*}
+  \end{minipage}
+    \begin{mathpar}
     \inferrule{}{ \Sigma, \rho \vdash c \Downarrow \Sigma, c}
 
     \inferrule{}{\Sigma, \rho \vdash x \Downarrow \Sigma, \rho(x)}
 
     \inferrule{
       \ell\notin\Dom\Sigma \\
-      \Sigma' = \Sigma[\ell \mapsto (\rho. \closure{}{x}{e})]
+      \Sigma' = \Sigma[\ell \mapsto (\rho, \closure{}{x}{e})]
     }{
       \Sigma, \rho \vdash \lam xe \Downarrow \Sigma', \ell
     }
@@ -23,42 +34,42 @@
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', \ell \\
       \Sigma' (\ell) = (\rho'',\closure{}{x}{e''}) \\
-      \Sigma', \rho \vdash e' \Downarrow \Sigma'', v' \\
-      \Sigma'', \rho''[x\mapsto v'] \vdash e'' \Downarrow \Sigma''', v
-    }{\Sigma, \rho \vdash \app{e}{e'} \Downarrow \Sigma''', v}
+      \Sigma', \rho \vdash e' \Downarrow \Sigma'', r' \\
+      \Sigma'', \rho''[x\mapsto r'] \vdash e'' \Downarrow \Sigma''', r
+    }{\Sigma, \rho \vdash \app{e}{e'} \Downarrow \Sigma''', r}
 
     \inferrule{
-      \Sigma, \rho \vdash e \Downarrow \Sigma', v \\
-      \Sigma', \rho[x \mapsto v] \vdash e' \Downarrow \Sigma'', v'
+      \Sigma, \rho \vdash e \Downarrow \Sigma', r \\
+      \Sigma', \rho[x \mapsto r] \vdash e' \Downarrow \Sigma'', r'
     }{
-      \Sigma, \rho \vdash \letin{x}{e}{e'} \Downarrow \Sigma'', v'
+      \Sigma, \rho \vdash \letin{x}{e}{e'} \Downarrow \Sigma'', r'
     }
 
     \inferrule{
-      \Sigma, \rho \vdash e \Downarrow \Sigma', v \\
-      \Sigma', \rho \vdash e' \Downarrow \Sigma'', v' \\
+      \Sigma, \rho \vdash e \Downarrow \Sigma', r \\
+      \Sigma', \rho \vdash e' \Downarrow \Sigma'', r' \\
       \ell\notin\Dom{\Sigma''} \\
-      \Sigma''' = \Sigma''[\ell \mapsto (v, v')]
+      \Sigma''' = \Sigma''[\ell \mapsto (r, r')]
     }{
       \Sigma, \rho \vdash \introPair{e}{e'} \Downarrow \Sigma''', \ell
     }
 
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', \ell \\
-      \Sigma' (\ell) = (v, v') \\
-      \Sigma', \rho[x,y \mapsto v, v'] \vdash e' \Downarrow \Sigma'', v''
+      \Sigma' (\ell) = (r, r') \\
+      \Sigma', \rho[x,y \mapsto r, r'] \vdash e' \Downarrow \Sigma'', r''
     }{
-      \Sigma, \rho \vdash \matchin{x,y}{e}{e'} \Downarrow  \Sigma'', v''
+      \Sigma, \rho \vdash \matchin{x,y}{e}{e'} \Downarrow  \Sigma'', r''
     }
 
     \inferrule{
       \rho (x) = \alpha \\
       \Sigma (\alpha) = W \\
       (\Sigma\setminus\alpha)[\borrow{\alpha} \mapsto W], \rho \vdash e
-      \Downarrow \Sigma', v \\
+      \Downarrow \Sigma', r \\
       \Sigma'' = (\Sigma' \setminus\borrow{\alpha})[\alpha \mapsto W]
     }{
-      \Sigma, \rho \vdash \region{x}{e} \Downarrow \Sigma', v
+      \Sigma, \rho \vdash \region{x}{e} \Downarrow \Sigma', r
     }
 
     \inferrule{\rho (x) = \alpha}{
@@ -66,37 +77,37 @@
     }
     \\
     \inferrule{
-      \Sigma, \rho \vdash e \Downarrow \Sigma', v\\
+      \Sigma, \rho \vdash e \Downarrow \Sigma', r\\
       \ell\notin \Dom\Sigma' }{
-      \Sigma,\rho \vdash \create e \Downarrow \Sigma'[\ell \mapsto \rss{v}], \ell
+      \Sigma,\rho \vdash \create e \Downarrow \Sigma'[\ell \mapsto \rss{r}], \ell
     }
 
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', \ell \\
-      \Sigma' (\ell) = \rss{v}
+      \Sigma' (\ell) = \rss{r}
     }{
       \Sigma, \rho \vdash \destroy e \Downarrow \Sigma'\setminus\ell, ()
     }
 
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', \borrow[i]\alpha \\
-      \Sigma' (\borrow[i]\alpha) = \rss{v}
+      \Sigma' (\borrow[i]\alpha) = \rss{r}
     }{
-      \Sigma, \rho \vdash \observe e \Downarrow \Sigma', v
+      \Sigma, \rho \vdash \observe e \Downarrow \Sigma', r
     }
 
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', \borrow[m]\alpha \\
-      \Sigma', \rho \vdash e' \Downarrow \Sigma'', v' \\
-      \Sigma'' (\borrow[m]\alpha) = \rss{v} \\
-      \Sigma''' = \Sigma''[\borrow[m]\alpha \mapsto v']
+      \Sigma', \rho \vdash e' \Downarrow \Sigma'', r' \\
+      \Sigma'' (\borrow[m]\alpha) = \rss{r} \\
+      \Sigma''' = \Sigma''[\borrow[m]\alpha \mapsto r']
     }{
       \Sigma, \rho \vdash \update e {e'} \Downarrow \Sigma''', ()
     }
 
   \end{mathpar}
   \caption{Reduction rules -- $\Sigma, \rho, \vdash e \Downarrow
-    \Sigma', v$ }
+    \Sigma', r$ }
   \label{fig:reduction}
 \end{figure*}
 

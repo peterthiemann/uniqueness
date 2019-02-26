@@ -13,14 +13,14 @@
   b ::=&\ \bvar{x}{\schm}\tag{Variable bindings}\\
   |&\ \bvar{\tvar}{\kschm}\tag{Type bindings}\\
   % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
-  \htag{Type and kind Schemes}
+  \htag{Type and kind schemes}
   \schm ::=&\ \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau})\\
   \kschm ::=&\ \forall\kvar^*.(\qual{C}{k_i^* \karr k})\\
 \end{align*}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.5\linewidth}
 \begin{align*}
-  \htag{Type Expressions}
+  \htag{Types}
   \tau ::=&\ \tvar\tag{Type variables}\\
   |&\ \tau\tarr{k}\tau\tag{Function types}\\
   |&\ \tapp{t}{\tau^*}\tag{Type constructors}\\

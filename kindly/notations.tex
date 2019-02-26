@@ -39,7 +39,10 @@
 \newcommand\tydecl[4]{(\T{#1} : #2 = #3\ \mathtt{of}\ #4)}
 
 % Expressions
-\newcommand\lam[2]{\lambda #1 . #2}
+\newcommand\LAM[1]{\Lambda #1 .}
+\newcommand\APP[2]{#1[ #2]}
+
+\newcommand\lam[2][{}]{\lambda^{#1} #2.}
 \newcommand\elet{\mathtt{let}}
 \newcommand\ematch{\mathtt{match}}
 \newcommand\ein{\mathtt{in}}
