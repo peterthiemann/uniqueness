@@ -20,6 +20,9 @@
     \inferSS{C}{\E}{k'_j}{k_j}
   }
   { \inferSK{C}{\E}{\tapp{t}{(\tau_j)}}{k} }
+  \and
+  \inferrule[KBorrow]
+  {}{ \inferSK{C}{\E}{\borrowty{k}{\tau}}k}
 \end{mathpar}
 
 
