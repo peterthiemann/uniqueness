@@ -67,12 +67,12 @@
   { 
     \bvar{\borrow x}{\borrowty k\tau} \in \E
   }
-  { \inferS{C}{\E}{\borrow{x}}{\borrowty{\kvar}{\tau}} }
+  { \inferS{C}{\E}{\borrow{x}}{\borrowty{k}{\tau}} }
   \and
   \inferrule[Region]
-  { \bvar x \tau \in \E \\
+  { \bvar x {\tau_x} \in \E \\
     \inferS{C}
-    {(\E \Sdel x); \bvar{\borrow x}{\borrowty k\tau}}
+    {(\E \Sdel x); \bvar{\borrow x}{\borrowty k{\tau_x}}}
     {e}
     {\tau} \\
     \inferSK{C}{\E}{\tau}{k_\tau}\\
