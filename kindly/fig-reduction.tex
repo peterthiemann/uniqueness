@@ -1,4 +1,4 @@
-\begin{figure*}[ht]
+\begin{figure*}[tp]
   % \input{semantics}
     \begin{mathpar}
     \inferrule{}{ \Sigma, \rho \vdash c \Downarrow \Sigma, c}
@@ -7,25 +7,24 @@
 
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Loc \\
-      \Sigma (\Loc) = (\rho, \ilam {\kvar^*}{\tvar^*}Ckx{e}) \\\\
-      \Sigma' =  \entail C {(\kaff \le k)} \Rightarrow
-      \Sigma[\Loc\mapsto\blob] ; \Sigma \\
+      \Sigma (\Loc) = (\rho, \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ckx{e}) \\\\
+      \Sigma' =  \IF{\entail C {\kaff \le k}}{\Sigma[\Loc\mapsto\blob]}{ \Sigma} \\
       \Loc'\notin\Dom\Sigma'  \\
-      \Sigma'' = \Sigma[\Loc' \mapsto (\rho,\lam[{k[\kvar^*\mapsto k^*]}]xe) ]
-    }{\Sigma, \rho \vdash  \ivar e{k^*}{\tau^*}  \Downarrow \Sigma'', \Loc'
+      \Sigma'' = \Sigma[\Loc' \mapsto (\rho, \subst {\Multi[i]{\kvar}}{\Multi[i]{k}}{(\lam[k]xe)}) ]
+    }{\Sigma, \rho \vdash  \ivar e{\Multi[i]{k}}{\Multi[j]{\tau}}  \Downarrow \Sigma'', \Loc'
     }
 
     \inferrule{
       \Loc\notin\Dom\Sigma \\
-      \Sigma' = \Sigma[\Loc \mapsto (\rho, \ilam  {\kvar^*}{\tvar^*}Ck xe)]
+      \Sigma' = \Sigma[\Loc \mapsto (\rho, \ilam  {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe)]
     }{
-      \Sigma, \rho \vdash \ilam  {\kvar^*}{\tvar^*}Ck xe \Downarrow \Sigma', \Loc
+      \Sigma, \rho \vdash \ilam  {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe \Downarrow \Sigma', \Loc
     }
     
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', \Loc \\
       \Sigma' (\Loc) = (\rho'',\lam[k]{x}{e''}) \\
-      \Sigma'' = \entail {} {(\kaff \le k)} \Rightarrow \Sigma'[\Loc\mapsto\blob];\Sigma'\\
+      \Sigma'' = \IF{\entail {} {\kaff \le k}}{ \Sigma'[\Loc\mapsto\blob]}{\Sigma'}\\
       \Sigma'', \rho \vdash e' \Downarrow \Sigma''', r' \\
       \Sigma''', \rho''[x\mapsto r'] \vdash e'' \Downarrow \Sigma'''', r
     }{\Sigma, \rho \vdash \app{e}{e'} \Downarrow \Sigma'''', r}
@@ -41,17 +40,19 @@
       \Sigma, \rho \vdash e \Downarrow \Sigma', r \\
       \Sigma', \rho \vdash e' \Downarrow \Sigma'', r' \\
       \Loc\notin\Dom{\Sigma''} \\
-      \Sigma''' = \Sigma''[\Loc \mapsto (r, r')]
+      \Sigma''' = \Sigma''[\Loc \mapsto \introPair[k]r{ r'}]
     }{
-      \Sigma, \rho \vdash \introPair{e}{e'} \Downarrow \Sigma''', \Loc
+      \Sigma, \rho \vdash \introPair[k]{e}{e'} \Downarrow \Sigma''', \Loc
     }
 
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', \Loc \\
-      \Sigma' (\Loc) = (r, r') \\
-      \Sigma', \rho[x,y \mapsto r, r'] \vdash e' \Downarrow \Sigma'', r''
+      \Sigma' (\Loc) = \introPair[k]r{ r'} \\
+      \Sigma'' = \IF{\entail {} {\kaff \le
+          k}}{\Sigma'[\Loc\mapsto\blob]}{\Sigma} \\
+      \Sigma'', \rho[x,y \mapsto r, r'] \vdash e' \Downarrow \Sigma''', r''
     }{
-      \Sigma, \rho \vdash \matchin{x,y}{e}{e'} \Downarrow  \Sigma'', r''
+      \Sigma, \rho \vdash \matchin{x,y}{e}{e'} \Downarrow  \Sigma''', r''
     }
 
     \inferrule{
@@ -59,7 +60,8 @@
       \Sigma (\alpha) = W \\
       (\Sigma\setminus\alpha)[\borrow{\alpha} \mapsto W], \rho \vdash e
       \Downarrow \Sigma', r \\
-      \Sigma'' = (\Sigma' \setminus\borrow{\alpha})[\alpha \mapsto W]
+      \Sigma' (\borrow\alpha) = W' \\
+      \Sigma'' = (\Sigma' \setminus\borrow{\alpha})[\alpha \mapsto W']
     }{
       \Sigma, \rho \vdash \region{x}{e} \Downarrow \Sigma', r
     }
