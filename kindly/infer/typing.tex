@@ -21,7 +21,7 @@
   \inferrule[Abs]
   { \tvar,\kvar_\tvar,\kvar\text{ new}\\
     \inferW{\Sv'}{(C',\unif')}
-    {\E;\bvark{x}{\tvar}{\kvar_\tvar}}{e}{\tau} \\\\
+    {\E;\bvar{x}{\tvar};\bvar{\tvar}{\kvar_\tvar}}{e}{\tau} \\\\
     \addlin{ \Sv = \Sv' \Sdel{x} }\\
     D = C'\Cand
     \addlin{\Cleq{\Sv}{\kvar} \Cand \Weaken_{(x,\kvar_\tvar)}(\Sv')} \\
@@ -72,7 +72,10 @@
   { \tvar,\kvar,\tvar',\kvar'\text{ new}\\
     \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
     \inferW{\Sv_2}{(C_2,\unif_2)}
-    {\E;\bvark{x}{\tvar}{\kvar};\bvark{x'}{\tvar'}{\kvar'}}{e_2}{\tau_2} \\
+    {\E;
+      \bvar{x}{\tvar};\bvar{\tvar}{\kvar};
+      \bvar{x'}{\tvar'};\bvar{\tvar'}{\kvar'}
+    }{e_2}{\tau_2} \\
     \unif' = \unif_1 \mostgeneral \unif_2 \\
     \addlin{\tsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
     D =
