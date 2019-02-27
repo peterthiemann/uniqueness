@@ -51,7 +51,7 @@
 \newcommand\ein{\mathtt{in}}
 \newcommand\letin[3]{\elet\ #1 = #2\ \ein\ #3}
 \newcommand\matchin[3]{\ematch\ #1 = #2\ \ein\ #3}
-\newcommand\introPair[2]{({#1},{#2})}
+\newcommand\introPair[3][{}]{({#2},{#3})^{#1}}
 \newcommand\introK[2]{\app{#1}{#2}}
 \newcommand\elimK[2]{\mathtt{elim}_{#1}\ #2}
 \newcommand\fix[1]{\mathtt{fix}\ #1}
@@ -125,10 +125,14 @@
 \newcommand\closure[3]{\lambda^{#1} #2 . #3}
 \newcommand\ered[4]{#3\ \operatorname{\Downarrow^{#1}_{#2}}\ #4}
 
+\newcommand\IF[3]{(#1) \Rightarrow #2 \mid #3}
+
 \newcommand\Addr\beta           %addresses
 \newcommand\Loc\ell             %locations
 
 \newcommand\blob\bullet
+
+\newcommand\Multi[2][{}]{\overline{#2_{#1}}}
 
 %% Misc
 \newcommand\addlin[1]{{\color{blue}{#1}}}

@@ -3,7 +3,8 @@
   \htag{Internal expressions}
   e ::=&\dots \\
   |&\ \ilam{\kvar^*}{\tvar^*}Ckxe \tag{Generalized abstraction} \\
-  |&\ \ivar x {k^*} {\tau^*} \tag{Generalized application}
+  |&\ \ivar x {k^*} {\tau^*} \tag{Generalized application} \\
+  |&\ \introPair[k]{e}{e} \tag{Tagged pairs}
 \end{align*}
   \begin{minipage}[t]{0.38\linewidth}
   \begin{align*}
@@ -19,10 +20,10 @@
   \begin{minipage}[t]{0.58\linewidth}
 \begin{align*}
     \htag{Storables}
-    W &::= (\rho, \ilam {\kvar^*}{\tvar^*}Ckx{e}) \tag{Poly Closures}
+    W &::= (\rho, \ilam {\Multi\kvar}{\Multi\tvar}Ckx{e}) \tag{Poly Closures}
   \\
   &\mid (\rho, \lam[k]xe) \tag{Closures} \\
-           &\mid (r, r) \tag{Pairs} \\
+           &\mid \introPair[k]rr \tag{Pairs} \\
       & \mid [r] \tag{Resources} \\
       & \mid \blob \tag{Freed Resource}
   \end{align*}
