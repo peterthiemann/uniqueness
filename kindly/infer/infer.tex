@@ -232,6 +232,13 @@ More precisely, we apply the following steps:
 
   We also complement $\mathcal R$ with $(\leq)$ by adding an edge
   between related constants.
+\item
+  At this point, we can easily check for satisfiability: A constraint
+  is satisfiable (in the given environment) if and only if,
+  for any constants $l_1$ and $l_2$ such that
+  there is a path from $l_1$ to $l_2$ in $\mathcal G$, then $l_1\lk_\Lat l_2$.
+  If this is not the case, we return \textbf{fail}.
+  
 \item For each strongly connected component in $\mathcal G$, unify all its vertices and replace it by a representative.
   We note $\unif_k$ the substitution that replaces a kind variable by
   its representative.
@@ -284,7 +291,7 @@ More precisely, we apply the following steps:
   Let $C^{k+}$ be the result after step (2), we trivially have that
   $\fv{C^{k+}} = \fv{C^k}$ and that $C^{k+} \equivC C^k$.
 
-  Let $C^{A}$ and $\unif_k$ be the results after step (3).
+  Let $C^{A}$ and $\unif_k$ be the results after step (4).
   By definition, we have $\unif_k C^{k+} \equivC C^{A}$ and
   $\unif_k C^{A} = C^{A}$. Since $\phi_k$ has already be applied to $C$ before
   unifying the strongly connected components,
@@ -296,7 +303,7 @@ More precisely, we apply the following steps:
   and $\unif C^{A} = C^{A}$.
   Furthermore, $\phi_\tau \meet \phi_k \leq \unif_\tau \meet \unif_k$.
   
-  Steps (4) to (8) all preserve the free variables and the equivalence
+  Steps (5) to (9) all preserve the free variables and the equivalence
   of constraints, which concludes.
 \end{proof}
 
@@ -320,11 +327,11 @@ More precisely, we apply the following steps:
   $P(C_2')$ hold. Indeed, since $C_1'$ and $C_2'$ are only composed
   of existential quantifications and kind inequalities, the only rules
   that applies are transitivity and lattice inequalities.
-  After step (2) and (4), the associated relations are fully saturated for these
+  After step (2) and (5), the associated relations are fully saturated for these
   two rules, hence all inequalities that can be deduced from $C_a'$ are already
   present in the relation.
 
-  The property $P$ is preserved by step (5) since we only remove
+  The property $P$ is preserved by step (6) since we only remove
   inequalities that involve existentially quantified variables. Such
   inequalities could not be picked in $P$.
   % In (6) we only remove
@@ -336,7 +343,7 @@ More precisely, we apply the following steps:
   For any $C=(k,k')$ such that $\entail{}{C}$ and $\entail{C''_a}{C}$,
   then $C \in (\leq) \subset {\mathcal R}''_a$.
   Indeed, the only trivial inequalities in our system are equalities of the form
-  $(\kvar, \kvar)$, which were removed in step (3) and the lattice inequalities.
+  $(\kvar, \kvar)$, which were removed in step (4) and the lattice inequalities.
 
   Let us consider $C = (k,k') \in \mathcal R''_1$.
   Since $C''_1\equivC C''_2$, we have $\entail{C''_2}{C}$.
@@ -346,7 +353,7 @@ More precisely, we apply the following steps:
   We conclude that $R''_1 \subset R''_2$.
   By symmetry, $R''_1 = R''_2$ and $C''_1 = C''_2$.
 
-  This equality is preserved by step (6) and (7)
+  This equality is preserved by step (7) and (8)
   since the transitive reduction of a directed acyclic graph is unique,
   which concludes.
 \end{proof}
