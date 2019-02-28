@@ -31,7 +31,11 @@ when $\entail{C}{D}$ and $\entail{D}{C}$.
 \begin{figure}[tp]
   \centering
   \begin{align*}
-    C ::=&\ \Cleq{\tau_1}{\tau_2}\ |\ \Cleq{k_1}{k_2}\ |\ C_1 \Cand C_2\ |\ \Cproj{\alpha}{C}
+    C &::= \Cleq{\tau_1}{\tau_2}
+        \mid \Cleq{k_1}{k_2}
+        \mid C_1 \Cand C_2
+        \mid \Cproj{\tvar}{C}
+        \mid \Cproj{\kvar}{C}
   \end{align*}
   \caption{The constraint language}
   \label{grammar:constraint}
