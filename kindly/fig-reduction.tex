@@ -6,12 +6,12 @@
     \inferrule{}{\Sigma, \rho \vdash x \Downarrow \Sigma, \rho(x)}
 
     \inferrule{
-      \Sigma, \rho \vdash e \Downarrow \Loc \\
-      \Sigma (\Loc) = (\rho, \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ckx{e}) \\\\
-      \Sigma' =  \IF{\entail C {\kaff \le k}}{\Sigma[\Loc\mapsto\blob]}{ \Sigma} \\
-      \Loc'\notin\Dom\Sigma'  \\
-      \Sigma'' = \Sigma[\Loc' \mapsto (\rho, \subst {\Multi[i]{\kvar}}{\Multi[i]{k}}{(\lam[k]xe)}) ]
-    }{\Sigma, \rho \vdash  \ivar e{\Multi[i]{k}}{\Multi[j]{\tau}}  \Downarrow \Sigma'', \Loc'
+      \Sigma, \rho \vdash e \Downarrow \Sigma', \Loc \\
+      \Sigma' (\Loc) = (\rho, \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ckx{e}) \\
+      \Sigma'' =  \IF{\entail C {\kaff \le k}}{\Sigma'[\Loc\mapsto\blob]}{ \Sigma'} \\
+      \Loc'\notin\Dom{\Sigma''}  \\
+      \Sigma''' = \Sigma''[\Loc' \mapsto (\rho, \subst{\Multi[j]{\tvar}}{\Multi[j]{t}}{\subst {\Multi[i]{\kvar}}{\Multi[i]{k}}{(\lam[k]xe)}}) ]
+    }{\Sigma, \rho \vdash  \ivar e{\Multi[i]{k}}{\Multi[j]{\tau}}  \Downarrow \Sigma''', \Loc'
     }
 
     \inferrule{
@@ -72,7 +72,7 @@
     \\
     \inferrule{
       \Sigma, \rho \vdash e \Downarrow \Sigma', r\\
-      \Loc\notin \Dom\Sigma' }{
+      \Loc\notin \Dom{\Sigma'} }{
       \Sigma,\rho \vdash \create e \Downarrow \Sigma'[\Loc \mapsto \rss{r}], \Loc
     }
 
@@ -84,8 +84,8 @@
     }
 
     \inferrule{
-      \Sigma, \rho \vdash e \Downarrow \Sigma', \borrow[i]\alpha \\
-      \Sigma' (\borrow[i]\alpha) = \rss{r}
+      \Sigma, \rho \vdash e \Downarrow \Sigma', \borrow\alpha \\
+      \Sigma' (\borrow\alpha) = \rss{r}
     }{
       \Sigma, \rho \vdash \observe e \Downarrow \Sigma', r
     }
