@@ -1,13 +1,24 @@
 \begin{mathpar}
+  \inferrule[Scheme]{
+    \inferSK{C \Cand C_x} \E \tau {k'} \\
+    \entail C {\Cleq{k'}k}
+  }{
+    \entail C {(\forall \kvar_i \forall (\tvar_j:k_j).\
+      \qual{C_x}{\tau}) \le  k}
+  }
+\end{mathpar}
+\hrulefill
+\begin{mathpar}
   \inferrule[Var]
   { \bvar{x}{
-      \forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}
+      \forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}
+    }
     \in \E \\
     \unif = [\kvar_i\mapsto k_i,\tvar_j \mapsto \tau_j] \\
     \entail C {\unif(C_x)} \\
-    \addlin{
-      \inferSK{C}{\E}{\unif \tau}{k_\tau}
-    }
+    % \addlin{
+    %   \inferSK{C}{\E}{\unif \tau}{k_\tau}
+    % }
   }
   { \inferS{C}{\E}{x}{\unif\tau}
   }
@@ -16,8 +27,8 @@
   { 
     \inferS{C}
     {\E;\bvar{x}{\tau'}}{e}{\tau} \\
-    \addlin{(\forall \bvar{x}{\schm} \in     \E|_{\fv e})~
-    \entail C {k(\schm) \le k} }
+    \addlin{(\forall \bvar{x}{\schm} \in \E)~
+    \entail C {\schm \le k} }
   }
   { \inferS{C}{\E}
     {\lam[k]{x}{e}}{\tau'\tarr{k}\tau} }
@@ -26,7 +37,7 @@
   { 
     \inferS{C}{\E_1}{e_1}{\tau_2 \tarr{k} \tau_1} \\
     \inferS{C}{\E_2}{e_2}{\tau'_2} \\
-    \addlin{\tsplit{C}{\E}{\E_1}{\E_2}}\\
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
     \entail C {\Cleq{\tau_2'}{\tau_2}} 
   }
   { \inferS{C}
@@ -40,7 +51,7 @@
   \\
   \entail{C}{\exists\Multi\kvar\Multi\tvar.D} \\
     \inferS{C}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\
-    \addlin{\tsplit{C}{\E}{\E_1}{\E_2}}\\
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
   }
   { \inferS{C}
     {\E}{\letin{x}{e_1}{e_2}}{\tau_2} }
@@ -48,7 +59,7 @@
   \inferrule[Pair]
   { \inferS{C}{\E_1}{e_1}{\tau_1} \\
     \inferS{C}{\E_2}{e_2}{\tau_2} \\
-    \addlin{\tsplit{C}{\E}{\E_1}{\E_2}}
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}
   }
   { \inferS{C}{\E}{\introPair{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }
   \and
@@ -57,7 +68,7 @@
     \inferS{C}{\E_1}{e_1}{\tyPair{\tau_1}{\tau'_1}} \\
     \inferS{C}
     {\E_2;\bvar{x}{\tau_1};\bvar{x'}{\tau'_1}}{e_2}{\tau_2} \\
-    \addlin{\tsplit{C}{\E}{\E_1}{\E_2}}
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}
   }
   { \inferS{C}
     {\E}{\matchin{x,x'}{e_1}{e_2}}{\tau_2} }
@@ -70,7 +81,7 @@
   { \inferS{C}{\E}{\borrow{x}}{\borrowty{k}{\tau}} }
   \and
   \inferrule[Region]
-  { \bvar x {\tau_x} \in \E \\
+  { \svar x {\tau_x} \in \E \\
     \inferS{C}
     {(\E \Sdel x); \bvar{\borrow x}{\borrowty k{\tau_x}}}
     {e}

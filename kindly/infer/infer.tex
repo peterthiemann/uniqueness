@@ -150,8 +150,15 @@ fresh kind variables and the associated substitution.
 \begin{figure}[ht]
   \centering
   \input{infer/sd-kinds}
-  \caption{Syntax-directed kind inference -- $\inferSK{C}{\E}{\tau}{k}$}
+  \caption{Syntax-directed kind inference --
+    $\inferSK{C}{\E}{\tau}{(\Multi k)k}$}
   \label{rules:sd-kinding}
+\end{figure}
+
+\begin{figure}[tp]
+  \input{infer/sd-splitting}
+  \caption{Syntax-directed splitting}
+  \label{fig:sd-splitting}
 \end{figure}
 
 

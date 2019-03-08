@@ -77,8 +77,11 @@
 \newcommand\Weaken{\operatorname{Weaken}}
 
 %% Typing environments
+\newcommand\Eempty{\cdot}
 \newcommand\E{\Gamma}
 \newcommand\bkind[1]{(#1)}
+\newcommand\bnone{\emptyset}
+\newcommand\svar[3][\iota]{[#2 : #3]_{#1}}
 \newcommand\bvar[2]{(#1 : #2)}
 \newcommand\bshadow[2][\iota]{(#2)_{#1}}
 \newcommand\bty[3]{(\T{#1} : #2 = #3)}
@@ -86,6 +89,8 @@
 
 \newcommand\esplit[2]{#1 \operatorname{\ltimes} #2}
 \newcommand\tsplit[4]{#1 \Leftarrow #2 = #3 \ltimes #4}
+\newcommand\lsplit[4]{#1 \vdash_e #2 = #3 \ltimes #4}
+\newcommand\bsplit[4]{#1 \vdash_e #2 = #3 \ltimes #4}
 \newcommand\tregion[4]{#1 \Leftarrow #3 \rightsquigarrow_n^{#2} #4}
 \newcommand\fv[1]{\operatorname{fv}(#1)}
 

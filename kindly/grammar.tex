@@ -9,8 +9,10 @@
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
   % |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
   \htag{Environments}
-  \E ::=&\ b^*\\
-  b ::=&\ \bvar{x}{\schm}\tag{Variable bindings}\\
+  \E ::=&\ \Eempty \mid \E;b\\
+  b ::=&\ \bnone \tag{Empty binding slot} \\
+  | & \ \bvar{x}{\schm}\tag{Variable bindings}\\
+  | & \ \svar{x}{\schm}\tag{Suspended bindings}\\
   |&\ \bvar{\tvar}{\kschm}\tag{Type bindings}\\
   % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
   \htag{Type and kind schemes}
