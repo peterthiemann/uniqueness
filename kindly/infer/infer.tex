@@ -143,7 +143,7 @@ fresh kind variables and the associated substitution.
 \begin{figure}[ht]
   \centering
   \input{infer/kinds}
-  \caption{Kind inference algorithm -- $\inferK{(C,\unif)}{\E}{\tau}{k}$}
+  \caption{Kind inference algorithm -- $\inferK{(C,\unif)}{\E}{\tau}{(\Multi{k}) k}$}
   \label{rules:kinding}
 \end{figure}
 
@@ -157,7 +157,8 @@ fresh kind variables and the associated substitution.
 
 \begin{figure}[tp]
   \input{infer/sd-splitting}
-  \caption{Syntax-directed splitting}
+  \caption{Syntax-directed splitting --- environments $\lsplit
+    C\E\E\E$; binders $\bsplit Cbbb$}
   \label{fig:sd-splitting}
 \end{figure}
 
