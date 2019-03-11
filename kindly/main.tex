@@ -22,6 +22,9 @@
 \usepackage{gensymb}
 % \usepackage{textgreek}
 
+\usepackage{listings}
+\usepackage[scaled=0.85]{DejaVuSansMono}
+
 \usepackage{tikz}
 \usetikzlibrary{arrows}
 
@@ -30,13 +33,21 @@
 
 \usepackage{natbib}% Good citations and bibliography
 \usepackage{mathpartir} % Syntax trees
+
 \usepackage[nameinlink,capitalize]{cleveref}
+\addto\extrasenglish{%
+  \def\sectionautorefname{Section}
+  \def\subsectionautorefname{Section}
+  \def\subsubsectionautorefname{Section}
+  \def\lstnumberautorefname{Line}
+}
 
 
 \bibliographystyle{ACM-Reference-Format}
 \citestyle{acmauthoryear}
 
 \input{prelude}
+\input{caml}
 \input{notations}
 
 \begin{document}

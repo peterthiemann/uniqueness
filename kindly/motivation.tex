@@ -4,6 +4,74 @@
   something with borrows (functional arrays), and then something
   really spaced out that pushes the limit}
 
+
+
+\subsection{A session on linearity}
+
+A classical example of linearity at work are to control the uses of resources such
+as files or network handles.
+%
+Session types, notably, allow to statically type check protocols.
+For instance, the type \lstinline{!int.!int.?int.end} represent a session
+where the program must send two integers, receive an integer, then end the session.
+%
+In this context, it is essential that channels
+are used linearly, since every use of the channel
+will make the protocol progress and change the type of the channel.
+
+Session types are usually defined with the following operators:
+
+\begin{center}
+  \begin{tabular}{r l}
+    $\tau ? \mathcal S$ & Send a value of type $\tau$ then continue with protocol $S$.\\
+    $\tau ? \mathcal S$& Receive a value of type $\tau$ then continue with protocol $S$.\\
+    $\mathcal S \oplus \mathcal S'$& Choose between protocols $S$ and $S'$.\\
+    $\mathcal S \operatorname{\&} \mathcal S'$& Offer a choice between protocols $S$ and $S'$.
+  \end{tabular}
+\end{center}
+
+It is well known that binary session types can be embedded into ML languages
+\cite{DBLP:journals/jfp/Padovani17}. We can easily
+embed session types in our language and provide the following API:
+
+\begin{lstlisting}
+type 'S st : lin
+val receive: ('a ? 'S) st -> 'a * 'S st
+val send : ('a:'k). 'a -> ('a ! 'S) st -{'k}> 'S st
+val close : end st -> unit
+\end{lstlisting}
+
+
+
+\TODO{Explain}
+
+We can then use these primitives to implement a simple addition service.
+We do not need any extra linearity annotations in the code: the fact
+that the \texttt{st} type is declared as linear is sufficient.
+In the case below, \lstinline{add_service} is inferred to be of type
+\lstinline{(int ! int ! int ? end) st -> unit}
+
+\begin{lstlisting}
+let add_service ep =
+  let (x, ep) = receive ep in
+  let (y, ep) = receive ep in
+  let ep = send (x + y) ep in
+  close ep
+\end{lstlisting}
+
+
+
+% \begin{figure}
+%   \centering
+%   \begin{lstlisting}
+% val select : ('S st -{'k}> 'a) -> 'a ot -{'k}> ('S dual) st
+% val branch : 'm it -> 'm
+%   \end{lstlisting}
+%   \caption{Session primitives}
+%   \label{api:session}
+% \end{figure}
+
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"
