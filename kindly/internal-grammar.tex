@@ -9,8 +9,8 @@
   \begin{minipage}[t]{0.38\linewidth}
   \begin{align*}
     \htag{Addresses}
-    \Addr &::= \Loc \tag{Locations}\\
-           &\mid \borrow{\Addr} \tag{Borrows}
+    \Addr, \AddrD &::= \Loc\BORROW^* \tag{Locations}
+    % \\           &\mid \borrow{\Addr} \tag{Borrows}
     \\
     \htag{Results}
     r &::= \Addr \mid c

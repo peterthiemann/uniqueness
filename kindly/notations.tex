@@ -56,9 +56,12 @@
 \newcommand\elimK[2]{\mathtt{elim}_{#1}\ #2}
 \newcommand\fix[1]{\mathtt{fix}\ #1}
 \newcommand\app[2]{(#1\ #2)}
-\newcommand\borrow[2][\iota]{{\&}^{#1}#2}
-\newcommand\borrowty[3][\iota]{{\&}^{#1}(#2,#3)}
+\newcommand\borrow[2][\BORROW]{{\&}^{#1}#2}
+\newcommand\borrowty[3][\BORROW]{{\&}^{#1}(#2,#3)}
 \newcommand\region[2]{\ensuremath{\mathtt{region}_n\ (#1)\ \{#2\}}}
+
+\newcommand\sborrow[2][\BORROW]{#2{#1}}
+
 
 \newcommand\create[1]{\ensuremath{\mathtt{create}\ #1}}
 \newcommand\rss[1]{[#1]}
@@ -81,9 +84,9 @@
 \newcommand\E{\Gamma}
 \newcommand\bkind[1]{(#1)}
 \newcommand\bnone{\emptyset}
-\newcommand\svar[3][\iota]{[#2 : #3]_{#1}}
+\newcommand\svar[3][\BORROW]{[#2 : #3]_{#1}}
 \newcommand\bvar[2]{(#1 : #2)}
-\newcommand\bshadow[2][\iota]{(#2)_{#1}}
+\newcommand\bshadow[2][\BORROW]{(#2)_{#1}}
 \newcommand\bty[3]{(\T{#1} : #2 = #3)}
 \newcommand\bineq[2]{(#1 \lk #2)}
 
@@ -100,6 +103,7 @@
 \newcommand\Sinter{\operatorname{\cap}}
 \newcommand\Sv{\Sigma}
 \newcommand\Sdel[1]{\setminus \{#1\}}
+\newcommand\Sadd[1]{\cup \{#1\}}
 
 %% Judgements
 \newcommand\BAR{\operatorname{|}}
@@ -131,7 +135,11 @@
 
 \newcommand\IF[3]{(#1) \Rightarrow #2 \mid #3}
 
-\newcommand\Addr\beta           %addresses
+\newcommand\MBORROW{m}
+\newcommand\IBORROW{i}
+\newcommand\BORROW\beta
+\newcommand\Addr\gamma           %addresses
+\newcommand\AddrD\delta
 \newcommand\Loc\ell             %locations
 
 \newcommand\blob\bullet
