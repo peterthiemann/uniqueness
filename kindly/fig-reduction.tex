@@ -12,7 +12,7 @@
       \Loc'\notin\Dom{\Sigma''}  \\
       \Sigma''' = \Sigma''[\Loc' \mapsto (\rho, \subst{\Multi[j]{\tvar}}{\Multi[j]{t}}{\subst {\Multi[i]{\kvar}}{\Multi[i]{k}}{(\lam[k]xe)}}) ]
     }{\Sigma, \Pi, \rho \vdash  \ivar e{\Multi[i]{k}}{\Multi[j]{\tau}}
-      \Downarrow \Sigma''', \Pi', \Loc'
+      \Downarrow \Sigma''', \Pi'\Sadd{\Loc'}, \Loc'
     }
 
     \inferrule{
@@ -20,7 +20,7 @@
       \Sigma' = \Sigma[\Loc \mapsto (\rho, \ilam  {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe)]
     }{
       \Sigma, \Pi, \rho \vdash \ilam
-      {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe \Downarrow \Sigma', \Pi, \Loc
+      {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe \Downarrow \Sigma', \Pi\Sadd\Loc, \Loc
     }
     
     \inferrule{
@@ -47,7 +47,7 @@
       \Sigma''' = \Sigma''[\Loc \mapsto \introPair[k]r{ r'}]
     }{
       \Sigma, \Pi, \rho \vdash \introPair[k]{e}{e'} \Downarrow
-      \Sigma''', \Pi'', \Loc
+      \Sigma''', \Pi''\Sadd\Loc, \Loc
     }
 
     \inferrule{
@@ -87,7 +87,7 @@
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', r\\
       \Loc\notin \Dom{\Sigma'} }{
       \Sigma, \Pi,\rho \vdash \create e \Downarrow \Sigma'[\Loc
-      \mapsto \rss{r}], \Pi', \Loc
+      \mapsto \rss{r}], \Pi'\Sadd\Loc, \Loc
     }
 
     \inferrule{
@@ -95,7 +95,7 @@
       \Sigma' (\Loc) = \rss{r}
     }{
       \Sigma, \Pi, \rho \vdash \destroy e \Downarrow
-      \Sigma'[\Loc\mapsto \blob], \Pi', ()
+      \Sigma'[\Loc\mapsto \blob], \Pi'\Sdel\Loc, ()
     }
 
     \inferrule{
