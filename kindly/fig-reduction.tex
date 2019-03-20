@@ -1,11 +1,11 @@
 \begin{figure*}[tp]
   % \input{semantics}
     \begin{mathpar}
-    \inferrule{}{ \Sigma, \Pi, \rho \vdash c \Downarrow \Sigma, \Pi, c}
+    \inferrule[SConst]{}{ \Sigma, \Pi, \rho \vdash c \Downarrow \Sigma, \Pi, c}
 
-    \inferrule{}{\Sigma, \Pi, \rho \vdash x \Downarrow \Sigma, \Pi, \rho(x)}
+    \inferrule[SVar]{}{\Sigma, \Pi, \rho \vdash x \Downarrow \Sigma, \Pi, \rho(x)}
 
-    \inferrule{
+    \inferrule[STApp]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Loc \\
       \Sigma' (\Loc) = (\rho, \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ckx{e}) \\
       \Sigma'' =  \IF{\entail C {k \le \kun}}{ \Sigma'}{\Sigma'[\Loc\mapsto\blob]} \\
@@ -15,7 +15,7 @@
       \Downarrow \Sigma''', \Pi'\Sadd{\Loc'}, \Loc'
     }
 
-    \inferrule{
+    \inferrule[SPLam]{
       \Loc\notin\Dom\Sigma \\
       \Sigma' = \Sigma[\Loc \mapsto (\rho, \ilam  {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe)]
     }{
@@ -23,7 +23,7 @@
       {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe \Downarrow \Sigma', \Pi\Sadd\Loc, \Loc
     }
     
-    \inferrule{
+    \inferrule[SApp]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Loc \\
       \Sigma' (\Loc) = (\rho'',\lam[k]{x}{e''}) \\
       \Sigma'' = \IF{\entail {} {k \le \kun}}{\Sigma'}{ \Sigma'[\Loc\mapsto\blob]}\\
@@ -32,7 +32,7 @@
       \Sigma'''', \Pi''', r
     }{\Sigma, \Pi, \rho \vdash \app{e}{e'} \Downarrow \Sigma'''',\Pi''', r}
 
-    \inferrule{
+    \inferrule[SLet]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', r \\
       \Sigma', \Pi', \rho[x \mapsto r] \vdash e' \Downarrow \Sigma'', \Pi'', r'
     }{
@@ -40,7 +40,7 @@
       \Pi'', r'
     }
 
-    \inferrule{
+    \inferrule[SPair]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', r \\
       \Sigma', \Pi', \rho \vdash e' \Downarrow \Sigma'', \Pi'', r' \\
       \Loc\notin\Dom{\Sigma''} \\
@@ -50,25 +50,33 @@
       \Sigma''', \Pi''\Sadd\Loc, \Loc
     }
 
-    \inferrule{
-      \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Addr \\
-      \Addr = \Loc\Multi\BORROW \\\\
+    \inferrule[SMatchLocation]{
+      \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Loc \\
       \Sigma' (\Loc) = \introPair[k]{ \Addr'}{\Addr''} \\
-      \Sigma' (\Addr') = W' \\
-      \Sigma' (\Addr'') = W'' \\\\
       \Sigma'' = \IF{\entail {} {k \le
-          \kun}}{\Sigma'}{\Sigma'[\Addr\mapsto\blob]} \\
-      \AddrD' = \Multi\BORROW(\Addr') \\
-      \AddrD'' = \Multi\BORROW (\Addr'') \\
+          \kun}}{\Sigma'}{\Sigma'[\Loc\mapsto\blob]} \\
+      \Sigma'', \Pi', \rho[x,y \mapsto \Addr', \Addr''] \vdash e'
+      \Downarrow \Sigma''', \Pi'', r''
+    }{
+      \Sigma, \Pi, \rho \vdash \matchin{x,y}{e}{e'} \Downarrow
+      \Sigma''', \Pi'',  r''
+    }
+
+    \inferrule[SMatchBorrow]{
+      \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Addr \\
+      \Addr = \Loc\Multi\BORROW\BORROW \\\\
+      \Sigma' (\Loc) = \introPair[k]{ \Addr'}{\Addr''} \\
+      \AddrD' = \Addr'\BORROW \\
+      \AddrD'' = \Addr''\BORROW \\\\
       \Pi'' = (\Pi'\Sdel{\Addr',\Addr''}) \Sadd{\AddrD', \AddrD''} \\
-      \Sigma'', \Pi'', \rho[x,y \mapsto \AddrD', \AddrD''] \vdash e'
+      \Sigma', \Pi'', \rho[x,y \mapsto \AddrD', \AddrD''] \vdash e'
       \Downarrow \Sigma''', \Pi''', r''
     }{
       \Sigma, \Pi, \rho \vdash \matchin{x,y}{e}{e'} \Downarrow
       \Sigma''', (\Pi''' \Sdel{\AddrD', \AddrD''}) \Sadd{\Addr', \Addr''},  r''
     }
 
-    \inferrule{
+    \inferrule[SRegion]{
       \rho (x) = \Addr \\
       \Addr \in \Pi \\
       \Sigma, (\Pi \Sdel\Addr) \Sadd{\sborrow{\Addr}}, \rho \vdash e
@@ -77,20 +85,20 @@
       \Sigma, \Pi, \rho \vdash \region{x}{e} \Downarrow \Sigma', (\Pi' \Sdel{\sborrow\Addr})\Sadd\Addr, r
     }
 
-    \inferrule{
+    \inferrule[SBorrow]{
       \rho (x) = \Addr \\ \sborrow\Addr \in \Pi
     }{
       \Sigma, \Pi, \rho \vdash \borrow{x} \Downarrow \Sigma, \Pi, \sborrow\Addr
     }
     \\
-    \inferrule{
+    \inferrule[SCreate]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', r\\
       \Loc\notin \Dom{\Sigma'} }{
       \Sigma, \Pi,\rho \vdash \create e \Downarrow \Sigma'[\Loc
       \mapsto \rss{r}], \Pi'\Sadd\Loc, \Loc
     }
 
-    \inferrule{
+    \inferrule[SDestroy]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Loc \\
       \Sigma' (\Loc) = \rss{r}
     }{
@@ -98,7 +106,7 @@
       \Sigma'[\Loc\mapsto \blob], \Pi'\Sdel\Loc, ()
     }
 
-    \inferrule{
+    \inferrule[SObserve]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Addr \\
       \Addr = \Loc\Multi\BORROW\IBORROW \\
       \Addr \in \Pi' \\
@@ -107,7 +115,7 @@
       \Sigma, \Pi, \rho \vdash \observe e \Downarrow \Sigma', \Pi', r
     }
 
-    \inferrule{
+    \inferrule[SUpdate]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Addr \\
       \Addr = \Loc\Multi\MBORROW\MBORROW \\
       \Sigma', \Pi', \rho \vdash e' \Downarrow \Sigma'', \Pi'', r' \\
@@ -118,7 +126,6 @@
       \Sigma, \Pi, \rho \vdash \update e {e'} \Downarrow \Sigma''',
       \Pi'' \Sdel{\Addr},  ()
     }
-
   \end{mathpar}
   \caption{Reduction rules -- $\Sigma, \Pi, \rho \vdash e \Downarrow
     \Sigma', \Pi', r$ }
