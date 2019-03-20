@@ -60,12 +60,12 @@
           \kun}}{\Sigma'}{\Sigma'[\Addr\mapsto\blob]} \\
       \AddrD' = \Multi\BORROW(\Addr') \\
       \AddrD'' = \Multi\BORROW (\Addr'') \\
-      \Pi'' = \Pi' \Sadd{\AddrD', \AddrD''} \\
+      \Pi'' = (\Pi'\Sdel{\Addr',\Addr''}) \Sadd{\AddrD', \AddrD''} \\
       \Sigma'', \Pi'', \rho[x,y \mapsto \AddrD', \AddrD''] \vdash e'
       \Downarrow \Sigma''', \Pi''', r''
     }{
       \Sigma, \Pi, \rho \vdash \matchin{x,y}{e}{e'} \Downarrow
-      \Sigma''', \Pi''' \Sdel{\AddrD', \AddrD''},  r''
+      \Sigma''', (\Pi''' \Sdel{\AddrD', \AddrD''}) \Sadd{\Addr', \Addr''},  r''
     }
 
     \inferrule{
