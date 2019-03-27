@@ -8,11 +8,11 @@
     \inferrule[STApp]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Loc \\
       \Sigma' (\Loc) = (\rho, \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ckx{e}) \\
-      \Sigma'' =  \IF{\entail C {k \le \kun}}{ \Sigma'}{\Sigma'[\Loc\mapsto\blob]} \\
-      \Loc'\notin\Dom{\Sigma''}  \\
-      \Sigma''' = \Sigma''[\Loc' \mapsto (\rho, \subst{\Multi[j]{\tvar}}{\Multi[j]{t}}{\subst {\Multi[i]{\kvar}}{\Multi[i]{k}}{(\lam[k]xe)}}) ]
+      \Pi'' =  \IF{\entail C {k \le \kun}}{ \Pi'}{\Pi'\Sdel\Loc} \\
+      \Loc'\notin\Dom{\Sigma'}  \\
+      \Sigma'' = \Sigma'[\Loc' \mapsto (\rho, \subst{\Multi[j]{\tvar}}{\Multi[j]{t}}{\subst {\Multi[i]{\kvar}}{\Multi[i]{k}}{(\lam[k]xe)}}) ]
     }{\Sigma, \Pi, \rho \vdash  \ivar e{\Multi[i]{k}}{\Multi[j]{\tau}}
-      \Downarrow \Sigma''', \Pi'\Sadd{\Loc'}, \Loc'
+      \Downarrow \Sigma'', \Pi''\Sadd{\Loc'}, \Loc'
     }
 
     \inferrule[SPLam]{
@@ -26,11 +26,11 @@
     \inferrule[SApp]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Loc \\
       \Sigma' (\Loc) = (\rho'',\lam[k]{x}{e''}) \\
-      \Sigma'' = \IF{\entail {} {k \le \kun}}{\Sigma'}{ \Sigma'[\Loc\mapsto\blob]}\\
-      \Sigma'', \Pi', \rho \vdash e' \Downarrow \Sigma''', \Pi'', r' \\
-      \Sigma''', \Pi'', \rho''[x\mapsto r'] \vdash e'' \Downarrow
-      \Sigma'''', \Pi''', r
-    }{\Sigma, \Pi, \rho \vdash \app{e}{e'} \Downarrow \Sigma'''',\Pi''', r}
+      \Pi'' = \IF{\entail {} {k \le \kun}}{\Pi'}{ \Pi'\Sdel\Loc}\\
+      \Sigma', \Pi'', \rho \vdash e' \Downarrow \Sigma'', \Pi''', r' \\
+      \Sigma'', \Pi''', \rho''[x\mapsto r'] \vdash e'' \Downarrow
+      \Sigma''', \Pi'''', r
+    }{\Sigma, \Pi, \rho \vdash \app{e}{e'} \Downarrow \Sigma''',\Pi'''', r}
 
     \inferrule[SLet]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', r \\
@@ -53,13 +53,13 @@
     \inferrule[SMatchLocation]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Loc \\
       \Sigma' (\Loc) = \introPair[k]{ \Addr'}{\Addr''} \\
-      \Sigma'' = \IF{\entail {} {k \le
-          \kun}}{\Sigma'}{\Sigma'[\Loc\mapsto\blob]} \\
-      \Sigma'', \Pi', \rho[x,y \mapsto \Addr', \Addr''] \vdash e'
-      \Downarrow \Sigma''', \Pi'', r''
+      \Pi'' = \IF{\entail {} {k \le
+          \kun}}{\Pi'}{\Pi'\Sdel\Loc} \\
+      \Sigma', \Pi'', \rho[x,y \mapsto \Addr', \Addr''] \vdash e'
+      \Downarrow \Sigma'', \Pi''', r''
     }{
       \Sigma, \Pi, \rho \vdash \matchin{x,y}{e}{e'} \Downarrow
-      \Sigma''', \Pi'',  r''
+      \Sigma'', \Pi''',  r''
     }
 
     \inferrule[SMatchBorrow]{
