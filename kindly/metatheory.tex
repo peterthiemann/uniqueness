@@ -1,0 +1,43 @@
+\section{Metatheory}
+\label{sec:metatheory}
+
+
+Borrow compatibility $\Multi\MBORROW\Multi\IBORROW \Bcompatible \BORROW$,
+Relating results to types $r : \tau$
+\begin{mathpar}
+  \inferrule{}{
+    \Multi\MBORROW\Multi\IBORROW\IBORROW \Bcompatible \IBORROW
+  }
+
+  \inferrule{}{
+    \Multi\MBORROW\MBORROW \Bcompatible \MBORROW
+  }
+  \\
+  \inferrule{}{ \Sigma \vdash c : \CType{c} }
+
+  \inferrule{
+    \Sigma (\ell) = (\rho, \lam[k]xe) \\
+  }{ \Sigma \vdash \ell : \tau_2\tarr{k}\tau_1 }
+
+  \inferrule{}{ \Sigma \vdash \Loc : \tapp{t}{\tau^*}}
+
+  \inferrule{
+    \Multi\MBORROW\Multi\IBORROW \Bcompatible \BORROW \\
+    \Sigma \vdash \Loc  : \tau
+  }{  \Sigma \vdash
+    \Loc\Multi\MBORROW\Multi\IBORROW : \borrow{\tau}}
+\end{mathpar}
+
+\begin{theorem}
+  Suppose that $\inferS{C}{\E}{e}{\tau}$.
+  Then $\Sigma, \Pi, \rho \vdash {e} \Downarrow \Sigma', \Pi', r$
+  and
+  \begin{itemize}
+  \item $\Sigma \vdash r : \tau$
+  \end{itemize}
+\end{theorem}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

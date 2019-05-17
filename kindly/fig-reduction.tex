@@ -49,7 +49,14 @@
       \Sigma, \Pi, \rho \vdash \introPair[k]{e}{e'} \Downarrow
       \Sigma''', \Pi''\Sadd\Loc, \Loc
     }
-
+  \end{mathpar}
+  \caption{Reduction rules -- lambda calculus fragment
+    -- $\Sigma, \Pi, \rho \vdash e \Downarrow  \Sigma', \Pi', r$
+  }
+  \label{fig:reduction}
+\end{figure*}
+\begin{figure*}
+  \begin{mathpar}
     \inferrule[SMatchLocation]{
       \Sigma, \Pi, \rho \vdash e \Downarrow \Sigma', \Pi', \Loc \\
       \Sigma' (\Loc) = \introPair[k]{ \Addr'}{\Addr''} \\
@@ -127,9 +134,10 @@
       \Pi'' \Sdel{\Addr},  ()
     }
   \end{mathpar}
-  \caption{Reduction rules -- $\Sigma, \Pi, \rho \vdash e \Downarrow
-    \Sigma', \Pi', r$ }
-  \label{fig:reduction}
+  \caption{Reduction rules -- resource handling
+    -- $\Sigma, \Pi, \rho \vdash e \Downarrow  \Sigma', \Pi', r$
+  }
+  \label{fig:reduction-resources}
 \end{figure*}
 
 
