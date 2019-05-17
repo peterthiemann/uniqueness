@@ -55,14 +55,14 @@
 \title{Kindly Bent to Free Us}
 \begin{abstract}
   System programming often requires to manipulate resources that
-  cannot be duplicated such as file system handles, network connections
-  or even globally allocated memory.
-  Unfortunately such resources are often the root of bugs and security issues
-  through use-after-free errors or data races, even in the context
-  of programming language traditionally considered safe, such as statically typed
-  functional languages.
-  Linear and affine type systems propose to forbid such erroneous programming
-  patterns by tracking usage of variables through types.
+  cannot be duplicated such as file system handles, network connections,
+  or globally allocated memory.
+  Improper handling of such resources is often the cause of bugs and security issues
+  through use-after-free errors or data races. These problems are not
+  prevented by most statically typed programming languages that only
+  guarantee type soundness and memory safety.
+  Linear and affine type systems support tracking of single-threaded resource usage
+  through types, but they are often too restrictive for real-world applications.
 
   We present \lang, an extension of ML with a kind system and qualified
   types that allows to track affine types.
