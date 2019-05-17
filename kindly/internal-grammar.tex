@@ -14,19 +14,22 @@
     \\
     \htag{Results}
     r &::= \Addr \mid c
+    \\
+    \htag{Environments}
+    \VEnv &::= \Eempty \mid \VEnv[ x \mapsto r]
   \end{align*}
   \end{minipage}
   \hfill
   \begin{minipage}[t]{0.58\linewidth}
-\begin{align*}
-    \htag{Storables}
-    W &::= (\rho, \ilam {\Multi\kvar}{\Multi\tvar}Ckx{e}) \tag{Poly Closures}
-  \\
-  &\mid (\rho, \lam[k]xe) \tag{Closures} \\
-      &\mid \introPair[k]rr \tag{Pairs} \\
-      & \mid [r] \tag{Resources} \\
-      & \mid \blob \tag{Freed Resource}
-  \end{align*}
+    \begin{align*}
+      \htag{Storables}
+      W &::= (\VEnv, \ilam {\Multi\kvar}{\Multi\tvar}Ckx{e}) \tag{Poly Closures}
+      \\
+        &\mid (\VEnv, \lam[k]xe) \tag{Closures} \\
+        &\mid \introPair[k]rr \tag{Pairs} \\
+        & \mid [r] \tag{Resources} \\
+        & \mid \blob \tag{Freed Resource}
+    \end{align*}
   \end{minipage}
 
 \caption{Syntax of internal language}

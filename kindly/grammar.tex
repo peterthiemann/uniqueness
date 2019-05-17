@@ -8,9 +8,9 @@
   |&\ \borrow{x}\tag{Borrows}\\
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
   % |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
-  \htag{Environments}
-  \E ::=&\ \Eempty \mid \E;b\\
-  b ::=&\ \bnone \tag{Empty binding slot} \\
+  \htag{Type environments}
+  \E ::=&\ \Eempty \mid \E;B\\
+  B ::=&\ \bnone \tag{Empty binding slot} \\
   | & \ \bvar{x}{\schm}\tag{Variable bindings}\\
   | & \ \svar{x}{\schm}\tag{Suspended bindings}\\
   |&\ \bvar{\tvar}{\kschm}\tag{Type bindings}\\

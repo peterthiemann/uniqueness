@@ -3,7 +3,8 @@
 
 
 Borrow compatibility $\Multi\MBORROW\Multi\IBORROW \Bcompatible \BORROW$,
-Relating results to types $r : \tau$
+Relating results to types $ \Sigma \vdash r : \tau$,
+Relating results to type schemes $\Sigma \vdash r : \schm$
 \begin{mathpar}
   \inferrule{}{
     \Multi\MBORROW\Multi\IBORROW\IBORROW \Bcompatible \IBORROW
@@ -16,8 +17,16 @@ Relating results to types $r : \tau$
   \inferrule{}{ \Sigma \vdash c : \CType{c} }
 
   \inferrule{
-    \Sigma (\ell) = (\rho, \lam[k]xe) \\
+    \Sigma (\ell) = (\rho, \lam[k]xe) \\\\
+    (\exists C,\E) ~\inferS{C}{\E, (x:\tau_2)}{e}{\tau_1} \\
+    \Sigma \vdash \VEnv : \E
   }{ \Sigma \vdash \ell : \tau_2\tarr{k}\tau_1 }
+
+  \inferrule{
+    \Sigma (\Loc) = \introPair[k]{r_1}{r_2} \\
+    \Sigma \vdash r_1 : \tau_1 \\
+    \Sigma \vdash r_2 : \tau_2
+  }{ \Sigma \vdash \Loc : \tau_1\times \tau_2}
 
   \inferrule{}{ \Sigma \vdash \Loc : \tapp{t}{\tau^*}}
 
@@ -26,6 +35,17 @@ Relating results to types $r : \tau$
     \Sigma \vdash \Loc  : \tau
   }{  \Sigma \vdash
     \Loc\Multi\MBORROW\Multi\IBORROW : \borrow{\tau}}
+  \\
+  \inferrule{
+    \Sigma (\Loc) =  (\VEnv, \ilam {\Multi\kvar}{\Multi\tvar}Ckx{e})
+    \\\\
+    (\exists \E)~ \Sigma \vdash \VEnv : \E
+    \\
+    \inferS{C}{\E, (x:\tau_2)}{e}{\tau_1} 
+  }{
+    \Sigma \vdash
+    \Loc : \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau_2\tarr{k}\tau_1})
+  }
 \end{mathpar}
 
 \begin{theorem}
