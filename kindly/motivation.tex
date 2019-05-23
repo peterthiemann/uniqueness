@@ -57,6 +57,7 @@ let add_service ep =
   let (y, ep) = receive ep in
   let ep = send (x + y) ep in
   close ep
+# (int ! int ! int ? end) st -> unit
 \end{lstlisting}
 
 
