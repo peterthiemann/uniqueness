@@ -1,41 +1,50 @@
 \begin{mathpar}
   \inferrule[ESplit-Empty]{}{
-    \lsplit{C}\Eempty\Eempty\Eempty
+    \bsplit{\Cempty}\Eempty\Eempty\Eempty
   }
 
   \inferrule[ESplit-Nonempty]{
-    \lsplit{C}{\E}{\E_1}{\E_2} \\
-    \bsplit C {b}{b_1}{b_2}
+    \bsplit{C_1}{\E}{\E_1}{\E_2} \\
+    \bsplit{C_2}{b}{b_1}{b_2}
   }{
-    \lsplit{C}{\E;b}{\E_1;b_1}{\E_2;b_2}
+    \bsplit{C_1\Cand C_2}{\E;b}{\E_1;b_1}{\E_2;b_2}
+  }
+
+  \inferrule[ESplit-Check]{
+    \bsplit{D}{\E}{\E_1}{\E_2} \\
+    \entail{C}{D}
+  }{
+    \lsplit{C}{\E}{\E_1}{\E_2}
   }
 \end{mathpar}
 \hrulefill
 \begin{mathpar}
-  \inferrule[BSplit-Both]{
-    \entail C {\Cleq\schm\kun}
-  }{
-    \bsplit C {\bvar{x}{\schm}} {\bvar{x}{\schm}} {\bvar{x}{\schm}}
+  \inferrule[BSplit-Both]{}{
+    \bsplit {\Cleq\schm\kun_\infty}
+    {\bvar{x}{\schm}} {\bvar{x}{\schm}} {\bvar{x}{\schm}}
   }
 
   \inferrule[BSplit-Left]{}{
-    \bsplit C {\bvar{x}{\schm}} {\bvar{x}{\schm}} {\bnone}
+    \bsplit {\Cempty} {\bvar{x}{\schm}} {\bvar{x}{\schm}} {\bnone}
   }
 
   \inferrule[BSplit-Right]{}{
-    \bsplit C {\bvar{x}{\schm}} {\bnone} {\bvar{x}{\schm}}
+    \bsplit {\Cempty} {\bvar{x}{\schm}} {\bnone} {\bvar{x}{\schm}}
   }
 
   \inferrule[BSplit-Imm-Borrow]{}{
-    \bsplit C{\bvar{\borrow[i]{x}}{\tau}}{\bvar{\borrow[i]{x}}{\tau}}{\bvar{\borrow[i]{x}}{\tau}}
+    \bsplit {\Cempty}
+    {\bvar{\borrow[i]{x}}{\tau}}
+    {\bvar{\borrow[i]{x}}{\tau}}{\bvar{\borrow[i]{x}}{\tau}}
   }
 
   \inferrule[BSplit-To-Borrow]{}{
-    \bsplit C{\bvar x \schm}{\svar x \schm}{\bvar x \schm}
+    \bsplit {\Cempty}{\bvar x \schm}{\svar x \schm}{\bvar x \schm}
   }
 
   \inferrule[BSplit-To-Imm]{}{
-    \bsplit C{\bvar{\borrow x} \schm}{\svar[i] x \schm}{\bvar{\borrow x} \schm}
+    \bsplit {\Cempty}
+    {\bvar{\borrow x} \schm}{\svar[i] x \schm}{\bvar{\borrow x} \schm}
   }
 \end{mathpar}
 %%% Local Variables:

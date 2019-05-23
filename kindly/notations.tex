@@ -71,7 +71,7 @@
 
 %% Constraints
 \newcommand\Ctrue{\operatorname{True}}
-\newcommand\Cempty{\emptyset}
+\newcommand\Cempty{\cdot}
 \newcommand\Ckind[2]{(#1 : #2)}
 \newcommand\Cleq[2]{(#1 \leq #2)}
 \newcommand\Ceq[2]{(#1 = #2)}
@@ -91,9 +91,8 @@
 \newcommand\bineq[2]{(#1 \lk #2)}
 
 \newcommand\esplit[2]{#1 \operatorname{\ltimes} #2}
-\newcommand\tsplit[4]{#1 \Leftarrow #2 = #3 \ltimes #4}
 \newcommand\lsplit[4]{#1 \vdash_e #2 = #3 \ltimes #4}
-\newcommand\bsplit[4]{#1 \vdash_e #2 = #3 \ltimes #4}
+\newcommand\bsplit[4]{#1 \Lleftarrow #2 = #3 \ltimes #4}
 \newcommand\tregion[4]{#1 \Leftarrow #3 \rightsquigarrow_n^{#2} #4}
 \newcommand\fv[1]{\operatorname{fv}(#1)}
 

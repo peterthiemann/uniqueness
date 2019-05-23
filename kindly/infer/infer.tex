@@ -90,16 +90,16 @@ operator on sets $\esplit{}{}$.
   % \Sv\cap\Sv'
   % &= \left\{ x \to l,l'
   %   \mid \Sone{x}{l}\in\Sv \text{ and } \Sone{x}{l'}\in\Sv' \right\} \\
-  \infer
-  { \forall x \in \Dom{\Sv_1}\cup\Dom{\Sv_2}.\quad
-    \tsplit{C_x}{\Sv(x)}{\Sv_1(x)}{\Sv_2(x)}
-  } 
-  { \tsplit{(\bigwedge C_x)}{\Sv}{\Sv_1}{\Sv_2} }
+  % \infer
+  % { \forall x \in \Dom{\Sv_1}\cup\Dom{\Sv_2}.\quad
+  %   \bsplit{C_x}{\Sv(x)}{\Sv_1(x)}{\Sv_2(x)}
+  % } 
+  % { \bsplit{(\bigwedge C_x)}{\Sv}{\Sv_1}{\Sv_2} }
   % &= \Sv\cap\Sv' \sqcup
   %   (\Sv\Sdel{x' \mid x'\in\Sv'}) \sqcup
   %   (\Sv'\Sdel{x \mid x\in\Sv})
   %   &\text{where $\sqcup$ is the disjoint union}\\
-  \and
+  % \and
   \inferrule{}
   { \Cleq{\Sv}{k_0}
     = \bigwedge_{\Sone{x}{l_x}\in\Sv} \bigwedge_{k\in l_x} \Cleq{k}{k_0}
@@ -157,7 +157,7 @@ fresh kind variables and the associated substitution.
 
 \begin{figure}[tp]
   \input{infer/sd-splitting}
-  \caption{Syntax-directed splitting --- environments $\lsplit
+  \caption{Splitting --- environments $\lsplit
     C\E\E\E$; binders $\bsplit Cbbb$}
   \label{fig:sd-splitting}
 \end{figure}

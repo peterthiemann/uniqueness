@@ -36,19 +36,6 @@ a data constructor $K$.
   \centering
   \begin{minipage}{0.45\linewidth}
     \begin{align*}
-      \tsplit{\Ctrue&}{\bvar{x}{k}}{\bvar{x}{k}}{\Cempty}\\
-      \tsplit{\Ctrue&}{\bvar{x}{k}}{\Cempty}{\bvar{x}{k}}\\[4pt]
-      \tsplit{\Ctrue&}{\bvar{\borrow[i]{x}}{k}}
-                      {\bvar{\borrow[i]{x}}{k}}{\bvar{\borrow[i]{x}}{k}}\\
-      \tsplit{\Cleq{k}{\kun_\infty}&}{\bvar{x}{k}}{\bvar{x}{k}}{\bvar{x}{k}}\\[4pt]
-      \tsplit{\Ctrue&}{\bvar{x}{k}}{\bshadow{x}}{\bvar{x}{k}}\\
-      \tsplit{\Ctrue&}{\bvar{x}{k}}{\bshadow[i]{x}}{\bvar{\borrow{x}}{k}}
-    \end{align*}
-    \caption{Type splitting}
-    \label{typesplit}
-  \end{minipage}\quad
-  \begin{minipage}{0.45\linewidth}
-    \begin{align*}
       % \tregion{\Ctrue&}{y}{\bvar{x}{\kvar}}{\bvar{x}{\kvar}}&\text{ when } x \neq y\\
       \tregion{\Ctrue&}{y}
         {\bshadow{x}}{\bshadow{x}}&\text{ when } x \neq y\\
