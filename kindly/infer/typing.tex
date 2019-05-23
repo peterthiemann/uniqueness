@@ -1,12 +1,22 @@
 \begin{mathpar}
+  \inferrule[Scheme]{
+    \inferK{C \Cand C_x} \E \tau {k'} \\
+    \entail C {\Cleq{k'}k}
+  }{
+    \entail C {(\forall \kvar_i \forall (\tvar_j:k_j).\
+      \qual{C_x}{\tau}) \le  k}
+  }
+\end{mathpar}
+\hrulefill
+\begin{mathpar}
   \inferrule[Var]
   { \bvar{x}{
       \forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}
     \in \E \\
     (\kvar'_i),(\tvar'_j) \text{ new} \\
-    \addlin{
-      \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{k_j}}{\tau}{k_\tau}
-    }\\
+    % \addlin{
+    %   \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{k_j}}{\tau}{k_\tau}
+    % }\\
     D = C_x\Cand C_\tau \\
     \unif' =
     \subst{\kvar_i}{\kvar'_i}{} \meet
@@ -15,7 +25,7 @@
     \normalize{D}{\unif'}
   }
   { \inferW
-    {\addlin{\Sone{x}{\unif k_\tau}}}
+    {\addlin{\Sone{x}{\unif\tau}}}
     {(C,\unif|_{\fv{\E}})}{\E}{x}{\unif\tau} }
   \and
   \inferrule[Abs]

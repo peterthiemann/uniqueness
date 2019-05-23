@@ -27,8 +27,9 @@
   { 
     \inferS{C}
     {\E;\bvar{x}{\tau'}}{e}{\tau} \\
-    \addlin{(\forall \bvar{x}{\schm} \in \E)~
-    \entail C {\schm \le k} }
+    \addlin{
+      \forall \bvar{x}{\schm} \in \E
+      .\ (\entail C {\schm \le k}) }
   }
   { \inferS{C}{\E}
     {\lam[k]{x}{e}}{\tau'\tarr{k}\tau} }
