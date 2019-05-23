@@ -1,0 +1,30 @@
+\begin{mathpar}
+  \inferrule[EBorrow]{
+    \bregion{C_r}{}{\svar{x}{\tau}}{b}
+  }{
+    \bregion{C_r}{x}{\E;\svar{x}{\tau}}{\E; b}
+  }
+
+  \inferrule[EBorrow-Check]{
+    \bregion{C_r}{x}{\E;\svar{x}{\tau}}{\E; b} \\
+    \entail{C}{D}
+  }{
+    \lregion{C_r}{x}{\E;\svar{x}{\tau}}{\E; b}
+  }
+\end{mathpar}
+\hrulefill
+\begin{mathpar}
+  \inferrule[BSplit-Mut]{}{
+    \bregion{(\kun_n\lk k\lk\kun_\infty)}{}
+    {\svar[i]{x}{\tau}}{\bvar{\borrow[i]{x}}{\borrowty[i] k{\tau}}}
+  }
+  \and
+  \inferrule[BSplit-Immut]{}{
+    \bregion{(\kaff_n\lk k\lk\kaff_\infty)}{}
+    {\svar[m]{x}{\tau}}{\bvar{\borrow[m]{x}}{\borrowty[m] k{\tau}}}
+  }
+\end{mathpar}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:

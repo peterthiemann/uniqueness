@@ -105,11 +105,11 @@ operator on sets $\esplit{}{}$.
     = \bigwedge_{\Sone{x}{l_x}\in\Sv} \bigwedge_{k\in l_x} \Cleq{k}{k_0}
   }
   \and
-  \inferrule
-  { \forall \bshadow{x} \in \Sv, b'\in\Sv'.\quad
-    \tregion{C_x}{y}{\bshadow{x}}{b'} }
-  { \tregion{(\bigwedge C_x)}{y}{\Sv}{\Sv'} }
-  \and
+  % \inferrule
+  % { \forall \bshadow{x} \in \Sv, b'\in\Sv'.\quad
+  %   \tregion{C_x}{y}{\bshadow{x}}{b'} }
+  % { \bregion{(\bigwedge C_x)}{y}{\Sv}{\Sv'} }
+  % \and
   % \inferrule
   % { \text{if } \operatorname{lenght}(\Sv(x))  = \Cempty{} \wedge  }
   { \Weaken_{(x,k)}(\Sv) =
@@ -161,6 +161,14 @@ fresh kind variables and the associated substitution.
     C\E\E\E$; binders $\bsplit Cbbb$}
   \label{fig:sd-splitting}
 \end{figure}
+
+\begin{figure}[tp]
+  \input{infer/sd-borrowing}
+  \caption{Borrowing --- environments $\lsplit
+    C\E\E\E$; binders $\bsplit Cbbb$}
+  \label{fig:sd-borrowing}
+\end{figure}
+
 
 
 \subsection{Type inference}

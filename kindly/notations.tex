@@ -93,7 +93,8 @@
 \newcommand\esplit[2]{#1 \operatorname{\ltimes} #2}
 \newcommand\lsplit[4]{#1 \vdash_e #2 = #3 \ltimes #4}
 \newcommand\bsplit[4]{#1 \Lleftarrow #2 = #3 \ltimes #4}
-\newcommand\tregion[4]{#1 \Leftarrow #3 \rightsquigarrow_n^{#2} #4}
+\newcommand\lregion[4]{#1 \vdash_e #3 \rightsquigarrow_n^{#2} #4}
+\newcommand\bregion[4]{#1 \Lleftarrow #3 \rightsquigarrow_n^{#2} #4}
 \newcommand\fv[1]{\operatorname{fv}(#1)}
 
 %% Sets
@@ -136,7 +137,7 @@
 
 \newcommand\MBORROW{m}
 \newcommand\IBORROW{i}
-\newcommand\BORROW{b}
+\newcommand\BORROW{\textit{b}}
 \newcommand\Addr\gamma           %addresses
 \newcommand\AddrD\delta
 \newcommand\Loc\ell             %locations

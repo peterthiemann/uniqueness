@@ -82,15 +82,10 @@
   \and
   \inferrule[Region]
   { \svar x {\tau_x} \in \E \\
-    \inferS{C}
-    {(\E \Sdel x); \bvar{\borrow x}{\borrowty k{\tau_x}}}
-    {e}
-    {\tau} \\
+    \addlin{ \bregion{C_r}{x}{\E}{\E'} }\\
+    \inferS{C}{\E'}{e}{\tau} \\
     \inferSK{C}{\E}{\tau}{k_\tau}\\
     \entail C {\Cleq{k_\tau}{\klin_{n-1}}} \\
-    \IF{\iota = m}{
-    \entail C {(\kaff_n\lk k \lk\kaff_\infty)}}{
-    \entail C {(\kun_n\lk k \lk\kun_\infty)}} \\
   }  { \inferS{C}{\E}{\region{x}{e}}{\tau} }
   \and
   %

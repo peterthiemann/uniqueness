@@ -32,23 +32,6 @@ a data constructor $K$.
 
 \TODO{Add system-F like type rules}
 
-\begin{figure*}[!h]
-  \centering
-  \begin{minipage}{0.45\linewidth}
-    \begin{align*}
-      % \tregion{\Ctrue&}{y}{\bvar{x}{\kvar}}{\bvar{x}{\kvar}}&\text{ when } x \neq y\\
-      \tregion{\Ctrue&}{y}
-        {\bshadow{x}}{\bshadow{x}}&\text{ when } x \neq y\\
-      \tregion{(\kun_n\lk\kvar\lk\kun_\infty)&}{x}
-        {\bshadow[i]{x}}{\bvar{\borrow[i]{x}}{\kvar}}\\
-      \tregion{(\kaff_n\lk\kvar\lk\kaff_\infty)&}{x}
-        {\bshadow[m]{x}}{\bvar{\borrow[m]{x}}{\kvar}}
-    \end{align*}
-    \caption{Borrowing}
-    \label{typesplit}
-  \end{minipage}
-\end{figure*}
-
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"

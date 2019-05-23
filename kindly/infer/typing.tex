@@ -98,7 +98,7 @@
   \inferrule[Region]
   { \inferW{\addlin{\Sv'}}{(C',\unif')}{\E}{e}{\tau} \\
     \inferK{(C_\tau,\unif_\tau)}{\E}{\tau}{k_\tau}\\
-    \addlin{ \tregion{C_r}{x}{\Sv}{\Sv'} }\\
+    \addlin{ \bregion{C_r}{x}{\Sv}{\Sv'} }\\
     D = C' \Cand C_\tau \Cand \Cleq{k_\tau}{\klin_{n-1}} \Cand C_r\\
     (C,\unif) = \normalize{D}{\unif' \mostgeneral \unif_\tau}\\    
   }  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{x}{e}}{\tau} }
