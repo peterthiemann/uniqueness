@@ -9,64 +9,6 @@ types.
 
 \subsection{Preliminaries}
 
-\subsubsection{Constraint language}
-
-\newcommand\A{\mathcal A}
-\newcommand\SC{\mathcal S}
-
-Let us note $\A$ our constraint system. The grammar of constraints is
-given in  \cref{grammar:constraint}.
-$\A$ is defined as the smallest cylindric term constraint system that
-satisfies the axiom shown in \cref{rules:entail}.
-We follows the traditional HM(X) formulation
-with conjunctions, projections and type inequalities.
-The new element specific to our approach are kind inequalities.
-Entailment is noted $\entail{C}{D}$, where $D$ is a consequence of the
-constraints $C$.
-We say that $C$ and $D$ are equivalent, noted $C \equivC D$,
-when $\entail{C}{D}$ and $\entail{D}{C}$.
-\TODO{Give the cylindric properties ?}
-
-
-\begin{figure}[tp]
-  \centering
-  \begin{align*}
-    C &::= \Cleq{\tau_1}{\tau_2}
-        \mid \Cleq{k_1}{k_2}
-        \mid C_1 \Cand C_2
-        \mid \Cproj{\tvar}{C}
-        \mid \Cproj{\kvar}{C}
-  \end{align*}
-  \caption{The constraint language}
-  \label{grammar:constraint}
-\end{figure}
-
-\begin{figure*}[tp]
-  \input{infer/lattice}
-  \caption{Lattice inequalities -- $k \lk_\Lat k'$}
-  \input{infer/entails}
-  \caption{Base entailment rules -- $\entail{C}{D}$ }
-  \label{rules:entail}
-\end{figure*}
-
-
-We note $\SC$ the set of solved forms
-which can be used inside type and kind schemes.
-We define $\SC$ as $\A$ quotiented by the relation $\equivC$.
-%
-We consider the existence of a function $\operatorname{normalize}$ which takes
-a constraint in $\A$ and a substitution $\psi$ and returns a constraint
-in solved form $C' \in \SC$,
-and an updated substitution. We detail the implementation
-of the normalization function in \cref{sec:normalize}
-
-% $\mathcal S$ is composed only of kind
-% inequalities \emph{over variables}. For convenience, if $C\in\mathcal S$, we
-% note $C$ as a list of kind inequalities: $\Cleq{\kvar_i}{\kvar_{i'}}^n$.
-% \TODO{Extend the properties of solved forms}
-
-
-
 \subsubsection{Usage maps}
 
 In order to determine if a variable is used in an affine manner, we must track
@@ -147,28 +89,6 @@ fresh kind variables and the associated substitution.
   \label{rules:kinding}
 \end{figure}
 
-\begin{figure}[ht]
-  \centering
-  \input{infer/sd-kinds}
-  \caption{Syntax-directed kind inference --
-    $\inferSK{C}{\E}{\tau}{(\Multi k)k}$}
-  \label{rules:sd-kinding}
-\end{figure}
-
-\begin{figure}[tp]
-  \input{infer/sd-splitting}
-  \caption{Splitting --- environments $\lsplit
-    C\E\E\E$; binders $\bsplit Cbbb$}
-  \label{fig:sd-splitting}
-\end{figure}
-
-\begin{figure}[tp]
-  \input{infer/sd-borrowing}
-  \caption{Borrowing --- environments $\lsplit
-    C\E\E\E$; binders $\bsplit Cbbb$}
-  \label{fig:sd-borrowing}
-\end{figure}
-
 
 
 \subsection{Type inference}
@@ -188,11 +108,6 @@ algorithm. The syntax-directed rules are shown in \cref{rules:typing}.
   \label{rules:typing}
 \end{figure*}
 
-\begin{figure*}[htp]
-  \input{infer/sd-typing}
-  \caption{Syntax-directed typing rules}
-  \label{fig:syntax-directed-typing}
-\end{figure*}
 \subsection{Normal forms and generalization}
 \label{sec:normalize}
 
