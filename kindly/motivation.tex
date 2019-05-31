@@ -31,11 +31,12 @@ Session types are usually defined with the following operators:
 It is well known that binary session types can be embedded into ML languages
 \cite{DBLP:journals/jfp/Padovani17}. We can easily
 embed session types in our language and provide the following API:
-
+%
 \begin{lstlisting}
 type 'S st : lin
 val receive: ('a ? 'S) st -> 'a * 'S st
 val send : ('a:'k). 'a -> ('a ! 'S) st -{'k}> 'S st
+val create : unit -> 'S st * (dual 'S) st
 val close : end st -> unit
 \end{lstlisting}
 
@@ -51,13 +52,59 @@ In the case below, \lstinline{add_service} is inferred to be of type
 
 \begin{lstlisting}
 let add_service ep =
-  let (x, ep) = receive ep in
-  let (y, ep) = receive ep in
+  let x, ep = receive ep in
+  let y, ep = receive ep in
   let ep = send (x + y) ep in
   close ep
-# (int ! int ! int ? end) st -> unit
+# add_service : (int ! int ! int ? end) st -> unit
 \end{lstlisting}
 
+The following code then acts as a client, by sending two messages
+and receiving the result.
+This code is polymorphic in both argument and return types and could thus
+be used to any binary operator.
+%
+\begin{lstlisting}
+let op_client ep x y =
+  let ep = send x ep in
+  let ep = send y ep in
+  let result, ep = receive ep in
+  close ep;
+  result
+# op_client : ('a_1 ? 'a_2 ? 'b ! end) st -> 'a_1 -{lin}> 'a_2 -{lin}> 'b
+\end{lstlisting}
+% The actual answer from the typechecker looks like this:
+% # ('m2:^k2), ('m1:^k1).
+% # (^k1 < ^k) & (lin < ^k) =>
+% # ('m1 ?'m2 ? 'result ! end) st -> 'm1 -{lin}> 'm2 -{^k}> 'result
+
+In addition, this function can be partially
+applied to a channel. Since the closure returned by such a partial
+application captures the channel, it can only be used once.
+This is reflected by the arrow, \lstinline/-{lin}>/, which is the
+type of functions that can only be used once.
+The general form of arrows types in \lang is \lstinline/-{k}>/, where
+\lstinline/kk/ is an arbitrary kind that describes the behavior of
+underlying closure.
+For convenience, we shorten \lstinline/-{un}>/ as \lstinline/->/.
+Note again that the linearity on the arrows was inferred without
+any annotation from the user. In fact, the only difference between the code
+presented so far and the example by
+\citet{DBLP:journals/jfp/Padovani17}
+is the kind annotation on the type definition of \lstinline/st/.
+
+\TODO{more details?}
+
+Finally, we can compose both server and client.
+Failure to fully consume either \lstinline/a/ or \lstinline/b/
+would result in a type error.
+\begin{lstlisting}
+let main1 () =
+  let (a, b) = create () in
+  add_service a;
+  op_client b 1 2
+# main : unit -> int
+\end{lstlisting}
 
 
 % \begin{figure}
@@ -69,6 +116,18 @@ let add_service ep =
 %   \caption{Session primitives}
 %   \label{api:session}
 % \end{figure}
+
+\subsection{Hybrid paradigms}
+
+The programming style used for channels so far, which are passed back
+and forth between functions, is appropriate for purely functional code.
+This style is however fairly bothersome in imperative contexts.
+
+ML languages are often characterised by their hybrid programming style
+that mixes functional styles with imperative side effects. In
+this context, the programming style used for channels is fairly verbose.
+Similarly to Rust, we use {\em borrows} to allow easy imperative
+programming with linear and affine resources.
 
 
 %%% Local Variables:
