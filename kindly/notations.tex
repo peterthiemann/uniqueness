@@ -58,7 +58,8 @@
 \newcommand\app[2]{(#1\ #2)}
 \newcommand\borrow[2][\BORROW]{{\&}^{#1}#2}
 \newcommand\borrowty[3][\BORROW]{{\&}^{#1}(#2,#3)}
-\newcommand\region[2]{\ensuremath{\mathtt{region}_n\ (#1)\ \{#2\}}}
+\newcommand\region[2]{\{\!|#2|\!\}^n_{#1}}
+\newcommand\regionS[1]{\{\!|#1|\!\}}
 
 \newcommand\sborrow[2][\BORROW]{#2{#1}}
 
@@ -68,6 +69,11 @@
 \newcommand\observe[1]{\ensuremath{\mathtt{observe}\ #1}}
 \newcommand\update[2]{\ensuremath{\mathtt{update}\ #1\ #2}}
 \newcommand\destroy[1]{\ensuremath{\mathtt{destroy}\ #1}}
+
+%% Region annotation
+
+\newcommand\Rannot[4][n]{#2 \rightsquigarrow_{#1} #3, #4}
+\newcommand\getBorrows[3]{#1 \oplus #2 = #3}
 
 %% Constraints
 \newcommand\Ctrue{\operatorname{True}}
@@ -98,11 +104,13 @@
 \newcommand\fv[1]{\operatorname{fv}(#1)}
 
 %% Sets
+\newcommand\Sempty{\cdot}
 \newcommand\Sone[2]{\left\{#1 \to #2\right\}}
 \newcommand\Sunion{\operatorname{\cup}}
 \newcommand\Sinter{\operatorname{\cap}}
 \newcommand\Sv{\Sigma}
 \newcommand\Sdel[1]{\setminus \{#1\}}
+\newcommand\Sonly[1]{\big|_{#1}}
 \newcommand\Sadd[1]{\cup \{#1\}}
 
 %% Judgements
