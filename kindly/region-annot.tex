@@ -37,7 +37,7 @@
   \inferrule[AnnotRegion-MutLeft]{}{
     \getBorrows
     {\Sone{x}{\IBORROW}}
-    {\Sone{x}{\IBORROW}}
+    {\Sone{x}{\MBORROW}}
     {\Sone{x}{\IBORROW},\Sone{x}{\MBORROW},\Cempty}
   }
   
@@ -52,7 +52,7 @@
     \getBorrows
     {\Sone{x}{\MBORROW}}
     {\Sone{x}{\MBORROW}}
-    {\Sone{x}{\MBORROW},\Cempty,\Sone{x}{\IBORROW}}
+    {\Sone{x}{\MBORROW},\Cempty,\Sone{x}{\MBORROW}}
   }
 \end{mathpar}
 \hrulefill
