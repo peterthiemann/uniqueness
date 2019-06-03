@@ -89,7 +89,7 @@ underlying closure.
 For convenience, we shorten \lstinline/-{un}>/ as \lstinline/->/.
 Note again that the linearity on the arrows was inferred without
 any annotation from the user. In fact, the only difference between the code
-presented so far and the example by
+presented so far and the examples by
 \citet{DBLP:journals/jfp/Padovani17}
 is the kind annotation on the type definition of \lstinline/st/.
 
@@ -119,16 +119,90 @@ let main1 () =
 
 \subsection{Hybrid paradigms}
 
-The programming style used for channels so far, which are passed back
-and forth between functions, is appropriate for purely functional code.
-This style is however fairly bothersome in imperative contexts.
+The programming style used for channels so far is
+appropriate for purely functional code.
+This style is however fairly bothersome in mutable contexts.
+%
+To make linearity easier to use for imperative programming, we rely on
+{\em borrows}. We present a typical API for mutable affine arrays
+in \cref{sig:array} and an example of use in \cref{ex:array}.
+We can distinguish three type of operations. Firstly,
+function that manipulate the whole
+array such as \lstinline/create/ and \lstinline/free/, and behaves exactly
+like the functions on channel presented in the previous section.
+Second, read-only functions such as \lstinline/get/
+manipulates \emph{immutable} borrows. An immutable borrow over array \lstinline/a/
+is introduced with \lstinline/&a/ and represent a read-only view of the array.
+Finally, mutable functions, such as \lstinline/set/ manipulate
+a \emph{mutable borrow}. Mutable borrows, introduced with \lstinline/&!a/
+represent a read-write view of the array.
 
-ML languages are often characterised by their hybrid programming style
-that mixes functional styles with imperative side effects. In
-this context, the programming style used for channels is fairly verbose.
-Similarly to Rust, we use {\em borrows} to allow easy imperative
-programming with linear and affine resources.
+Multiple immutable borrows can be used concurrently and are considered
+unrestricted (\lstinline/un/).
+A mutable borrow is exclusive, and considered affine (\lstinline/aff/).
+Furthermore, any borrow prevents access to the ``raw'' access
+as long as they are in use. In \cref{ex:array}, on \cref{ex:array:get},
+two immutable borrows are used in the same expression. Once this operation
+is done, the borrows are not used anymore, which allows us to take
+an exclusive immutable borrow to mutate the array on \cref{ex:array:set}.
+Finally we can return the whole array on \cref{ex:array:return} since
+none of the borrows are used anymore.
 
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\linewidth}
+\begin{lstlisting}
+module Array : sig
+  type ('a : un) t : aff
+  
+  val create : ('a : un) => int -> 'a -> 'a t
+  val free : 'a t -> unit
+
+  val length : &('a t) -> int
+
+  val get : &('a t) * int -> 'a
+  val set : &!('a t) * int * 'a -> unit
+end
+\end{lstlisting}
+    \caption{Affine primitives}
+    \label{sig:array}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.5\linewidth}
+\begin{lstlisting}
+let mk_fib_array n =
+  let a = create n 1 in
+  for i = 2 to n - 1 do
+    let x1 = get &a (i-1) + get &a (i-2) in(*@\label{ex:array:get}*)
+    set &!a i(*@\label{ex:array:set}*)
+  done;
+  a(*@\label{ex:array:return}*)
+# mk_fib_array : int -> int Array.t
+\end{lstlisting}
+    \caption{Example of use of affine arrays}
+    \label{ex:array}
+  \end{subfigure}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.5\linewidth}
+\begin{lstlisting}
+let for f a  = 
+  let n = Array.length &a in
+  let rec loop f a i = 
+    if i < n then (
+      f &!a i;
+      loop f &!a (i+1)
+    )
+  in
+  loop f &!a 0
+# Borrowed m ('a Array.t) tt =>
+  (tt -> int -> unit) -> tt -> unit
+\end{lstlisting}
+    \caption{For loop function for affine arrays}
+    \label{ex:array}
+  \end{subfigure}
+\end{figure}
 
 %%% Local Variables:
 %%% mode: latex
