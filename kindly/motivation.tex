@@ -89,7 +89,7 @@ underlying closure.
 For convenience, we shorten \lstinline/-{un}>/ as \lstinline/->/.
 Note again that the linearity on the arrows was inferred without
 any annotation from the user. In fact, the only difference between the code
-presented so far and the example by
+presented so far and the examples by
 \citet{DBLP:journals/jfp/Padovani17}
 is the kind annotation on the type definition of \lstinline/st/.
 
@@ -117,17 +117,221 @@ let main1 () =
 %   \label{api:session}
 % \end{figure}
 
-\subsection{Hybrid paradigms}
+\subsection{Imperative programming}
 
-The programming style used for channels so far, which are passed back
-and forth between functions, is appropriate for purely functional code.
-This style is however fairly bothersome in imperative contexts.
+The programming style used for channels so far is
+appropriate for purely functional code.
+This style is however fairly bothersome in mutable contexts.
+%
+To make linearity easier to use for imperative programming, we rely on
+{\em borrows}. We present a typical API for mutable affine arrays
+in \cref{sig:array} and an example of use in \cref{ex:array}.
+We can distinguish three type of operations. Firstly,
+function that manipulate the whole
+array such as \lstinline/create/ and \lstinline/free/, and behaves exactly
+like the functions on channel presented in the previous section.
+Second, read-only functions such as \lstinline/get/
+manipulates \emph{immutable} borrows. An immutable borrow over array \lstinline/a/
+is introduced with \lstinline/&a/ and represent a read-only view of the array.
+Finally, mutable functions, such as \lstinline/set/ manipulate
+a \emph{mutable borrow}. Mutable borrows, introduced with \lstinline/&!a/
+represent a read-write view of the array.
 
-ML languages are often characterised by their hybrid programming style
-that mixes functional styles with imperative side effects. In
-this context, the programming style used for channels is fairly verbose.
-Similarly to Rust, we use {\em borrows} to allow easy imperative
-programming with linear and affine resources.
+Multiple immutable borrows can be used concurrently and are considered
+unrestricted (\lstinline/un/).
+A mutable borrow is exclusive, and considered affine (\lstinline/aff/).
+Furthermore, any borrow prevents access to the ``raw'' access
+as long as they are in use. In \cref{ex:array}, on \cref{ex:array:get},
+two immutable borrows are used in the same expression. Once this operation
+is done, the borrows are not used anymore, which allows us to take
+an exclusive immutable borrow to mutate the array on \cref{ex:array:set}.
+Finally we can return the whole array on \cref{ex:array:return} since
+none of the borrows are used anymore.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\linewidth}
+\begin{lstlisting}
+module Array : sig
+  type ('a : un) t : aff
+  
+  val create : ('a : un) => int -> 'a -> 'a t
+  val free : 'a t -> unit
+
+  val length : &('a t) -> int
+
+  val get : &('a t) * int -> 'a
+  val set : &!('a t) * int * 'a -> unit
+end
+\end{lstlisting}
+    \caption{Affine primitives}
+    \label{sig:array}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.5\linewidth}
+\begin{lstlisting}
+let mk_fib_array n =
+  let a = create n 1 in
+  for i = 2 to n - 1 do
+    let x = get &a (i-1) + get &a (i-2) in(*@\label{ex:array:get}*)
+    set &!a i x(*@\label{ex:array:set}*)
+  done;
+  a(*@\label{ex:array:return}*)
+# mk_fib_array : int -> int Array.t
+\end{lstlisting}
+    \caption{Example of use of affine arrays}
+    \label{ex:array}
+  \end{subfigure}
+\end{figure}
+
+Naturally, \lang also checks that borrows do not escape their point
+of use through {\em syntactic regions}. The example
+above is reproduce in \cref{ex:array:region} with
+regions explicitly delimited by \lstinline/{| ... |}/.
+\lang ensures that borrows never escape the smallest enclosing
+region.
+For instance, On \cref{ex:array:region:get}, \lstinline/&a/ does
+not escape the region since the borrow is not captured, and the
+region only return integers.
+Regions annotations are automatically inserted by \lang using
+syntactic information such as borrows and binders.
+Users can also annotate regions manually to further restrict the range
+of a borrow. In practice, we have found that regions
+annotations are very rarely needed in common imperative usage.
+
+
+\begin{figure}
+  \centering
+  % \begin{subfigure}{0.6\linewidth}
+\begin{lstlisting}
+let mk_fib_array n =
+  let a = create n 1 in
+  for i = 2 to n - 1 do {|
+    let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
+    set &!a i x
+  |}
+  done;
+  a(*@\label{ex:array:return}*)
+# mk_fib_array : int -> int Array.t
+\end{lstlisting}
+    \caption{Example from \cref{ex:array} with explicit regions}
+    \label{ex:array:region}
+  % \end{subfigure}
+\end{figure}
+
+
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.5\linewidth}
+\begin{lstlisting}
+let for f a  = 
+  let n = Array.length &a in
+  let rec loop f a i = 
+    if i < n then (
+      f &!a i;
+      loop f &!a (i+1)
+    )
+  in
+  loop f &!a 0
+# Borrowed m ('a Array.t) tt =>
+  (tt -> int -> unit) -> tt -> unit
+\end{lstlisting}
+    \caption{For loop function for affine arrays}
+    \label{ex:array}
+  \end{subfigure}
+\end{figure}
+
+\section{Hybrid programming styles}
+
+While purely functional data-structure present numerous advantages in term
+of correctness and ease of use, they sometimes offer worse performances
+than their imperative counterpart. On the other hand, reasoning about imperative
+data-structure in the context of sharing is notoriously difficult.
+%
+In this section, we show how linearity and borrowing allows us to define
+a safe API for hybrid arrays that support both immutable and mutable features,
+and how it can be used to implement a backtracking sudoku solver.
+
+
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.48\linewidth}
+\begin{lstlisting}
+module type HybArray = sig
+  type ('a : un) t : aff
+  
+  val create : ('a : un) => int -> 'a -> 'a t
+  val free : 'a t -> unit
+
+  val length : &('a t) -> int
+  val get : &('a t) * int -> 'a
+
+  val set : &('a t) * int * 'a -> 'a t
+  val set_immut : &!('a t) * int * 'a -> unit
+end
+\end{lstlisting}
+    \caption{Signature}
+    \label{sig:hybarray}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.5\linewidth}
+\begin{lstlisting}
+module Cow : HybArray = struct
+  include Array
+
+  let set (a, i, x) =
+    let f k =
+      if k = i then x else Array.get (a,k)
+    in
+    create (length a) f
+  
+  let set_mut = Array.set
+end
+\end{lstlisting}
+    \caption{Implementation using copy-on-write}
+    \label{ex:cow}
+  \end{subfigure}
+  \caption{Hybrid arrays -- signature and example implementation}
+\end{figure}
+
+
+
+
+\begin{figure}
+  \centering
+\begin{lstlisting}[multicols=2]
+type board = IntSet.t Mat.t
+
+let propagate_line i0 j0 g n =
+  for j = j0+1 to size - 1 do
+    let cell = Mat.get &g (i0 , j) in
+    let cell' = IntSet.remove n cell in
+    Mat.set_mut &!g (i0, j) cell'
+  done
+
+let propagate i j g n =
+  propagate_line i j &!g n;
+  propagate_column i j &!g n;
+  propagate_square i j &!g n
+
+let rec solve i j g =
+  match is_solved &g with
+  | true -> Mat.print &g
+  | false ->
+    let (new_i, new_j) = next_pos (i,j) in
+    let try_solution n =
+      let new_g = 
+        Mat.set &g (i,j) (singleton n) in
+      propagate i j &!new_g n;
+      if is_valid &new_g when
+        solve new_i new_j new_g
+    in
+    let cell = Mat.get &g (i,j) in
+    IntSet.iter try_solution cell
+\end{lstlisting}
+  \caption{Chosen excerpt from the sudoku solver}
+  \label{ex:cow}
+\end{figure}
 
 
 %%% Local Variables:
