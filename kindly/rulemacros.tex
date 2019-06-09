@@ -1,0 +1,161 @@
+\newcommand\ruleSConst[1][i]{%
+  \inferrule[SConst]{}{ \Store, \Perm, \VEnv \vdash c \Downarrow^{#1+1} \Ok{\Store, \Perm, c}}
+}
+
+\newcommand\ruleSVar[1][i]{%
+  \inferrule[SVar]{}{\Store, \Perm, \VEnv \vdash x \Downarrow^{#1+1} \Ok{\Store, \Perm, \VEnv(x)}}
+}
+
+\newcommand\ruleSTApp[1][i]{%
+  \inferrule[STApp]{
+    \VEnv (x) = \Loc \\
+    \Store' (\Loc) = (\VEnv, \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ckx{e}) \\
+    \Perm'' =  \IF{\entail C {k \le \kun}}{ \Perm'}{\Perm'\Sdel\Loc} \\
+    \Loc'\notin\Dom{\Store'}  \\
+    \Store'' = \Store'[\Loc' \mapsto (\VEnv, \subst{\Multi[j]{\tvar}}{\Multi[j]{t}}{\subst {\Multi[i]{\kvar}}{\Multi[i]{k}}{(\lam[k]xe)}}) ]
+  }{\Store, \Perm, \VEnv \vdash  \ivar x{\Multi[i]{k}}{\Multi[j]{\tau}}
+    \Downarrow^{#1+1} \Ok{\Store'', \Perm''\Sadd{\Loc'}, \Loc'}
+  }
+}[]1           
+
+\newcommand\ruleSPLam[1][i]{%
+  \inferrule[SPLam]{
+    \Loc\notin\Dom\Store \\
+    \Store' = \Store[\Loc \mapsto (\VEnv, \ilam  {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe)]
+  }{
+    \Store, \Perm, \VEnv \vdash \ilam
+    {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe \Downarrow^{#1+1} \Store', \Perm\Sadd\Loc, \Loc
+  }
+}
+
+\newcommand\ruleSApp[1][i]{%
+  \inferrule[SApp]{
+    \Store, \Perm, \VEnv \vdash e \Downarrow^{#1} \Store', \Perm', \Loc \\
+    \Store' (\Loc) = (\VEnv'',\lam[k]{x}{e''}) \\
+    \Perm'' = \IF{\entail {} {k \le \kun}}{\Perm'}{ \Perm'\Sdel\Loc}\\
+    \Store', \Perm'', \VEnv \vdash e' \Downarrow^{#1} \Store'', \Perm''', r' \\
+    \Store'', \Perm''', \VEnv''[x\mapsto r'] \vdash e'' \Downarrow^{#1}
+    \Store''', \Perm'''', r
+  }{\Store, \Perm, \VEnv \vdash \app{e}{e'} \Downarrow^{#1+1} \Store''',\Perm'''', r}
+}
+
+\newcommand\ruleSLet[1][i]{%
+  \inferrule[SLet]{
+    \Store, \Perm, \VEnv \vdash e \Downarrow^{#1} \Store', \Perm', r \\
+    \Store', \Perm', \VEnv[x \mapsto r] \vdash e' \Downarrow^{#1} \Store'', \Perm'', r'
+  }{
+    \Store, \Perm, \VEnv \vdash \letin{x}{e}{e'} \Downarrow^{#1+1} \Store'',
+    \Perm'', r'
+  }
+}
+
+\newcommand\ruleSPair[1][i]{%
+  \inferrule[SPair]{
+    \Store, \Perm, \VEnv \vdash e \Downarrow^{#1} \Store', \Perm', r \\
+    \Store', \Perm', \VEnv \vdash e' \Downarrow^{#1} \Store''1, \Perm'', r' \\
+    \Loc\notin\Dom{\Store''} \\
+    \Store''' = \Store''[\Loc \mapsto \introPair[k]r{ r'}]
+  }{
+    \Store, \Perm, \VEnv \vdash \introPair[k]{e}{e'} \Downarrow^{#1+1}
+    \Store''', \Perm''\Sadd\Loc, \Loc
+  }
+}
+
+\newcommand\ruleSMatchLocation[1][i]{%
+  \inferrule[SMatchLocation]{
+    \Store, \Perm, \VEnv \vdash e \Downarrow^{#1} \Store', \Perm', \Loc \\
+    \Store' (\Loc) = \introPair[k]{ \Addr'}{\Addr''} \\
+    \Perm'' = \IF{\entail {} {k \le
+        \kun}}{\Perm'}{\Perm'\Sdel\Loc} \\
+    \Store', \Perm'', \VEnv[x,y \mapsto \Addr', \Addr''] \vdash e'
+    \Downarrow^{#1} \Store'', \Perm''', r''
+  }{
+    \Store, \Perm, \VEnv \vdash \matchin{x,y}{e}{e'} \Downarrow^{#1+1}
+    \Store'', \Perm''',  r''
+  }
+}
+
+\newcommand\ruleSMatchBorrow[1][i]{%
+  \inferrule[SMatchBorrow]{
+    \Store, \Perm, \VEnv \vdash e \Downarrow^{#1} \Store', \Perm', \Addr \\
+    \Addr = \Loc\Multi\BORROW\BORROW \\\\
+    \Store' (\Loc) = \introPair[k]{ \Addr'}{\Addr''} \\
+    \AddrD' = \Addr'\BORROW \\
+    \AddrD'' = \Addr''\BORROW \\\\
+    \Perm'' = (\Perm'\Sdel{\Addr',\Addr''}) \Sadd{\AddrD', \AddrD''} \\
+    \Store', \Perm'', \VEnv[x,y \mapsto \AddrD', \AddrD''] \vdash e'
+    \Downarrow^{#1} \Store''', \Perm''', r''
+  }{
+    \Store, \Perm, \VEnv \vdash \matchin{x,y}{e}{e'} \Downarrow^{#1+1}
+    \Store''', (\Perm''' \Sdel{\AddrD', \AddrD''}) \Sadd{\Addr', \Addr''},  r''
+  }
+}
+
+\newcommand\ruleSRegion[1][i]{%
+  \inferrule[SRegion]{
+    \VEnv (x) = \Addr \\
+    \Addr \in \Perm \\
+    \Store, (\Perm \Sdel\Addr) \Sadd{\sborrow{\Addr}}, \VEnv \vdash e
+    \Downarrow^{#1} \Store', \Perm', r 
+  }{
+    \Store, \Perm, \VEnv \vdash \region{x}{e} \Downarrow^{#1+1} \Store', (\Perm' \Sdel{\sborrow\Addr})\Sadd\Addr, r
+  }
+}
+
+\newcommand\ruleSBorrow[1][i]{%
+  \inferrule[SBorrow]{
+    \VEnv (x) = \Addr \\ \sborrow\Addr \in \Perm
+  }{
+    \Store, \Perm, \VEnv \vdash \borrow{x} \Downarrow^{#1+1} \Store, \Perm, \sborrow\Addr
+  }
+}
+
+\newcommand\ruleSCreate[1][i]{%
+  \inferrule[SCreate]{
+    \Store, \Perm, \VEnv \vdash e \Downarrow^{#1} \Store', \Perm', r\\
+    \Loc\notin \Dom{\Store'} }{
+    \Store, \Perm,\VEnv \vdash \create e \Downarrow^{#1+1} \Store'[\Loc
+    \mapsto \rss{r}], \Perm'\Sadd\Loc, \Loc
+  }
+}
+
+\newcommand\ruleSDestroy[1][i]{%
+  \inferrule[SDestroy]{
+    \Store, \Perm, \VEnv \vdash e \Downarrow^{#1} \Store', \Perm', \Loc \\
+    \Store' (\Loc) = \rss{r}
+  }{
+    \Store, \Perm, \VEnv \vdash \destroy e \Downarrow^{#1+1}
+    \Store'[\Loc\mapsto \blob], \Perm'\Sdel\Loc, ()
+  }
+}
+
+\newcommand\ruleSObserve[1][i]{%
+  \inferrule[SObserve]{
+    \Store, \Perm, \VEnv \vdash e \Downarrow^{#1} \Store', \Perm', \Addr \\
+    \Addr = \Loc\Multi\BORROW\IBORROW \\
+    \Addr \in \Perm' \\
+    \Store' (\Loc) = \rss{r}
+  }{
+    \Store, \Perm, \VEnv \vdash \observe e \Downarrow^{#1+1} \Store', \Perm', r
+  }
+}
+
+\newcommand\ruleSUpdate[1][i]{%
+  \inferrule[SUpdate]{
+    \Store, \Perm, \VEnv \vdash e \Downarrow^{#1} \Store', \Perm', \Addr \\
+    \Addr = \Loc\Multi\MBORROW\MBORROW \\
+    \Store', \Perm', \VEnv \vdash e' \Downarrow^{#1} \Store'', \Perm'', r' \\
+    \Addr \in \Perm'' \\
+    \Store'' (\Loc) = \rss{r} \\
+    \Store''' = \Store''[\Loc \mapsto \rss{r'}]
+  }{
+    \Store, \Perm, \VEnv \vdash \update e {e'} \Downarrow^{#1+1} \Store''',
+    \Perm'' \Sdel{\Addr},  ()
+  }
+}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+
