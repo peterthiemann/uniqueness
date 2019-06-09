@@ -12,7 +12,7 @@
 \newcommand\K[1]{\mathrm{#1}}
 \newcommand\loc{\ell}
 
-% Latice
+% Lattice
 \newcommand\lub\bigvee
 \newcommand\glb\bigwedge
 \newcommand\Lat{\mathcal L}
@@ -158,9 +158,17 @@
 \newcommand\addlin[1]{{\color{blue}{#1}}}
 
 %%
-\newcommand\CType[1]{\operatorname{\text{CType}} (#1)}
+\newcommand\CType[1]{\operatorname{\text{CType}} (#1)} %constant type
+\newcommand\IType[2]{\operatorname{\text{IType}} (\T{#1}, #2)} % implementation type
 \newcommand\Bcompatible{\sim}
-\newcommand\VEnv\rho
+\newcommand\VEnv\gamma          %value environments
+\newcommand\Store\delta % {s}
+\newcommand\SE\Delta            % store typing
+\newcommand\Perm\pi
+
+\newcommand\TimeOut{\operatorname{TimeOut}}
+\newcommand\Ok[1]{\operatorname{Ok} (#1)}
+\newcommand\Nat{\mathbf{N}}
 
 %%% Local Variables:
 %%% mode: latex

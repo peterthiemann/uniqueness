@@ -1,11 +1,11 @@
+\clearpage{}
 \section{Metatheory}
 \label{sec:metatheory}
 
-
-Borrow compatibility $\Multi\MBORROW\Multi\IBORROW \Bcompatible \BORROW$,
-Relating results to types $ \Sigma \vdash r : \tau$,
-Relating results to type schemes $\Sigma \vdash r : \schm$
-\begin{mathpar}
+\begin{itemize}
+\item Borrow compatibility
+  $\Multi\MBORROW\Multi\IBORROW \Bcompatible \BORROW$,
+  \begin{mathpar}
   \inferrule{}{
     \Multi\MBORROW\Multi\IBORROW\IBORROW \Bcompatible \IBORROW
   }
@@ -13,49 +13,112 @@ Relating results to type schemes $\Sigma \vdash r : \schm$
   \inferrule{}{
     \Multi\MBORROW\MBORROW \Bcompatible \MBORROW
   }
-  \\
-  \inferrule{}{ \Sigma \vdash c : \CType{c} }
-
+  \end{mathpar}
+\item Store typing $ \vdash \Store : \SE$,
+  \begin{mathpar}
+    \inferrule{
+      (\forall \Loc \in \Dom\Store)~
+      \vdash \Store (\Loc) : \SE (\Loc)
+    }{ \vdash \Store : \SE }
+  \end{mathpar}
+\item Relating storables to type schemes $\SE \vdash W : \schm$
+  \begin{mathpar}
   \inferrule{
-    \Sigma (\ell) = (\rho, \lam[k]xe) \\\\
-    (\exists C,\E) ~\inferS{C}{\E, (x:\tau_2)}{e}{\tau_1} \\
-    \Sigma \vdash \VEnv : \E
-  }{ \Sigma \vdash \ell : \tau_2\tarr{k}\tau_1 }
+    (\exists \E)~ \SE \vdash \VEnv : \E
+    \\
+    \inferS{C}{\E, (x:\tau_2)}{e}{\tau_1}
+  }{
+    \SE \vdash (\VEnv, \ilam {\Multi\kvar}{\Multi\tvar}Ckx{e})
+    : \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})
+  }
+  \end{mathpar}
+\item Relating storables to types $ \SE \vdash W : \tau$
+  \begin{mathpar}
+    \inferrule{
+      (\exists \E, C)~ \SE \vdash \VEnv : \E
+      \\
+      \inferS{C}{\E, (x:\tau_2)}{e}{\tau_1}
+    }{
+      \SE \vdash (\VEnv, \lam[k]xe) : \tau_2\tarr{k}\tau_1
+    }
 
-  \inferrule{
-    \Sigma (\Loc) = \introPair[k]{r_1}{r_2} \\
-    \Sigma \vdash r_1 : \tau_1 \\
-    \Sigma \vdash r_2 : \tau_2
-  }{ \Sigma \vdash \Loc : \tau_1\times \tau_2}
+    \inferrule{
+      \SE \vdash r_1 : \tau_1 \\
+      \SE \vdash r_2 : \tau_2
+    }{
+      \SE \vdash \introPair[k]{r_1}{r_2} : \tau_1\times \tau_2
+    }
 
-  \inferrule{}{ \Sigma \vdash \Loc : \tapp{t}{\tau^*}}
+    \inferrule{
+      \SE \vdash r : \IType{t}{\tau^*}
+    }{
+      \SE \vdash {[r]} : \tapp{t}{\tau^*}
+    }
+
+    \inferrule{}{
+      \SE \vdash \blob : \tau
+    }
+  \end{mathpar}
+\item Relating  results to types $ \SE \vdash r : \tau$, 
+\item Relating results to type schemes $\SE \vdash r : \schm$
+\item Relating environments to contexts
+  $\SE \vdash \VEnv : \E$
+\end{itemize}
+\begin{mathpar}
+  \inferrule{}{ \SE \vdash c : \CType{c} }
+
+  \inferrule{}{ \SE \vdash \ell : \SE (\ell) }
 
   \inferrule{
     \Multi\MBORROW\Multi\IBORROW \Bcompatible \BORROW \\
-    \Sigma \vdash \Loc  : \tau
-  }{  \Sigma \vdash
+    \SE \vdash \Loc  : \tau
+  }{  \SE \vdash
     \Loc\Multi\MBORROW\Multi\IBORROW : \borrow{\tau}}
   \\
-  \inferrule{
-    \Sigma (\Loc) =  (\VEnv, \ilam {\Multi\kvar}{\Multi\tvar}Ckx{e})
-    \\\\
-    (\exists \E)~ \Sigma \vdash \VEnv : \E
-    \\
-    \inferS{C}{\E, (x:\tau_2)}{e}{\tau_1} 
-  }{
-    \Sigma \vdash
-    \Loc : \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau_2\tarr{k}\tau_1})
-  }
+  \inferrule{}{\SE \vdash \Sempty : \Eempty}
+
+  \inferrule{\SE \vdash \VEnv : \E \\ \SE \vdash r : \schm}
+  {\SE \vdash \VEnv[ x\mapsto r] : \E[x \mapsto \schm] }
 \end{mathpar}
 
 \begin{theorem}
-  Suppose that $\inferS{C}{\E}{e}{\tau}$.
-  Then $\Sigma, \Pi, \rho \vdash {e} \Downarrow \Sigma', \Pi', r$
-  and
+  Suppose that
   \begin{itemize}
-  \item $\Sigma \vdash r : \tau$
+  \item $\inferS{C}{\E}{e}{\tau}$
+  \item $\SE \vdash \VEnv : \E$
+  \item $\vdash \Store : \SE$
+  \item $\Perm \subseteq \Dom\Store$
+  \end{itemize}
+  Then, forall $i\in\Nat$, 
+  \begin{itemize}
+  \item $\Store, \Perm, \VEnv \vdash {e} \Downarrow^i R$
+    where either $R=\TimeOut$ or $R = \Ok{\Store', \Perm', r'}$
+  \item $\SE \le \SE'$, $\Store \le \Store'$, $\vdash \Store' : \SE'$
+  \item $\Perm' \subseteq \Dom{\Store'}$
+  \item $\SE' \vdash r' : \tau$
+  \item If $r' = \Loc'$ then $\Loc' \in \Perm'$
   \end{itemize}
 \end{theorem}
+    
+\begin{proof}
+  The proof is by induction on $i$.
+  The base case is trivial as $\Store, \Perm, \VEnv \vdash {e}
+  \Downarrow^0 \TimeOut$.
+
+  For indexes greater than zero we have a case distinction over all applicable execution
+  rules.
+
+  \textbf{Case }$\ruleSConst$.
+  The claim is immediate.
+
+  \textbf{Case }$\ruleSVar$.
+  The claim is immediate.
+
+  \textbf{Case }$\ruleSTApp$.
+  
+  By assumption, we have that $\Store \vdash \Loc : \E (x)$ so that
+  $\E(x) = \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau_2\tarr{k}\tau_1})$.
+\end{proof}
 
 %%% Local Variables:
 %%% mode: latex
