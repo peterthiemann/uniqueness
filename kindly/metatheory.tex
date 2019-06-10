@@ -61,10 +61,7 @@
   \end{mathpar}
 \item Relating  results to types $ \SE \vdash r : \tau$, 
 \item Relating results to type schemes $\SE \vdash r : \schm$
-\item Relating environments to contexts
-  $\SE \vdash \VEnv : \E$
-\end{itemize}
-\begin{mathpar}
+  \begin{mathpar}
   \inferrule{}{ \SE \vdash c : \CType{c} }
 
   \inferrule{}{ \SE \vdash \ell : \SE (\ell) }
@@ -74,12 +71,19 @@
     \SE \vdash \Loc  : \tau
   }{  \SE \vdash
     \Loc\Multi\MBORROW\Multi\IBORROW : \borrow{\tau}}
-  \\
+  \end{mathpar}
+\item Relating environments to contexts
+  $\SE \vdash \VEnv : \E$
+\end{itemize}
+\begin{mathpar}
   \inferrule{}{\SE \vdash \Sempty : \Eempty}
 
   \inferrule{\SE \vdash \VEnv : \E \\ \SE \vdash r : \schm}
   {\SE \vdash \VEnv[ x\mapsto r] : \E[x \mapsto \schm] }
 \end{mathpar}
+
+We write $\Addresses{\VEnv}$ for the function that extracts addresses
+from the domain of the variable environment. 
 
 \begin{theorem}
   Suppose that
@@ -88,6 +92,7 @@
   \item $\SE \vdash \VEnv : \E$
   \item $\vdash \Store : \SE$
   \item $\Perm \subseteq \Dom\Store$
+  \item $\Addresses{\VEnv} \subseteq \Perm$
   \end{itemize}
   Then, forall $i\in\Nat$, 
   \begin{itemize}
@@ -116,8 +121,48 @@
 
   \textbf{Case }$\ruleSTApp$.
   
-  By assumption, we have that $\Store \vdash \Loc : \E (x)$ so that
-  $\E(x) = \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau_2\tarr{k}\tau_1})$.
+  By assumption, we have that $\SE \vdash \Loc : \E (x)$ so that
+  $\E(x) =
+  \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau_2\tarr{k}\tau_1})$.
+  All conclusions hold: $\SE \le \SE' = \SE[\Loc' \mapsto
+  (\tau_2\tarr{k}\tau_1)[\Multi{\kvar_i} \mapsto \Multi{ k_i},
+  \Multi{\alpha_j} \mapsto \Multi{t_j}]]$;
+  $\vdash \Store' : \SE'$;
+  $\Perm' \subseteq \Dom{\Store'}$;
+  $\DE' \vdash \Loc' : \tau$;
+  and $\Loc' \in \Perm' \Sadd{\Loc'}$.
+
+  \textbf{Case }$\ruleSPLam$.
+
+  By assumption $\SE \vdash     \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe
+  : \schm$ where $\schm =
+  \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$. Let
+  $\SE'  = \SE[\Loc \mapsto \schm]$.
+  Then $\SE \le \SE'$ and $\vdash\Store' : \SE'$.
+  Moreover, $\SE' \vdash \Loc : \schm$ and $\Loc \in \Perm
+  \Sadd{\Loc}$ as required.
+
+  \textbf{Case }$\ruleSApp$.
+
+  \textbf{Case }$\ruleSLet$.
+
+  \textbf{Case }$\ruleSPair$.
+
+  \textbf{Case }$\ruleSMatchLocation$.
+
+  \textbf{Case }$\ruleSMatchBorrow$.
+
+  \textbf{Case }$\ruleSRegion$.
+
+  \textbf{Case }$\ruleSBorrow$.
+
+  \textbf{Case }$\ruleSCreate$.
+
+  \textbf{Case }$\ruleSDestroy$.
+
+  \textbf{Case }$\ruleSObserve$.
+
+  \textbf{Case }$\ruleSUpdate$.
 \end{proof}
 
 %%% Local Variables:
