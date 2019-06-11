@@ -125,11 +125,11 @@ from the domain of the variable environment.
   $\E(x) =
   \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau_2\tarr{k}\tau_1})$.
   All conclusions hold: $\SE \le \SE' = \SE[\Loc' \mapsto
-  (\tau_2\tarr{k}\tau_1)[\Multi{\kvar_i} \mapsto \Multi{ k_i},
-  \Multi{\alpha_j} \mapsto \Multi{t_j}]]$;
+  (\tau_2\tarr{k}\tau_1)[\Multi[i]{\kvar}b \mapsto \Multi[i]{ k},
+  \Multi[j]{\alpha} \mapsto \Multi[j]{t}]]$;
   $\vdash \Store' : \SE'$;
   $\Perm' \subseteq \Dom{\Store'}$;
-  $\DE' \vdash \Loc' : \tau$;
+  $\SE' \vdash \Loc' : \tau$;
   and $\Loc' \in \Perm' \Sadd{\Loc'}$.
 
   \textbf{Case }$\ruleSPLam$.
@@ -143,6 +143,16 @@ from the domain of the variable environment.
   \Sadd{\Loc}$ as required.
 
   \textbf{Case }$\ruleSApp$.
+
+  By assumption $\ruleSDApp$.
+
+  We need to show that
+  \begin{itemize}
+  \item $\SE \vdash \VEnv : \E_1$
+  \item $\vdash \Store : \SE$
+  \item $\Perm \subseteq \Dom\Store$
+  \item $\Addresses{\VEnv} \subseteq \Perm$
+  \end{itemize}
 
   \textbf{Case }$\ruleSLet$.
 

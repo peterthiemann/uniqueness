@@ -32,15 +32,7 @@
   { \inferS{C}{\E}
     {\lam[k]{x}{e}}{\tau'\tarr{k}\tau} }
   \and
-  \inferrule[App]
-  { 
-    \inferS{C}{\E_1}{e_1}{\tau_2 \tarr{k} \tau_1} \\
-    \inferS{C}{\E_2}{e_2}{\tau'_2} \\
-    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
-    \entail C {\Cleq{\tau_2'}{\tau_2}} 
-  }
-  { \inferS{C}
-    {\E}{\app{e_1}{e_2}}{\tau_1} }
+  \ruleSDApp
   \and
   \inferrule[Let]
   { \inferS{C \Cand D}{\E_1}{e_1}{\tau_1} \\

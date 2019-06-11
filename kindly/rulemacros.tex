@@ -31,15 +31,15 @@
 
 \newcommand\ruleSApp[1][i]{%
   \inferrule[SApp]{
-    \Store, \Perm, \VEnv \vdash e
+    \Store, \Perm, \VEnv \vdash e_1
     \Downarrow^{#1} \Ok{\Store', \Perm', \Loc} \\
     \Store' (\Loc) = (\VEnv'',\lam[k]{x}{e''}) \\
     \Perm'' = \IF{\entail {} {k \le \kun}}{\Perm'}{ \Perm'\Sdel\Loc}\\
-    \Store', \Perm'', \VEnv \vdash e'
+    \Store', \Perm'', \VEnv \vdash e_2
     \Downarrow^{#1} \Ok{ \Store'', \Perm''', r'} \\
     \Store'', \Perm''', \VEnv''[x\mapsto r'] \vdash e'' \Downarrow^{#1}
     \Ok{\Store''', \Perm'''', r}
-  }{\Store, \Perm, \VEnv \vdash \app{e}{e'}
+  }{\Store, \Perm, \VEnv \vdash \app{e_1}{e_2}
     \Downarrow^{#1+1} \Ok{\Store''',\Perm'''', r}
   }
 }
@@ -171,6 +171,20 @@
     \Store, \Perm, \VEnv \vdash \update e {e'}
     \Downarrow^{#1+1} \Ok{\Store''', \Perm'' \Sdel{\Addr},  ()}
   }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% syntax-directed typing
+\newcommand\ruleSDApp{%
+  \inferrule[App]
+  { 
+    \inferS{C}{\E_1}{e_1}{\tau_2 \tarr{k} \tau_1} \\
+    \inferS{C}{\E_2}{e_2}{\tau'_2} \\
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
+    \entail C {\Cleq{\tau_2'}{\tau_2}} 
+  }
+  { \inferS{C}
+    {\E}{\app{e_1}{e_2}}{\tau_1} }
 }
 
 %%% Local Variables:
