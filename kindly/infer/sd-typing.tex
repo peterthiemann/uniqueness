@@ -23,14 +23,7 @@
   { \inferS{C}{\E}{x}{\unif\tau}
   }
   \and
-  \inferrule[Abs]
-  { 
-    \inferS{C}
-    {\E;\bvar{x}{\tau'}}{e}{\tau} \\
-    \addlin{\entail{C}{\Cleq{\E}{k}}}
-  }
-  { \inferS{C}{\E}
-    {\lam[k]{x}{e}}{\tau'\tarr{k}\tau} }
+  \ruleSDLam
   \and
   \ruleSDApp
   \and

@@ -32,15 +32,16 @@
 \newcommand\ruleSApp[1][i]{%
   \inferrule[SApp]{
     \Store, \Perm, \VEnv \vdash e_1
-    \Downarrow^{#1} \Ok{\Store', \Perm', \Loc} \\
-    \Store' (\Loc) = (\VEnv'',\lam[k]{x}{e''}) \\
-    \Perm'' = \IF{\entail {} {k \le \kun}}{\Perm'}{ \Perm'\Sdel\Loc}\\
-    \Store', \Perm'', \VEnv \vdash e_2
-    \Downarrow^{#1} \Ok{ \Store'', \Perm''', r'} \\
-    \Store'', \Perm''', \VEnv''[x\mapsto r'] \vdash e'' \Downarrow^{#1}
-    \Ok{\Store''', \Perm'''', r}
+    \Downarrow^{#1} \Ok{\Store_1, \Perm_1, r_1} \\
+    r_1 = \Loc \\
+    \Store_1 (\Loc) = (\VEnv'',\lam[k]{x}{e}) \\\\
+    \Perm_1' = \IF{\entail {} {k \le \kun}}{\Perm_1}{ \Perm_1\Sdel\Loc}\\
+    \Store_1, \Perm_1', \VEnv \vdash e_2
+    \Downarrow^{#1} \Ok{ \Store_2, \Perm_2, r_2} \\
+    \Store_2, \Perm_2, \VEnv''[x\mapsto r_2] \vdash e \Downarrow^{#1}
+    \Ok{\Store_3, \Perm_3, r_3}
   }{\Store, \Perm, \VEnv \vdash \app{e_1}{e_2}
-    \Downarrow^{#1+1} \Ok{\Store''',\Perm'''', r}
+    \Downarrow^{#1+1} \Ok{\Store_3,\Perm_3, r_3}
   }
 }
 
@@ -175,6 +176,17 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% syntax-directed typing
+\newcommand\ruleSDLam{%
+  \inferrule[Abs]
+  { 
+    \inferS{C}
+    {\E;\bvar{x}{\tau_2}}{e}{\tau_1} \\
+    \addlin{\entail{C}{\Cleq{\E}{k}}}
+  }
+  { \inferS{C}{\E}
+    {\lam[k]{x}{e}}{\tau_2\tarr{k}\tau_1} }
+}
+
 \newcommand\ruleSDApp{%
   \inferrule[App]
   { 

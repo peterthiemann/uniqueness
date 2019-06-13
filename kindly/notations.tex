@@ -26,7 +26,7 @@
 \newcommand\tarr[1]{{\xrightarrow{#1}}}
 \newcommand\tapp[2]{#2\ \T{#1}}
 \newcommand\qual[2]{#1 \operatorname{\Rightarrow} #2}
-\newcommand\tyPair[2]{#1 * #2}
+\newcommand\tyPair[3][{}]{#1 \times^{#1} #2}
 
 \newcommand\instanciate[2]{#1 \operatorname{\succ} #2}
 \newcommand\generalize[3]{\operatorname{\text{gen}}(#1,#2,#3)}
@@ -171,6 +171,8 @@
 \newcommand\Ok[1]{\operatorname{Ok} (#1)}
 \newcommand\Nat{\mathbf{N}}
 \newcommand\Addresses[1]{\operatorname{addr} (#1)}
+\newcommand\Reach[2]{\operatorname{reach}_{#1} (#2)}
+\newcommand\Writeable[2]{\operatorname{writeable}_{#1} (#2)}
 
 %%% Local Variables:
 %%% mode: latex
