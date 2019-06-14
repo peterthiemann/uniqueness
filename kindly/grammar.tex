@@ -16,8 +16,8 @@
   |&\ \bvar{\tvar}{\kschm}\tag{Type bindings}\\
   % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
   \htag{Type and kind schemes}
-  \schm ::=&\ \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau})\\
-  \kschm ::=&\ \forall\kvar^*.(\qual{C}{k_i^* \karr k})\\
+  \schm ::=&\ \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau})\\
+  \kschm ::=&\ \forall\Multi\kvar.(\qual{C}{\Multi{k} \karr k})\\
 \end{align*}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.5\linewidth}
@@ -25,7 +25,7 @@
   \htag{Types}
   \tau ::=&\ \tvar\tag{Type variables}\\
   |&\ \tau\tarr{k}\tau\tag{Function types}\\
-  |&\ \tapp{t}{\tau^*}\tag{Type constructors}\\
+  |&\ \tapp{t}{\Multi\tau}\tag{Type constructors}\\
   |&\ \borrow{\tau}\tag{Borrowed Type}\\
   \htag{Kinds}
   k ::=&\ \kvar\tag{Kind variables}\\

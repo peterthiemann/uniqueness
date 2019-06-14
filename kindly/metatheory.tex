@@ -18,7 +18,7 @@
   \begin{mathpar}
     \inferrule{
       (\forall \Loc \in \Dom\Store)~
-      \vdash \Store (\Loc) : \SE (\Loc)
+      \SE \vdash \Store (\Loc) : \SE (\Loc)
     }{ \vdash \Store : \SE }
   \end{mathpar}
 \item Relating storables to type schemes $\SE \vdash W : \schm$
@@ -85,16 +85,26 @@
 \end{mathpar}
 \clearpage{}
 We write $\Addresses{\VEnv}$ for the function that extracts addresses
-from the domain of the variable environment.
+from the range of the variable environment.
 
 We write $\Reach\Store\VEnv \subseteq \Dom\Store$ for the function
 that computes all store addresses reachable from $\Addresses\VEnv$
 assuming that $\Addresses\VEnv \subseteq \Dom\Store$. 
 
 We write $\Writeable\SE\Loc$ to express that the type of location
-$\Loc$ does not permit changing its content. For example, if $\SE
-(\Loc) = \tau_2\tarr{\kun}{\tau_1}$, then $\Loc$ is not writeable. 
-
+$\Loc$ permits changing its content. For example,
+\begin{itemize}
+\item if $\SE (\Loc) =
+  \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$,
+  then $\Loc$ is not writeable.
+\item if $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$, then $\Loc$ is not
+  writeable.
+\item if $\SE (\Loc) = \tyPair{\tau_1}{\tau_2}$, then $\Loc$ is not writeable.
+\item if $\SE (\Loc) = \tapp{t}{\Multi\tau}$, then $\Loc$ is
+  writeable. (IT RATHER SEEMS LIKE $\Loc$'s DECENDANT IS WRITEABLE)
+\item if $\SE (\Loc) = \borrow\tau$, then \dots (THAT SHOULDN'T REALLY
+  BE A STORE TYPE)
+\end{itemize}
 \begin{theorem}
   Suppose that
   \begin{itemize}
