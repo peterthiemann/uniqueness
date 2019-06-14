@@ -75,13 +75,22 @@
     \Loc\Multi\MBORROW\Multi\IBORROW : \borrow{\tau}}
   \end{mathpar}
 \item Relating environments to contexts
-  $\SE \vdash \VEnv : \E$
+  $\SE \vdash \VEnv, \Suspended\VEnv : \E$\\
+  Here $\VEnv$ is the active environment and $\Suspended\VEnv$ is the
+  suspended environment.
 \end{itemize}
 \begin{mathpar}
-  \inferrule{}{\SE \vdash \Sempty : \Eempty}
+  \inferrule{}{\SE \vdash \Sempty, \Sempty : \Eempty}
 
-  \inferrule{\SE \vdash \VEnv : \E \\ \SE \vdash r : \schm}
-  {\SE \vdash \VEnv[ x\mapsto r] : \E[x \mapsto \schm] }
+  \inferrule{\SE \vdash \VEnv, \Suspended\VEnv : \E \\ \SE \vdash r : \schm}
+  {\SE \vdash \VEnv[ x\mapsto r], \Suspended\VEnv : \E\bvar x\schm }
+
+  \inferrule{\SE \vdash \VEnv, \Suspended\VEnv : \E \\ \SE \vdash r : \schm}
+  {\SE \vdash \VEnv, \Suspended\VEnv[ x\mapsto r] : \E\svar x\schm }
+
+  \inferrule{\SE \vdash \VEnv, \Suspended\VEnv : \E \\ \SE \vdash rb : \tau}
+  {\SE \vdash \VEnv[ x\mapsto rb], \Suspended\VEnv : \E\bvar{\borrow
+      x}{\borrowty k{ \tau}} }
 \end{mathpar}
 \clearpage{}
 We write $\Addresses{\VEnv}$ for the function that extracts addresses
@@ -331,8 +340,41 @@ $\Loc$ permits changing its content. For example,
 
   \textbf{Case }$\ruleSMatchBorrow$.
 
+  \clearpage
   \textbf{Case }$\ruleSRegion$.
 
+  We assume that
+  \begin{itemize}
+  \item $\inferS{C}{\E}{\region{x}{e}}{\tau}$
+  \item $\SE \vdash \VEnv, \Suspended\VEnv : \E$ \\
+    ($\Suspended\VEnv$ contains suspended
+    bindings which we cannot use, although we have the permission)
+  \item $\vdash \Store : \SE$
+  \item $\Reach\Store{\VEnv, \Suspended\VEnv} \subseteq \Perm \subseteq \Dom\Store$\\
+    (we have permission for suspended bindings)
+  \item  $\VEnv'$ with $\Addresses{\VEnv'}
+    \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
+    \\
+    (that would be the enclosing frame)
+  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv + \Suspended\VEnv + \VEnv' \vdash {\region{x}{e}}
+    \Downarrow^{i+1} R$ and $R\ne \TimeOut$.
+  \end{itemize}
+  
+  We apply inversion to the typing: 
+  
+  $\ruleSDRegion$.
+
+  We see that $x \in \Dom{\Suspended\VEnv}$.
+  
+  Hence, $\E'$ is mostly equal to $\E$ but $\svar x{\tau_x}$ is
+  replaced by $\bvar {\borrow x}{\borrowty{k} {\tau_x}}$.
+
+  (PT: but how is $k$ chosen? Is it $k_\tau$?)
+
+  So $\VEnv' = \VEnv[x \mapsto \Suspended\VEnv (x)b]$ and
+  $\Suspended\VEnv' = \Suspended\VEnv \Sdel x$
+
+\clearpage
   \textbf{Case }$\ruleSBorrow$.
 
   \textbf{Case }$\ruleSCreate$.

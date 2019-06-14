@@ -1,3 +1,7 @@
+\newcommand\ruleTimeOut{%
+  \inferrule[TimeOut]{}{\Store, \Perm, \VEnv \vdash e \Downarrow^0 \TimeOut}
+}
+
 \newcommand\ruleSConst[1][i]{%
   \inferrule[SConst]{}{ \Store, \Perm, \VEnv \vdash c \Downarrow^{#1+1} \Ok{\Store, \Perm, c}}
 }
@@ -9,6 +13,7 @@
 \newcommand\ruleSTApp[1][i]{%
   \inferrule[STApp]{
     \VEnv (x) = \Loc \\
+    \Loc \in \Perm \\
     \Store (\Loc) = (\VEnv, \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ckx{e}) \\
     \Perm' =  \IF{\entail C {k \le \kun}}{ \Perm}{\Perm\Sdel\Loc} \\
     \Loc'\notin\Dom{\Store}  \\
@@ -20,12 +25,14 @@
 
 \newcommand\ruleSPLam[1][i]{%
   \inferrule[SPLam]{
-    \Loc\notin\Dom\Store \\
-    \Store' = \Store[\Loc \mapsto (\VEnv, \ilam  {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe)]
+    \Loc'\notin\Dom\Store \\
+    \Store' = \Store[\Loc' \mapsto (\VEnv, \ilam
+    {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe)] \\
+    \Perm' = \Perm\Sadd{\Loc'}
   }{
     \Store, \Perm, \VEnv \vdash
     \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe
-    \Downarrow^{#1+1} \Ok{ \Store', \Perm\Sadd\Loc, \Loc}
+    \Downarrow^{#1+1} \Ok{ \Store', \Perm', \Loc'}
   }
 }
 
@@ -59,16 +66,17 @@
 
 \newcommand\ruleSPair[1][i]{%
   \inferrule[SPair]{
-    \Store, \Perm, \VEnv \vdash e
-    \Downarrow^{#1} \Ok{ \Store', \Perm', r} \\
-    \Store', \Perm', \VEnv \vdash e'
-    \Downarrow^{#1} \Ok{\Store''1, \Perm'', r'} \\
-    \Loc\notin\Dom{\Store''} \\
-    \Store''' = \Store''[\Loc \mapsto \introPair[k]r{ r'}]
+    \Store, \Perm, \VEnv \vdash e_1
+    \Downarrow^{#1} \Ok{ \Store_1, \Perm_1, r_1} \\
+    \Store_1, \Perm_1, \VEnv \vdash e_2
+    \Downarrow^{#1} \Ok{\Store_2, \Perm_2, r_2} \\\\
+    \Loc'\notin\Dom{\Store_2} \\
+    \Store_2' = \Store_2[\Loc' \mapsto \introPair[k]{r_1}{ r_2}] \\
+    \Perm_2' = \Perm_2 \Sadd{\Loc'}
   }{
-    \Store, \Perm, \VEnv \vdash \introPair[k]{e}{e'}
+    \Store, \Perm, \VEnv \vdash \introPair[k]{e_1}{e_2}
     \Downarrow^{#1+1}
-    \Ok{\Store''', \Perm''\Sadd\Loc, \Loc}
+    \Ok{\Store_2', \Perm_2', \Loc'}
   }
 }
 
@@ -149,7 +157,7 @@
   \inferrule[SObserve]{
     \Store, \Perm, \VEnv \vdash e
     \Downarrow^{#1} \Ok{ \Store', \Perm', \Addr} \\
-    \Addr = \Loc\Multi\BORROW\IBORROW \\
+    \Addr = \Loc\Multi\MBORROW\Multi\IBORROW\IBORROW \\
     \Addr \in \Perm' \\
     \Store' (\Loc) = \rss{r}
   }{
@@ -197,6 +205,16 @@
   }
   { \inferS{C}
     {\E}{\app{e_1}{e_2}}{\tau_1} }
+}
+
+\newcommand\ruleSDRegion{%
+  \inferrule[Region]
+  { \svar x {\tau_x} \in \E \\
+    \addlin{ \bregion{C_r}{x}{\E}{\E'} }\\
+    \inferS{C}{\E'}{e}{\tau} \\
+    \inferSK{C}{\E}{\tau}{k_\tau}\\
+    \entail C {C_r \Cand \Cleq{k_\tau}{\klin_{n-1}}} \\
+  }  { \inferS{C}{\E}{\region{x}{e}}{\tau} }
 }
 
 %%% Local Variables:

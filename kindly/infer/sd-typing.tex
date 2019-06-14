@@ -64,13 +64,7 @@
   }
   { \inferS{C}{\E}{\borrow{x}}{\borrowty{k}{\tau}} }
   \and
-  \inferrule[Region]
-  { \svar x {\tau_x} \in \E \\
-    \addlin{ \bregion{C_r}{x}{\E}{\E'} }\\
-    \inferS{C}{\E'}{e}{\tau} \\
-    \inferSK{C}{\E}{\tau}{k_\tau}\\
-    \entail C {\Cleq{k_\tau}{\klin_{n-1}}} \\
-  }  { \inferS{C}{\E}{\region{x}{e}}{\tau} }
+  \ruleSDRegion
   \and
   %
   % \inferrule[Elim]
