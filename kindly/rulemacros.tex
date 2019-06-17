@@ -99,15 +99,15 @@
     \Store, \Perm, \VEnv \vdash e
     \Downarrow^{#1} \Ok{ \Store', \Perm', \Addr} \\
     \Addr = \Loc\Multi\BORROW\BORROW \\\\
-    \Store' (\Loc) = \introPair[k]{ \Addr'}{\Addr''} \\
-    \AddrD' = \Addr'\BORROW \\
-    \AddrD'' = \Addr''\BORROW \\\\
-    \Perm'' = (\Perm'\Sdel{\Addr',\Addr''}) \Sadd{\AddrD', \AddrD''} \\
-    \Store', \Perm'', \VEnv[x,y \mapsto \AddrD', \AddrD''] \vdash e'
+    \Store' (\Loc) = \introPair[k]{ \Addr_l}{\Addr_r} \\
+    \Addr_l' = \Addr_l\BORROW \\
+    \Addr_r' = \Addr_r\BORROW \\\\
+    \Perm'' = (\Perm'\Sdel{\Addr_l,\Addr_r}) \Sadd{\Addr'_l, \Addr'_r} \\
+    \Store', \Perm'', \VEnv[x,y \mapsto \Addr'_l, \Addr'_r] \vdash e'
     \Downarrow^{#1} \Ok{ \Store''', \Perm''', r''}
   }{
     \Store, \Perm, \VEnv \vdash \matchin{x,y}{e}{e'} \Downarrow^{#1+1}
-    \Ok{\Store''', (\Perm''' \Sdel{\AddrD', \AddrD''}) \Sadd{\Addr', \Addr''},  r''}
+    \Ok{\Store''', (\Perm''' \Sdel{\Addr'_l, \Addr'_r}) \Sadd{\Addr_l,\Addr_r},  r''}
   }
 }
 

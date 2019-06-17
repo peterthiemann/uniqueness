@@ -142,13 +142,12 @@
 \newcommand\closure[3]{\lambda^{#1} #2 . #3}
 \newcommand\ered[4]{#3\ \operatorname{\Downarrow^{#1}_{#2}}\ #4}
 
-\newcommand\IF[3]{(#1) \Rightarrow #2 \mid #3}
+\newcommand\IF[3]{\text{if } (#1) \text{ then } #2 \text{ else } #3}
 
 \newcommand\MBORROW{m}
 \newcommand\IBORROW{i}
 \newcommand\BORROW{\textit{b}}
-\newcommand\Addr\gamma           %addresses
-\newcommand\AddrD\delta
+\newcommand\Addr\rho           %addresses
 \newcommand\Loc\ell             %locations
 
 \newcommand\blob\bullet
@@ -162,7 +161,7 @@
 \newcommand\CType[1]{\operatorname{\text{CType}} (#1)} %constant type
 \newcommand\IType[2]{\operatorname{\text{IType}} (\T{#1}, #2)} % implementation type
 \newcommand\Bcompatible{\sim}
-\newcommand\VEnv\varrho          %value environments
+\newcommand\VEnv\gamma          %value environments
 \newcommand\Store\delta % {s}
 \newcommand\SE\Delta            % store typing
 \newcommand\Perm\pi
