@@ -241,8 +241,7 @@ let for f a  =
   \end{subfigure}
 \end{figure}
 
-\section{Hybrid programming styles}
-
+\subsection{Hybrid programming style}
 
 In the last few years, new persistent data-structures
 have been introduced which allow transient mutations, but discourage
@@ -365,6 +364,24 @@ and a convenient programming style.
   \label{ex:sudoku}
 \end{figure}
 
+\subsection{Type abstraction and linearity violation}
+
+While linearity allows to verify many properties, it also prevents
+the implementation of functions that are nevertheless safe. Rust addresses this
+issue through the \lstinline/unsafe/ construct, which allows to locally
+ignore linearity constraints. This is essential to build basic
+functions such as splitting strings.
+%
+\lang allows to partially emulate this behavior using type abstraction
+as provided by ML modules.
+In particular, data types can be internally defined as unrestricted but exposed
+as affine.
+
+\TODO{Show example with arrays}
+
+\subsection{Local data-structures with regions}
+
+\TODO{Show a queue attached to a file}
 
 %%% Local Variables:
 %%% mode: latex
