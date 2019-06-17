@@ -243,15 +243,42 @@ let for f a  =
 
 \section{Hybrid programming styles}
 
-While purely functional data-structure present numerous advantages in term
-of correctness and ease of use, they sometimes offer worse performances
-than their imperative counterpart. On the other hand, reasoning about imperative
-data-structure in the context of sharing is notoriously difficult.
+
+In the last few years, new persistent data-structures
+have been introduced which allow transient mutations, but discourage
+non-linear uses either through degraded performances
+\cite{DBLP:conf/ml/ConchonF07} or
+dynamic and static checks \cite{DBLP:journals/pacmpl/Puente17}.
+In particular, persistent Hash-Array-Mapped-Trie has been used with similar
+API in numerous non-pure functional languages (OCaml, Clojure, \dots).
+Affine types allow to formalize the performance contract between the programmer
+and the library, while borrows avoid the need to thread state explicitly,
+as usually required by an immutable API.
 %
 In this section, we show how linearity and borrowing allows us to define
-a safe API for hybrid arrays that support both immutable and mutable features,
+a safe API for persistent arrays that support both immutable and mutable features,
 and how it can be used to implement a backtracking sudoku solver.
 
+Our sudoku solver is implemented by maintaining a grid that represent the state of the game. In order to make backtracking easier, we want to modify the grid immutably. However, while some changes correspond to backtracking points,
+some do not.
+In order to improve performance, we want to implement modifications
+that do not correspond to backtracking points as mutations.
+Thanks to affine types and borrows, we can provide an API that guarantee correct
+uses of mutable and immutable modifications to the board.
+This API is represented by the signature \lstinline/HybArray/ in \cref{sig:hybarray}.
+It only differs with the \lstinline/Array/ module on two points.
+The mutation function is now called \lstinline/set_mut/, with
+a type \lstinline/&!('a t) * int * 'a -> unit/ and
+the \lstinline/set/ operation
+is now of type \lstinline/&('a t) * int * 'a -> 'a t/. It
+takes an \emph{immutable} borrow, which allows it to read the array, and
+return a fresh hybrid array.
+We showcase a very simple implementation of \lstinline/HybArray/ in
+\cref{ex:cow} where hybrid arrays are represented
+as regular arrays with copy-on-write for immutable
+modifications.
+A more elaborate implementation could use persistent arrays
+\cite{DBLP:conf/ml/ConchonF07}.
 
 
 \begin{figure}
@@ -268,7 +295,7 @@ module type HybArray = sig
   val get : &('a t) * int -> 'a
 
   val set : &('a t) * int * 'a -> 'a t
-  val set_immut : &!('a t) * int * 'a -> unit
+  val set_mut : &!('a t) * int * 'a -> unit
 end
 \end{lstlisting}
     \caption{Signature}
@@ -281,7 +308,7 @@ module Cow : HybArray = struct
 
   let set (a, i, x) =
     let f k =
-      if k = i then x else Array.get (a,k)
+      if k = i then x else get (a,k)
     in
     create (length a) f
   
@@ -296,41 +323,46 @@ end
 
 
 
+Thanks to this API, modifications that correspond to backtracking points
+use \lstinline/set/, which allows arbitrary uses of the previous version
+of the array, while other modifications uses \lstinline/set_mut/, which
+forbids uses of the previous version.
+This can be seen in the sudoku solver implementation in \cref{ex:sudoku}.
+The board is represented as a matrix of cells (\cref{line:boardtype}).
+We assume the existence of a \lstinline/Matrix/ module which uses the same API
+as \lstinline/HybArray/ but with two indices.
+Each cell is an integer
+set that represent admissible solutions so far. The sudoku solver will
+iterate on the cells and try each possible solution (\cref{line:try_solution}).
+When a value is picked for the current cell, we use an immutable modification
+to create a backtracking point (\cref{line:immutset}) and propagate
+the changes with the \lstinline/propagate/ function. The \lstinline/propagate/
+function does not need to preserve the previous
+version of the board, and thus uses direct mutation.
+The implementation of \lstinline/propagate/ is split into three parts
+for lines, columns, and square. For concision, only \lstinline/propagate_lines/ is
+presented here (\cref{line:propline}).
+The typing ensures that all the mutations do not compromise
+backtracking, since sharing is only allowed through
+the immutable set functions, which is used for backtracking points.
+
+While we presented our API on simple copy-on-write arrays, this API
+could easily be adapted to any persistent data-structure with
+transient mutability such as RRB Vectors \cite{DBLP:journals/pacmpl/Puente17}
+and persistent HAMT (used notably as Clojure's default associative maps
+\cite{bagwell2001ideal,clojurehamt}) while providing a good performance profile
+and a convenient programming style.
 
 \begin{figure}
   \centering
-\begin{lstlisting}[multicols=2]
-type board = IntSet.t Mat.t
-
-let propagate_line i0 j0 g n =
-  for j = j0+1 to size - 1 do
-    let cell = Mat.get &g (i0 , j) in
-    let cell' = IntSet.remove n cell in
-    Mat.set_mut &!g (i0, j) cell'
-  done
-
-let propagate i j g n =
-  propagate_line i j &!g n;
-  propagate_column i j &!g n;
-  propagate_square i j &!g n
-
-let rec solve i j g =
-  match is_solved &g with
-  | true -> Mat.print &g
-  | false ->
-    let (new_i, new_j) = next_pos (i,j) in
-    let try_solution n =
-      let new_g = 
-        Mat.set &g (i,j) (singleton n) in
-      propagate i j &!new_g n;
-      if is_valid &new_g when
-        solve new_i new_j new_g
-    in
-    let cell = Mat.get &g (i,j) in
-    IntSet.iter try_solution cell
-\end{lstlisting}
+  \begin{minipage}[t]{0.45\linewidth}
+    \lstinputlisting[linerange=1-13]{code/sukodu.affe}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.54\linewidth}
+    \lstinputlisting[linerange=15-28,firstnumber=last]{code/sukodu.affe}
+  \end{minipage}
   \caption{Chosen excerpt from the sudoku solver}
-  \label{ex:cow}
+  \label{ex:sudoku}
 \end{figure}
 
 
