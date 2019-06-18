@@ -81,15 +81,15 @@
   \inferrule[MatchPair]
   { \tvar,\kvar,\tvar',\kvar'\text{ new}\\
     \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
+    \E' = \E;
+      \bvar{x}{\transfm{\tvar}};\bvar{\tvar}{\kvar};
+      \bvar{x'}{\transfm{\tvar'}};\bvar{\tvar'}{\kvar'}\\
     \inferW{\Sv_2}{(C_2,\unif_2)}
-    {\E;
-      \bvar{x}{\tvar};\bvar{\tvar}{\kvar};
-      \bvar{x'}{\tvar'};\bvar{\tvar'}{\kvar'}
-    }{e_2}{\tau_2} \\
+    {\E'}{e_2}{\tau_2} \\
     \unif' = \unif_1 \mostgeneral \unif_2 \\
     \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
     D =
-    C'_1 \Cand C_2 \Cand \Cleq{\tau_1}{\tyPair{\tvar}{\tvar'}}
+    C'_1 \Cand C_2 \Cand \Cleq{\tau_1}{\transfm{\tyPair{\tvar}{\tvar'}}}
     \Cand \addlin{C_s} \\
     (C,\unif) = \normalize{D}{\unif'}\\
   }

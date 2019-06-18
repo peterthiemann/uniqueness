@@ -89,7 +89,7 @@
     \Store', \Perm'', \VEnv[x,y \mapsto \Addr', \Addr''] \vdash e'
     \Downarrow^{#1} \Ok{\Store'', \Perm''', r''}
   }{
-    \Store, \Perm, \VEnv \vdash \matchin{x,y}{e}{e'} \Downarrow^{#1+1}
+    \Store, \Perm, \VEnv \vdash \matchin[\text{id}]{x,y}{e}{e'} \Downarrow^{#1+1}
     \Ok{\Store'', \Perm''',  r''}
   }
 }
@@ -106,7 +106,7 @@
     \Store', \Perm'', \VEnv[x,y \mapsto \Addr'_l, \Addr'_r] \vdash e'
     \Downarrow^{#1} \Ok{ \Store''', \Perm''', r''}
   }{
-    \Store, \Perm, \VEnv \vdash \matchin{x,y}{e}{e'} \Downarrow^{#1+1}
+    \Store, \Perm, \VEnv \vdash \matchin[\&^\BORROW]{x,y}{e}{e'} \Downarrow^{#1+1}
     \Ok{\Store''', (\Perm''' \Sdel{\Addr'_l, \Addr'_r}) \Sadd{\Addr_l,\Addr_r},  r''}
   }
 }

@@ -50,7 +50,7 @@
 \newcommand\ematch{\mathtt{match}}
 \newcommand\ein{\mathtt{in}}
 \newcommand\letin[3]{\elet\ #1 = #2\ \ein\ #3}
-\newcommand\matchin[3]{\ematch\ #1 = #2\ \ein\ #3}
+\newcommand\matchin[4][\etransfm]{\ematch_{#1}\ #2 = #3\ \ein\ #4}
 \newcommand\introPair[3][{}]{({#2},{#3})^{#1}}
 \newcommand\introK[2]{\app{#1}{#2}}
 \newcommand\elimK[2]{\mathtt{elim}_{#1}\ #2}
@@ -62,6 +62,8 @@
 \newcommand\regionS[1]{\{\!|#1|\!\}}
 
 \newcommand\sborrow[2][\BORROW]{#2{#1}}
+\newcommand\etransfm{\phi}
+\newcommand\transfm[1]{\etransfm(#1)}
 
 
 \newcommand\create[1]{\ensuremath{\mathtt{create}\ #1}}
