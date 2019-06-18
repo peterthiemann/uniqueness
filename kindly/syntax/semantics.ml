@@ -50,7 +50,8 @@ type storable
   | STRESOURCE of result
   | STRELEASED
 
-type store = SEmpty | SUpd of store * int * storable
+(* hashtable and next free location *)
+type store = Store of (raw_loc, storable) Hashtbl.t * raw_loc
 
 type perm = address list
 
@@ -77,6 +78,24 @@ let rec vlookup : venv -> ident -> result sem =
 
 let (.![]) = vlookup
 
+
+let salloc : store -> storable -> (raw_loc, store) sem =
+  fun delta w ->
+  match delta with
+    Store (htable, nexta) ->
+      Return (nexta, Store (Hashtbl.add htable nexta w, nexta+1))
+
+let slookup : store -> raw_loc -> storable sem =
+  fun delta ell ->
+  match delta with
+    Store (htable, _) ->
+      try 
+        Return (Hashtbl.find ell)
+      else
+        Error "illegal store location"
+
+let (.![]) = slookup
+
 let getraw_loc : result -> raw_loc sem =
   fun r ->
   match r with
@@ -84,7 +103,12 @@ let getraw_loc : result -> raw_loc sem =
   | _ -> Error ("type mismatch")
 
 let getstpoly : storable -> (venv * kappa list * alpha list * constr * kind * ident * exp) sem =
-  
+  fun w ->
+  match w with
+    STPOLY (gamma, kappas, alphas, cstr, knd, x, e) ->
+      Return (gamma, kappas, alphas, cstr, knd, x, e)
+  | _ ->
+      Error ("expected STPOLY")
 
 let (let*?) : bool -> (unit -> 'b sem) -> 'b sem =
   fun b f ->
@@ -98,11 +122,19 @@ let eval : store -> perm -> venv -> int -> exp -> (store * perm * result) sem =
   | VAR (x) ->
      let* r = gamma.![x] in
      Return (delta, pi, r)
-  | VARINST (x, kappas, tys) ->
+  | VARINST (x, kinds, tys) ->
      let* rx = gamma.![x] in
-     let* rl = getraw_loc rx in (* ℓ ← γ (x) *)
-     let*? () = List.mem (Loc rl) pi in
-     Error "finished"
+     let* ell = getraw_loc rx in (* ℓ ← γ (x) *)
+     let*? () = List.mem (Loc ell) pi in
+     let* w = delta.![ell] in
+     let* (gamma', kappas', alphas', cstr', knd', x', e') = getstpoly w in
+     let pi' = if csubst kinds kappas' cstr' entails csubst kinds kappas' (knd' <= KUNR)) 
+               then pi 
+               else Set.remove pi ell in
+     let w = STCLOSURE (gamma', ksubst kinds kappas' knd', x',
+                        tsubst tys alphas' (ksubst kinds kappas' e'))
+     let* (ell', delta') = salloc delta w
+     Return (delta', Set.add pi' (Loc ell'), ell')
   | _ ->
      Error "not implemented"
 
