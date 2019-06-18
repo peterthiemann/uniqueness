@@ -51,7 +51,8 @@ type storable
   | STRELEASED
 
 (* hashtable and next free location *)
-type store = Store of (raw_loc, storable) Hashtbl.t * raw_loc
+module Store = Map.Make(Int)
+type store = Store of storable Store.t * raw_loc
 
 type perm = address list
 
@@ -79,20 +80,17 @@ let rec vlookup : venv -> ident -> result sem =
 let (.![]) = vlookup
 
 
-let salloc : store -> storable -> (raw_loc, store) sem =
+let salloc : store -> storable -> (raw_loc * store) sem =
   fun delta w ->
   match delta with
     Store (htable, nexta) ->
-      Return (nexta, Store (Hashtbl.add htable nexta w, nexta+1))
+      Return (nexta, Store (Store.add nexta w htable, nexta+1))
 
 let slookup : store -> raw_loc -> storable sem =
-  fun delta ell ->
-  match delta with
-    Store (htable, _) ->
-      try 
-        Return (Hashtbl.find ell)
-      else
-        Error "illegal store location"
+  fun (Store (htable, _)) ell ->
+  match Store.find_opt ell htable with
+  | Some x -> Return x
+  | None -> Error "illegal store location"
 
 let (.![]) = slookup
 
@@ -114,27 +112,34 @@ let (let*?) : bool -> (unit -> 'b sem) -> 'b sem =
   fun b f ->
   if b then f () else Error ("test failed")
 
+type subst 
+let (-->) : 'a -> 'a -> subst = assert false
+let (./{}) : constr -> subst -> constr = assert false
+
 let eval : store -> perm -> venv -> int -> exp -> (store * perm * result) sem =
   fun delta pi gamma i e ->
   match e with
     CONST (c) -> 
-     Return (delta, pi, RCONST (c))
+    Return (delta, pi, RCONST (c))
   | VAR (x) ->
-     let* r = gamma.![x] in
-     Return (delta, pi, r)
+    let* r = gamma.![x] in
+    Return (delta, pi, r)
   | VARINST (x, kinds, tys) ->
-     let* rx = gamma.![x] in
-     let* ell = getraw_loc rx in (* ℓ ← γ (x) *)
-     let*? () = List.mem (Loc ell) pi in
-     let* w = delta.![ell] in
-     let* (gamma', kappas', alphas', cstr', knd', x', e') = getstpoly w in
-     let pi' = if csubst kinds kappas' cstr' entails csubst kinds kappas' (knd' <= KUNR)) 
-               then pi 
-               else Set.remove pi ell in
-     let w = STCLOSURE (gamma', ksubst kinds kappas' knd', x',
-                        tsubst tys alphas' (ksubst kinds kappas' e'))
-     let* (ell', delta') = salloc delta w
-     Return (delta', Set.add pi' (Loc ell'), ell')
+    let* rx = gamma.![x] in
+    let* ell = getraw_loc rx in (* ℓ ← γ (x) *)
+    let*? () = List.mem (Loc ell) pi in
+    let* w = delta.![ell] in
+    let* (gamma', kappas', alphas', cstr', knd', x', e') = getstpoly w in
+    let pi' =
+      if cstr'./{kinds --> kappas'} <=> (knd' <= KUNR)./{kinds --> kappas'}  
+      then pi 
+      else Set.remove pi ell
+    in
+    let w = STCLOSURE (gamma', ksubst kinds kappas' knd', x',
+                       tsubst tys alphas' (ksubst kinds kappas' e')) in
+    let* (ell', delta') = salloc delta w
+        Return (delta', Set.add pi' (Loc ell'), ell') in
+    (??)
   | _ ->
-     Error "not implemented"
+    Error "not implemented"
 
