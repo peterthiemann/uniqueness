@@ -200,14 +200,15 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
   fun delta pi gamma i e ->
   if i=0 then TimeOut else
   match e with
-    CONST (c) -> 
+  | CONST (c) -> 
     Return (delta, pi, RCONST (c))
   | VAR (x) ->
     let* r = gamma.!(x) in
     Return (delta, pi, r)
+  (* rule varinst *)
   | VARINST (x, kinds, tys) ->
     let* rx = gamma.!(x) in
-    let* ell = getraw_loc rx in (* ℓ ← γ (x) *)
+    let* ell = getraw_loc rx in
     let*? () = List.mem (loc ell) pi in
     let* w = delta.![ell] in
     let* (gamma', kappas', cstr', knd', x', e') = getstpoly w in
@@ -220,6 +221,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
                        x', e'./{kinds --> kappas'}) in
     let* (ell', delta') = salloc delta w in
     Return (delta', s_add pi' (loc ell'), RADDR (loc ell'))
+  (**)
   | POLYLAM (kappas, cstr, knd, x', e') ->
      let w = STPOLY (gamma, kappas, cstr, knd, x', e') in
      let* (ell', delta') = salloc delta w in
