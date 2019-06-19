@@ -12,9 +12,9 @@
 
 \newcommand\ruleSTApp[1][i]{%
   \inferrule[STApp]{
-    \VEnv (x) = \Loc \\
+    \Matches \Loc { \VEnv (x)} \\
     \Loc \in \Perm \\
-    \Store (\Loc) = (\VEnv, \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ckx{e}) \\
+    \Matches {(\VEnv, \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ckx{e})}{ \Store (\Loc)}\\
     \Perm' =  \IF{\entail C {k \le \kun}}{ \Perm}{\Perm\Sdel\Loc} \\
     \Loc'\notin\Dom{\Store}  \\
     \Store' = \Store[\Loc' \mapsto (\VEnv, \subst{\Multi[j]{\tvar}}{\Multi[j]{t}}{\subst {\Multi[i]{\kvar}}{\Multi[i]{k}}{(\lam[k]xe)}}) ]
@@ -40,8 +40,8 @@
   \inferrule[SApp]{
     \Store, \Perm, \VEnv \vdash e_1
     \Downarrow^{#1} \Ok{\Store_1, \Perm_1, r_1} \\
-    r_1 = \Loc \\
-    \Store_1 (\Loc) = (\VEnv'',\lam[k]{x}{e}) \\\\
+    \Matches\Loc{ r_1} \\
+    \Matches{ (\VEnv'',\lam[k]{x}{e})}{ \Store_1 (\Loc)}  \\\\
     \Perm_1' = \IF{\entail {} {k \le \kun}}{\Perm_1}{ \Perm_1\Sdel\Loc}\\
     \Store_1, \Perm_1', \VEnv \vdash e_2
     \Downarrow^{#1} \Ok{ \Store_2, \Perm_2, r_2} \\
@@ -54,13 +54,13 @@
 
 \newcommand\ruleSLet[1][i]{%
   \inferrule[SLet]{
-    \Store, \Perm, \VEnv \vdash e
-    \Downarrow^{#1} \Ok{ \Store', \Perm', r} \\
-    \Store', \Perm', \VEnv[x \mapsto r] \vdash e'
-    \Downarrow^{#1} \Ok{ \Store'', \Perm'', r'}
+    \Store, \Perm, \VEnv \vdash e_1
+    \Downarrow^{#1} \Ok{ \Store_1, \Perm_1, r_1} \\
+    \Store_1, \Perm_1, \VEnv[x \mapsto r_1] \vdash e_2
+    \Downarrow^{#1} \Ok{ \Store_2, \Perm_2, r_2}
   }{
-    \Store, \Perm, \VEnv \vdash \letin{x}{e}{e'}
-    \Downarrow^{#1+1} \Ok{\Store'', \Perm'', r'} 
+    \Store, \Perm, \VEnv \vdash \letin{x}{e_1}{e_2}
+    \Downarrow^{#1+1} \Ok{\Store_2, \Perm_2, r_2} 
   }
 }
 
@@ -83,37 +83,40 @@
 \newcommand\ruleSMatchLocation[1][i]{%
   \inferrule[SMatchLocation]{
     \Store, \Perm, \VEnv \vdash e
-    \Downarrow^{#1} \Ok{ \Store', \Perm', \Loc} \\
-    \Store' (\Loc) = \introPair[k]{ \Addr'}{\Addr''} \\
-    \Perm'' = \IF{\entail {} {k \le \kun}}{\Perm'}{\Perm'\Sdel\Loc} \\
-    \Store', \Perm'', \VEnv[x,y \mapsto \Addr', \Addr''] \vdash e'
-    \Downarrow^{#1} \Ok{\Store'', \Perm''', r''}
+    \Downarrow^{#1} \Ok{ \Store_1, \Perm_1, r_1} \\
+    \Matches{\Loc}{r_1}  \\
+    \Matches{\introPair[k]{ \Addr_1}{\Addr_2}}{
+    \Store' (\Loc)} \\
+    \Perm_1' = \IF{\entail {} {k \le \kun}}{\Perm_1}{\Perm_1\Sdel\Loc} \\
+    \Store_1, \Perm_1', \VEnv[x,y \mapsto \Addr_1, \Addr_2] \vdash e_2
+    \Downarrow^{#1} \Ok{\Store_2, \Perm_2, r_2}
   }{
-    \Store, \Perm, \VEnv \vdash \matchin[\text{id}]{x,y}{e}{e'} \Downarrow^{#1+1}
-    \Ok{\Store'', \Perm''',  r''}
+    \Store, \Perm, \VEnv \vdash \matchin[\text{id}]{x,y}{e_1}{e_2} \Downarrow^{#1+1}
+    \Ok{\Store_2, \Perm_2,  r_2}
   }
 }
 
 \newcommand\ruleSMatchBorrow[1][i]{%
   \inferrule[SMatchBorrow]{
-    \Store, \Perm, \VEnv \vdash e
-    \Downarrow^{#1} \Ok{ \Store', \Perm', \Addr} \\
-    \Addr = \Loc\Multi\BORROW\BORROW \\\\
-    \Store' (\Loc) = \introPair[k]{ \Addr_l}{\Addr_r} \\
-    \Addr_l' = \Addr_l\BORROW \\
-    \Addr_r' = \Addr_r\BORROW \\\\
-    \Perm'' = (\Perm'\Sdel{\Addr_l,\Addr_r}) \Sadd{\Addr'_l, \Addr'_r} \\
-    \Store', \Perm'', \VEnv[x,y \mapsto \Addr'_l, \Addr'_r] \vdash e'
-    \Downarrow^{#1} \Ok{ \Store''', \Perm''', r''}
+    \Store, \Perm, \VEnv \vdash e_1
+    \Downarrow^{#1} \Ok{ \Store_1, \Perm_1, r_1} \\
+    \Matches{\Loc\Multi\BORROW\BORROW}{r_1} \\
+    \Matches{\introPair[k]{ \Addr_1}{\Addr_2}} {    \Store' (\Loc)} \\
+    \Addr_1' = \Addr_1\BORROW \\
+    \Addr_2' = \Addr_2\BORROW \\\\
+    \Perm_1' = (\Perm'\Sdel{\Addr_1,\Addr_1}) \Sadd{\Addr'_2, \Addr'_2} \\
+    \Store1, \Perm_1', \VEnv[x,y \mapsto \Addr'_1, \Addr'_2] \vdash e_2
+    \Downarrow^{#1} \Ok{ \Store_2, \Perm_2, r_2} \\
+    \Perm_2' = (\Perm_2 \Sdel{\Addr'_1, \Addr'_2}) \Sadd{\Addr_1,\Addr_2}
   }{
-    \Store, \Perm, \VEnv \vdash \matchin[\&^\BORROW]{x,y}{e}{e'} \Downarrow^{#1+1}
-    \Ok{\Store''', (\Perm''' \Sdel{\Addr'_l, \Addr'_r}) \Sadd{\Addr_l,\Addr_r},  r''}
+    \Store, \Perm, \VEnv \vdash \matchin[\&^\BORROW]{x,y}{e_1}{e_2} \Downarrow^{#1+1}
+    \Ok{\Store_2, \Perm_2',  r_2}
   }
 }
 
 \newcommand\ruleSRegion[1][i]{%
   \inferrule[SRegion]{
-    \VEnv (x) = \Addr \\
+    \Matches\Addr{\VEnv (x)} \\
     \Addr \in \Perm \\
     \Store, (\Perm \Sdel\Addr) \Sadd{\sborrow{\Addr}}, \VEnv \vdash e
     \Downarrow^{#1} \Ok{\Store', \Perm', r}
@@ -125,7 +128,7 @@
 
 \newcommand\ruleSBorrow[1][i]{%
   \inferrule[SBorrow]{
-    \VEnv (x) = \Addr \\ \sborrow\Addr \in \Perm
+    \Matches\Addr{\VEnv (x)} \\ \sborrow\Addr \in \Perm
   }{
     \Store, \Perm, \VEnv \vdash \borrow{x}
     \Downarrow^{#1+1} \Ok{ \Store, \Perm, \sborrow\Addr}
@@ -146,7 +149,7 @@
   \inferrule[SDestroy]{
     \Store, \Perm, \VEnv \vdash e
     \Downarrow^{#1} \Ok{ \Store', \Perm', \Loc} \\
-    \Store' (\Loc) = \rss{r}
+    \Matches{\rss{r}}{\Store' (\Loc)}
   }{
     \Store, \Perm, \VEnv \vdash \destroy e \Downarrow^{#1+1}
     \Ok{\Store'[\Loc\mapsto \blob], \Perm'\Sdel\Loc, ()}
@@ -155,30 +158,32 @@
 
 \newcommand\ruleSObserve[1][i]{%
   \inferrule[SObserve]{
-    \Store, \Perm, \VEnv \vdash e
-    \Downarrow^{#1} \Ok{ \Store', \Perm', \Addr} \\
-    \Addr = \Loc\Multi\MBORROW\Multi\IBORROW\IBORROW \\
-    \Addr \in \Perm' \\
-    \Store' (\Loc) = \rss{r}
+    \Store, \Perm, \VEnv \vdash e_1
+    \Downarrow^{#1} \Ok{ \Store_1, \Perm_1, r_1} \\
+    \Matches\Addr{r_1} \\
+    \Matches{\Loc\Multi\MBORROW\Multi\IBORROW\IBORROW}\Addr \\
+    \Addr \in \Perm_1 \\
+    \Matches{\rss{r}}{\Store_1 (\Loc)}
   }{
     \Store, \Perm, \VEnv \vdash \observe e
-    \Downarrow^{#1+1} \Ok{ \Store', \Perm', r}
+    \Downarrow^{#1+1} \Ok{ \Store_1, \Perm_1, r}
   }
 }
 
 \newcommand\ruleSUpdate[1][i]{%
   \inferrule[SUpdate]{
-    \Store, \Perm, \VEnv \vdash e
-    \Downarrow^{#1} \Ok{ \Store', \Perm', \Addr} \\
-    \Addr = \Loc\Multi\MBORROW\MBORROW \\
-    \Store', \Perm', \VEnv \vdash e'
-    \Downarrow^{#1} \Ok{ \Store'', \Perm'', r'} \\
-    \Addr \in \Perm'' \\
-    \Store'' (\Loc) = \rss{r} \\
-    \Store''' = \Store''[\Loc \mapsto \rss{r'}]
+    \Store, \Perm, \VEnv \vdash e_1
+    \Downarrow^{#1} \Ok{ \Store_1, \Perm_1, r_1} \\
+    \Matches\Addr{r_1} \\
+    \Matches{ \Loc\Multi\MBORROW\MBORROW}\Addr \\
+    \Store_1, \Perm_1, \VEnv \vdash e_2
+    \Downarrow^{#1} \Ok{ \Store_2, \Perm_2, r_2} \\
+    \Addr \in \Perm_2 \\
+    \Matches{\rss{r}}{\Store_2 (\Loc)} \\
+    \Store_2' = \Store_2[\Loc \mapsto \rss{r_2}]
   }{
-    \Store, \Perm, \VEnv \vdash \update e {e'}
-    \Downarrow^{#1+1} \Ok{\Store''', \Perm'' \Sdel{\Addr},  ()}
+    \Store, \Perm, \VEnv \vdash \update {e_1} {e_2}
+    \Downarrow^{#1+1} \Ok{\Store_2', \Perm_2 \Sdel{\Addr},  ()}
   }
 }
 
