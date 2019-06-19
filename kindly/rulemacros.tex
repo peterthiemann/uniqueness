@@ -85,8 +85,7 @@
     \Store, \Perm, \VEnv \vdash e
     \Downarrow^{#1} \Ok{ \Store_1, \Perm_1, r_1} \\
     \Matches{\Loc}{r_1}  \\
-    \Matches{\introPair[k]{ \Addr_1}{\Addr_2}}{
-    \Store' (\Loc)} \\
+    \Matches{\introPair[k]{ \Addr_1}{\Addr_2}}{\Store' (\Loc)} \\
     \Perm_1' = \IF{\entail {} {k \le \kun}}{\Perm_1}{\Perm_1\Sdel\Loc} \\
     \Store_1, \Perm_1', \VEnv[x,y \mapsto \Addr_1, \Addr_2] \vdash e_2
     \Downarrow^{#1} \Ok{\Store_2, \Perm_2, r_2}
@@ -100,7 +99,7 @@
   \inferrule[SMatchBorrow]{
     \Store, \Perm, \VEnv \vdash e_1
     \Downarrow^{#1} \Ok{ \Store_1, \Perm_1, r_1} \\
-    \Matches{\Loc\Multi\BORROW\BORROW}{r_1} \\
+    \Matches{\BORROW\Multi\BORROW\Loc}{r_1} \\
     \Matches{\introPair[k]{ \Addr_1}{\Addr_2}} {    \Store' (\Loc)} \\
     \Addr_1' = \Addr_1\BORROW \\
     \Addr_2' = \Addr_2\BORROW \\\\
@@ -161,7 +160,7 @@
     \Store, \Perm, \VEnv \vdash e_1
     \Downarrow^{#1} \Ok{ \Store_1, \Perm_1, r_1} \\
     \Matches\Addr{r_1} \\
-    \Matches{\Loc\Multi\MBORROW\Multi\IBORROW\IBORROW}\Addr \\
+    \Matches{\IBORROW\Multi\IBORROW\Multi\MBORROW\Loc}\Addr \\
     \Addr \in \Perm_1 \\
     \Matches{\rss{r}}{\Store_1 (\Loc)}
   }{
@@ -175,7 +174,7 @@
     \Store, \Perm, \VEnv \vdash e_1
     \Downarrow^{#1} \Ok{ \Store_1, \Perm_1, r_1} \\
     \Matches\Addr{r_1} \\
-    \Matches{ \Loc\Multi\MBORROW\MBORROW}\Addr \\
+    \Matches{ \MBORROW\Multi\MBORROW\Loc}\Addr \\
     \Store_1, \Perm_1, \VEnv \vdash e_2
     \Downarrow^{#1} \Ok{ \Store_2, \Perm_2, r_2} \\
     \Addr \in \Perm_2 \\
