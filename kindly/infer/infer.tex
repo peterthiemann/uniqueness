@@ -54,10 +54,10 @@ operator on sets $\esplit{}{}$.
   % \and
   % \inferrule
   % { \text{if } \operatorname{lenght}(\Sv(x))  = \Cempty{} \wedge  }
-  { \Weaken_{(x,k)}(\Sv) =
+  { \Weaken_{x}(\Sv) =
     \begin{dcases}
-      \Ctrue& \operatorname{length}(\Sv(x)) = 1\\
-      {k}\lk\kaff_\infty& \text{ otherwise}\\
+      \Ctrue& x\in\Sv\\
+      \Cleq{\Sv(x)}{\kaff_\infty}& \text{ otherwise}\\
     \end{dcases}
 
   }
