@@ -161,21 +161,16 @@ resource.
   \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
   \item $\SE' \vdash r' : \tau$
   \item $\Reach{\Store'}{r'} \subseteq \Perm'$
-  \item For all $\Loc \in \Dom{\Store'} \setminus \Reach{\Store'}{\VEnv}$ it must be that
+  \item Outside: For all $\Loc \in \Dom{\Store'} \setminus \Reach{\Store'}{\VEnv}$ it must be that
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
-  \item For all $\Loc \in \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
+  \item Immutables: For all $\Loc \in \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
-  \item For all $\Loc \in \Reach{\Store'}{\Active\VEnv}$,
-    \begin{itemize}
-    \item if $\Linear{\SE'}\Loc$ then $\Loc\notin\Perm'$.
-    \item $\Store' (\Loc) \ne \Store (\Loc)$ and $\Loc\notin\Perm'$
-    \end{itemize}
-  \item For all $\Loc \in \Reach{\Store'}{\MutableBorrows\VEnv}$,
-    if $\neg\Writeable{\SE'}\Loc $ then
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc \in \Perm \Leftrightarrow \Loc\in\Perm'$ 
+  \item Resources: For all $\Loc \in \Reach{\Store'}{\Active\VEnv}$,
+    if $\Linear{\SE'}\Loc$ then $\Loc\notin\Perm'$.
+  \item No thin air permission: For all $\Loc\in \Perm'$, either $\Loc \in \Dom{\Store'}
+    \setminus \Dom{\Store}$ or $\Loc \in \Perm$.
   \end{itemize}
 \end{theorem}
     
