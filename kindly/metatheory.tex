@@ -118,12 +118,13 @@ $\Loc$ permits changing its content. For example,
   Suppose that
   \begin{itemize}
   \item $\inferS{C}{\E}{e}{\tau}$
-  \item $\SE \vdash \VEnv : \E$
+  \item $\SE \vdash \VEnv, \Suspended\VEnv : \E$
   \item $\vdash \Store : \SE$
-  \item $\Reach\Store{\VEnv} \subseteq \Perm \subseteq \Dom\Store$
-  \item  $\VEnv'$ with $\Addresses{\VEnv'}
-    \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
-  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv + \VEnv' \vdash {e}
+  \item $\Reach\Store{\VEnv} \subseteq \Perm$
+  \item $\Addresses\Perm \subseteq \Dom\Store$
+  % \item  $\VEnv'$ with $\Addresses{\VEnv'}
+  %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
+  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv, \Suspended\VEnv \vdash {e}
     \Downarrow^i R$ and $R\ne \TimeOut$.
   \end{itemize}
   Then,
