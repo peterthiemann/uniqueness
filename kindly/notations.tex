@@ -175,7 +175,9 @@
 \newcommand\Reach[2]{\operatorname{reach}_{#1} (#2)}
 \newcommand\Writeable[2]{\operatorname{writeable}_{#1} (#2)}
 
-\newcommand\Suspended[1]{{#1}_{\#}}
+\newcommand\Active[1]{{#1}_{\bullet}}
+\newcommand\MutableBorrows[1]{{#1}_{\circledast}}
+\newcommand\ImmutableBorrows[1]{{#1}_{\circ}}
 
 \newcommand\Matches[2]{#1 \gets #2}        %pattern matching
 

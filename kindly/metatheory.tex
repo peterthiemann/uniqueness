@@ -4,14 +4,14 @@
 
 \begin{itemize}
 \item Borrow compatibility
-  $\Multi\MBORROW\Multi\IBORROW \Bcompatible \BORROW$,
+  $\Multi\IBORROW\Multi\MBORROW \Bcompatible \BORROW$,
   \begin{mathpar}
   \inferrule{}{
-    \Multi\MBORROW\Multi\IBORROW\IBORROW \Bcompatible \IBORROW
+    \IBORROW\Multi\IBORROW\Multi\MBORROW \Bcompatible \IBORROW
   }
 
   \inferrule{}{
-    \Multi\MBORROW\MBORROW \Bcompatible \MBORROW
+    \MBORROW\Multi\MBORROW \Bcompatible \MBORROW
   }
   \end{mathpar}
 \item Store typing $ \vdash \Store : \SE$,
@@ -69,27 +69,38 @@
   \inferrule{}{ \SE \vdash \ell : \SE (\ell) }
 
   \inferrule{
-    \Multi\MBORROW\Multi\IBORROW \Bcompatible \BORROW \\
+    \Multi\IBORROW\Multi\MBORROW \Bcompatible \BORROW \\
     \SE \vdash \Loc  : \tau
   }{  \SE \vdash
-    \Loc\Multi\MBORROW\Multi\IBORROW : \borrow{\tau}}
+    \Multi\IBORROW\Multi\MBORROW\Loc : \borrow{\tau}}
   \end{mathpar}
-\item Relating environments to contexts
-  $\SE \vdash \VEnv, \Suspended\VEnv : \E$\\
-  Here $\VEnv$ is the active environment and $\Suspended\VEnv$ is the
-  suspended environment.
+\item Relating environments to contexts. Here we consider an
+  environment $\VEnv = (\Active\VEnv, \MutableBorrows\VEnv,
+  \ImmutableBorrows\VEnv)$ as a triple
+  consisting of the active entries in $\Active\VEnv$ and the suspended
+  entries for mutable borrows in $\MutableBorrows\VEnv$ and for
+  immutable borrows in $\ImmutableBorrows\VEnv$. The
+  suspended entries cannot be used directly, but they can be activated
+  by borrowing.
+  
+  $\SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E$
 \end{itemize}
 \begin{mathpar}
-  \inferrule{}{\SE \vdash \Sempty, \Sempty : \Eempty}
+  \inferrule{}{\SE \vdash \Sempty, \Sempty, \Sempty : \Eempty}
 
-  \inferrule{\SE \vdash \VEnv, \Suspended\VEnv : \E \\ \SE \vdash r : \schm}
-  {\SE \vdash \VEnv[ x\mapsto r], \Suspended\VEnv : \E\bvar x\schm }
+  \inferrule{
+    \SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E
+    \\ \SE \vdash r : \schm}
+  {\SE \vdash \Active\VEnv[ x\mapsto r], \MutableBorrows\VEnv , \ImmutableBorrows\VEnv : \E\bvar x\schm }
 
-  \inferrule{\SE \vdash \VEnv, \Suspended\VEnv : \E \\ \SE \vdash r : \schm}
-  {\SE \vdash \VEnv, \Suspended\VEnv[ x\mapsto r] : \E\svar x\schm }
+  \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E \\ \SE \vdash r : \schm}
+  {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv[ x\mapsto r], \ImmutableBorrows\VEnv : \E\svar[\MBORROW] x\schm }
 
-  \inferrule{\SE \vdash \VEnv, \Suspended\VEnv : \E \\ \SE \vdash rb : \tau}
-  {\SE \vdash \VEnv[ x\mapsto rb], \Suspended\VEnv : \E\bvar{\borrow
+  \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E \\ \SE \vdash r : \schm}
+  {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv[ x\mapsto r] : \E\svar[\IBORROW] x\schm }
+
+  \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E \\ \SE \vdash br : \tau}
+  {\SE \vdash \Active\VEnv[ x\mapsto br], \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E\bvar{\borrow
       x}{\borrowty k{ \tau}} }
 \end{mathpar}
 \clearpage{}
@@ -106,9 +117,9 @@ $\Loc$ permits changing its content. For example,
 \item if $\SE (\Loc) =
   \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$,
   then $\Loc$ is not writeable.
-\item if $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$, then $\Loc$ is not
+\item if $\SE (\Loc) = \tau_2\tarr{\kun}{\tau_1}$, then $\Loc$ is not
   writeable.
-\item if $\SE (\Loc) = \tyPair{\tau_1}{\tau_2}$, then $\Loc$ is not writeable.
+\item if $\SE (\Loc) = \tyPair[\kun]{\tau_1}{\tau_2}$, then $\Loc$ is not writeable.
 \item if $\SE (\Loc) = \tapp{t}{\Multi\tau}$, then $\Loc$ is
   writeable. (IT RATHER SEEMS LIKE $\Loc$'s DECENDANT IS WRITEABLE)
 \item if $\SE (\Loc) = \borrow\tau$, then \dots (THAT SHOULDN'T REALLY
@@ -118,13 +129,13 @@ $\Loc$ permits changing its content. For example,
   Suppose that
   \begin{itemize}
   \item $\inferS{C}{\E}{e}{\tau}$
-  \item $\SE \vdash \VEnv, \Suspended\VEnv : \E$
+  \item $\SE \vdash \VEnv : \E$
   \item $\vdash \Store : \SE$
-  \item $\Reach\Store{\VEnv} \subseteq \Perm$
+  \item $\Reach\Store{\Active\VEnv} \subseteq \Perm$
   \item $\Addresses\Perm \subseteq \Dom\Store$
   % \item  $\VEnv'$ with $\Addresses{\VEnv'}
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
-  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv, \Suspended\VEnv \vdash {e}
+  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv \vdash {e}
     \Downarrow^i R$ and $R\ne \TimeOut$.
   \end{itemize}
   Then,
@@ -134,13 +145,16 @@ $\Loc$ permits changing its content. For example,
     $R = \Ok{\Store', \Perm', r'}$  
   \item $\SE \le \SE'$, $\Store \le \Store'$,
     $\vdash \Store' : \SE'$ 
-  \item $\Perm' \subseteq \Dom{\Store'}$
+  \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
   \item $\SE' \vdash r' : \tau$
   \item $\Reach{\Store'}{r'} \subseteq \Perm'$
-  \item For all $\Loc \in \Reach{\Store'}{\VEnv'}$ it must be that
+  \item For all $\Loc \notin \Reach{\Store'}{\VEnv}$ it must be that
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
-  \item For all $\Loc \in \Reach{\Store'}{\VEnv}$,
+  \item For all $\Loc \in \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
+    $\Store' (\Loc) = \Store (\Loc)$
+    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
+  \item For all $\Loc \in \Reach{\Store'}{\Active\VEnv}$,
     if $\neg \Writeable{\SE'}\Loc $ then
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
@@ -347,17 +361,17 @@ $\Loc$ permits changing its content. For example,
   We assume that
   \begin{itemize}
   \item $\inferS{C}{\E}{\region{x}{e}}{\tau}$
-  \item $\SE \vdash \VEnv, \Suspended\VEnv : \E$ \\
-    ($\Suspended\VEnv$ contains suspended
+  \item $\SE \vdash \VEnv, \MutableBorrows\VEnv : \E$ \\
+    ($\MutableBorrows\VEnv$ contains suspended
     bindings which we cannot use, although we have the permission)
   \item $\vdash \Store : \SE$
-  \item $\Reach\Store{\VEnv, \Suspended\VEnv} \subseteq \Perm \subseteq \Dom\Store$\\
+  \item $\Reach\Store{\VEnv, \MutableBorrows\VEnv} \subseteq \Perm \subseteq \Dom\Store$\\
     (we have permission for suspended bindings)
   \item  $\VEnv'$ with $\Addresses{\VEnv'}
     \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
     \\
     (that would be the enclosing frame)
-  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv + \Suspended\VEnv + \VEnv' \vdash {\region{x}{e}}
+  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv + \MutableBorrows\VEnv + \VEnv' \vdash {\region{x}{e}}
     \Downarrow^{i+1} R$ and $R\ne \TimeOut$.
   \end{itemize}
   
@@ -365,15 +379,15 @@ $\Loc$ permits changing its content. For example,
   
   $\ruleSDRegion$.
 
-  We see that $x \in \Dom{\Suspended\VEnv}$.
+  We see that $x \in \Dom{\MutableBorrows\VEnv}$.
   
   Hence, $\E'$ is mostly equal to $\E$ but $\svar x{\tau_x}$ is
   replaced by $\bvar {\borrow x}{\borrowty{k} {\tau_x}}$.
 
   (PT: but how is $k$ chosen? Is it $k_\tau$?)
 
-  So $\VEnv' = \VEnv[x \mapsto \Suspended\VEnv (x)b]$ and
-  $\Suspended\VEnv' = \Suspended\VEnv \Sdel x$
+  So $\VEnv' = \VEnv[x \mapsto \MutableBorrows\VEnv (x)b]$ and
+  $\MutableBorrows\VEnv' = \MutableBorrows\VEnv \Sdel x$
 
 \clearpage
   \textbf{Case }$\ruleSBorrow$.
