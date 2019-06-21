@@ -54,10 +54,10 @@ operator on sets $\esplit{}{}$.
   % \and
   % \inferrule
   % { \text{if } \operatorname{lenght}(\Sv(x))  = \Cempty{} \wedge  }
-  { \Weaken_{(x,k)}(\Sv) =
+  { \Weaken_{x}(\Sv) =
     \begin{dcases}
-      \Ctrue& \operatorname{length}(\Sv(x)) = 1\\
-      {k}\lk\kaff_\infty& \text{ otherwise}\\
+      \Ctrue& x\in\Sv\\
+      \Cleq{\Sv(x)}{\kaff_\infty}& \text{ otherwise}\\
     \end{dcases}
 
   }
@@ -96,7 +96,7 @@ fresh kind variables and the associated substitution.
 We reformulate the HM(X) type inference in the context of our affine type
 system. The main difference compared to HM(X) are noted in \addlin{blue}.
 We note $\inferW{\addlin{\Sigma}}{(C,\unif)}{\bf{\E}}{\bf{e}}{\tau}$ when
-$e$\ as type $\tau$ in $\E$ under the constraints $C$ and unifier $\unif$.
+$e$\ has type $\tau$ in $\E$ under the constraints $C$ and unifier $\unif$.
 $\Sigma$ is a map which associates free variables in $e$ to
 their kinds.
 As before, $\E$ and $e$ are the input parameters of the inference
@@ -140,7 +140,7 @@ The main idea of the algorithm is to first remove all the type equalities
 by using regular Herbrand unification. After that, we only have
 a set of inequalities among kinds, which we can consider as a relation.
 We can then saturate the relation,
-unify all kinds that in the same equivalence classes to obtain
+unify all kinds that are in the same equivalence classes to obtain
 a most general unifier on kind variables,
 remove all existentially quantified variables and
 then minimize back the relation.

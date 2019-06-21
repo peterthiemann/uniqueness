@@ -30,14 +30,14 @@
   \and
   \inferrule[Abs]
   { \tvar,\kvar_\tvar,\kvar\text{ new}\\
-    \inferW{\Sv'}{(C',\unif')}
+    \inferW{\Sv}{(C',\unif')}
     {\E;\bvar{x}{\tvar};\bvar{\tvar}{\kvar_\tvar}}{e}{\tau} \\\\
-    \addlin{ \Sv = \Sv' \Sdel{x} }\\
+    \addlin{ \Sv' = \Sv \Sdel{x} }\\
     D = C'\Cand
-    \addlin{\Cleq{\Sv}{\kvar} \Cand \Weaken_{(x,\kvar_\tvar)}(\Sv')} \\
+    \addlin{\Cleq{\Sv'}{\kvar} \Cand \Weaken_{x}(\Sv)} \\
     (C,\unif) = \normalize{D}{\unif'}
   }
-  { \inferW{\addlin{\Sv}}{(C,\unif\Sdel{\tvar})}{\E}
+  { \inferW{\addlin{\Sv'}}{(C,\unif\Sdel{\tvar})}{\E}
     {\lam{x}{e}}{\unif(\tvar)\tarr{\kvar}\tau} }
   \and
   \inferrule[App]
@@ -59,9 +59,10 @@
     (C'_1,\sigma) = \generalize{C_1}{\unif_1\E}{\tau_1} \\
     \inferW{\Sv_2}{(C_2,\unif_2)}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\
     \unif' = \unif_1 \mostgeneral \unif_2 \\
-    \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
+    \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{(\Sv_2 \Sdel{x})}}\\
     D =
-    C'_1 \Cand C_2 \Cand \addlin{C_s} \\
+    C'_1 \Cand C_2 \Cand
+    \addlin{C_s \Cand \Weaken_{x}(\Sv_2)}  \\
     (C,\unif) = \normalize{D}{\unif'}\\
   }
   { \inferW{\addlin{\Sv}}{(C,\unif|_{\fv{\E}})}
@@ -87,10 +88,10 @@
     \inferW{\Sv_2}{(C_2,\unif_2)}
     {\E'}{e_2}{\tau_2} \\
     \unif' = \unif_1 \mostgeneral \unif_2 \\
-    \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
+    \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{(\Sv_2 \Sdel{x,x'})}}\\
     D =
     C'_1 \Cand C_2 \Cand \Cleq{\tau_1}{\transfm{\tyPair{\tvar}{\tvar'}}}
-    \Cand \addlin{C_s} \\
+    \Cand \addlin{C_s \Cand \Weaken_{x,x'}(\Sv_2)} \\
     (C,\unif) = \normalize{D}{\unif'}\\
   }
   { \inferW{\addlin{\Sv}}{(C,\unif|_{\fv{\E}})}
