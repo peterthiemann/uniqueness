@@ -125,6 +125,19 @@ $\Loc$ permits changing its content. For example,
 \item if $\SE (\Loc) = \borrow\tau$, then \dots (THAT SHOULDN'T REALLY
   BE A STORE TYPE)
 \end{itemize}
+We write $\Linear\SE\Loc$ to express that $\Loc$ points to a linear
+resource.
+\begin{itemize}
+\item if $\SE (\Loc) =
+  \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$,
+  then $\Loc$ is $\dots$
+\item if $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\klin}{k}$, then $\Loc$ is linear.
+\item if $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \klin
+  k$, then $\Loc$ is linear.
+\item if $\SE (\Loc) = \tapp{t}{\Multi\tau}$, then $\Loc$ is linear.
+\item if $\SE (\Loc) = \borrow\tau$, then \dots (THAT SHOULDN'T REALLY
+  BE A STORE TYPE)
+\end{itemize}
 \begin{theorem}
   Suppose that
   \begin{itemize}
@@ -148,16 +161,21 @@ $\Loc$ permits changing its content. For example,
   \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
   \item $\SE' \vdash r' : \tau$
   \item $\Reach{\Store'}{r'} \subseteq \Perm'$
-  \item For all $\Loc \notin \Reach{\Store'}{\VEnv}$ it must be that
+  \item For all $\Loc \in \Dom{\Store'} \setminus \Reach{\Store'}{\VEnv}$ it must be that
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
   \item For all $\Loc \in \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
   \item For all $\Loc \in \Reach{\Store'}{\Active\VEnv}$,
-    if $\neg \Writeable{\SE'}\Loc $ then
+    \begin{itemize}
+    \item if $\Linear{\SE'}\Loc$ then $\Loc\notin\Perm'$.
+    \item $\Store' (\Loc) \ne \Store (\Loc)$ and $\Loc\notin\Perm'$
+    \end{itemize}
+  \item For all $\Loc \in \Reach{\Store'}{\MutableBorrows\VEnv}$,
+    if $\neg\Writeable{\SE'}\Loc $ then
     $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
+    and $\Loc \in \Perm \Leftrightarrow \Loc\in\Perm'$ 
   \end{itemize}
 \end{theorem}
     
