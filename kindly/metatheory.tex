@@ -76,32 +76,44 @@
   \end{mathpar}
 \item Relating environments to contexts. Here we consider an
   environment $\VEnv = (\Active\VEnv, \MutableBorrows\VEnv,
-  \ImmutableBorrows\VEnv)$ as a triple
-  consisting of the active entries in $\Active\VEnv$ and the suspended
+  \ImmutableBorrows\VEnv, \Suspended\VEnv)$ as a quadruple
+  consisting of the active entries in $\Active\VEnv$ and the
   entries for mutable borrows in $\MutableBorrows\VEnv$ and for
-  immutable borrows in $\ImmutableBorrows\VEnv$. The
+  immutable borrows in $\ImmutableBorrows\VEnv$, and suspended entries
+  in $\Suspended\VEnv$. The
   suspended entries cannot be used directly, but they can be activated
   by borrowing.
   
-  $\SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E$
+  $\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+  \ImmutableBorrows\VEnv, \Suspended\VEnv : \E$
 \end{itemize}
 \begin{mathpar}
-  \inferrule{}{\SE \vdash \Sempty, \Sempty, \Sempty : \Eempty}
+  \inferrule{}{\SE \vdash \Sempty, \Sempty, \Sempty, \Sempty : \Eempty}
 
   \inferrule{
-    \SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E
+    \SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E
     \\ \SE \vdash r : \schm}
-  {\SE \vdash \Active\VEnv[ x\mapsto r], \MutableBorrows\VEnv , \ImmutableBorrows\VEnv : \E\bvar x\schm }
+  {\SE \vdash \Active\VEnv[ x\mapsto r], \MutableBorrows\VEnv ,
+    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E\bvar x\schm }
 
-  \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E \\ \SE \vdash r : \schm}
-  {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv[ x\mapsto r], \ImmutableBorrows\VEnv : \E\svar[\MBORROW] x\schm }
+  \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\
+    \SE \vdash r : \schm}
+  { \SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv, \Suspended\VEnv[ x\mapsto r] : \E\svar x\schm }
 
-  \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E \\ \SE \vdash r : \schm}
-  {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv[ x\mapsto r] : \E\svar[\IBORROW] x\schm }
+  \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
+    \IBORROW r : \tau} 
+  {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv[ x\mapsto \IBORROW r], \Suspended\VEnv : \E\bvar{\borrow[\IBORROW] x}{\borrowty[\IBORROW] k{ \tau}} }
 
-  \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E \\ \SE \vdash br : \tau}
-  {\SE \vdash \Active\VEnv[ x\mapsto br], \MutableBorrows\VEnv, \ImmutableBorrows\VEnv : \E\bvar{\borrow
-      x}{\borrowty k{ \tau}} }
+  \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
+    \MBORROW r : \tau}
+  {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv[ x\mapsto \MBORROW r],
+    \ImmutableBorrows\VEnv : \E\bvar{\borrow[\MBORROW] x}{\borrowty[\MBORROW] k{ \tau}} }
 \end{mathpar}
 \clearpage{}
 We write $\Addresses{\VEnv}$ for the function that extracts addresses
@@ -144,7 +156,7 @@ resource.
   \item $\inferS{C}{\E}{e}{\tau}$
   \item $\SE \vdash \VEnv : \E$
   \item $\vdash \Store : \SE$
-  \item $\Reach\Store{\Active\VEnv} \subseteq \Perm$
+  \item $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv} \subseteq \Perm$
   \item $\Addresses\Perm \subseteq \Dom\Store$
   % \item  $\VEnv'$ with $\Addresses{\VEnv'}
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
@@ -169,6 +181,9 @@ resource.
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
   \item Resources: For all $\Loc \in \Reach{\Store'}{\Active\VEnv}$,
     if $\Linear{\SE'}\Loc$ then $\Loc\notin\Perm'$.
+  \item Immutables: For all $\Loc \in \Reach
+    {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\loc$ then
+    $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm'$.
   \item No thin air permission: For all $\Loc\in \Perm'$, either $\Loc \in \Dom{\Store'}
     \setminus \Dom{\Store}$ or $\Loc \in \Perm$.
   \end{itemize}
