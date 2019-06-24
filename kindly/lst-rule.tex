@@ -65,6 +65,13 @@
   {KUNR\ None}{$\kun$}1
   ,
 }
+
+\newcommand\lstsemrule[1]{%
+  \lstinputlisting
+  [style=rule,linerange=rule\ #1-(**)]
+  {syntax/semanticsannotated.ml}
+}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"

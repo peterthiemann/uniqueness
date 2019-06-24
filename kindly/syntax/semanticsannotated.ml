@@ -25,6 +25,7 @@ type kind = KVAR of kind var
           | KUNR of int option
 
 type kappa = kind var           (* kind variable *)
+type kappas = kappa list
 
 type constr = (kind * kind) list
 
@@ -33,12 +34,12 @@ type ty = TYVAR of alpha
         | TYCON of ty list * ident
         | TYBOR of borrow * ty
 
-type schm = SCHM of kappa list * (alpha * kind) list * constr * ty
+type schm = SCHM of kappas * (alpha * kind) list * constr * ty
 
 type exp = CONST of int
          | VAR of ident
          | VARINST of ident * kind list * ty list
-         | POLYLAM of kappa list * constr * kind * ident * exp
+         | POLYLAM of kappas * constr * kind * ident * exp
          | SAPP of exp * exp * splitting
          | SLET of ident * exp * exp * splitting
          | SPAIR of kind * exp * exp * splitting
@@ -53,7 +54,7 @@ type exp = CONST of int
 
 
 type storable
-  = STPOLY of venv * kappa list * constr * kind * ident * exp
+  = STPOLY of venv * kappas * constr * kind * ident * exp
   | STCLOSURE of venv * kind * ident * exp
   | STPAIR of kind * result * result
   | STRESOURCE of result
@@ -156,7 +157,7 @@ let getaddress : result -> address sem =
     RADDR (rho) -> Ok rho
   | _ -> Error ("address expected")
 
-let getstpoly : storable -> (venv * kappa list * constr * kind * ident * exp) sem =
+let getstpoly : storable -> (venv * kappas * constr * kind * ident * exp) sem =
   fun w ->
   match w with
     STPOLY (gamma, kappas, cstr, k, x, e) ->
@@ -226,10 +227,12 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
     let* (ell', delta') = salloc delta w in
     Ok (delta', s_add pi' (loc ell'), RADDR (loc ell'))
   (**)
+  (* rule polylam *)
   | POLYLAM (kappas, cstr, k, x', e') ->
      let w = STPOLY (gamma, kappas, cstr, k, x', e') in
      let* (ell', delta') = salloc delta w in
      Ok (delta', s_add pi (loc ell'), RADDR (loc ell'))
+  (**)
   (* rule sapp *)
   | SAPP (e_1, e_2, split) ->
      let i' = i - 1 in
@@ -245,12 +248,15 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* (delta_3, pi_3, r_3) = eval delta_2 pi_2 (VUpd (gamma', x', r_2)) i' e' in
      Ok (delta_3, pi_3, r_3)
   (**)
+  (* rule slet *)
   | SLET (x, e_1, e_2, split) ->
      let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma split in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 (VUpd (gamma_2, x, r_1)) i' e_2 in
      Ok (delta_2, pi_2, r_2)
+  (**)
+  (* rule spair *)
   | SPAIR (k, e_1, e_2, split) ->
      let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma split in
@@ -259,6 +265,8 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let w = STPAIR (k, r_1, r_2) in
      let* (ell', delta') = salloc delta w in
      Ok (delta_2, s_add pi_2 (loc ell'), RADDR (loc ell'))
+  (**)
+  (* rule smatch *)
   | SMATCH (x, y, e_1, e_2, split) ->
      let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma split in
@@ -271,6 +279,8 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1' (VUpd (VUpd (gamma_2, x, r_1'), y, r_2')) i' e_2 in
      Ok (delta_2, pi_2, r_2)
+  (**)
+  (* rule matchborrow *)
   | MATCHBORROW (x, y, e_1, e_2, split) ->
      let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma split in
@@ -288,6 +298,8 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1' (VUpd (VUpd (gamma_2, x, r_1''), y, r_2'')) i' e_2 in
      let pi_2' = s_add (s_add (s_rem (s_rem pi_2 rho_1') rho_2') rho_1) rho_2 in
      Ok (delta_2, pi_2', r_2)
+  (**)
+  (* rule sregion *)
   | SREGION (e_1, x, n, b) ->
      let i' = i - 1 in
      let* rx = gamma.!(x) in
@@ -298,12 +310,16 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* (delta_1, pi_1, r_1) = eval delta pi' gamma i' e_1 in
      let pi_1' = s_add (s_rem pi rho') rho in
      Ok (delta_1, pi_1', r_1)
+  (**)
+  (* rule sborrow *)
   | SBORROW (b, x) ->
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
      let* rho' = borrowed rho b in
      let*? () = List.mem rho' pi in
      Ok (delta, pi, RADDR rho')
+  (**)
+  (* rule screate *)
   | SCREATE (e_1) ->
      let i' = i - 1 in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
@@ -311,6 +327,8 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* (ell', delta') = salloc delta w in
      let pi_1' = s_add pi (loc ell') in
      Ok (delta_1, pi_1', RADDR (loc ell'))
+  (**)
+  (* rule sdestroy *)
   | SDESTROY (e_1) ->
      let i' = i - 1 in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
@@ -320,6 +338,8 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* delta_1' = delta_1.![ell] <- STRELEASED in
      let pi_1' = s_rem pi_1 (loc ell) in
      Ok (delta_1', pi_1', RVOID)
+  (**)
+  (* rule sobserve *)
   | SOBSERVE (e_1) ->
      let i' = i - 1 in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
@@ -328,6 +348,8 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* w = delta_1.![ell] in
      let* r = getstresource w in
      Ok (delta_1, pi_1, r)
+  (**)
+  (* rule supdate *)
   | SUPDATE (e_1, e_2, split) ->
      let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma split in
@@ -342,4 +364,5 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* delta_2' = delta_2.![ell] <- STRESOURCE (r_2) in
      let pi_2' = s_rem pi_2 rho in
      Ok (delta_2', pi_2', RVOID)
+  (**)
 
