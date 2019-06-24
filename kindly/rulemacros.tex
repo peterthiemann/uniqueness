@@ -226,7 +226,7 @@
 
 
 \newcommand\ruleIVar{%
-  \inferrule[Var]
+  \inferrule[Var$_I$]
   { \bvar{x}{
       \forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}
     \in \E \\
@@ -234,19 +234,17 @@
     % \addlin{
     % \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{k_j}}{\tau}{k_\tau}
     % }\\
-    D = C_x\Cand C_\tau \\
-    \unif' =
-    \subst{\kvar_i}{\kvar'_i}{} \meet
-    \subst{\tvar_j}{\tvar'_j}{} \meet \unif_\tau \\
-    (C,\unif) =
-    \normalize{D}{\unif'}
+    % D = C_x\Cand C_\tau \\
+    \unif = [\kvar_i\mapsto \kvar'_i,\tvar_j \mapsto \tvar'_j]\\
+    (C,\unif') =
+    \normalize{C_x}{\unif}
   }
   { \inferW
-    {\addlin{\Sone{x}{\unif\tau}}}
-    {(C,\unif|_{\fv{\E}})}{\E}{x}{\unif\tau} }
+    {\addlin{\Sone{x}{\unif'\tau}}}
+    {(C,\unif'|_{\fv{\E}})}{\E}{x}{\unif'\tau} }
 }
 \newcommand\ruleIAbs{%
-  \inferrule[Abs]
+  \inferrule[Abs$_I$]
   { \tvar,\kvar_\tvar,\kvar\text{ new}\\
     \inferW{\Sv}{(C',\unif')}
     {\E;\bvar{x}{\tvar};\bvar{\tvar}{\kvar_\tvar}}{e}{\tau} \\\\
@@ -259,7 +257,7 @@
     {\lam{x}{e}}{\unif(\tvar)\tarr{\kvar}\tau} }
 }
 \newcommand\ruleIApp{%
-  \inferrule[App]
+  \inferrule[App$_I$]
   { \tvar,\kvar\text{ new}\\
     \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
     \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\
@@ -274,7 +272,7 @@
     {\E}{\app{e_1}{e_2}}{\unif(\tvar)} }
 }
 \newcommand\ruleILet{%
-  \inferrule[Let]
+  \inferrule[Let$_I$]
   { \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
     (C'_1,\sigma) = \generalize{C_1}{\unif_1\E}{\tau_1} \\
     \inferW{\Sv_2}{(C_2,\unif_2)}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\
@@ -289,7 +287,7 @@
     {\E}{\letin{x}{e_1}{e_2}}{\unif\tau_2} }
 }
 \newcommand\ruleIPair{%
-  \inferrule[Pair]
+  \inferrule[Pair$_I$]
   { \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
     \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\
     \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
@@ -301,7 +299,7 @@
   { \inferW{\Sv}{(C,\unif)}{\E}{\introPair{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }
 }
 \newcommand\ruleIMatch{%
-  \inferrule[MatchPair]
+  \inferrule[MatchPair$_I$]
   { \tvar,\kvar,\tvar',\kvar'\text{ new}\\
     \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
     \E' = \E;
@@ -320,7 +318,7 @@
     {\E}{\matchin{x,x'}{e_1}{e_2}}{\unif\tau_2} }
 }
 \newcommand\ruleIBorrow{%
-  \inferrule[Borrow]
+  \inferrule[Borrow$_I$]
   { \kvar \text{ new}\\
     \inferW{\Sv'}{(C,\unif)}{\E}{x}{\tau} \\
     % k = \operatorname{kind}(\iota)\\
@@ -329,7 +327,7 @@
   { \inferW{\Sv}{(C,\unif)}{\E}{\borrow{x}}{\borrowty{\kvar}{\tau}} }
 }
 \newcommand\ruleIRegion{%
-  \inferrule[Region]
+  \inferrule[Region$_I$]
   { \inferW{\addlin{\Sv'}}{(C',\unif')}{\E}{e}{\tau} \\
     \inferK{(C_\tau,\unif_\tau)}{\E}{\tau}{k_\tau}\\
     \addlin{ \bregion{C_r}{x}{\Sv}{\Sv'} }\\

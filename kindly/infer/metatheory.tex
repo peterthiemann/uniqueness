@@ -10,6 +10,41 @@ of the equivalent statements for HM(X).
 
 \subsubsection{Soundness}
 
+\begin{theorem}[Soundness of inference]
+  Given a type environment $\E$ and a term $e$,\\
+  if $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$
+  then $\inferS{C}{\unif\E|_{dom(\Sv)}}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$.
+\end{theorem}
+\begin{proof}
+  We proceed by induction over the derivation of $\vdash_w$.
+  
+  \textbf{Case }$\ruleIVar$
+  
+  We have $\Sv = \Sone{x}{\unif\tau}$ and
+  $\bvar{x}{\sigma} \in \E$.
+  We pick $\E' = \unif'\E|_{dom(\Sv)} = \{\bvar{x}{\sigma}\}$.
+  Since $\E'\Sdel{x}$ is empty and by definition of normalize, we
+  have that
+  $\entail C \unif'(C_x) \Cand \Cleq{\E'\Sdel{x}}{\kaff_\infty}$.
+  We also have that $\unif' \leq \unif$ and $\unif'C = C$.
+  By $Var$, we obtain $\inferS{C}{\E'}{x}{\unif\tau}$, which concludes.
+  \\
+  
+  \textbf{Case }$\ruleIAbs$
+
+  \textbf{Case }$\ruleIApp$
+
+  \textbf{Case }$\ruleILet$
+
+  \textbf{Case }$\ruleIPair$
+
+  \textbf{Case }$\ruleIMatch$
+
+  \textbf{Case }$\ruleIBorrow$
+
+  \textbf{Case }$\ruleIRegion$
+  
+\end{proof}
 
 
 \subsubsection{Completeness}
