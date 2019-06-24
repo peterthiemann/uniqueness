@@ -150,6 +150,23 @@ resource.
 \item if $\SE (\Loc) = \borrow\tau$, then \dots (THAT SHOULDN'T REALLY
   BE A STORE TYPE)
 \end{itemize}
+We write $\Affine\SE\Loc$ to express that $\Loc$ points to an affine
+resource.
+\begin{itemize}
+\item if $\SE (\Loc) =
+  \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$,
+  then $\Loc$ is $\dots$
+\item if $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\kaff}{k}$, then $\Loc$ is affine.
+\item if $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \kaff
+  k$, then $\Loc$ is affine.
+\item if $\SE (\Loc) = \tapp{t}{\Multi\tau}$, then $\Loc$ is affine.
+\item if $\SE (\Loc) = \borrow[\MBORROW]\tau$, then $\Loc$ is affine
+  \dots (THAT SHOULDN'T REALLY  BE A STORE TYPE)
+\item if $\SE (\Loc) = \borrow[\IBORROW]\tau$, then $\Loc$ is not affine
+  \dots (THAT SHOULDN'T REALLY  BE A STORE TYPE)
+\end{itemize}
+TODO consider using a multiset for $\Reach\Store{}$. For a multiset
+$M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
 \begin{theorem}
   Suppose that
   \begin{itemize}
@@ -160,6 +177,15 @@ resource.
   \item $\Addresses\Perm \subseteq \Dom\Store$
   % \item  $\VEnv'$ with $\Addresses{\VEnv'}
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
+  \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
+    \begin{itemize}
+    \item 
+      For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active\VEnv}} >0$,
+      if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc\REACH= 1$
+    \item For all $\Loc$ such that $
+      \MultiNumber\Loc{\Reach{\Store}{\MutableBorrows\VEnv}} >0$, it
+      must be that $\MultiNumber\Loc\REACH=1$.
+    \end{itemize}
   \item  $i\in\Nat$ and $\Store, \Perm, \VEnv \vdash {e}
     \Downarrow^i R$ and $R\ne \TimeOut$.
   \end{itemize}
@@ -173,19 +199,28 @@ resource.
   \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
   \item $\SE' \vdash r' : \tau$
   \item $\Reach{\Store'}{r'} \subseteq \Perm'$
-  \item Outside: For all $\Loc \in \Dom{\Store'} \setminus \Reach{\Store'}{\VEnv}$ it must be that
+  \item Outside: For all $\Loc \in \Dom{\Store} \setminus
+    \Reach{\Store'}{\VEnv}$ it must be that 
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
-  \item Immutables: For all $\Loc \in \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
+    %% must be \Store because \Perm has no idea of \Perm'
+  \item Immutables: For all $\Loc \in
+    \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
+    $\Loc\in\Dom\Store$, 
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
-  \item Resources: For all $\Loc \in \Reach{\Store'}{\Active\VEnv}$,
-    if $\Linear{\SE'}\Loc$ then $\Loc\notin\Perm'$.
+  \item Resources:
+    Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
+    For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$,
+    \begin{itemize}
+    \item if $\Affine{\SE}\Loc$ then $n\le 1$; if $n=0$, then $\Loc\notin\Perm'$.
+    \item if $\Linear{\SE}\Loc$ then $n=0$ and $\Loc\notin\Perm'$.
+    \end{itemize}
   \item Immutables: For all $\Loc \in \Reach
     {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\loc$ then
     $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm'$.
-  \item No thin air permission: For all $\Loc\in \Perm'$, either $\Loc \in \Dom{\Store'}
-    \setminus \Dom{\Store}$ or $\Loc \in \Perm$.
+  \item No thin air permission: For all $\Loc\in \Perm'$, either $\Loc
+    \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
   \end{itemize}
 \end{theorem}
     
