@@ -7,48 +7,16 @@ of the equivalent statements for HM(X).
 \subsection{Constraints}
 
 
+\begin{lemma}
+  \label{lemma:constrsubst}
+  Given constraints $C$ and $D$ and substitution $\unif$, if $\entail{D}{C}$
+  then $\entail{\unif D}{\unif C}$.
+  \begin{proof}
+    By induction over the entailment judgement.
+  \end{proof}
+\end{lemma}
 
 \subsubsection{Soundness}
-
-\begin{lemma}
-  \label{lemma:typ:weakening}
-  Given a type environment $\E$, $\Sv \subset \E$, a term $e$ and a variable $x\in\E$,\\
-  if $\inferS{C}{\E|_{dom(\Sv)}}{e}{\tau}$
-  then $\inferS{C\Cand \Weaken_{x}(\Sv)}{\E|_{dom(\Sv)\cup\{x\}}}{e}{\tau}$
-
-  \begin{proof}
-    Trivial if $x \in \Sv$. Otherwise, by induction over the typing derivation.
-  \end{proof}
-\end{lemma}
-
-We say that a use map $\Sv$ and an environment $\E$ are equivalent,
-noted $\Sv \equivC \E$, if, for
-any kind $k$, $\Cleq{\Sv}{k} \equivC \Cleq{\E|_{dom(\Sv)}}{k}$.
-
-\begin{lemma}
-  \label{lemma:usemapequiv}
-  Given a type environment $\E$ and a term $e$ such
-  that $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$ and a kind $k$,\\
-  then $\Sv \equivC \E$.
-  \begin{proof}
-    TODO
-  \end{proof}
-\end{lemma}
-
-
-\begin{lemma}
-  \label{lemma:equivsplit}
-  Given a type environment $\E$ and
-  use maps $\Sv_1$, $\Sv_2$,
-  if $\bsplit{C}{\Sv}{\Sv_1}{\Sv_2}$, then
-  there exists $\E_1$, $\E_2$ such that $\Sv_1 \equivC \E_1$,
-  $\Sv_2 \equivC \E_2$,
-  $\Sv \equivC \E$, $\bsplit{C'}{\E}{\E_1}{\E_2}$ and $C\equivC C'$.
-  \begin{proof}
-    TODO
-  \end{proof}
-\end{lemma}
-
 
 \begin{lemma}
   \label{lemma:constrimply}
@@ -60,78 +28,204 @@ any kind $k$, $\Cleq{\Sv}{k} \equivC \Cleq{\E|_{dom(\Sv)}}{k}$.
   \end{proof}
 \end{lemma}
 
+
+\begin{lemma}
+  \label{lemma:typ:weakening}
+  Given a type environment $\E$, $\E' \subset \E$, a term $e$ and a variable $x\in\E$,\\
+  if $\inferS{C}{\E'}{e}{\tau}$
+  then $\inferS{C\Cand \Weaken_{x}(\E')}{\E';\bvar{x}{\E(x)}}{e}{\tau}$
+
+  \begin{proof}
+    Trivial if $x \in \Sv$. Otherwise, by induction over the typing derivation.
+  \end{proof}
+\end{lemma}
+
+% We say that a use map $\Sv$ and an environment $\E$ are equivalent,
+% noted $\Sv \equivC \E$, if, for
+% any kind $k$, $\Cleq{\Sv}{k} \equivC \Cleq{\E|_{dom(\Sv)}}{k}$.
+
+We define a flattened environments, noted $\Eflat\E$ as the environment
+where all the binders are replace by normal ones. More formally:
+\begin{align*}
+  \Eflat\E
+  &= \left\{ \bvar{x}{\tau} \mid
+    \bvar{x}{\tau}\in\E
+    \vee \bvar{\borrow{x}}{\borrowty{k}{\tau}}\in\E
+    \vee \svar{x}{\tau}\in\E
+    \right\}
+\end{align*}
+
+\begin{lemma}
+  \label{lemma:env:flat}
+  Given a type environment $\E$ and a term $e$ such
+  that $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$ 
+  then $\Eflat\Sv \subset \E$.
+  \begin{proof}
+    By induction over the typing derivation.
+  \end{proof}
+\end{lemma}
+
+
+% \begin{lemma}
+%   \label{lemma:equivsplit}
+%   Given a type environment $\E$ and
+%   use maps $\Sv_1$, $\Sv_2$,
+%   if $\bsplit{C}{\Sv}{\Sv_1}{\Sv_2}$, then
+%   there exists $\E_1$, $\E_2$ such that $\Sv_1 \equivC \E_1$,
+%   $\Sv_2 \equivC \E_2$,
+%   $\Sv \equivC \E$, $\bsplit{C'}{\E}{\E_1}{\E_2}$ and $C\equivC C'$.
+%   \begin{proof}
+%     TODO
+%   \end{proof}
+% \end{lemma}
+
+
 \begin{theorem}[Soundness of inference]
   Given a type environment $\E$ and a term $e$,\\
   if $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$
-  then $\inferS{C}{\unif\E|_{dom(\Sv)}}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$.
+  then $\inferS{C}{\unif\Sv}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$.
 \begin{proof}
   \newcommand\mcase[1]{\noindent\textbf{Case }#1\\\noindent}
-  Let $\E' = \unif\E|_{dom(\Sv)}$.
   We proceed by induction over the derivation of $\vdash_w$.
   
   \mcase{$\ruleIVar$}
   
-  We have $\Sv = \Sone{x}{\unif\tau}$ and
-  $\bvar{x}{\sigma} \in \E$.
-  We have $\E' = \{\bvar{x}{\sigma}\}$.
-  Since $\E'\Sdel{x}$ is empty and by definition of normalize, we
+  We have $\Sv = \Sone{x}{\sigma}$.
+  Without loss of generality, we can consider $\unif_x = \unif'|_{\fv{\E}} = \unif'|_{\fv{\sigma}}$.
+  Since $\Sv\Sdel{x}$ is empty and by definition of normalize, we
   have that
-  $\entail C \unif'(C_x) \Cand \Cleq{\E'\Sdel{x}}{\kaff_\infty}$.
-  We also have that $\unif' \leq \unif$ and $\unif'C = C$.
-  By rule $Var$, we obtain $\inferS{C}{\E'}{x}{\unif\tau}$, which concludes.
+  $\entail C \unif'(C_x) \Cand \Cleq{\unif_x\Sv\Sdel{x}}{\kaff_\infty}$,
+  $\unif' \leq \unif$ and $\unif'C = C$.
+  By definition, $\unif_x\unif' = \unif'$.
+  By rule $Var$, we obtain $\inferS{C}{\unif_x\Sv}{x}{\unif_x\unif'\tau}$, which concludes.
   \\
   
   \mcase{$\ruleIAbs$}
 
   By induction, we have
-  $\inferS{C'}{\unif(\E;\bvar{x}{\tvar})|_{dom(\Sv)}}{e}{\tau}$, $\unif C = C$
+  $\inferS{C'}{\Sv_x}{e}{\tau}$, $\unif C = C$
   and $\unif \tau = \tau$.\\
-  By definition of normalize, we have
-  that $\entail{C}{C'\Cand\Cleq{\Sv'}{\kvar} \Cand \Weaken_{x}(\Sv)}$ and
-  $\unif' \leq \unif$.\\
-  By \cref{lemma:typ:weakening,lemma:usemapequiv}, we deduce
-  that
-  $\inferS{C'\Cand \Weaken_{x}(\Sv)}{\E';\bvar{x}{\unif(\tvar)}}{e}{\tau}$
-  and $\entail{C}{\Cleq{\E'}{\unif\kvar}}$.\\
+  By definition of normalize and \cref{lemma:constrsubst}, we have
+  $\entail{C}{C'\Cand\Cleq{\unif'\Sv}{\unif'\kvar} \Cand \Weaken_{x}(\unif'\Sv_x)}$ and
+  $\unif \leq \unif'$.
+  By \cref{lemma:constrsubst}, we have $\entail{C}{\Cleq{\Sv}{\unif\kvar}}$.
+  
+  We now consider two cases:
+  \begin{enumerate}[leftmargin=*,noitemsep,topsep=5pt]
+  \item If $x\in\Sv_x$, then $\Weaken_{x}(\unif\Sv_x) = \Ctrue$
+    and by \cref{lemma:env:flat}, $\Sv_x = \Sv;\bvar{x}{\alpha}$.
+    We can deduce that
+    $\inferS{C'\Cand \Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x)}{\unif\Sv;\bvar{x}{\unif(\tvar)}}{e}{\tau}$.
+  \item If $x\notin\Sv_x$, then $\Sv = \Sv_x$ and 
+    $\Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x) = \Cleq{\unif\tvar}{\kaff_\infty}$.
+    By \cref{lemma:typ:weakening},
+    we have that
+    $\inferS{C'\Cand \Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x)}{\unif\Sv;\bvar{x}{\unif(\tvar)}}{e}{\tau}$
+  \end{enumerate}
+  % By \cref{lemma:env:flat}, we know that if $x\in\Sv_x$, then 
+  % By \cref{lemma:typ:weakening,}, we deduce
+  % that
+  % $\inferS{C'\Cand \Weaken_{x}(\unif\Sv_x)}{\unif\Sv;\bvar{x}{\unif(\tvar)}}{e}{\tau}$.
   By \cref{lemma:constrimply}, we
-  have $\inferS{C}{\E';\bvar{x}{\unif(\tvar)}}{e}{\tau}$.\\
+  have $\inferS{C}{\unif\Sv;\bvar{x}{\unif(\tvar)}}{e}{\tau}$.\\
   By rule $Abs$, we obtain
-  $\inferS{C}{\E'}{\lam{x}{e}}{\unif(\tvar)\tarr{\unif(\kvar)}\tau}$ which concludes.\\
+  $\inferS{C}{\unif\Sv}{\lam{x}{e}}{\unif(\tvar)\tarr{\unif(\kvar)}\tau}$ which concludes.
+  \\
+
+  % $\ruleSDLam$
 
   \mcase{$\ruleIApp$}
 
   By induction, we have 
-  $\inferS{C_1}{\unif_1(\E)|_{dom(\Sv_1)}}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
-  and $\unif_1 \tau_1 = \tau_1$\\
+  $\inferS{C_1}{\unif_1\Sv_1}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
+  and $\unif_1 \tau_1 = \tau_1$
   and 
-  $\inferS{C_2}{\unif_2(\E)|_{dom(\Sv_2)}}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
-  and $\unif_2 \tau_2 = \tau_2$.\\
-
-
-
-  $\ruleSDApp$
+  $\inferS{C_2}{\unif_2\Sv_2}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
+  and $\unif_2 \tau_2 = \tau_2$.
+  %
+  By normalization, $\entail{C}{D}$, $\unif \leq \unif'$ and $\unif C = C$.
+  By \cref{lemma:constrimply} and by substitution, we have
+  $\inferS{C}{\unif\Sv_1}{e_1}{\unif\tau_1}$ and
+  $\inferS{C}{\unif\Sv_2}{e_2}{\unif\tau_2}$.
+  We directly have that
+  $\bsplit{\unif C_s}{\unif \Sv}{\Sv_1}{\unif\Sv_2}$
+  and by \cref{lemma:constrimply}, $\entail{\unif C}{\unif C_s}$.
+  %
+  Finally, since the constraint $\Cleq{\tau_1}{\tau_2\tarr{\kvar}\tvar}$
+  has been solved by normalization,
+  we have $\unif'\tau_1 = \unif\tau_2\tarr{k}\unif\tvar$ for some kind $k$.
+  By rule $App$, we obtain
+  $\inferS{C}
+  {\unif\Sv}{\app{e_1}{e_2}}{\unif(\tvar)}$,
+  which concludes.
+  \\
+  
 
   \mcase{$\ruleILet$}
 
-  \mcase{$\ruleIPair$}
-  
   By induction, we have 
-  $\inferS{C_1}{\unif_1(\E)|_{dom(\Sv_1)}}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
-  and $\unif_1 \tau_1 = \tau_1$\\
+  $\inferS{C_1}{\unif_1\Sv_1}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
+  and $\unif_1 \tau_1 = \tau_1$
   and 
-  $\inferS{C_2}{\unif_2(\E)|_{dom(\Sv_2)}}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
-  and $\unif_2 \tau_2 = \tau_2$.\\
+  $\inferS{C_2}{\unif_2\Sv_2}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
+  and $\unif_2 \tau_2 = \tau_2$.
+  %
+  By definition of $\text{gen}$, $\entail{C_\schm}{C_1}$.
+  %
+  By normalization, $\entail{C}{D}$, $\unif \leq \unif'$ and $\unif C = C$.
+  By \cref{lemma:constrimply} and by substitution, we have
+  $\inferS{C}{\unif\Sv_1}{e_1}{\unif\tau_1}$ and
+  $\inferS{C}{\unif\Sv_2}{e_2}{\unif\tau_2}$.
+  %
 
-  $\inferrule[Pair]
-  { \inferS{C}{\E_1}{e_1}{\tau_1} \\
-    \inferS{C}{\E_2}{e_2}{\tau_2} \\
-    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}
+  \TODO{}
+  
+  $
+  \inferrule[Let]
+  { \inferS{C \Cand D}{\E_1}{e_1}{\tau_1} \\
+    (C_\schm,\schm) = \generalize{D}{\E}{\tau_1}\\
+    \entail{C}{C_\schm} \\
+    \inferS{C}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
   }
-  { \inferS{C}{\E}{\introPair{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }$\\
+  { \inferS{C}
+    {\E}{\letin{x}{e_1}{e_2}}{\tau_2} }$
+  
+  \mcase{$\ruleIPair$}
+
+  By induction, we have 
+  $\inferS{C_1}{\unif_1\Sv_1}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
+  and $\unif_1 \tau_1 = \tau_1$
+  and 
+  $\inferS{C_2}{\unif_2\Sv_2}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
+  and $\unif_2 \tau_2 = \tau_2$.
+  %
+  By normalization, $\entail{C}{D}$, $\unif \leq \unif'$ and $\unif C = C$.
+  By \cref{lemma:constrimply} and by substitution, we have
+  $\inferS{C}{\unif\Sv_1}{e_1}{\unif\tau_1}$ and
+  $\inferS{C}{\unif\Sv_2}{e_2}{\unif\tau_2}$.
+  We directly have that
+  $\bsplit{\unif C_s}{\unif \Sv}{\Sv_1}{\unif\Sv_2}$
+  and by \cref{lemma:constrimply}, $\entail{\unif C}{\unif C_s}$.
+  %
+  By rule $Pair$, we obtain
+  $\inferS{C}
+  {\unif\Sv}{\app{e_1}{e_2}}{\unif(\tyPair{\tvar_1}{\tvar_2}))}$,
+  which concludes.
+  \\
 
   \mcase{$\ruleIMatch$}
 
   \mcase{$\ruleIBorrow$}
+
+  We trivially have
+  $\bvar{\borrow x}{\borrowty{\unif(k)}{\unif(\tau)}} \in \unif\Sv$.
+  By induction, we have $\unif C = C$ and $\unif(\tau) = \tau$.
+  Since $\kvar$ is new, $\unif(\kvar) = \kvar$.
+  By rule $Borrow$, we obtain
+  $\inferS{C}{\unif\Sv}{\borrow{x}}{\borrowty{\kvar}{\tau}}$,
+  which concludes.
+  \\
 
   \mcase{$\ruleIRegion$}
   

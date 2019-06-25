@@ -47,11 +47,6 @@
   }
   { \inferS{C}{\E}{\introPair{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }
   \and
-  \inferrule[Borrow]
-  { 
-    \bvar{\borrow x}{\borrowty k\tau} \in \E
-  }
-  { \inferS{C}{\E}{\borrow{x}}{\borrowty{k}{\tau}} }
   \and
   \inferrule[MatchPair]
   { 
