@@ -10,41 +10,133 @@ of the equivalent statements for HM(X).
 
 \subsubsection{Soundness}
 
+\begin{lemma}
+  \label{lemma:typ:weakening}
+  Given a type environment $\E$, $\Sv \subset \E$, a term $e$ and a variable $x\in\E$,\\
+  if $\inferS{C}{\E|_{dom(\Sv)}}{e}{\tau}$
+  then $\inferS{C\Cand \Weaken_{x}(\Sv)}{\E|_{dom(\Sv)\cup\{x\}}}{e}{\tau}$
+
+  \begin{proof}
+    Trivial if $x \in \Sv$. Otherwise, by induction over the typing derivation.
+  \end{proof}
+\end{lemma}
+
+We say that a use map $\Sv$ and an environment $\E$ are equivalent,
+noted $\Sv \equivC \E$, if, for
+any kind $k$, $\Cleq{\Sv}{k} \equivC \Cleq{\E|_{dom(\Sv)}}{k}$.
+
+\begin{lemma}
+  \label{lemma:usemapequiv}
+  Given a type environment $\E$ and a term $e$ such
+  that $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$ and a kind $k$,\\
+  then $\Sv \equivC \E$.
+  \begin{proof}
+    TODO
+  \end{proof}
+\end{lemma}
+
+
+\begin{lemma}
+  \label{lemma:equivsplit}
+  Given a type environment $\E$ and
+  use maps $\Sv_1$, $\Sv_2$,
+  if $\bsplit{C}{\Sv}{\Sv_1}{\Sv_2}$, then
+  there exists $\E_1$, $\E_2$ such that $\Sv_1 \equivC \E_1$,
+  $\Sv_2 \equivC \E_2$,
+  $\Sv \equivC \E$, $\bsplit{C'}{\E}{\E_1}{\E_2}$ and $C\equivC C'$.
+  \begin{proof}
+    TODO
+  \end{proof}
+\end{lemma}
+
+
+\begin{lemma}
+  \label{lemma:constrimply}
+  Given a typing derivation $\inferS{C}{\E}{e}{\tau}$ and
+  a constraint $D \in \mathcal S$ in solved form such that $\entail{D}{C}$, then
+  $\inferS{D}{\E}{e}{\tau}$
+  \begin{proof}
+    TODO
+  \end{proof}
+\end{lemma}
+
 \begin{theorem}[Soundness of inference]
   Given a type environment $\E$ and a term $e$,\\
   if $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$
   then $\inferS{C}{\unif\E|_{dom(\Sv)}}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$.
-\end{theorem}
 \begin{proof}
+  \newcommand\mcase[1]{\noindent\textbf{Case }#1\\\noindent}
+  Let $\E' = \unif\E|_{dom(\Sv)}$.
   We proceed by induction over the derivation of $\vdash_w$.
   
-  \textbf{Case }$\ruleIVar$
+  \mcase{$\ruleIVar$}
   
   We have $\Sv = \Sone{x}{\unif\tau}$ and
   $\bvar{x}{\sigma} \in \E$.
-  We pick $\E' = \unif'\E|_{dom(\Sv)} = \{\bvar{x}{\sigma}\}$.
+  We have $\E' = \{\bvar{x}{\sigma}\}$.
   Since $\E'\Sdel{x}$ is empty and by definition of normalize, we
   have that
   $\entail C \unif'(C_x) \Cand \Cleq{\E'\Sdel{x}}{\kaff_\infty}$.
   We also have that $\unif' \leq \unif$ and $\unif'C = C$.
-  By $Var$, we obtain $\inferS{C}{\E'}{x}{\unif\tau}$, which concludes.
+  By rule $Var$, we obtain $\inferS{C}{\E'}{x}{\unif\tau}$, which concludes.
   \\
   
-  \textbf{Case }$\ruleIAbs$
+  \mcase{$\ruleIAbs$}
 
-  \textbf{Case }$\ruleIApp$
+  By induction, we have
+  $\inferS{C'}{\unif(\E;\bvar{x}{\tvar})|_{dom(\Sv)}}{e}{\tau}$, $\unif C = C$
+  and $\unif \tau = \tau$.\\
+  By definition of normalize, we have
+  that $\entail{C}{C'\Cand\Cleq{\Sv'}{\kvar} \Cand \Weaken_{x}(\Sv)}$ and
+  $\unif' \leq \unif$.\\
+  By \cref{lemma:typ:weakening,lemma:usemapequiv}, we deduce
+  that
+  $\inferS{C'\Cand \Weaken_{x}(\Sv)}{\E';\bvar{x}{\unif(\tvar)}}{e}{\tau}$
+  and $\entail{C}{\Cleq{\E'}{\unif\kvar}}$.\\
+  By \cref{lemma:constrimply}, we
+  have $\inferS{C}{\E';\bvar{x}{\unif(\tvar)}}{e}{\tau}$.\\
+  By rule $Abs$, we obtain
+  $\inferS{C}{\E'}{\lam{x}{e}}{\unif(\tvar)\tarr{\unif(\kvar)}\tau}$ which concludes.\\
 
-  \textbf{Case }$\ruleILet$
+  \mcase{$\ruleIApp$}
 
-  \textbf{Case }$\ruleIPair$
+  By induction, we have 
+  $\inferS{C_1}{\unif_1(\E)|_{dom(\Sv_1)}}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
+  and $\unif_1 \tau_1 = \tau_1$\\
+  and 
+  $\inferS{C_2}{\unif_2(\E)|_{dom(\Sv_2)}}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
+  and $\unif_2 \tau_2 = \tau_2$.\\
 
-  \textbf{Case }$\ruleIMatch$
 
-  \textbf{Case }$\ruleIBorrow$
 
-  \textbf{Case }$\ruleIRegion$
+  $\ruleSDApp$
+
+  \mcase{$\ruleILet$}
+
+  \mcase{$\ruleIPair$}
+  
+  By induction, we have 
+  $\inferS{C_1}{\unif_1(\E)|_{dom(\Sv_1)}}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
+  and $\unif_1 \tau_1 = \tau_1$\\
+  and 
+  $\inferS{C_2}{\unif_2(\E)|_{dom(\Sv_2)}}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
+  and $\unif_2 \tau_2 = \tau_2$.\\
+
+  $\inferrule[Pair]
+  { \inferS{C}{\E_1}{e_1}{\tau_1} \\
+    \inferS{C}{\E_2}{e_2}{\tau_2} \\
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}
+  }
+  { \inferS{C}{\E}{\introPair{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }$\\
+
+  \mcase{$\ruleIMatch$}
+
+  \mcase{$\ruleIBorrow$}
+
+  \mcase{$\ruleIRegion$}
   
 \end{proof}
+\end{theorem}
 
 
 \subsubsection{Completeness}

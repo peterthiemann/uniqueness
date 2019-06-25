@@ -245,16 +245,20 @@
 }
 \newcommand\ruleIAbs{%
   \inferrule[Abs$_I$]
-  { \tvar,\kvar_\tvar,\kvar\text{ new}\\
+  { \tvar,
+    %\kvar_\tvar,
+    \kvar\text{ new}\\
     \inferW{\Sv}{(C',\unif')}
-    {\E;\bvar{x}{\tvar};\bvar{\tvar}{\kvar_\tvar}}{e}{\tau} \\\\
+    {\E;\bvar{x}{\tvar}
+      % ;\bvar{\tvar}{\kvar_\tvar}
+    }{e}{\tau} \\\\
     \addlin{ \Sv' = \Sv \Sdel{x} }\\
     D = C'\Cand
     \addlin{\Cleq{\Sv'}{\kvar} \Cand \Weaken_{x}(\Sv)} \\
     (C,\unif) = \normalize{D}{\unif'}
   }
   { \inferW{\addlin{\Sv'}}{(C,\unif\Sdel{\tvar})}{\E}
-    {\lam{x}{e}}{\unif(\tvar)\tarr{\kvar}\tau} }
+    {\lam{x}{e}}{\unif(\tvar)\tarr{\unif(\kvar)}\tau} }
 }
 \newcommand\ruleIApp{%
   \inferrule[App$_I$]
