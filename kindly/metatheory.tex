@@ -167,6 +167,7 @@ resource.
 \end{itemize}
 TODO consider using a multiset for $\Reach\Store{}$. For a multiset
 $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
+\clearpage{}
 \begin{theorem}
   Suppose that
   \begin{itemize}
@@ -223,10 +224,30 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
     \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
   \end{itemize}
 \end{theorem}
-    
+
+\begin{proof}
+  The base case is trivial as
+  \lstinline[style=rule]{eval \Store \Perm \VEnv 0 e = \TimeOut}. 
+  
+  Let now $i>0$ and consider the different cases for expressions.
+
+  \textbf{Case} $e$
+  \lstsemrule{sapp}
+
+  By assumption $\ruleSDApp$.
+
+  As \lstinline{split}  is evidence for the split in the typing rule,
+  we find that
+  \begin{align}
+    \label{eq:1}
+    \SE \vdash \VEnv_1 : \E_1 && \SE \vdash \VEnv_2 : \E_2
+  \end{align}
+\end{proof}
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{proof}
   The proof is by induction on the evaluation judgment $\Store, \Perm,
-  \VEnv + \VEnv' \vdash {e} \Downarrow^i R$.
+  \VEnv \vdash {e} \Downarrow^i R$.
   
   The base case is trivial as $\Store, \Perm, \VEnv \vdash {e}
   \Downarrow^0 \TimeOut$.
