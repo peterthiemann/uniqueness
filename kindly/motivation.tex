@@ -45,25 +45,31 @@ val close : end st -> unit
 \TODO{Explain}
 
 We can then use these primitives to implement a simple addition service.
+Both client and server code are shown in
+\cref{fig:sessiontype}.
 We do not need any extra linearity annotations in the code: the fact
 that the \texttt{st} type is declared as linear is sufficient.
-In the case below, \lstinline{add_service} is inferred to be of type
-\lstinline{(int ! int ! int ? end) st -> unit}
-
+The server, \lstinline{add_service}, is inferred to be of type
+\lstinline{(int ! int ! int ? end) st -> unit}.
+The client, \lstinline/op_client/, operates by sending two messages
+and receiving the result.
+This code is polymorphic in both argument and return types and could thus
+be used to any binary operator.
+%
+\begin{figure}[!h]
+  \begin{subfigure}[t]{.5\linewidth}
 \begin{lstlisting}
 let add_service ep =
   let x, ep = receive ep in
   let y, ep = receive ep in
   let ep = send (x + y) ep in
   close ep
-# add_service : (int ! int ! int ? end) st -> unit
+# add_service :
+  (int ! int ! int ? end) st -> unit
 \end{lstlisting}
-
-The following code then acts as a client, by sending two messages
-and receiving the result.
-This code is polymorphic in both argument and return types and could thus
-be used to any binary operator.
-%
+    \caption{Addition server}
+  \end{subfigure}~
+  \begin{subfigure}[t]{.5\linewidth}
 \begin{lstlisting}
 let op_client ep x y =
   let ep = send x ep in
@@ -71,14 +77,20 @@ let op_client ep x y =
   let result, ep = receive ep in
   close ep;
   result
-# op_client : ('a_1 ? 'a_2 ? 'b ! end) st -> 'a_1 -{lin}> 'a_2 -{lin}> 'b
+# op_client :
+  ('a_1 ? 'a_2 ? 'b ! end) st -> 'a_1 -{lin}> 'a_2 -{lin}> 'b
 \end{lstlisting}
 % The actual answer from the typechecker looks like this:
 % # ('m2:^k2), ('m1:^k1).
 % # (^k1 < ^k) & (lin < ^k) =>
 % # ('m1 ?'m2 ? 'result ! end) st -> 'm1 -{lin}> 'm2 -{^k}> 'result
+    \caption{Binary operators client}
+  \end{subfigure}
+  \caption{Corresponding session type programs in \lang}
+  \label{fig:sessiontype}
+\end{figure}
 
-In addition, this function can be partially
+In addition, the \lstinline/op_client/ function can be partially
 applied to a channel. Since the closure returned by such a partial
 application captures the channel, it can only be used once.
 This is reflected by the arrow, \lstinline/-{lin}>/, which is the
@@ -254,9 +266,9 @@ Affine types allow to formalize the performance contract between the programmer
 and the library, while borrows avoid the need to thread state explicitly,
 as usually required by an immutable API.
 %
-In this section, we show how linearity and borrowing allows us to define
+In this section, we show how \lang allows us to define
 a safe API for persistent arrays that support both immutable and mutable features,
-and how it can be used to implement a backtracking sudoku solver.
+and how it can be used to implement a simple backtracking sudoku solver.
 
 Our sudoku solver is implemented by maintaining a grid that represent the state of the game. In order to make backtracking easier, we want to modify the grid immutably. However, while some changes correspond to backtracking points,
 some do not.
@@ -344,6 +356,10 @@ presented here (\cref{line:propline}).
 The typing ensures that all the mutations do not compromise
 backtracking, since sharing is only allowed through
 the immutable set functions, which is used for backtracking points.
+In particular, the \lstinline/try_solution/ function can be used in a loop
+precisely because the \lstinline/set/ function only requires an
+\emph{immutable} borrow of \lstinline/new_g/.
+This is allowed, since immutable borrows are unrestricted.
 
 While we presented our API on simple copy-on-write arrays, this API
 could easily be adapted to any persistent data-structure with
