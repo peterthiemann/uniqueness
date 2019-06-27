@@ -143,8 +143,8 @@ let supdate : store -> raw_loc -> storable -> store sem =
   let htable' = Store.add ell w htable in
   Ok (Store (htable', limit))
 
-let (.![]) = slookup
-let (.![]<-) = supdate
+let (.*()) = slookup
+let (.*()<-) = supdate
 
 let getraw_loc : result -> raw_loc sem =
   fun r ->
@@ -227,7 +227,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
     let* rx = gamma.!(x) in
     let* ell = getraw_loc rx in
     let*? () = !$ ell <|= pi in
-    let* w = delta.![ell] in
+    let* w = delta.*(ell) in
     let* (gamma', kappas', cstr', k', x', e') = getstpoly w in
     let pi' =
       if cstr'./{ks --> kappas'} <=> [(k', KUNR None)]./{ks --> kappas'}  
@@ -246,32 +246,30 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      Ok (delta', pi <+> !$ ell', RADDR !$ ell')
   (**)
   (* rule sapp *)
-  | SAPP (e_1, e_2, split) ->
+  | SAPP (e_1, e_2, sp) ->
      let i' = i - 1 in
-     let (gamma_1, gamma_2) = vsplit gamma split in
+     let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
-     let* ell = getraw_loc r_1 in
-     let* w = delta_1.![ell] in
+     let* ell_1 = getraw_loc r_1 in
+     let* w = delta_1.*(ell_1) in
      let* (gamma', k', x', e') = getstclosure w in
-     let pi_1' =
-       if k' <= KUNR None then pi_1 else pi_1 <-> !$ ell
-     in
+     let pi_1' = (if k' <= KUNR None then pi_1 else pi_1 <-> !$ ell_1) in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1' gamma_2 i' e_2 in
      let* (delta_3, pi_3, r_3) = eval delta_2 pi_2 gamma'.+(x'-:> r_2) i' e' in
      Ok (delta_3, pi_3, r_3)
   (**)
   (* rule slet *)
-  | SLET (x, e_1, e_2, split) ->
+  | SLET (x, e_1, e_2, sp) ->
      let i' = i - 1 in
-     let (gamma_1, gamma_2) = vsplit gamma split in
+     let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 gamma_2.+(x -:> r_1) i' e_2 in
      Ok (delta_2, pi_2, r_2)
   (**)
   (* rule spair *)
-  | SPAIR (k, e_1, e_2, split) ->
+  | SPAIR (k, e_1, e_2, sp) ->
      let i' = i - 1 in
-     let (gamma_1, gamma_2) = vsplit gamma split in
+     let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 gamma_2 i' e_2 in
      let w = STPAIR (k, r_1, r_2) in
@@ -279,12 +277,12 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      Ok (delta_2, pi_2 <+> !$ ell', RADDR !$ ell')
   (**)
   (* rule smatch *)
-  | SMATCH (x, y, e_1, e_2, split) ->
+  | SMATCH (x, y, e_1, e_2, sp) ->
      let i' = i - 1 in
-     let (gamma_1, gamma_2) = vsplit gamma split in
+     let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* ell = getraw_loc r_1 in
-     let* w = delta_1.![ell] in
+     let* w = delta_1.*(ell) in
      let* (k', r_1', r_2') = getstpair w in
      let pi_1' =
        if k' <= KUNR None then pi_1 else pi_1 <-> !$ ell
@@ -293,12 +291,12 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      Ok (delta_2, pi_2, r_2)
   (**)
   (* rule matchborrow *)
-  | MATCHBORROW (x, y, e_1, e_2, split) ->
+  | MATCHBORROW (x, y, e_1, e_2, sp) ->
      let i' = i - 1 in
-     let (gamma_1, gamma_2) = vsplit gamma split in
+     let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* (b, _, ell) = getborrowed_loc r_1 in
-     let* w = delta_1.![ell] in
+     let* w = delta_1.*(ell) in
      let* (k', r_1', r_2') = getstpair w in
      let* rho_1 = getaddress r_1' in
      let* rho_2 = getaddress r_2' in
@@ -345,9 +343,9 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let i' = i - 1 in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
      let* ell = getraw_loc r_1 in
-     let* w = delta_1.![ell] in
+     let* w = delta_1.*(ell) in
      let* r = getstresource w in
-     let* delta_1' = delta_1.![ell] <- STRELEASED in
+     let* delta_1' = delta_1.*(ell) <- STRELEASED in
      let pi_1' = pi_1 <-> !$ ell in
      Ok (delta_1', pi_1', RVOID)
   (**)
@@ -357,23 +355,23 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
      let* (b, _, ell) = getborrowed_loc r_1 in
      let*? () = (b = Imm) in
-     let* w = delta_1.![ell] in
+     let* w = delta_1.*(ell) in
      let* r = getstresource w in
      Ok (delta_1, pi_1, r)
   (**)
   (* rule supdate *)
-  | SUPDATE (e_1, e_2, split) ->
+  | SUPDATE (e_1, e_2, sp) ->
      let i' = i - 1 in
-     let (gamma_1, gamma_2) = vsplit gamma split in
+     let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* rho = getaddress r_1 in
      let* (b, _, ell) = getborrowed_loc r_1 in
      let*? () = (b = Mut) in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 gamma_2 i' e_2 in
-     let* w = delta_2.![ell] in
+     let* w = delta_2.*(ell) in
      let* r = getstresource w in
      let*? () = rho <|= pi_2 in
-     let* delta_2' = delta_2.![ell] <- STRESOURCE (r_2) in
+     let* delta_2' = delta_2.*(ell) <- STRESOURCE (r_2) in
      let pi_2' = pi_2 <-> rho in
      Ok (delta_2', pi_2', RVOID)
   (**)
