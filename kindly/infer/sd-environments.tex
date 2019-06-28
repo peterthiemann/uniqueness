@@ -1,0 +1,40 @@
+\begin{mathpar}
+  \inferrule{}{ \Cleq{\Eempty}{k} = \Cempty}
+
+  \inferrule{
+    \Cleq\E k = C_1 \\ \Cleq B k = C_2
+  }{
+    \Cleq{\E; B}{k} = C_1 \Cand C_2
+  }
+
+  \inferrule{
+    \Cleq \tau k = C
+  }{ \Cleq{\bvar x \tau}{k} = C}
+
+  \inferrule{
+    \Cleq \tau k = C_1 \\
+    \BORROW ??? C_2
+  }{
+    \Cleq{\svar x \tau} k = C_1 \Cand C_2
+  }
+
+  \inferrule{}
+  { \Cleq{ \tau_2\tarr{k'}\tau_1 } k = \Cleq{k'}k }
+
+  \inferrule{
+    \tvar : \kschm
+  }
+  { \Cleq{ \tvar} k = \Cleq\kschm k }
+
+  \inferrule{
+  }{ \Cleq{\tapp{t}{\Multi\tau}} k = ???}
+
+  \inferrule{}{
+    \Cleq{\borrow{\tau}} k = ???
+  }
+\end{mathpar}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:

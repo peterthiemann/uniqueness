@@ -37,7 +37,7 @@
     \inferrule{
       (\exists \E, C)~ \SE \vdash \VEnv : \E
       \\
-      \inferS{C}{\E, (x:\tau_2)}{e}{\tau_1}
+      \inferS{C}{\E\bvar x{\tau_2})}{e}{\tau_1}
       \\
       \addlin{\entail{C}{\Cleq{\E}{k}}}
     }{
@@ -236,7 +236,7 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
     \item if $n'=0$, then $\Loc\notin\Perm'$.
     \end{itemize}
   \item Immutables: For all $\Loc \in \Reach
-    {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\loc$ then
+    {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Loc$ then
     $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm'$.
   \item No thin air permission: For all $\Loc\in \Perm'$, $\Loc
     \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
@@ -292,12 +292,21 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
     with $R_1 \ne \TimeOut$.
   \end{itemize}
   Hence, we can apply the inductive hypothesis and obtain:
+  \begin{gather}
+    \label{eq:2}
+    R_1 = \Ok{\Store_1, \Perm_1, r_1}
+    \\
+    \SE \le \SE_1 \qquad
+    \Store \le \Store_1 \qquad
+    \vdash \Store_1 :    \SE_1
+    \\
+    \Addresses{\Perm_1} \subseteq \Dom{\Store_1}
+    \\\label{eq:3}
+    \SE_1 \vdash r_1 : \tau_2\tarr{k}\tau_1
+    \\
+    \Reach{\Store_1}{r_1} \subseteq \Perm_1
+  \end{gather}
   \begin{itemize}
-  \item $R_1 = \Ok{\Store_1, \Perm_1, r_1}$  
-  \item $\SE \le \SE_1$, $\Store \le \Store_1$,     $\vdash \Store_1 : \SE_1$ 
-  \item $\Addresses{\Perm_1} \subseteq \Dom{\Store_1}$
-  \item $\SE_1 \vdash r_1 : \tau_2\tarr{k}\tau_1$
-  \item $\Reach{\Store_1}{r_1} \subseteq \Perm_1$
   \item Outside: For all $\Loc \in \Dom{\Store} \setminus
     \Reach{\Store_1}{\VEnv_1}$ it must be that 
     $\Store_1 (\Loc) = \Store (\Loc)$
@@ -320,6 +329,23 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
   \item No thin air permission: For all $\Loc\in \Perm_1$, $\Loc
     \in \Perm \cup  \Dom{\Store_1} \setminus \Dom{\Store}$.
   \end{itemize}
+
+  By inversion of \eqref{eq:3}, it must be that $r_1$ is a location
+  $\Loc_1$ typed by $\SE_1 (\Loc_1) = \tau_2\tarr{k}\tau_1$.
+  Hence, $w= \Store_1 (\Loc_1)$ with $\SE_1 \vdash w :
+  \tau_2\tarr{k}\tau_1$, so that $w$ is a closure of the form
+  $(\VEnv', k', x', e')$.
+
+  By inversion of the store typing $\SE_1 \vdash   (\VEnv', k', x',
+  e') : \tau_2\tarr{k}\tau_1$, we obtain some $\E'$ and $C'$ such that
+  \begin{gather}
+    \label{eq:4}
+    \SE_1 \vdash \VEnv' : \E'
+    \\\label{eq:5}
+    \inferS{C'}{\E'\bvar{x'}{\tau_2}}{e'}{\tau_1}
+    \\
+    {\entail{C'}{\Cleq{\E'}{k'}}}
+  \end{gather}
 
   Next, we establish the assumptions for the recursive call
   @eval delta_1 pi_1' gamma_2 i' e_2@
@@ -365,6 +391,67 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
     not pass affine resources to $\VEnv_1$. 
   \item $i'<i$ and  @eval delta_1 pi_1' gamma_2 i' e_2@ terminates
     with $R_2 \ne \TimeOut$.
+  \end{itemize}
+  Hence, we can apply the inductive hypothesis and obtain
+  $\Store_2$, $\Perm_2$, $r_2$, $\SE_2$ such that
+  \begin{gather}
+    \label{eq:6}
+    R_2 = \Ok{\Store_2, \Perm_2, r_2}
+    \\\label{eq:7}
+    \SE_1 \le \SE_2 \qquad
+    \Store_1 \le \Store_2 \qquad
+    \vdash \Store_2 :  \SE_2
+    \\\label{eq:9}
+    \Addresses{\Perm_2} \subseteq \Dom{\Store_2}
+    \\\label{eq:8}
+    \SE_2 \vdash r_2 : \tau_2
+    \\
+    \Reach{\Store_2}{r_2} \subseteq \Perm_2
+  \end{gather}
+  \begin{itemize}
+  \item Outside: For all $\Loc \in \Dom{\Store_1} \setminus
+    \Reach{\Store_2}{\VEnv_2}$ it must be that 
+    $\Store_2(\Loc) = \Store_1 (\Loc)$
+    and $\Loc\in\Perm_1' \Leftrightarrow \Loc\in\Perm_2$ 
+  \item Immutables: For all $\Loc \in
+    \Reach{\Store_2}{\ImmutableBorrows{\VEnv_2}}$ it must be that
+    $\Loc\in\Dom{\Store_1}$, 
+    $\Store_2 (\Loc) = \Store_1 (\Loc)$
+    and $\Loc\in{\Perm_1'} \Leftrightarrow \Loc\in\Perm_2$ 
+  \item Resources:
+    Let $\REACH_2' =\Reach{\Store_2}{\Active{\VEnv_2}}$.
+    For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_2} >0$ and $n' =
+    \MultiNumber\Loc{\REACH_2'}$, 
+    \begin{itemize}
+    \item if $\Affine{\SE_2}\Loc$ then $n=1$ and $n'\le 1$,
+    \item if $\Linear{\SE_2}\Loc$ then $n=1$ and $n' = 0$,
+    \item if $n'=0$, then $\Loc\notin\Perm_2$.
+    \end{itemize}
+  \item Immutables: For all $\Loc \in \Reach
+    {\Store_2}{\Active{\VEnv_2}}$, if $\neg\Writeable{\SE_2}\Loc$ then
+    $\Store_2 (\ell) = \Store_1 (\ell)$ and $\Loc\in \Perm_2$.
+  \item No thin air permission: For all $\Loc\in \Perm_2$, $\Loc
+    \in \Perm_1' \cup  \Dom{\Store_2} \setminus \Dom{\Store_1}$.
+  \end{itemize}
+  
+  Finally, we establish the assumptions for the recursive call 
+  @eval delta_2 pi_2 gamma'(x'-:>r_2) i' e'@.
+  \begin{itemize}
+  \item $\inferS{C'}{\E'\bvar{x'}{\tau_2}}{e'}{\tau_1}$
+
+    which holds by \eqref{eq:5}.
+  \item $\SE_2 \vdash \VEnv' (x' \mapsto r_2) : \E'\bvar{x'}{\tau_2} $
+
+    By \eqref{eq:4}, $\SE_1\le\SE_2$ by \eqref{eq:7}, and weakening
+    Lemma~\ref{lemma:store-weakening}, we have
+    $\SE_2 \vdash \VEnv' : \E'$.
+    It remains to show $\SE_2 \vdash r_2 : \tau_2$, which is
+    \eqref{eq:8}.
+  \item  $\vdash \Store_2 : \SE_2$\\
+    holds by \eqref{eq:7}.
+  \item  $\Addresses{\Perm_2} \subseteq \Dom{\Store_2}$\\
+    by \eqref{eq:9}.
+  \item $\Reach{\Store_2}{\Active{\VEnv'}, \MutableBorrows{\VEnv'}, \ImmutableBorrows{\VEnv'}} \subseteq \Perm_2$
   \end{itemize}
 \end{proof}
 \clearpage
