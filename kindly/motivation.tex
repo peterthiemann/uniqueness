@@ -382,24 +382,83 @@ and a convenient programming style.
   \label{ex:sudoku}
 \end{figure}
 
-\subsection{Type abstraction and linearity violations}
+% \subsection{Type abstraction and linearity violations}
 
-While linearity allows to verify many properties, it also prevents
-the implementation of functions that are nevertheless safe. Rust addresses this
-issue through the \lstinline/unsafe/ construct, which allows to locally
-ignore linearity constraints. This is essential to build basic
-functions such as splitting strings.
-%
-\lang allows to partially emulate this behavior using type abstraction
-as provided by ML modules.
-In particular, data types can be internally defined as unrestricted but exposed
-as affine.
+% While linearity allows to verify many properties, it also prevents
+% the implementation of functions that are nevertheless safe. Rust addresses this
+% issue through the \lstinline/unsafe/ construct, which allows to locally
+% ignore linearity constraints. This is essential to build basic
+% functions such as splitting strings.
+% %
+% \lang allows to partially emulate this behavior using type abstraction
+% as provided by ML modules.
+% In particular, data types can be internally defined as unrestricted but exposed
+% as affine.
 
-\TODO{Show example with arrays}
+% \TODO{Show example with arrays}
 
 \subsection{Local data-structures with regions}
 
-\TODO{Show a queue attached to a file}
+We have seen that borrows are limited to a region. In the various examples so
+far, such regions didn't appear in the type signature explicitly.
+We know present an example implement of a \texttt{Pool} module
+that uses such region to enforce linearity of the objects in the pool.
+
+\TODO{finish explanation}
+
+
+\begin{figure}[!h]
+  \centering
+  \begin{subfigure}[t]{.45\linewidth}
+\begin{lstlisting}
+type ('a: 'k) pool : 'k = {
+  spawn : unit -> 'a ;
+  queue : 'a queue;
+}
+
+let create spawn =
+  { spawn ; queue = Queue.create () }
+let consume f c = Queue.iter f c.queue
+
+let use { spawn ; queue } f =
+  let o = match Queue.pop &queue with
+    | Some x -> x
+    | None () -> spawn ()
+  in
+  let r = f &!o in
+  Queue.push o &queue;
+  r
+\end{lstlisting}
+    \caption{Implementation}
+  \end{subfigure}~
+  \begin{subfigure}[t]{.55\linewidth}
+\begin{lstlisting}
+type ('a: 'k) pool : 'k
+
+create : (unit -> 'a) -> 'a pool
+consume : ('a -> unit) -> 'a pool -> unit
+use : ('a_1:'k_1),('a_2:'k_2),('k_1 < lin_r),('k_2 < lin_r) =>
+  &('a_1 pool) -> (&!(aff_r,'a_1) -{'k}> 'a_2) -{'k_1}> 'a_2
+\end{lstlisting}
+    \caption{Interface}
+
+\begin{lstlisting}
+let uri = "postgresql://localhost:5432"
+
+(* Create a database connection pool. *)
+let pool = Pool.create (fun () -> Db.connect uri)
+
+(* Use the pool in queries. *)
+let create_user name =
+  Pool.use &pool (fun connection ->
+    Db.insert "users" [("name", name)] connection)
+\end{lstlisting}
+    \caption{Example of use}
+  \end{subfigure}
+
+  \caption{The \texttt{Pool} module}
+\end{figure}
+
 
 %%% Local Variables:
 %%% mode: latex
