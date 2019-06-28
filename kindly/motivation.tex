@@ -398,11 +398,31 @@ and a convenient programming style.
 % \TODO{Show example with arrays}
 
 \subsection{Local data-structures with regions}
+\label{tuto:pool}
 
 We have seen that borrows are limited to a region. In the various examples so
-far, such regions didn't appear in the type signature explicitly.
-We know present an example implement of a \texttt{Pool} module
-that uses such region to enforce linearity of the objects in the pool.
+far, such regions didn't appear in the type signatures explicitly.
+We know present an pool implementation which can store linear objects
+and such region to enforce proper uses of the objects.
+The implementation and interfaces of the \texttt{Pool} module
+are shown in \cref{impl:pool,intf:pool}. A simple example of use
+is shown in \cref{ex:pool}.
+
+A pool is parameterized by its content. Additional, the kind of the pool
+depends on the content: Linear content implies
+a linear pool, while unrestricted content implies an unrestricted pool.
+The implementation uses a concurrent queue
+as a bag of elements with atomic add and remove operations.
+The \lstinline/Pool.create/ and \lstinline/Pool.consume/ allow to build or destroy
+the pool by providing the necessary components for the elements
+of the loop.
+The main function of interest is the \lstinline/Pool.use/ function, which
+allow to use an mutable borrow of the object. The function proceeds by removing
+the element from the pool (or creating a fresh element),
+passing it down to the \lstinline/f/ function, and then adding
+it back to the pool.
+We explicitly delimit the region on \cref{line:pool:region} to ensure that
+the \lstinline/f/ function will not be able to capture \lstinline/&!o/.
 
 \TODO{finish explanation}
 
@@ -417,19 +437,20 @@ type ('a: 'k) pool : 'k = {
 }
 
 let create spawn =
-  { spawn ; queue = Queue.create () }
-let consume f c = Queue.iter f c.queue
+  { spawn ; queue = CQueue.create () }
+let consume f c = CQueue.iter f c.queue
 
 let use { spawn ; queue } f =
-  let o = match Queue.pop &queue with
+  let o = match CQueue.pop &queue with
     | Some x -> x
     | None () -> spawn ()
   in
-  let r = f &!o in
+  let r = {| f &!o |} in(*@\label{line:pool:region}*)
   Queue.push o &queue;
   r
 \end{lstlisting}
     \caption{Implementation}
+    \label{impl:pool}
   \end{subfigure}~
   \begin{subfigure}[t]{.55\linewidth}
 \begin{lstlisting}
@@ -441,6 +462,7 @@ use : ('a_1:'k_1),('a_2:'k_2),('k_1 < lin_r),('k_2 < lin_r) =>
   &('a_1 pool) -> (&!(aff_r,'a_1) -{'k}> 'a_2) -{'k_1}> 'a_2
 \end{lstlisting}
     \caption{Interface}
+    \label{intf:pool}
 
 \begin{lstlisting}
 let uri = "postgresql://localhost:5432"
@@ -454,9 +476,11 @@ let create_user name =
     Db.insert "users" [("name", name)] connection)
 \end{lstlisting}
     \caption{Example of use}
+    \label{ex:pool}
   \end{subfigure}
 
   \caption{The \texttt{Pool} module}
+  \label{fig:pool}
 \end{figure}
 
 
