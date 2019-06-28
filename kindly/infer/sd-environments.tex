@@ -1,36 +1,47 @@
 \begin{mathpar}
-  \inferrule{}{ \Cleq{\Eempty}{k} = \Cempty}
+  \inferrule{}{ \Cleq{\Eempty}{k} \Crewrite  \Cempty}
 
   \inferrule{
-    \Cleq\E k = C_1 \\ \Cleq B k = C_2
+    \Cleq\E k \Crewrite  C \\ \E \vdash \Cleq B k \Crewrite  D
   }{
-    \Cleq{\E; B}{k} = C_1 \Cand C_2
+    \Cleq{\E; B}{k} \Crewrite  C \Cand D
   }
+  \\
+  \inferrule{
+    \E \vdash \Cleq \schm k \Crewrite  C
+  }{ \E \vdash \Cleq{\bvar x \schm}{k} \Crewrite  C}
 
   \inferrule{
-    \Cleq \tau k = C
-  }{ \Cleq{\bvar x \tau}{k} = C}
-
-  \inferrule{
-    \Cleq \tau k = C_1 \\
-    \BORROW ??? C_2
+    \E \vdash \Cleq \schm k \Crewrite  C \\
+    \Cleq{\BORROW^n} k  \Crewrite  D
   }{
-    \Cleq{\svar x \tau} k = C_1 \Cand C_2
+    \E \vdash \Cleq{\svar x \schm^n} k \Crewrite  C \Cand D
+  }
+  \\
+  \inferrule{}{\Cleq{\IBORROW^n} k \Crewrite  \Cleq{\kun_n} k}
+
+  \inferrule{}{\Cleq{\MBORROW^n} k \Crewrite  \Cleq{\kaff_n} k}
+  \\
+  \inferrule{
+    \E; \Multi{\bvar{\alpha}{k}} \vdash \Cleq\tau k \Crewrite  D
+  }{
+    \E \vdash \Cleq{\forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau})}
+    k \Crewrite  C \Cand D
   }
 
   \inferrule{}
-  { \Cleq{ \tau_2\tarr{k'}\tau_1 } k = \Cleq{k'}k }
+  { \E \vdash \Cleq{ \tau_2\tarr{k'}\tau_1 } k \Crewrite  \Cleq{k'}k }
 
   \inferrule{
-    \tvar : \kschm
+    \E(\tvar) = \kschm
   }
-  { \Cleq{ \tvar} k = \Cleq\kschm k }
+  { \E \vdash \Cleq{ \tvar} k \Crewrite  \Cleq\kschm k }
 
   \inferrule{
-  }{ \Cleq{\tapp{t}{\Multi\tau}} k = ???}
+  }{ \E \vdash \Cleq{\tapp{t}{\Multi\tau}} k \Crewrite  ???}
 
   \inferrule{}{
-    \Cleq{\borrow{\tau}} k = ???
+    \E \vdash \Cleq{\borrowty {k'} {\tau}} k \Crewrite  \Cleq{k'}k
   }
 \end{mathpar}
 
