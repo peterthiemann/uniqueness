@@ -1,27 +1,27 @@
 \begin{mathpar}
   \inferrule[EBorrow]{
-    \bregion{C_r}{}{\svar{x}{\tau}}{b}
+    \bregion{C_r}{}{\svar{x}{\tau}^n}{b}
   }{
-    \bregion{C_r}{x}{\E;\svar{x}{\tau}}{\E; b}
+    \bregion{C_r}{x}{\E;\svar{x}{\tau}^n}{\E; b}
   }
 
   \inferrule[EBorrow-Check]{
-    \bregion{C_r}{x}{\E;\svar{x}{\tau}}{\E; b} \\
+    \bregion{D}{x}{\E;\svar{x}{\tau}^n}{\E; b} \\
     \entail{C}{D}
   }{
-    \lregion{C_r}{x}{\E;\svar{x}{\tau}}{\E; b}
+    \lregion{C}{x}{\E;\svar{x}{\tau}^n}{\E; b}
   }
 \end{mathpar}
 \hrulefill
 \begin{mathpar}
-  \inferrule[BSplit-Mut]{}{
+  \inferrule[BSplit-Immut]{}{
     \bregion{(\kun_n\lk k\lk\kun_\infty)}{}
-    {\svar[i]{x}{\tau}}{\bvar{\borrow[i]{x}}{\borrowty[i] k{\tau}}}
+    {\svar[\IBORROW]{x}{\tau}^n}{\bvar{\borrow[\IBORROW]{x}}{\borrowty[\IBORROW] k{\tau}}}
   }
   \and
-  \inferrule[BSplit-Immut]{}{
+  \inferrule[BSplit-Mut]{}{
     \bregion{(\kaff_n\lk k\lk\kaff_\infty)}{}
-    {\svar[m]{x}{\tau}}{\bvar{\borrow[m]{x}}{\borrowty[m] k{\tau}}}
+    {\svar[\MBORROW]{x}{\tau}^n}{\bvar{\borrow[\MBORROW]{x}}{\borrowty[\MBORROW] k{\tau}}}
   }
 \end{mathpar}
 %%% Local Variables:

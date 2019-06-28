@@ -39,12 +39,12 @@
   }
 
   \inferrule[BSplit-To-Borrow]{}{
-    \bsplit {\Cempty}{\bvar x \schm}{\svar x \schm}{\bvar x \schm}
+    \bsplit {\Cempty}{\bvar x \schm}{\svar x \schm^n}{\bvar x \schm}
   }
 
   \inferrule[BSplit-To-Imm]{}{
     \bsplit {\Cempty}
-    {\bvar{\borrow x} \schm}{\svar[i] x \schm}{\bvar{\borrow x} \schm}
+    {\bvar{\borrow x} \schm}{\svar[\IBORROW] x \schm^n}{\bvar{\borrow x} \schm}
   }
 \end{mathpar}
 %%% Local Variables:
