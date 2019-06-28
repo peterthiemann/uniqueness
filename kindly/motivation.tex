@@ -165,18 +165,20 @@ none of the borrows are used anymore.
   \begin{subfigure}{0.48\linewidth}
 \begin{lstlisting}
 module Array : sig
-  type ('a : un) t : aff
+  type ('a : 'k) t : 'k
   
   val create : ('a : un) => int -> 'a -> 'a t
   val free : 'a t -> unit
 
   val length : &('a t) -> int
 
-  val get : &('a t) * int -> 'a
+  val get : ('a : un) => &('a t) * int -> 'a
   val set : &!('a t) * int * 'a -> unit
+  
+  val map : (&'a -> 'b) -> &('a t) -> 'b t
 end
 \end{lstlisting}
-    \caption{Affine primitives}
+    \caption{Affine arrays}
     \label{sig:array}
   \end{subfigure}\hfill
   \begin{subfigure}{0.5\linewidth}
@@ -184,8 +186,8 @@ end
 let mk_fib_array n =
   let a = create n 1 in
   for i = 2 to n - 1 do
-    let x = get &a (i-1) + get &a (i-2) in(*@\label{ex:array:get}*)
-    set &!a i x(*@\label{ex:array:set}*)
+    let x = get (&a, i-1) + get (&a, i-2) in(*@\label{ex:array:get}*)
+    set (&!a, i, x)(*@\label{ex:array:set}*)
   done;
   a(*@\label{ex:array:return}*)
 # mk_fib_array : int -> int Array.t
