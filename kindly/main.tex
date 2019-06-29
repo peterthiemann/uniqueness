@@ -58,23 +58,28 @@
 
 \title{Kindly Bent to Free Us}
 \begin{abstract}
-  System programming often requires to manipulate resources that
-  cannot be duplicated such as file system handles, network connections,
-  or globally allocated memory.
-  Improper handling of such resources is often the cause of bugs and security issues
-  through use-after-free errors or data races. These problems are not
-  prevented by most statically typed programming languages that only
-  guarantee type soundness and memory safety.
-  Linear and affine type systems support tracking of single-threaded resource usage
-  through types, but they are often too restrictive for real-world applications.
+  System programming often requires the manipulation of resources like
+  file system handles, network connections, or dynamically allocated
+  memory. Programmers need to follow certain protocols to handle
+  these resources correctly. Violating these protocols causes bugs
+  ranging from type mismatches over data races to use-after-free 
+  errors and memory leaks. These bugs often lead to security  vulnerabilities.
 
-  We present \lang, an extension of ML with a kind system and qualified
-  types that allows to track affine types.
-  This language supports the defining features of ML family languages:
+  Proper statically typed programming languages guarantee type soundness and memory 
+  safety by design, but most of them do not address issues arising
+  from improper resource handling. 
+  Linear and affine types guarantee single-threaded resource usage,
+  but they are rarely deployed as they are too restrictive for real-world applications.
+
+  We present \lang, an extension of ML with constrained types that
+  manages linearity and affinity properties through kinds. In addition
+  \lang{} supports the mutable and immutable borrowing of affine
+  resources, inspired by features of Rust.
+  Moreover, \lang{} retains the defining features of the ML family:
   an impure, strict functional expression language with complete principal type
   inference and type abstraction through modules.
-  Our language do not require any linearity annotation in
-  expressions and support common functional idioms.
+  Our language does not require any linearity annotations in
+  expressions and supports common functional programming idioms.
 \end{abstract}
 
 
