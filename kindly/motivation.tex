@@ -406,34 +406,45 @@ We know present an pool implementation which can store linear objects
 and such region to enforce proper uses of the objects.
 The implementation and interfaces of the \texttt{Pool} module
 are shown in \cref{impl:pool,intf:pool}. A simple example of use
-is shown in \cref{ex:pool}.
+is shown in \cref{ex:pool}. 
 
-A pool is parameterized by its content. Additional, the kind of the pool
-depends on the content: Linear content implies
-a linear pool, while unrestricted content implies an unrestricted pool.
-The implementation uses a concurrent queue
+A pool is parameterized by its content. The kind of the pool
+depends on the content: linear content implies
+a linear pool while unrestricted content implies an unrestricted pool.
+The functions \lstinline/Pool.create/ and \lstinline/Pool.consume/ allow
+to build or destroy
+the pool by providing the corresponding functions for the elements
+of the pool.
+The main function is \lstinline/Pool.use/ which
+allow to use an object from the pool.
+\lstinline/Pool.use/ takes a shared borrow of a pool (in order to allow
+for concurrent access) and a function. This function will receive
+a mutable borrow of one arbitrary object of the pool. The typing ensure
+that this borrow is not captured nor kept by the function.
+This is done through a \emph{region} variable $r$ which annotates
+the kinds. Here, the borrow is of type \lstinline/&!(aff_r,'a_1 )/, which indicates
+a mutable borrow with an affine kind. The return type of \lstinline/f/ is bound
+to be of kind \lstinline/'k_2 < aff_r/. Since this is a strict inequality,
+types whose kind mention the region can not be returned.
+
+The implementation presented in \cref{impl:pool} uses a concurrent queue
 as a bag of elements with atomic add and remove operations.
-The \lstinline/Pool.create/ and \lstinline/Pool.consume/ allow to build or destroy
-the pool by providing the necessary components for the elements
-of the loop.
-The main function of interest is the \lstinline/Pool.use/ function, which
-allow to use an mutable borrow of the object. The function proceeds by removing
-the element from the pool (or creating a fresh element),
-passing it down to the \lstinline/f/ function, and then adding
+The implementation for the \lstinline/Pool.create/ and \lstinline/Pool.consume/
+functions are straightforward.
+The function \lstinline/Pool.use/ first draws
+an element from the pool (or creates a fresh element),
+pass it down to the \lstinline/f/ function, and then add
 it back to the pool.
 We explicitly delimit the region on \cref{line:pool:region} to ensure that
-the \lstinline/f/ function will not be able to capture \lstinline/&!o/.
-
-\TODO{finish explanation}
-
+the return value of \lstinline/f &!o/ do not capture \lstinline/&!o/.
 
 \begin{figure}[!h]
   \centering
   \begin{subfigure}[t]{.45\linewidth}
 \begin{lstlisting}
-type ('a: 'k) pool : 'k = {
+type ('a:'k) pool : 'k = {
   spawn : unit -> 'a ;
-  queue : 'a queue;
+  queue : 'a CQueue.t;
 }
 
 let create spawn =
@@ -454,12 +465,12 @@ let use { spawn ; queue } f =
   \end{subfigure}~
   \begin{subfigure}[t]{.55\linewidth}
 \begin{lstlisting}
-type ('a: 'k) pool : 'k
+type ('a:'k) pool : 'k
 
 create : (unit -> 'a) -> 'a pool
 consume : ('a -> unit) -> 'a pool -> unit
-use : ('a_1:'k_1),('a_2:'k_2),('k_1 < lin_r),('k_2 < lin_r) =>
-  &('a_1 pool) -> (&!(aff_r,'a_1) -{'k}> 'a_2) -{'k_1}> 'a_2
+use : ('a_1:'k_1),('a_2:'k_2),('k_1 < aff_r),('k_2 < aff_r) =>
+  &('a_1 pool) -> (&!(aff_r,'a_1) -{lin}> 'a_2) -{'k_1}> 'a_2
 \end{lstlisting}
     \caption{Interface}
     \label{intf:pool}
