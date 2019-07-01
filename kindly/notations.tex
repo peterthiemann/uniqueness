@@ -58,7 +58,7 @@
 \newcommand\app[2]{(#1\ #2)}
 \newcommand\borrow[2][\BORROW]{{\&}^{#1}#2}
 \newcommand\borrowty[3][\BORROW]{{\&}^{#1}(#2,#3)}
-\newcommand\region[2]{\{\!|#2|\!\}^n_{#1}}
+\newcommand\region[3][n]{\{\!|#3|\!\}^{#1}_{#2}}
 \newcommand\regionS[1]{\{\!|#1|\!\}}
 
 \newcommand\sborrow[2][\BORROW]{#2{#1}}
@@ -75,6 +75,7 @@
 %% Region annotation
 
 \newcommand\Rannot[4][n]{#2 \rightsquigarrow_{#1} #3, #4}
+\newcommand\RannotT[2]{#1 \rightsquigarrow #2}
 \newcommand\getBorrows[3]{#1 \oplus #2 = #3}
 
 %% Constraints

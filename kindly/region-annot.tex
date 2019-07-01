@@ -44,31 +44,16 @@
   \inferrule[AnnotRegion-MutRight]{}{
     \getBorrows
     {\Sone{x}{\MBORROW}}
-    {\Sone{x}{\IBORROW}}
-    {\Cempty,\Sone{x}{\MBORROW},\Sone{x}{\IBORROW}}
+    {\Sone{x}{b}}
+    {\Sone{x}{\MBORROW},\Cempty,\Sone{x}{b}}
   }
   
-  \inferrule[AnnotRegion-Mut]{}{
-    \getBorrows
-    {\Sone{x}{\MBORROW}}
-    {\Sone{x}{\MBORROW}}
-    {\Sone{x}{\MBORROW},\Cempty,\Sone{x}{\MBORROW}}
-  }
 \end{mathpar}
 \hrulefill
 \begin{mathpar}
   \inferrule{}
   { \Rannot{\borrow{x}}{\borrow{x}}{\Sone{x}{b}} }
 
-  \inferrule
-  { \forall i,\ \Rannot{e_i}{e'_i}{B_i} \\
-    \getBorrows{B_1}{(B_2\Sdel{x})}{S_1,S,S_2} \\
-    S'_2 = S_2\Sunion B_2\Sonly{x}
-  }
-  { \Rannot
-    {\letin{x}{e_1}{e_2}}
-    {\letin{x}{\region{S_1}{e'_1}}{\region{S'_2}{e'_2}}}{S} }
-  
   \inferrule{e = c\ |\ x}
   { \Rannot{e}{e}{\Sempty} }
 
@@ -79,23 +64,14 @@
   { \Rannot{\app{e_1}{e_2}}{\app{\region{S_1}{e'_1}}{\region{S_2}{e'_2}}}{S} }
 
   \inferrule
-  { \Rannot{e}{e'}{B} \\
-    B_x = B\Sonly{x}
-  }
-  { \Rannot{\lam{x}{e}}{\lam{x}{\region{B_x}{e'}}}{B\Sdel{x}} }
-
-  \inferrule
-  { \Rannot{e}{e'}{B} }
-  { \Rannot{\regionS{e}}{\region{B}{e'}}{\Sempty} }
-
-  \inferrule
   { \forall i,\ \Rannot{e_i}{e'_i}{B_i} \\
-    \getBorrows{B_1}{B_2}{S_1,S,S_2}
+    \getBorrows{B_1}{(B_2\Sdel{x})}{S_1,S,S_2} \\
+    S'_2 = S_2\Sunion B_2\Sonly{x}
   }
   { \Rannot
-    {\introPair{e_1}{e_2}}
-    {\introPair{\region{S_1}{e'_1}}{\region{S_2}{e'_2}}}
-    {S} }
+    {\letin{x}{e_1}{e_2}}
+    {\letin{x}{\region{S_1}{e'_1}}{\region{S'_2}{e'_2}}}{S} }
+  
 
   \inferrule
   { \forall i,\ \Rannot{e_i}{e'_i}{B_i} \\
@@ -105,6 +81,29 @@
   { \Rannot
     {\matchin{x,y}{e_1}{e_2}}
     {\matchin{x,y}{\region{S_1}{e'_1}}{\region{S'_2}{e'_2}}}{S} }
+
+  \inferrule[Rewrite-Region]
+  { \Rannot{e}{e'}{B} }
+  { \Rannot{\regionS{e}}{\region{B}{e'}}{\Sempty} }
+
+  \inferrule[Rewrite-Lam]
+  { \Rannot{e}{e'}{B} \\
+    B_x = B\Sonly{x}
+  }
+  { \Rannot{\lam{x}{e}}{\lam{x}{\region{B_x}{e'}}}{B\Sdel{x}} }
+
+  \inferrule[Rewrite-Pair]
+  { \forall i,\ \Rannot{e_i}{e'_i}{B_i} \\
+    \getBorrows{B_1}{B_2}{S_1,S,S_2}
+  }
+  { \Rannot
+    {\introPair{e_1}{e_2}}
+    {\introPair{\region{S_1}{e'_1}}{\region{S_2}{e'_2}}}
+    {S} }
+
+  \inferrule[Rewrite-Top]
+  { \Rannot[1]{e}{e'}{S} }
+  { \RannotT{e}{\region[1]{S}{e'}} }
 \end{mathpar}
 
 %%% Local Variables:
