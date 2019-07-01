@@ -1,6 +1,23 @@
 \section{The \lang language}
 
+We now present a formalization of the \lang language featuring
+a minimal ML language with let-polymorphism, abstract types, pairs, and our novel
+linear type system with borrows which uses kinds and qualified types.
+For ease of presentation,
+our formalization makes the following simplifications.
+First, we only consider matching on pairs, instead of arbitrary algebraic
+datatypes. We consider separate operators for borrowing and reborrowing (taking
+the borrow of a borrow). We consider regions to be fully annotated
+and present a set of rules to infer their placement.
+Finally we emulates region variables
+as a series of nesting indices.
+
+In the rest of this section, we present the syntax (\cref{syntax}),
+a linearity-aware semantics (\cref{sem}), syntax directed typing rules
+(\cref{sdtyping}) and automatic rules for region annotations (\cref{regionannot}).
+
 \subsection{Syntax}
+\label{syntax}
 
 The syntax of \lang is presented in \cref{grammar} and follows
 traditional ML languages with let bindings.
@@ -26,11 +43,14 @@ a data constructor $K$.
 
 \clearpage
 \subsection{Semantics}
+\label{sem}
+
 \input{fig-reduction}
 \input{fig-code}
 
 \clearpage
 \subsection{Typing}
+\label{sdtyping}
 
 \subsubsection{Constraint language}
 
@@ -131,6 +151,7 @@ of the normalization function in \cref{sec:normalize}
 \clearpage
 
 \subsection{Annotating regions}
+\label{regionannot}
 
 \begin{figure*}[htp]
   \centering
