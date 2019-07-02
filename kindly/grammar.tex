@@ -5,7 +5,7 @@
   % |&\ \fix{e}\tag{Fixpoint}\\
   |&\ \introPair{e}{e'} \mid \matchin{x,y}{e}{e'}\tag{Pairs}\\
   |&\ \region{x}{e}\tag{Region}\\
-  |&\ \borrow{x}\tag{Borrows}\\
+  |&\ \borrow{x} \mid \reborrow{\tau}\tag{Borrows}\\
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
   % |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
   \htag{Borrows}
@@ -29,7 +29,7 @@
   \tau ::=&\ \tvar\tag{Type variables}\\
   |&\ \tau\tarr{k}\tau\tag{Function types}\\
   |&\ \tapp{t}{\Multi\tau}\tag{Type constructors}\\
-  |&\ \borrow{\tau}\tag{Borrowed Type}\\
+  |&\ \borrowty{k}{\tau}\tag{Borrowed Type}\\
   \htag{Kinds}
   k ::=&\ \kvar\tag{Kind variables}\\
   |&\ \klin_n\tag{Linear kind}\\

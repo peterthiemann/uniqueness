@@ -51,8 +51,9 @@
 \end{mathpar}
 \hrulefill
 \begin{mathpar}
-  \inferrule{}
-  { \Rannot{\borrow{x}}{\borrow{x}}{\Sone{x}{b}} }
+  \inferrule
+  { e = \borrow{x} \mid \reborrow{x}}
+  { \Rannot{e}{e}{\Sone{x}{b}} }
 
   \inferrule{e = c\ |\ x}
   { \Rannot{e}{e}{\Sempty} }

@@ -221,6 +221,17 @@
   }  { \inferS{C}{\E}{\region{x}{e}}{\tau} }
 }
 
+\newcommand\ruleSDBorrow{
+  \inferrule[Borrow]
+  { \bvar{\borrow x}{\borrowty k\tau} \in \E }
+  { \inferS{C}{\E}{\borrow{x}}{\borrowty{k}{\tau}} }
+}
+\newcommand\ruleSDReBorrow{
+  \inferrule[Borrow]
+  { \inferS{C}{\E}{x}{\borrowty{k}{\tau}} }
+  { \inferS{C}{\E}{\reborrow{x}}{\borrowty{k}{\tau}} }
+}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Inference
 
@@ -229,7 +240,7 @@
   \inferrule[Var$_I$]
   { \bvar{x}{\sigma}\in \E \\
     \sigma = \forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau} \\
-    (\kvar'_i),(\tvar'_j) \text{ new} \\
+    (\kvar'_i),(\tvar'_j) \text{ new} \\\\
     % \addlin{
     % \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{k_j}}{\tau}{k_\tau}
     % }\\
@@ -239,7 +250,7 @@
     \normalize{C_x}{\unif}
   }
   { \inferW
-    {\addlin{\Sone{x}{\sigma}}}
+    {\addlin{\bvar{x}{\sigma}}}
     {(C,\unif'|_{\fv{\E}})}{\E}{x}{\unif'\tau} }
 }
 \newcommand\ruleIAbs{%
@@ -329,7 +340,17 @@
     % k = \operatorname{kind}(\iota)\\
   }
   { \inferW
-    {\addlin{\Sone{\borrow{x}}{\borrowty{\kvar}{\tau}}}}
+    {\addlin{\bvar{\borrow{x}}{\borrowty{\kvar}{\tau}}}}
+    {(C,\unif)}{\E}{\borrow{x}}{\borrowty{\kvar}{\tau}} }
+}
+\newcommand\ruleIReBorrow{%
+  \inferrule[ReBorrow$_I$]
+  { \inferW{\Sv}{(C',\unif')}{\E}{x}{\tau'} \\
+    % k = \operatorname{kind}(\iota)\\
+    (C,\unif) = \normalize{C' \Cand \Cleq{\tau'}{\borrowty{\kvar}{\tau}}}{\unif'}\\   
+  }
+  { \inferW
+    {\addlin{\bvar{\borrow{x}}{\borrowty{\kvar}{\tau}}}}
     {(C,\unif)}{\E}{\borrow{x}}{\borrowty{\kvar}{\tau}} }
 }
 \newcommand\ruleIRegion{%

@@ -25,21 +25,6 @@
   \and
   \ruleSDLam
   \and
-  \ruleSDApp
-  \and
-  \inferrule[Let]
-  { \inferS{C \Cand D}{\E_1}{e_1}{\tau_1} \\
-    \schm = \forall\Multi\kvar\forall\bvar{\Multi\tvar}{\Multi{
-        k}}. \qual{D}{\tau_1}\\
-    \{\Multi\kvar, \Multi\tvar\} = \fv{D, \tau_1} \setminus \fv{C, \E}
-  \\
-  \entail{C}{\exists\Multi\kvar\Multi\tvar.D} \\
-    \inferS{C}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\
-    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
-  }
-  { \inferS{C}
-    {\E}{\letin{x}{e_1}{e_2}}{\tau_2} }
-  \and
   \inferrule[Pair]
   { \inferS{C}{\E_1}{e_1}{\tau_1} \\
     \inferS{C}{\E_2}{e_2}{\tau_2} \\
@@ -47,6 +32,17 @@
   }
   { \inferS{C}{\E}{\introPair{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }
   \and
+  \ruleSDApp
+  \and
+  \inferrule[Let]
+  { \inferS{C \Cand D}{\E_1}{e_1}{\tau_1} \\
+    (C_\schm,\schm) = \generalize{D}{\E}{\tau_1}\\
+    \entail{C}{C_\schm} \\
+    \inferS{C}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
+  }
+  { \inferS{C}
+    {\E}{\letin{x}{e_1}{e_2}}{\tau_2} }
   \and
   \inferrule[MatchPair]
   { 
@@ -60,6 +56,10 @@
   }
   { \inferS{C}
     {\E}{\matchin{x,x'}{e_1}{e_2}}{\tau_2} }
+  \and
+  \ruleSDBorrow
+  \and
+  \ruleSDReBorrow
   \and
   %
   \ruleSDRegion
