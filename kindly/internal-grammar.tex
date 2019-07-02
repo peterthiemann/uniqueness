@@ -1,13 +1,15 @@
 \begin{figure*}[ht]
-\begin{align*}
-  \htag{Internal expressions}
-  e ::=&\dots \\
-  |&\ \ilam{\kvar^*}{\tvar^*}Ckxe \tag{Generalized abstraction} \\
-  |&\ \ivar x {k^*} {\tau^*} \tag{Generalized application} \\
-  |&\ \introPair[k]{e}{e} \tag{Tagged pairs}
-\end{align*}
-  \begin{minipage}[t]{0.38\linewidth}
+%   \begin{align*}
+% \end{align*}
+\begin{minipage}[t]{0.4\linewidth}
   \begin{align*}
+    \htag{Type environments}
+    \E ::=&\ \Eempty \mid \E;B\\
+    B ::=&\ \bnone \tag{Empty binding slot} \\
+    | & \ \bvar{x}{\schm}\tag{Variable bindings}\\
+    | & \ \svar{x}{\schm}^n \tag{Suspended bindings}\\
+    |&\ \bvar{\tvar}{\kschm}\tag{Type bindings}\\
+    % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
     \htag{Addresses}
     \Addr &::= \Multi\IBORROW\Multi\MBORROW\Loc \tag{Locations}
     % \\           &\mid \borrow{\Addr} \tag{Borrows}
@@ -17,23 +19,27 @@
     \\
     \htag{Environments}
     \VEnv &::= \Eempty \mid \VEnv[ x \mapsto r]
+  \end{align*}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.58\linewidth}
+  \begin{align*}
+    \htag{Internal expressions}
+    e &::= \dots \\
+    &\mid \ilam{\kvar^*}{\tvar^*}Ckxe \tag{Generalized abstraction} \\
+    &\mid \ivar x {k^*} {\tau^*} \tag{Generalized application} \\
+    &\mid \introPair[k]{e}{e} \tag{Tagged pairs}\\
+    \htag{Storables}
+    W &::= (\VEnv, \ilam {\Multi\kvar}{\Multi\tvar}Ckx{e}) \tag{Poly Closures}\\
+    &\mid (\VEnv, \lam[k]xe) \tag{Closures} \\
+    &\mid \introPair[k]rr \tag{Pairs} \\
+    &\mid [r] \tag{Resources} \\
+    &\mid \blob \tag{Freed Resource}
     \\
     \htag{Store}
     \Store &::= \Eempty \mid \Store[ \Loc \mapsto W]
   \end{align*}
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{0.58\linewidth}
-    \begin{align*}
-      \htag{Storables}
-      W &::= (\VEnv, \ilam {\Multi\kvar}{\Multi\tvar}Ckx{e}) \tag{Poly Closures}
-      \\
-        &\mid (\VEnv, \lam[k]xe) \tag{Closures} \\
-        &\mid \introPair[k]rr \tag{Pairs} \\
-        & \mid [r] \tag{Resources} \\
-        & \mid \blob \tag{Freed Resource}
-    \end{align*}
-  \end{minipage}
+\end{minipage}
 
 \caption{Syntax of internal language}
 \label{fig:syntax-internal-language}

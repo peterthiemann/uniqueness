@@ -14,13 +14,8 @@
   \htag{Match Specification}
   \etransfm ::=&\ \text{id} \tag{Normal match} \\
   |&\ \&^{\BORROW} \tag{Borrow match}\\
-  \htag{Type environments}
-  \E ::=&\ \Eempty \mid \E;B\\
-  B ::=&\ \bnone \tag{Empty binding slot} \\
-  | & \ \bvar{x}{\schm}\tag{Variable bindings}\\
-  | & \ \svar{x}{\schm}^n \tag{Suspended bindings}\\
-  |&\ \bvar{\tvar}{\kschm}\tag{Type bindings}
-  % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
+  \htag{Constraints}
+  C ::=&\  (\Cleq{k}{k'})^*
 \end{align*}
 \end{subfigure}\hfill
 \begin{subfigure}[t]{0.5\linewidth}
@@ -36,11 +31,9 @@
   |&\ \kaff_n\tag{Affine kind}\\
   |&\ \kun_n\tag{Unrestricted kind}\\
   n \in&\ \mathbb N \cup \{\infty\}\\
-  \htag{Constraints}
-  C ::=&\  (\Cleq{k}{k'})^*\\
   \htag{Type and kind schemes}
   \schm ::=&\ \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau})\\
-  \kschm ::=&\ \forall\Multi\kvar.(\qual{C}{\Multi{k} \karr k})\\
+  \kschm ::=&\ \forall\Multi\kvar.(\qual{C}{\Multi{k} \karr k})
 \end{align*}
 \end{subfigure}
 
