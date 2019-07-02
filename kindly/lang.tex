@@ -109,12 +109,24 @@ of the normalization function in \cref{sec:normalize}
 
 \subsubsection{Kinding}
 
+We note $\inferSK{C}{\E}{\tau}{(\Multi k)k}$
+when $\tau$ has kind $(\Multi k)k$ in environment $\E$ under constraints $C$.
+The rules are shown in \cref{rules:sd-kinding}.
+Kinds and types follow a small calculus with variables ($\tvar$,\dots),
+functions (type constructors $\T{t}$), application ($\tapp{t}{\Multi{\tau}}$)
+and primitives such as arrow ($\tau\tarr{k}\tau'$) and
+borrow ($\borrowty{k}{\tau}$).
+Kind inference is thus fairly straightforward and is done simply by following
+the syntax of the types. The only kind arrows can appear when looking
+up the kind scheme of a type constructor $\T t$. Kind arrows are forbidden
+in any other contexts.
+
 
 \begin{figure}[ht]
   \centering
   \input{infer/sd-kinds}
-  \caption{Syntax-directed kind inference --
-    $\inferSK{C}{\E}{\tau}{(\Multi k)k}$}
+  \caption{Syntax-directed kinding rule --
+    $\inferSK{C}{\E}{\tau}{k}$}
   \label{rules:sd-kinding}
 \end{figure}
 

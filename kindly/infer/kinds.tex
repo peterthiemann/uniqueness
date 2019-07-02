@@ -1,29 +1,32 @@
 \begin{mathpar}
   \inferrule[KVar|KCons]
   { \bvar{\tvar|\T t}{
-      \forall \kvar_i.\ \qual{D}{(k_j)^* \karr k}}
+      \forall \kvar_i.\ \qual{D}{(\Multi[j]{k}) \karr k}}
     \in \E \\
-    (\kvar'_i) \text{ new} \\
+    (\kvar'_i) \text{ new} \\\\
     (C,\unif) =
     \normalize{D}{\subst{\kvar_i}{\kvar'_i}{}_i}
   }
-  { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tvar}{\unif ((k_j)^* k)} }
+  { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tvar|\T t}{\unif ((\Multi[j]{k}) \karr k)} }
   \and
   \inferrule[KArr]
   { }
-  { \inferK{(\Ctrue,\emptyset)}{\E}{\tau_1 \tarr{k} \tau_2}{() k} }
-  \and
+  { \inferK{(\Ctrue,\emptyset)}{\E}{\tau_1 \tarr{k} \tau_2}{k} }
+
   \inferrule[KApp]
   { \forall j,\
-    \inferK{(C_j,\unif_j)}{\E}{\tau_j}{() k'_j} \\
-    \inferK{(C_0,\unif_0)}{\E}{\T t}{(k_j) k}
-    \\
+    \inferK{(C_j,\unif_j)}{\E}{\tau_j}{k'_j} \\
+    \inferK{(C_0,\unif_0)}{\E}{\T t}{(\Multi[j]{k}) \karr k}
+    \\\\
     (C,\unif) =
     \normalize
-    {C_0\Cand (\bigwedge_j C_j) \Cand \Cleq{k'_j}{k_j}_j}
-    {\unif_0\meet (\meeti_j \unif_j)}
+    {C_0\Cand \Multi[j]{C} \Cand \Cleq{k'_j}{k_j}_j}
+    {\unif_0\meet \Multi[j]{\unif}}
   }
-  { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tapp{t}{(\tau_j)}}{()\unif k} }
+  { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tapp{t}{(\tau_j)}}{\unif k} }
+  \and
+  \inferrule[KBorrow]
+  { }{ \inferK{(\Ctrue,\emptyset)}{\E}{\borrowty{k}{\tau}}{k}}
 \end{mathpar}
 
 
