@@ -6,7 +6,7 @@
   }{
     \Cleq{\E; B}{k} \Crewrite  C \Cand D
   }
-  \\
+
   \inferrule{
     \E \vdash \Cleq \schm k \Crewrite  C
   }{ \E \vdash \Cleq{\bvar x \schm}{k} \Crewrite  C}
@@ -17,32 +17,18 @@
   }{
     \E \vdash \Cleq{\svar x \schm^n} k \Crewrite  C \Cand D
   }
-  \\
+
   \inferrule{}{\Cleq{\IBORROW^n} k \Crewrite  \Cleq{\kun_n} k}
 
   \inferrule{}{\Cleq{\MBORROW^n} k \Crewrite  \Cleq{\kaff_n} k}
-  \\
+
   \inferrule{
-    \E; \Multi{\bvar{\alpha}{k}} \vdash \Cleq\tau k \Crewrite  D
+    \inferSK{C \Cand C_x} \E \tau {k'} \\
+    D = C \Cand C_x \Cand \Cleq{k'}k
   }{
-    \E \vdash \Cleq{\forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau})}
-    k \Crewrite  C \Cand D
+    \E \vdash \Cleq{\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}{k} \Crewrite  D
   }
 
-  \inferrule{}
-  { \E \vdash \Cleq{ \tau_2\tarr{k'}\tau_1 } k \Crewrite  \Cleq{k'}k }
-
-  \inferrule{
-    \E(\tvar) = \kschm
-  }
-  { \E \vdash \Cleq{ \tvar} k \Crewrite  \Cleq\kschm k }
-
-  \inferrule{
-  }{ \E \vdash \Cleq{\tapp{t}{\Multi\tau}} k \Crewrite  ???}
-
-  \inferrule{}{
-    \E \vdash \Cleq{\borrowty {k'} {\tau}} k \Crewrite  \Cleq{k'}k
-  }
 \end{mathpar}
 
 %%% Local Variables:

@@ -214,10 +214,9 @@
 \newcommand\ruleSDRegion{%
   \inferrule[Region]
   { \svar x {\tau_x}^n \in \E \\
-    \addlin{ \bregion{C_r}{x}{\E}{\E'} }\\
+    \addlin{ \lregion{C_r}{x}{\E}{\E'} }\\\\
     \inferS{C}{\E'}{e}{\tau} \\
-    \inferSK{C}{\E}{\tau}{k_\tau}\\
-    \entail C {C_r \Cand \Cleq{k_\tau}{\klin_{n-1}}} \\
+    \entail C {\Cleq{\tau}{\klin_{n-1}}} \\
   }  { \inferS{C}{\E}{\region{x}{e}}{\tau} }
 }
 
