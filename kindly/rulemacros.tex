@@ -15,7 +15,7 @@
     \Matches \Loc { \VEnv (x)} \\
     \Loc \in \Perm \\
     \Matches {(\VEnv, \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ckx{e})}{ \Store (\Loc)}\\
-    \Perm' =  \IF{\entail C {k \le \kun}}{ \Perm}{\Perm\Sdel\Loc} \\
+    \Perm' =  \IF{\entail C {k \le \kun_\infty}}{ \Perm}{\Perm\Sdel\Loc} \\
     \Loc'\notin\Dom{\Store}  \\
     \Store' = \Store[\Loc' \mapsto (\VEnv, \subst{\Multi[j]{\tvar}}{\Multi[j]{t}}{\subst {\Multi[i]{\kvar}}{\Multi[i]{k}}{(\lam[k]xe)}}) ]
   }{\Store, \Perm, \VEnv \vdash  \ivar x{\Multi[i]{k}}{\Multi[j]{\tau}}
