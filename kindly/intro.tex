@@ -1,5 +1,40 @@
 \section{Introduction}
 
+A large proportion of systems programming is focused on the proper
+handling of resources, like file handles, network connections, or
+dynamically allocated memory. Each of these resources comes with a
+protocol that prescribes the correct use of its API.
+For examples, a file handle appears as the result of of opening a
+file. If it was opened for reading, then read operations will suceed,
+but write operations will fail. Once the handle is closed, it cannot
+be used for reading or writing, anymore.
+
+Dynamic allocation of memory is analogous. An API call returns a
+pointer to a memory area, which can then be read and written to until
+the memory is released by another API call.
+
+In both cases, a resource is created in a certain state and a resource
+handle is returned to the program. Depending on this state, certain API calls
+can safely be applied to it. Finally, there is another API call to
+release the resource, which yields the handle invalid.
+Taken to the extreme, each API call changes the state so that a
+different set of API calls is enabled afterwards. 
+
+Ignoring this protocol is a common source of errors \cite{is there
+  some paper?}.
+
+Most statically typed languages do not address this issue.
+
+But linear types do.
+
+But typestate does it. A popular example is session types.
+
+Typestate needs to be supported by affinity (or linearity, or
+uniqueness).
+
+But these approaches are restrictive in pratice because [here is an
+example that doesn't work well with existing systems].
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"
