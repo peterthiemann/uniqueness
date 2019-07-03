@@ -3,7 +3,7 @@
   { \bvar{\tvar|\T t}{
       \forall \kvar_i.\ \qual{D}{(\Multi[j]{k}) \karr k}}
     \in \E \\
-    (\kvar'_i) \text{ new} \\\\
+    \Multi[i]{\kvar'} \text{ new} \\\\
     (C,\unif) =
     \normalize{D}{\subst{\kvar_i}{\kvar'_i}{}_i}
   }
@@ -20,7 +20,7 @@
     \\\\
     (C,\unif) =
     \normalize
-    {C_0\Cand \Multi[j]{C} \Cand \Cleq{k'_j}{k_j}_j}
+    {C_0\Cand \Multi[j]{C} \Cand \Multi[j]{\Cleq{k'_j}{k_j}}}
     {\unif_0\meet \Multi[j]{\unif}}
   }
   { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tapp{t}{(\tau_j)}}{\unif k} }

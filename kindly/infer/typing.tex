@@ -1,14 +1,4 @@
 \begin{mathpar}
-  \inferrule[Scheme]{
-    \inferK{C \Cand C_x} \E \tau {k'} \\
-    \entail C {\Cleq{k'}k}
-  }{
-    \entail C {(\forall \kvar_i \forall (\tvar_j:k_j).\
-      \qual{C_x}{\tau}) \le  k}
-  }
-\end{mathpar}
-\hrulefill
-\begin{mathpar}
   \ruleIVar
 
   \ruleIBorrow
