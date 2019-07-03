@@ -6,41 +6,59 @@
 
 \subsection{A session on linearity}
 
-A classical example of linearity at work are to control the uses of resources such
-as files or network handles.
+Session typing \cite{Honda1993,DBLP:conf/esop/HondaVK98} is a type
+discipline for checking protocols statically. A session type is
+ascribed to a communication channel and describes
+a sequence of interactions. For instance, the type
+\lstinline{!int.!int.?int.end} specifies a protocol
+where the program must send two integers, receive an integer, and then
+close the channel. 
 %
-Session types, notably, allow to statically type check protocols.
-For instance, the type \lstinline{!int.!int.?int.end} represent a session
-where the program must send two integers, receive an integer, then end the session.
-%
-In this context, it is essential that channels
-are used linearly, since every use of the channel
-will make the protocol progress and change the type of the channel.
+In this context, channels must be used linearly, because every use of
+a channel ``consumes'' one interaction and hence changes the type of the
+channel. That is, after sending two integers on the channel,
+the remaining channel has type \lstinline{?int.end}.
 
-Session types are usually defined with the following operators:
-
+Here are some standard type operators for session types \SType:
 \begin{center}
-  \begin{tabular}{r l}
-    $\tau ! \mathcal S$ & Send a value of type $\tau$ then continue with protocol $S$.\\
-    $\tau ? \mathcal S$& Receive a value of type $\tau$ then continue with protocol $S$.\\
-    $\mathcal S \oplus \mathcal S'$& Choose between protocols $S$ and $S'$.\\
-    $\mathcal S \operatorname{\&} \mathcal S'$& Offer a choice between protocols $S$ and $S'$.
+  $\SType ::=$
+  \begin{tabular}[t]{rl}
+    $\tau ! \SType$ & Send a value of type $\tau$ then continue with protocol $\SType$.\\
+    $\tau ? \SType$& Receive a value of type $\tau$ then continue with protocol $\SType$.\\
+    $\SType \oplus \SType'$& Internal choice between protocols $\SType$ and $\SType'$.\\
+    $\SType \operatorname{\&} \SType'$
+                    & Offer a choice between protocols $\SType$ and $\SType'$. 
   \end{tabular}
 \end{center}
 
-It is well known that binary session types can be embedded into ML languages
-\cite{DBLP:journals/jfp/Padovani17}. We can easily
-embed session types in our language and provide the following API:
+\citet{DBLP:journals/jfp/Padovani17}  has shown how to encode this
+style of session typing in ML-like languages, but his implementation
+downgrades linearity to a run-time check for affinity. Building on that
+encoding we can provide a safe API in \lang that statically enforces
+linear handling of channels:
 %
 \begin{lstlisting}
-type 'S st : lin
-val receive: ('a ? 'S) st -> 'a * 'S st
+type 'S st : lin (*@\label{line:session1}*)
+val receive: ('a ? 'S) st -> 'a * 'S st (*@\label{line:session2}*)
 val send : ('a:'k). 'a -> ('a ! 'S) st -{'k}> 'S st
+val send : ('a ! 'S) st -> 'a -{lin}> 'S st
 val create : unit -> 'S st * (dual 'S) st
 val close : end st -> unit
 \end{lstlisting}
 
+Line~\ref{line:session1} introduces a parameterized abstract
+type \lstinline{st} which is linear as indicated
+by its kind \lstinline{lin}. Its low-level implementation would wrap a
+handle for a socket, for example. The \lstinline{receive}  operation
+in Line~\ref{line:session2} takes a channel that is ready to receive a
+value of type \lstinline{'a} and returns a pair of the value a the
+channel at its residual type \lstinline{'S}. It does not matter
+whether \lstinline{'a} is restricted to be linear, in fact
+\lstinline{receive} is polymorphic in the kind of \lstinline{'a} and
+also in the kind of \lstinline{->}. This kind polymorphism is the
+default if no constraints are specified.
 
+The \lstinline{send} operation, however, 
 
 \TODO{Explain}
 
