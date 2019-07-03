@@ -40,11 +40,11 @@ linear handling of channels:
 \begin{lstlisting}
 type 'S st : lin (*@\label{line:session1}*)
 val receive: ('a ? 'S) st -> 'a * 'S st (*@\label{line:session2}*)
-val send : ('a:'k). 'a -> ('a ! 'S) st -{'k}> 'S st
 val send : ('a ! 'S) st -> 'a -{lin}> 'S st
 val create : unit -> 'S st * (dual 'S) st
 val close : end st -> unit
 \end{lstlisting}
+% val send : ('a:'k). 'a -> ('a ! 'S) st -{'k}> 'S st 
 
 Line~\ref{line:session1} introduces a parameterized abstract
 type \lstinline{st} which is linear as indicated
@@ -57,22 +57,28 @@ whether \lstinline{'a} is restricted to be linear, in fact
 \lstinline{receive} is polymorphic in the kind of \lstinline{'a} and
 also in the kind of \lstinline{->}. This kind polymorphism is the
 default if no constraints are specified.
+%
+The \lstinline{send} operation takes a linear channel and returns a
+single-use function that takes a value of type \lstinline{'a} suitable
+for sending and returns the channel with updated type.
+%
+The \lstinline{create} operation returns a pair of channel
+endpoints. They follow dual communication protocols, where the
+\lstinline{dual} operator swaps sending and receiving operations.
+%
+Finally, \lstinline{close} closes the channel.
 
-The \lstinline{send} operation, however, 
+In \cref{fig:sessiontype} we show how to use these primitives to
+implement client and server for an addition service.
+No linearity annotations are needed in the code, as all linearity
+properties can be inferred from the linearity of the \texttt{st} type.
 
-\TODO{Explain}
-
-We can then use these primitives to implement a simple addition service.
-Both client and server code are shown in
-\cref{fig:sessiontype}.
-We do not need any extra linearity annotations in the code: the fact
-that the \texttt{st} type is declared as linear is sufficient.
-The server, \lstinline{add_service}, is inferred to be of type
+The inferred type of the server, \lstinline{add_service}, is
 \lstinline{(int ! int ! int ? end) st -> unit}.
-The client, \lstinline/op_client/, operates by sending two messages
+The client operates by sending two messages
 and receiving the result.
-This code is polymorphic in both argument and return types and could thus
-be used to any binary operator.
+This code is polymorphic in both argument and return types, so it could
+be used with any binary operator.
 %
 \begin{figure}[!h]
   \begin{subfigure}[t]{.5\linewidth}
@@ -80,7 +86,7 @@ be used to any binary operator.
 let add_service ep =
   let x, ep = receive ep in
   let y, ep = receive ep in
-  let ep = send (x + y) ep in
+  let ep = send ep (x + y) in
   close ep
 # add_service :
   (int ! int ! int ? end) st -> unit
@@ -90,8 +96,8 @@ let add_service ep =
   \begin{subfigure}[t]{.5\linewidth}
 \begin{lstlisting}
 let op_client ep x y =
-  let ep = send x ep in
-  let ep = send y ep in
+  let ep = send ep x in
+  let ep = send ep y in
   let result, ep = receive ep in
   close ep;
   result
@@ -107,31 +113,31 @@ let op_client ep x y =
   \caption{Corresponding session type programs in \lang}
   \label{fig:sessiontype}
 \end{figure}
+%
+Moreover, the \lstinline/op_client/ function can be partially applied
+to a channel. Since the closure returned by such a partial application
+captures the channel, it can only be used once.  This restriction is
+reflected by the arrow of kind \lstinline{lin}, \lstinline/-{lin}>/,
+which is the type of a single-use function. 
+The general form of
+arrows types in \lang is \lstinline/-{k}>/, where \lstinline/kk/ is a
+kind that restricts the number of uses of the function.  For
+convenience, we shorten \lstinline/-{un}>/ to \lstinline/->/.  \lang
+infers the
+single-use property of the arrows without any user
+annotation. In fact, the only difference between the
+code presented here and Padovani's examples
+\cite{DBLP:journals/jfp/Padovani17} is the kind annotation on the
+type definition of \lstinline/st/.
 
-In addition, the \lstinline/op_client/ function can be partially
-applied to a channel. Since the closure returned by such a partial
-application captures the channel, it can only be used once.
-This is reflected by the arrow, \lstinline/-{lin}>/, which is the
-type of functions that can only be used once.
-The general form of arrows types in \lang is \lstinline/-{k}>/, where
-\lstinline/kk/ is an arbitrary kind that describes the behavior of
-underlying closure.
-For convenience, we shorten \lstinline/-{un}>/ as \lstinline/->/.
-Note again that the linearity on the arrows was inferred without
-any annotation from the user. In fact, the only difference between the code
-presented so far and the examples by
-\citet{DBLP:journals/jfp/Padovani17}
-is the kind annotation on the type definition of \lstinline/st/.
-
-\TODO{more details?}
-
-Finally, we can compose both server and client.
-Failure to fully consume either \lstinline/a/ or \lstinline/b/
+To run client and server, we can create a channel and apply
+\lstinline{add_service} to one end and \lstinline{op_client} to the other.
+Failure to consume either channel endpoints (\lstinline/a/ or \lstinline/b/)
 would result in a type error.
 \begin{lstlisting}
 let main1 () =
   let (a, b) = create () in
-  add_service a;
+  fork add_service a;
   op_client b 1 2
 # main : unit -> int
 \end{lstlisting}
