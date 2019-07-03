@@ -5,6 +5,7 @@
   really spaced out that pushes the limit}
 
 \subsection{A session on linearity}
+\label{sec:session-linearity}
 
 Session typing \cite{Honda1993,DBLP:conf/esop/HondaVK98} is a type
 discipline for checking protocols statically. A session type is
@@ -135,7 +136,7 @@ To run client and server, we can create a channel and apply
 Failure to consume either channel endpoints (\lstinline/a/ or \lstinline/b/)
 would result in a type error.
 \begin{lstlisting}
-let main1 () =
+let main () =
   let (a, b) = create () in
   fork add_service a;
   op_client b 1 2
@@ -154,35 +155,45 @@ let main1 () =
 % \end{figure}
 
 \subsection{Imperative programming}
+\label{sec:imper-progr}
 
-The programming style used for channels so far is
-appropriate for purely functional code.
-This style is however fairly bothersome in mutable contexts.
+The programming style demonstrated for channels is
+appropriate for purely functional code, but becomes tedious when
+manipulating mutable resources.
 %
 To make linearity easier to use for imperative programming, we rely on
-{\em borrows}. We present a typical API for mutable affine arrays
-in \cref{sig:array} and an example of use in \cref{ex:array}.
-We can distinguish three type of operations. Firstly,
-function that manipulate the whole
-array such as \lstinline/create/ and \lstinline/free/, and behaves exactly
-like the functions on channel presented in the previous section.
-Second, read-only functions such as \lstinline/get/
-manipulates \emph{immutable} borrows. An immutable borrow over array \lstinline/a/
-is introduced with \lstinline/&a/ and represent a read-only view of the array.
-Finally, mutable functions, such as \lstinline/set/ manipulate
-a \emph{mutable borrow}. Mutable borrows, introduced with \lstinline/&!a/
-represent a read-write view of the array.
+the notion of borrowing \cite{DBLP:conf/popl/BoylandR05}. As an example,
+\cref{sig:array} contains an API for mutable affine arrays with a use case in \cref{ex:array}. 
 
-Multiple immutable borrows can be used concurrently and are considered
-unrestricted (\lstinline/un/).
-A mutable borrow is exclusive, and considered affine (\lstinline/aff/).
-Furthermore, any borrow prevents access to the ``raw'' access
-as long as they are in use. In \cref{ex:array}, on \cref{ex:array:get},
+We distinguish several kinds of operation: constructors, destructore,
+observers, and mutators. 
+Constructors and destructors like \lstinline/create/ and \lstinline/free/ manipulate the whole
+array. As with channels in \cref{sec:session-linearity},
+\lstinline/create/ yields a linear resource which is consumed by \lstinline/free/.
+During the lifetime of the array resource \lstinline/a/, we can split
+off \emph{immutable borrows} \lstinline/&a/ that provide a read-only
+view or \emph{mutable borrows} \lstinline/&!a/ for read-write views.
+Observer functions such as \lstinline/get/ expect an immutable borrow
+argument, mutator functions such a \lstinline/set/ expect
+a mutable borrow.
+
+Generally, each borrow is tied to a region whose lifetime is properly
+contained in the lifetime of the resource. 
+In a region, we can split off as many immutable borrows as we like
+from a resource, but we can have only one mutable borrow. In a
+subsidiary region, we can take further immutable borrows from any
+borrow or we can take a mutable borrow from a mutable borrow from a
+enclosing region. Borrows are confined to their regions. Inside,
+immutable borrows are unrestricted (\lstinline/un/) whereas mutable
+borrows are affine (\lstinline/aff/).
+
+Furthermore, any borrow prevents access to the ``raw''  resource
+as long as it is in use. In \cref{ex:array}, \cref{ex:array:get},
 two immutable borrows are used in the same expression. Once this operation
-is done, the borrows are not used anymore, which allows us to take
-an exclusive immutable borrow to mutate the array on \cref{ex:array:set}.
-Finally we can return the whole array on \cref{ex:array:return} since
-none of the borrows are used anymore.
+is done, the borrows are not used anymore, which allows us to use
+an exclusive mutable borrow in \cref{ex:array:set}.
+Finally, we return the whole array in \cref{ex:array:return} because
+none of the borrows are in scope anymore.
 
 \begin{figure}
   \centering
@@ -221,6 +232,7 @@ let mk_fib_array n =
   \end{subfigure}
 \end{figure}
 
+%%% TBC
 Naturally, \lang also checks that borrows do not escape their point
 of use through {\em syntactic regions}. The example
 above is reproduce in \cref{ex:array:region} with
@@ -275,7 +287,7 @@ let for f a  =
   (tt -> int -> unit) -> tt -> unit
 \end{lstlisting}
     \caption{For loop function for affine arrays}
-    \label{ex:array}
+    \label{ex:array:for}
   \end{subfigure}
 \end{figure}
 
