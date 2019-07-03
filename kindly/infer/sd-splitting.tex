@@ -20,7 +20,7 @@
 \hrulefill
 \begin{mathpar}
   \inferrule[BSplit-Both]{}{
-    \bsplit {\Cleq\schm\kun_\infty}
+    \bsplit {\Cleq{\schm}{\kun_\infty}}
     {\bvar{x}{\schm}} {\bvar{x}{\schm}} {\bvar{x}{\schm}}
   }
 
@@ -34,8 +34,8 @@
 
   \inferrule[BSplit-Imm-Borrow]{}{
     \bsplit {\Cempty}
-    {\bvar{\borrow[i]{x}}{\tau}}
-    {\bvar{\borrow[i]{x}}{\tau}}{\bvar{\borrow[i]{x}}{\tau}}
+    {\bvar{\borrow[i]{x}}{\schm}}
+    {\bvar{\borrow[i]{x}}{\schm}}{\bvar{\borrow[i]{x}}{\schm}}
   }
 
   \inferrule[BSplit-To-Borrow]{}{
