@@ -3,7 +3,8 @@
 We now formulate type inference for the \lang language. Type inference is
 based on the HM(X) framework~\citep{DBLP:journals/tapos/OderskySW99} which
 presents how to implement Hindley-Milner type inference in a language
-with qualified types. We first present various preliminaries definitions,
+with qualified types and an arbitrary custom constraint language.
+We first present various preliminaries definitions,
 we then show our extension of HM(X) that support a kind system and affine
 types.
 
@@ -42,11 +43,11 @@ operator on sets $\esplit{}{}$.
   %   (\Sv'\Sdel{x \mid x\in\Sv})
   %   &\text{where $\sqcup$ is the disjoint union}\\
   % \and
-  \inferrule{}
-  { \Cleq{\Sv}{k}
-    = \bigwedge_{\Sone{x}{\schm}\in\Sv} \Cleq{\schm}{k}
-  }
-  \and
+  % \inferrule{}
+  % { \Cleq{\Sv}{k}
+  %   = \bigwedge_{\Sone{x}{\schm}\in\Sv} \Cleq{\schm}{k}
+  % }
+  % \and
   % \inferrule
   % { \forall \bshadow{x} \in \Sv, b'\in\Sv'.\quad
   %   \tregion{C_x}{y}{\bshadow{x}}{b'} }
@@ -56,13 +57,20 @@ operator on sets $\esplit{}{}$.
   % { \text{if } \operatorname{lenght}(\Sv(x))  = \Cempty{} \wedge  }
   { \Weaken_{\bvar{x}{\sigma}}(\Sv) =
     \begin{dcases}
-      \Ctrue& x\in\Sv\\
-      \Cleq{\sigma}{\kaff_\infty}& \text{ otherwise}\\
+      \Ctrue& \text{if } x\in\Sv\\
+      \Cleq{\sigma}{\kaff_\infty}&\\
     \end{dcases}
 
   }
+
+  \inferrule{
+    \inferK{C \Cand C_x} \E \tau {k'} \\
+    D = C \Cand C_x \Cand \Cleq{k'}k
+  }{
+    \E \vdash \Cleq{\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}{k} \Crewrite  D
+  }
 \end{mathpar}
-\caption{Operation on usage maps $\Sv$}
+\caption{Auxiliary rules for inference}
 \label{op:usgmap}
 \end{figure}
 
@@ -74,13 +82,14 @@ algorithmic point of view, $\E$ and $\tau$ are the input parameters of
 our inference procedure.
 We present the kind inference algorithm as a set of syntax-directed rules in
 \cref{rules:kinding}.
-Since higher-kinded types are not supported, the type application
-rule and the type constructor rule are merged in {\sc KApp}.
-Additionally, type variables must be of a simple kind in rule {\sc KVar}.
-Note that in the case of a type constructor with no argument, the {\sc KApp}
-rule degenerates to a simpler form which is similar to the {\sc KVar} rule.
-Kind schemes are instantiated in the {\sc KApp} and {\sc KVar} rules by creating
+Similar to the syntax-directed rules, higher-kinds are not generally supported
+and can only appear by looking-up the kind scheme of a type constructor,
+for use in the type application rule {\sc KApp}.
+Type variables must be of a simple kind in rule {\sc KVar}.
+Kind schemes are instantiated in the {\sc KVar} rules by creating
 fresh kind variables and the associated substitution.
+{\sc KArr} and {\sc KBorrow} simply returns the kind of the primitive
+arrow and borrow types.
 
 \begin{figure}[ht]
   \centering

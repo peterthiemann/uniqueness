@@ -344,7 +344,7 @@
 }
 \newcommand\ruleIReBorrow{%
   \inferrule[ReBorrow$_I$]
-  { \inferW{\Sv}{(C',\unif')}{\E}{x}{\tau'} \\
+  { \inferW{\Sv}{(C',\unif')}{\E}{x}{\tau'} \\\\
     % k = \operatorname{kind}(\iota)\\
     (C,\unif) = \normalize{C' \Cand \Cleq{\tau'}{\borrowty{\kvar}{\tau}}}{\unif'}\\   
   }
