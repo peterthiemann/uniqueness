@@ -322,27 +322,27 @@ In this section, we show how \lang allows us to define
 a safe API for persistent arrays that support both immutable and mutable features,
 and how it can be used to implement a simple backtracking Sudoku solver.
 
-The Sudoku solver maintains a 2D-array that represents the state of
-the game and uses backtracking when there are several alternatives to proceed.
-The use of backtracking suggests a persistent data structure for the 2D-array.
+The Sudoku solver maintains an array to represent the state of
+the game and uses backtracking when there are several choices to proceed.
+The use of backtracking suggests a persistent data structure for the array.
 However, only changes that correspond to a choice point need to use
 the persistence mechanism, others may be implemented as
 cheap in-place mutations.
 
 \cref{sig:hybarray} contains an API \lstinline/HybArray/ 
-that guarantees correct use of mutable and immutable modifications to
-the board by relying on affine types and borrows.
+that enables using mutable and immutable modifications to
+the board through affine types and borrows.
 The signature differs slightly from the \lstinline/Array/
 signature. For simplicity, the array elements are unrestricted, 
 hence it is sufficent for the array to be affine.
-The in-place mutation function is called \lstinline/set_mut/ with type
-\lstinline/&!('a t) * int * 'a -> unit/ and the persistent
+The in-place mutation function \lstinline/set_mut/ with type
+\lstinline/&!('a t) * int * 'a -> unit/ works on a mutable borrow  whereas the persistent
 \lstinline/set/ operation has type \lstinline/&('a t) * int * 'a -> 'a t/. It
-takes an \emph{immutable borrow} because it only reads from the
+takes an immutable borrow because it only reads from the
 argument array, but returns a fresh,  modified structure.
-The code in \cref{ex:cow} is a very simple implementation of
+The code in \cref{ex:cow} contains a very simple implementation of
 \lstinline/HybArray/ that represents hybrid arrays
-as regular arrays with copy-on-write for persistent
+as regular arrays and uses copy-on-write for persistent
 modifications. The function
 \lstinline/create_from : int -> (int -> 'a) -> 'a Array.t /
 initializes an array from a function.
@@ -390,41 +390,42 @@ end
   \caption{Hybrid arrays -- signature and example implementation}
 \end{figure}
 
-
-
-Thanks to this API, modifications that correspond to backtracking points
-use \lstinline/set/, which allows arbitrary uses of the previous version
-of the array, while other modifications uses \lstinline/set_mut/, which
+Our implementation of a Sudoku solver (\cref{ex:sudoku}) performs
+modifications that correspond to choice points using \lstinline/set/,
+which makes it trivial to come back to the previous version
+of the array, while other modifications use \lstinline/set_mut/, which
 forbids uses of the previous version.
-This can be seen in the Sudoku solver implementation in \cref{ex:sudoku}.
-The board is represented as a matrix of cells (\cref{line:boardtype}).
-We assume the existence of a \lstinline/Matrix/ module which uses the same API
-as \lstinline/HybArray/ but with two indices.
-Each cell is an integer
-set that represent admissible solutions so far. The Sudoku solver will
-iterate on the cells and try each possible solution (\cref{line:try_solution}).
-When a value is picked for the current cell, we use an immutable modification
-to create a backtracking point (\cref{line:immutset}) and propagate
-the changes with the \lstinline/propagate/ function. The \lstinline/propagate/
-function does not need to preserve the previous
-version of the board, and thus uses direct mutation.
+
+The board is represented as a 2D-matrix (\cref{line:boardtype}), where
+the \lstinline/Matrix/ type uses the same API as \lstinline/HybArray/
+but with two indices. 
+Each cell contains an integer set that represent admissible solutions so far.
+The Sudoku solver iterates over the cells and tries each possible solution (\cref{line:try_solution}).
+When a value is picked for the current cell, we create a choicepoint,
+change the cell with an immutable modification (\cref{line:immutset}), and propagate
+the changes with the \lstinline/propagate/ function.
+The \lstinline/propagate/ function uses direct mutation through a
+mutable borrow of the matrix as it need not preserve the previous
+version of the board.  
 The implementation of \lstinline/propagate/ is split into three parts
-for lines, columns, and square. For concision, only \lstinline/propagate_lines/ is
-presented here (\cref{line:propline}).
-The typing ensures that all the mutations do not compromise
-backtracking, since sharing is only allowed through
-the immutable set functions, which is used for backtracking points.
+for lines, columns, and square, which are all very similar to function
+\lstinline/propagate_lines/ (\cref{line:propline}). 
+
+The typing ensures that the mutations do not compromise the state at
+the choice point, because they operate on a new state \lstinline/new_g/ created for one
+particular branch of the choice.
 In particular, the \lstinline/try_solution/ function can be used in a loop
 precisely because the \lstinline/set/ function only requires an
-\emph{immutable} borrow of \lstinline/new_g/.
-This is allowed, since immutable borrows are unrestricted.
+unrestricted immutable borrow of \lstinline/g/, which can be used as
+many times as needed.
+We could even free \lstinline/new_g/ in \cref{line:free:new_g}.
 
-While we presented our API on simple copy-on-write arrays, this API
-could easily be adapted to any persistent data-structure with
+
+While presented for copy-on-write arrays, the API
+can easily be adapted to other persistent data structures with
 transient mutability such as RRB Vectors \cite{DBLP:journals/pacmpl/Puente17}
-and persistent HAMT (used notably as Clojure's default associative maps
-\cite{bagwell2001ideal,clojurehamt}) while providing a good performance profile
-and a convenient programming style.
+or persistent HAMT \cite{bagwell2001ideal,clojurehamt} to provide  a
+convenient programming style without compromising performance.
 
 \begin{figure}
   \centering

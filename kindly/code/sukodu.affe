@@ -21,8 +21,8 @@ let rec solve i j g =
       let new_g = 
         Matrix.set (&g,i,j,IntSet.singleton n) in(*@\label{line:immutset}*)
       propagate i j &!new_g n;
-      if is_valid &new_g when
+      if is_valid &new_g then
         solve new_i new_j new_g
-    in
+    in(*@\label{line:free:new_g}*)
     let cell = Matrix.get (&g,i,j) in
     IntSet.iter try_solution cell
