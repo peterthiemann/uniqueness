@@ -165,6 +165,17 @@ To make linearity easier to use for imperative programming, we rely on
 the notion of borrowing \cite{DBLP:conf/popl/BoylandR05}. As an example,
 \cref{sig:array} contains an API for mutable affine arrays with a use case in \cref{ex:array}. 
 
+The intention of this API is to enable arrays to contain affine
+elements. One would first use \lstinline/create n v/ to create
+an (unrestricted) array of size \lstinline/n/ with some value
+\lstinline/v/. This value must be unrestricted as it is duplicated to
+initialize all array elements. Using the \lstinline/map/ function we
+can transform the unrestricted elements into linear affine)
+ones. This transformation yields a linear (affine) array that can be
+processed further using \lstinline/map/ (or \lstinline/set/ if
+affine). Before \lstinline/free/ing the array the elements must be
+affine, again. 
+
 We distinguish several kinds of operation: constructors, destructore,
 observers, and mutators. 
 Constructors and destructors like \lstinline/create/ and \lstinline/free/ manipulate the whole
@@ -173,7 +184,7 @@ array. As with channels in \cref{sec:session-linearity},
 During the lifetime of the array resource \lstinline/a/, we can split
 off \emph{immutable borrows} \lstinline/&a/ that provide a read-only
 view or \emph{mutable borrows} \lstinline/&!a/ for read-write views.
-Observer functions such as \lstinline/get/ expect an immutable borrow
+Observer functions such as \lstinline/length/ and \lstinline/get/ expect an immutable borrow
 argument, mutator functions such a \lstinline/set/ expect
 a mutable borrow.
 
@@ -203,12 +214,12 @@ module Array : sig
   type ('a : 'k) t : 'k
   
   val create : ('a : un) => int -> 'a -> 'a t
-  val free : 'a t -> unit
+  val free : ('a : aff) => 'a t -> unit
 
   val length : &('a t) -> int
 
   val get : ('a : un) => &('a t) * int -> 'a
-  val set : &!('a t) * int * 'a -> unit
+  val set : ('a : aff) => &!('a t) * int * 'a -> unit
   
   val map : (&'a -> 'b) -> &('a t) -> 'b t
 end
