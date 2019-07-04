@@ -25,12 +25,7 @@
   \and
   \ruleSDLam
   \and
-  \inferrule[Pair]
-  { \inferS{C}{\E_1}{e_1}{\tau_1} \\
-    \inferS{C}{\E_2}{e_2}{\tau_2} \\
-    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}
-  }
-  { \inferS{C}{\E}{\introPair{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }
+  \ruleSDPair
   \and
   \ruleSDApp
   \and
