@@ -78,13 +78,27 @@ a data constructor $K$.
 \subsection{Typing}
 \label{sdtyping}
 
-\subsubsection{Bindings and Weakening}
+We now present the essential parts of our \lang's type system. A complete
+description of the system is available in \cref{appendix:sdtyping}.
+In this section, we focus on chosen parts of our system
+through a set of selected rules.
+%
+We first define the following typing, kinding and constraint judgements:
+\begin{description}
+\item[$\inferS{C}{\E}{e}{\tau}$ --]
+  Expression $e$ has type $\tau$ in environment $\E$ under constraints $C$.
+\item[$\inferSK{C}{\E}{\tau}{k}$ --]
+  Type $\tau$ has kind $k$ in environment $\E$ under constraints $C$.
+\item[$\entail{D}{C}$ --] Constraint $D$ implies constraint $C$.
+\end{description}
 
+We will now present the novel aspects of our system which are necessary to handle
+three specific features: binders, borrows, and sharing.
 
 \subsubsection{Regions and Borrows}
 
 
-\begin{figure}
+\begin{figure}[!h]
   \centering
   \begin{subfigure}{0.4\linewidth}
     \begin{mathpar}
@@ -114,11 +128,52 @@ a data constructor $K$.
   \end{subfigure}
 \end{figure}
 
+\subsubsection{Bindings and Closures}
+
+One essential aspect of linear types is to control which variables
+are allowed to be unused. This is usually done through \emph{weakening},
+which allow to discard bindings from the environment.
+Another important feature is to control \emph{captures} done by closures.
+In \lang, we enforce both properties through the use of environment-wide
+kind inequalities, which we note $\Cleq{\E}{k}$.
+The intuitive meaning of $\Cleq{\E}{k}$ is that for all bindings
+$\bvar{x}{\tau}$ in $\E$,
+if type $\tau$ has kind $k'$ ($\inferSK{C}{\E}{\tau}{k'}$)
+then $\Cleq{k'}{k}$.
+While this definition is incomplete, it is sufficient to understand
+its use in the {\sc Abs} and {\sc Var} rules shown in \cref{selectrules:binders}.
+%
+The {\sc Var} rule looks up the type scheme of the variable $x$ in
+the environment $\E$
+and instantiate a concrete type through the substitution $\unif$. It then
+checks that the other bindings in $\E$ can safely be discarded by
+ensuring they are not linear. This is achieved through the constraint
+$\Cleq{\E\Sdel{X}}{\kaff_\infty}$.
+%
+The {\sc Lam} constraints must ensures that if the body of the lambda captures
+linear or affine variable, the content will be reflected in the kind
+annotated on the arrow, such as $\tau_2 \tarr{k} \tau_1$.
+In order to do so, we constraint all the bindings of $\E$ to be less than $k$.
+If one of the binding of $\E$ constraints a type whose kind is affine,
+we will derive the constraints $\Cleq{\kaff_n}{k}$, which ensures that
+the kind on the arrow is at least affine.
+
+\begin{figure}[!h]
+  \centering
+  \begin{mathpar}
+    \ruleSDLam
+    
+    \ruleSDVar
+  \end{mathpar}
+  \caption{The {\sc Lam} and {\sc Var} rules}
+  \label{selectrules:binders}
+\end{figure}
+
 
 \subsubsection{Copying and Splitting}
 
 
-\begin{figure}
+\begin{figure}[!h]
   \centering
   \begin{subfigure}{0.35\linewidth}
     \begin{mathpar}
