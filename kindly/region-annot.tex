@@ -89,9 +89,8 @@
 
   \inferrule[Rewrite-Lam]
   { \Rannot{e}{e'}{B} \\
-    B_x = B\Sonly{x}
   }
-  { \Rannot{\lam{x}{e}}{\lam{x}{\region{B_x}{e'}}}{B\Sdel{x}} }
+  { \Rannot{\lam{x}{e}}{\lam{x}{\region{B}{e'}}}{\Sempty} }
 
   \inferrule[Rewrite-Pair]
   { \forall i,\ \Rannot{e_i}{e'_i}{B_i} \\
