@@ -157,26 +157,29 @@ let main () =
 \subsection{Imperative programming}
 \label{sec:imper-progr}
 
-The programming style demonstrated for channels is
-appropriate for purely functional code, but becomes tedious when
-manipulating mutable resources.
+The functional resource-passing style demonstrated for channels in
+\cref{sec:session-linearity} becomes tedious when manipulating mutable
+resources like buffers or connection pools.
 %
-To make linearity easier to use for imperative programming, we rely on
-the notion of borrowing \cite{DBLP:conf/popl/BoylandR05}. As an example,
-\cref{sig:array} contains an API for mutable affine arrays with a use case in \cref{ex:array}. 
+To make linearity easier to use with an imperative programming style, we rely on
+the notion of borrowing \cite{DBLP:conf/popl/BoylandR05}.
 
-The intention of this API is to enable arrays to contain affine
-elements. One would first use \lstinline/create n v/ to create
+As a first example, we consider an API for mutable linear arrays
+(\cref{sig:array}).
+The intention of this API is to safely handle manual allocation and
+deallocation of arrays that may contain affine elements.
+One would first use \lstinline/create n v/ to create
 an (unrestricted) array of size \lstinline/n/ with some value
 \lstinline/v/. This value must be unrestricted as it is duplicated to
 initialize all array elements. Using the \lstinline/map/ function we
-can transform the unrestricted elements into linear affine)
-ones. This transformation yields a linear (affine) array that can be
-processed further using \lstinline/map/ (or \lstinline/set/ if
-affine). Before \lstinline/free/ing the array the elements must be
+can transform the unrestricted elements into linear (affine)
+ones. This array can be processed further using \lstinline/map/ (or \lstinline/set/ if
+affine). The \lstinline/get/ function only applies if the element type
+is unrestricted as one element is duplicated. The \lstinline/length/
+function applies anytime. Before \lstinline/free/ing the array the elements must be
 affine, again. 
 
-We distinguish several kinds of operation: constructors, destructore,
+To manage the different kinds of accessing the array we distinguish between constructors, destructors, 
 observers, and mutators. 
 Constructors and destructors like \lstinline/create/ and \lstinline/free/ manipulate the whole
 array. As with channels in \cref{sec:session-linearity},
@@ -188,30 +191,33 @@ Observer functions such as \lstinline/length/ and \lstinline/get/ expect an immu
 argument, mutator functions such a \lstinline/set/ expect
 a mutable borrow.
 
-Generally, each borrow is tied to a region whose lifetime is properly
+Each borrow is tied to a region whose lifetime is properly
 contained in the lifetime of the resource. 
 In a region, we can split off as many immutable borrows as we like
-from a resource, but we can have only one mutable borrow. In a
+from a resource, but we can take only one mutable borrow. In a
 subsidiary region, we can take further immutable borrows from any
 borrow or we can take a mutable borrow from a mutable borrow from a
-enclosing region. Borrows are confined to their regions. Inside,
+enclosing region. Borrows are confined to their regions. Inside the region,
 immutable borrows are unrestricted (\lstinline/un/) whereas mutable
 borrows are affine (\lstinline/aff/).
 
-Furthermore, any borrow prevents access to the ``raw''  resource
-as long as it is in use. In \cref{ex:array}, \cref{ex:array:get},
-two immutable borrows are used in the same expression. Once this operation
-is done, the borrows are not used anymore, which allows us to use
-an exclusive mutable borrow in \cref{ex:array:set}.
-Finally, we return the whole array in \cref{ex:array:return} because
-none of the borrows are in scope anymore.
+The code in \cref{ex:array} demonstrates a use of the API to create an
+array of Fibonacci numbers. After creation of the array, we can see
+that the presence of a borrow prevents access to the ``raw'' 
+resource inside the borrow's region. In \cref{ex:array:get} of the
+example, there are two immutable borrows in the same
+expression, which forms a region by itself. These borrows are split
+off the mutable borrow used in \cref{ex:array:set}, which belongs to
+the next enclosing region.
+Finally, the code returns the whole array in \cref{ex:array:return},
+which is possible because none of the borrows are in scope anymore.
 
-\begin{figure}
+\begin{figure}[tp]
   \centering
   \begin{subfigure}{0.48\linewidth}
 \begin{lstlisting}
 module Array : sig
-  type ('a : 'k) t : 'k
+  type ('a : 'k) t : lin
   
   val create : ('a : un) => int -> 'a -> 'a t
   val free : ('a : aff) => 'a t -> unit
@@ -243,21 +249,18 @@ let mk_fib_array n =
   \end{subfigure}
 \end{figure}
 
-%%% TBC
-Naturally, \lang also checks that borrows do not escape their point
-of use through {\em syntactic regions}. The example
-above is reproduce in \cref{ex:array:region} with
-regions explicitly delimited by \lstinline/{| ... |}/.
-\lang ensures that borrows never escape the smallest enclosing
-region.
-For instance, On \cref{ex:array:region:get}, \lstinline/&a/ does
-not escape the region since the borrow is not captured, and the
-region only return integers.
-Regions annotations are automatically inserted by \lang using
-syntactic information such as borrows and binders.
-Users can also annotate regions manually to further restrict the range
-of a borrow. In practice, we have found that regions
-annotations are very rarely needed in common imperative usage.
+\cref{ex:array:region} makes explicit the regions from the example
+indicated by braces as in \lstinline/{| ... |}/.  \lang guarantees that borrows
+never escape the smallest enclosing region.  For instance, in
+\cref{ex:array:region:get}, \lstinline/&a/ does not escape because it
+is consumed in the calls to \lstinline/get/.
+Regions annotations are automatically inserted using
+syntactic information such as borrows and binders (see
+\cref{regionannot} for more information).  Users can also
+annotate regions manually to further restrict the range of a
+borrow. In practice, we have found that region annotations are
+rarely needed with common programming idioms. All regions for the
+examples in this section have been inferred.
 
 
 \begin{figure}
@@ -294,7 +297,7 @@ let for f a  =
     )
   in
   loop f &!a 0
-# Borrowed m ('a Array.t) tt =>
+# for : Borrowed m ('a Array.t) tt =>
   (tt -> int -> unit) -> tt -> unit
 \end{lstlisting}
     \caption{For loop function for affine arrays}
@@ -304,51 +307,57 @@ let for f a  =
 
 \subsection{Hybrid programming style}
 
-In the last few years, new persistent data-structures
-have been introduced which allow transient mutations, but discourage
-non-linear uses either through degraded performances
+In the last few years, new persistent data structures
+have been introduced which permit transient mutations, but discourage
+non-linear uses either through degraded performance
 \cite{DBLP:conf/ml/ConchonF07} or
 dynamic and static checks \cite{DBLP:journals/pacmpl/Puente17}.
-In particular, persistent Hash-Array-Mapped-Trie has been used with similar
-API in numerous non-pure functional languages (OCaml, Clojure, \dots).
-Affine types allow to formalize the performance contract between the programmer
+In particular, persistent Hash-Array-Mapped-Tries have been used with similar
+APIs in several non-pure functional languages (OCaml, Clojure, \dots).
+Affine types allow us to formalize the performance contract between the programmer
 and the library, while borrows avoid the need to thread state explicitly,
-as usually required by an immutable API.
+as usually required by an API that enforces immutability.
 %
 In this section, we show how \lang allows us to define
 a safe API for persistent arrays that support both immutable and mutable features,
-and how it can be used to implement a simple backtracking sudoku solver.
+and how it can be used to implement a simple backtracking Sudoku solver.
 
-Our sudoku solver is implemented by maintaining a grid that represent the state of the game. In order to make backtracking easier, we want to modify the grid immutably. However, while some changes correspond to backtracking points,
-some do not.
-In order to improve performance, we want to implement modifications
-that do not correspond to backtracking points as mutations.
-Thanks to affine types and borrows, we can provide an API that guarantee correct
-uses of mutable and immutable modifications to the board.
-This API is represented by the signature \lstinline/HybArray/ in \cref{sig:hybarray}.
-It only differs with the \lstinline/Array/ module on two points.
-The mutation function is now called \lstinline/set_mut/, with
-a type \lstinline/&!('a t) * int * 'a -> unit/ and
-the \lstinline/set/ operation
-is now of type \lstinline/&('a t) * int * 'a -> 'a t/. It
-takes an \emph{immutable} borrow, which allows it to read the array, and
-return a fresh hybrid array.
-We showcase a very simple implementation of \lstinline/HybArray/ in
-\cref{ex:cow} where hybrid arrays are represented
-as regular arrays with copy-on-write for immutable
-modifications.
-A more elaborate implementation could use persistent arrays
-\cite{DBLP:conf/ml/ConchonF07}.
+The Sudoku solver maintains a 2D-array that represents the state of
+the game and uses backtracking when there are several alternatives to proceed.
+The use of backtracking suggests a persistent data structure for the 2D-array.
+However, only changes that correspond to a choice point need to use
+the persistence mechanism, others may be implemented as
+cheap in-place mutations.
+
+\cref{sig:hybarray} contains an API \lstinline/HybArray/ 
+that guarantees correct use of mutable and immutable modifications to
+the board by relying on affine types and borrows.
+The signature differs slightly from the \lstinline/Array/
+signature. For simplicity, the array elements are unrestricted, 
+hence it is sufficent for the array to be affine.
+The in-place mutation function is called \lstinline/set_mut/ with type
+\lstinline/&!('a t) * int * 'a -> unit/ and the persistent
+\lstinline/set/ operation has type \lstinline/&('a t) * int * 'a -> 'a t/. It
+takes an \emph{immutable borrow} because it only reads from the
+argument array, but returns a fresh,  modified structure.
+The code in \cref{ex:cow} is a very simple implementation of
+\lstinline/HybArray/ that represents hybrid arrays
+as regular arrays with copy-on-write for persistent
+modifications. The function
+\lstinline/create_from : int -> (int -> 'a) -> 'a Array.t /
+initializes an array from a function.
+% A more elaborate implementation could use persistent arrays
+% \cite{DBLP:conf/ml/ConchonF07}.
 
 
-\begin{figure}
+\begin{figure}[tp]
   \centering
   \begin{subfigure}{0.48\linewidth}
 \begin{lstlisting}
 module type HybArray = sig
   type ('a : un) t : aff
   
-  val create : ('a : un) => int -> 'a -> 'a t
+  val create : int -> 'a -> 'a t
   val free : 'a t -> unit
 
   val length : &('a t) -> int
@@ -370,7 +379,7 @@ module Cow : HybArray = struct
     let f k =
       if k = i then x else get (a,k)
     in
-    create (length a) f
+    create_from (length a) f
   
   let set_mut = Array.set
 end
@@ -387,12 +396,12 @@ Thanks to this API, modifications that correspond to backtracking points
 use \lstinline/set/, which allows arbitrary uses of the previous version
 of the array, while other modifications uses \lstinline/set_mut/, which
 forbids uses of the previous version.
-This can be seen in the sudoku solver implementation in \cref{ex:sudoku}.
+This can be seen in the Sudoku solver implementation in \cref{ex:sudoku}.
 The board is represented as a matrix of cells (\cref{line:boardtype}).
 We assume the existence of a \lstinline/Matrix/ module which uses the same API
 as \lstinline/HybArray/ but with two indices.
 Each cell is an integer
-set that represent admissible solutions so far. The sudoku solver will
+set that represent admissible solutions so far. The Sudoku solver will
 iterate on the cells and try each possible solution (\cref{line:try_solution}).
 When a value is picked for the current cell, we use an immutable modification
 to create a backtracking point (\cref{line:immutset}) and propagate
@@ -425,7 +434,7 @@ and a convenient programming style.
   \begin{minipage}[t]{0.54\linewidth}
     \lstinputlisting[linerange=15-28,firstnumber=last]{code/sukodu.affe}
   \end{minipage}
-  \caption{Chosen excerpt from the sudoku solver}
+  \caption{Excerpt of the Sudoku solver}
   \label{ex:sudoku}
 \end{figure}
 
