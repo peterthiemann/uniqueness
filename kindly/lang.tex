@@ -65,14 +65,63 @@ a data constructor $K$.
   \caption{Syntax}
   \label{grammar}
 \end{figure*}
-\input{internal-grammar}
 
 \clearpage
-\subsection{Semantics}
-\label{sem}
 
-\input{fig-reduction}
-\input{fig-code}
+\subsection{Annotating regions}
+\label{regionannot}
+
+So far, all \lang programs have been fully annotated with regions information.
+We now show how to infer these regions annotations based on
+optionally-annotated programs.
+First, we extend the region annotation to $\region{S}{E}$ where $S$ is
+a set of variables. This annotation, defined below, is equivalent to nested
+region annotations for each individual variable.
+
+\begin{align*}
+  \region{x;S}{e} &= \region{x}{\region{S}{e}}& \region{\emptyset}{e} &= e\\
+\end{align*}
+
+\Cref{fig:region-annotation} define a rewriting relation $\RannotT{e}{e'}$
+which indicates that an optionally annotated term $e$ can be written
+in a fully annotated term $e'$.
+Through the rule \textsc{Rewrite-Top}, this is defined
+in term of an inductively defined relation
+$\Rannot{e}{e'}{S}$ where $n$ is the current nesting and $S$ is a set of
+variable that are not enclosed in a region yet.
+The base cases are constants, variables and borrows.
+The general idea is to start from the leafs of the syntax tree, create a
+region for each borrow, and enlarge the region as much as possible.
+This is implemented by a depth-first walk of the syntax
+tree which collects each variable that has a corresponding borrow.
+At each step, it rewrites the inner subterms,
+consider which borrow must be enclosed by a region now, and
+return the others for later enclosing. Binders force immediate
+enclosing of the bound variables, as demonstrated in rule \textsc{Rewrite-Lam}.
+For nodes with multiple children, we
+use a scope merge operator to decide if regions should be placed and where.
+This is shown in rule \textsc{Rewrite-Pair}.
+The merge operator, written $\getBorrows{B_l}{B_r}{(S_l,S,S_r)}$, takes
+the sets $B_l$ and $B_r$ returned by rewriting the subterms
+and returns three sets: $S_l$ and $S_r$ indicates the variables
+that should be immediately enclosed by a region on the left and right
+subterms and $S$ indicates the set of the yet-to-be-enclosed variables.
+As an example, the rule \textsc{AnnotRegion-MutLeft} is applied
+when there is an immutable borrow and a mutable borrow. In that case, a
+region is created to enclose the immutable borrow, while the mutable
+borrow is left to be closed later. This is coherent with the rules
+for environment splitting and suspended bindings from \cref{sdtyping}.
+%
+Explicitly annotated regions are handled specially through
+rule \textsc{Rewrite-Region}. In that case, we assume that all inner
+borrows should be enclosed immediately.
+
+\begin{figure*}[!hbt]
+  \centering
+  \input{region-annot}
+  \caption{Automatic region annotation --- $\RannotT{e}{e'}$}
+  \label{fig:region-annotation}
+\end{figure*}
 
 \clearpage
 \subsection{Typing}
@@ -262,62 +311,14 @@ the kind on the arrow is at least affine.
 
 
 
+
 \clearpage
+\subsection{Semantics}
+\label{sem}
 
-\subsection{Annotating regions}
-\label{regionannot}
-
-So far, all \lang programs have been fully annotated with regions information.
-We now show how to infer these regions annotations based on
-optionally-annotated programs.
-First, we extend the region annotation to $\region{S}{E}$ where $S$ is
-a set of variables. This annotation, defined below, is equivalent to nested
-region annotations for each individual variable.
-
-\begin{align*}
-  \region{x;S}{e} &= \region{x}{\region{S}{e}}& \region{\emptyset}{e} &= e\\
-\end{align*}
-
-\Cref{fig:region-annotation} define a rewriting relation $\RannotT{e}{e'}$
-which indicates that an optionally annotated term $e$ can be written
-in a fully annotated term $e'$.
-Through the rule \textsc{Rewrite-Top}, this is defined
-in term of an inductively defined relation
-$\Rannot{e}{e'}{S}$ where $n$ is the current nesting and $S$ is a set of
-variable that are not enclosed in a region yet.
-The base cases are constants, variables and borrows.
-The general idea is to start from the leafs of the syntax tree, create a
-region for each borrow, and enlarge the region as much as possible.
-This is implemented by a depth-first walk of the syntax
-tree which collects each variable that has a corresponding borrow.
-At each step, it rewrites the inner subterms,
-consider which borrow must be enclosed by a region now, and
-return the others for later enclosing. Binders force immediate
-enclosing of the bound variables, as demonstrated in rule \textsc{Rewrite-Lam}.
-For nodes with multiple children, we
-use a scope merge operator to decide if regions should be placed and where.
-This is shown in rule \textsc{Rewrite-Pair}.
-The merge operator, written $\getBorrows{B_l}{B_r}{(S_l,S,S_r)}$, takes
-the sets $B_l$ and $B_r$ returned by rewriting the subterms
-and returns three sets: $S_l$ and $S_r$ indicates the variables
-that should be immediately enclosed by a region on the left and right
-subterms and $S$ indicates the set of the yet-to-be-enclosed variables.
-As an example, the rule \textsc{AnnotRegion-MutLeft} is applied
-when there is an immutable borrow and a mutable borrow. In that case, a
-region is created to enclose the immutable borrow, while the mutable
-borrow is left to be closed later. This is coherent with the rules
-for environment splitting and suspended bindings from \cref{sdtyping}.
-%
-Explicitly annotated regions are handled specially through
-rule \textsc{Rewrite-Region}. In that case, we assume that all inner
-borrows should be enclosed immediately.
-
-\begin{figure*}[!hbt]
-  \centering
-  \input{region-annot}
-  \caption{Automatic region annotation --- $\RannotT{e}{e'}$}
-  \label{fig:region-annotation}
-\end{figure*}
+\input{internal-grammar}
+\input{fig-reduction}
+\input{fig-code}
 
 %%% Local Variables:
 %%% mode: latex
