@@ -95,18 +95,56 @@ We first define the following typing, kinding and constraint judgements:
 We will now present the novel aspects of our system which are necessary to handle
 three specific features: binders, borrows, and sharing.
 
+
 \subsubsection{Regions and Borrows}
 
+In order to provide good support for imperative programming, \affe allows
+to borrows a resource. Such borrows are constrained to a given
+region.
+In order to support such features, we differentiate several sorts of
+bindings in typing environments.
+The grammar of type environment (noted $\E$) is shown in \cref{grammar:env}.
+On top of the traditional type and value bindings, noted respectively
+$\bvar{\tvar}{\kschm}$ and $\bvar{x}{\schm}$, we also consider two new
+bindings.
+Borrow bindings $\bvar{\borrow{x}}{\borrowty{k}{\tau}}$ which indicates
+that the borrow $\borrow{x}$ can be used directly, as implemented
+by the rule {\sc Borrow} in \cref{selectrules:borrow}
+Suspended bindings $\svar{x}{\schm}^n$ indicates that $x$ is alive, but
+can not be used immediately.
+In order to use a suspended binding for the variable $x$,
+we need to enter a \emph{region} associated with $x$,
+as shown in the {\sc Region} rule.
+
+\TODO{Explain region rule}
 
 \begin{figure}[!h]
   \centering
-  \begin{subfigure}{0.4\linewidth}
-    \begin{mathpar}
-      \ruleSDRegion
-    \end{mathpar}
-    \caption{The {\sc Region} rule}
-  \end{subfigure}\hfill
-  \begin{subfigure}{0.6\linewidth}
+  \begin{mathpar}
+    \ruleSDBorrow
+    
+    \ruleSDRegion
+  \end{mathpar}
+  \caption{The {\sc Borrow} and {\sc Region} rules}
+  \label{selectrules:borrow}
+  \vspace{1em}
+
+  \begin{minipage}{0.35\linewidth}
+    \begin{align*}
+      \htag{Type environments}
+      \E &::=\ \Eempty \mid \E;B\\
+      \htag{Bindings}
+      B &::=\ \bnone \tag{Empty} \\
+      &\mid \bvar{x}{\schm}\tag{Variables}\\
+      &\mid \bvar{\borrow{x}}{\borrowty{k}{\tau}}\tag{Borrows}\\
+      &\mid \svar{x}{\schm}^n \tag{Suspended}\\
+      &\mid \bvar{\tvar}{\kschm}\tag{Types}
+      % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
+    \end{align*}
+    \caption{Type environments}
+    \label{grammar:env}
+  \end{minipage}\hfill
+  \begin{minipage}{0.6\linewidth}
     \centering
     \begin{tabular}
       {@{}>{$}r<{$}@{ $\Lleftarrow$ }
@@ -125,49 +163,9 @@ three specific features: binders, borrows, and sharing.
       &Mut
     \end{tabular}
     \caption{Borrowing rules for bindings}
-  \end{subfigure}
+  \end{minipage}
 \end{figure}
 
-\subsubsection{Bindings and Closures}
-
-One essential aspect of linear types is to control which variables
-are allowed to be unused. This is usually done through \emph{weakening},
-which allow to discard bindings from the environment.
-Another important feature is to control \emph{captures} done by closures.
-In \lang, we enforce both properties through the use of environment-wide
-kind inequalities, which we note $\Cleq{\E}{k}$.
-The intuitive meaning of $\Cleq{\E}{k}$ is that for all bindings
-$\bvar{x}{\tau}$ in $\E$,
-if type $\tau$ has kind $k'$ ($\inferSK{C}{\E}{\tau}{k'}$)
-then $\Cleq{k'}{k}$.
-While this definition is incomplete, it is sufficient to understand
-its use in the {\sc Abs} and {\sc Var} rules shown in \cref{selectrules:binders}.
-%
-The {\sc Var} rule looks up the type scheme of the variable $x$ in
-the environment $\E$
-and instantiate a concrete type through the substitution $\unif$. It then
-checks that the other bindings in $\E$ can safely be discarded by
-ensuring they are not linear. This is achieved through the constraint
-$\Cleq{\E\Sdel{X}}{\kaff_\infty}$.
-%
-The {\sc Lam} constraints must ensures that if the body of the lambda captures
-linear or affine variable, the content will be reflected in the kind
-annotated on the arrow, such as $\tau_2 \tarr{k} \tau_1$.
-In order to do so, we constraint all the bindings of $\E$ to be less than $k$.
-If one of the binding of $\E$ constraints a type whose kind is affine,
-we will derive the constraints $\Cleq{\kaff_n}{k}$, which ensures that
-the kind on the arrow is at least affine.
-
-\begin{figure}[!h]
-  \centering
-  \begin{mathpar}
-    \ruleSDLam
-    
-    \ruleSDVar
-  \end{mathpar}
-  \caption{The {\sc Lam} and {\sc Var} rules}
-  \label{selectrules:binders}
-\end{figure}
 
 
 \subsubsection{Copying and Splitting}
@@ -213,6 +211,48 @@ the kind on the arrow is at least affine.
     \end{tabular}
     \caption{Splitting rules for bindings}
   \end{subfigure}
+\end{figure}
+
+
+\subsubsection{Bindings and Closures}
+
+One essential aspect of linear types is to control which variables
+are allowed to be unused. This is usually done through \emph{weakening},
+which allow to discard bindings from the environment.
+Another important feature is to control \emph{captures} done by closures.
+In \lang, we enforce both properties through the use of environment-wide
+kind inequalities, which we note $\Cleq{\E}{k}$.
+The intuitive meaning of $\Cleq{\E}{k}$ is that for all bindings
+$\bvar{x}{\tau}$ in $\E$,
+if type $\tau$ has kind $k'$ ($\inferSK{C}{\E}{\tau}{k'}$)
+then $\Cleq{k'}{k}$.
+While this definition is incomplete, it is sufficient to understand
+its use in the {\sc Abs} and {\sc Var} rules shown in \cref{selectrules:binders}.
+%
+The {\sc Var} rule looks up the type scheme of the variable $x$ in
+the environment $\E$
+and instantiate a concrete type through the substitution $\unif$. It then
+checks that the other bindings in $\E$ can safely be discarded by
+ensuring they are not linear. This is achieved through the constraint
+$\Cleq{\E\Sdel{X}}{\kaff_\infty}$.
+%
+The {\sc Lam} constraints must ensures that if the body of the lambda captures
+linear or affine variable, the content will be reflected in the kind
+annotated on the arrow, such as $\tau_2 \tarr{k} \tau_1$.
+In order to do so, we constraint all the bindings of $\E$ to be less than $k$.
+If one of the binding of $\E$ constraints a type whose kind is affine,
+we will derive the constraints $\Cleq{\kaff_n}{k}$, which ensures that
+the kind on the arrow is at least affine.
+
+\begin{figure}[!h]
+  \centering
+  \begin{mathpar}
+    \ruleSDLam
+    
+    \ruleSDVar
+  \end{mathpar}
+  \caption{The {\sc Lam} and {\sc Var} rules}
+  \label{selectrules:binders}
 \end{figure}
 
 

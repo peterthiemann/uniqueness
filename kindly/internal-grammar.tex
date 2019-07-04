@@ -3,13 +3,6 @@
 % \end{align*}
 \begin{minipage}[t]{0.4\linewidth}
   \begin{align*}
-    \htag{Type environments}
-    \E ::=&\ \Eempty \mid \E;B\\
-    B ::=&\ \bnone \tag{Empty binding slot} \\
-    | & \ \bvar{x}{\schm}\tag{Variable bindings}\\
-    | & \ \svar{x}{\schm}^n \tag{Suspended bindings}\\
-    |&\ \bvar{\tvar}{\kschm}\tag{Type bindings}\\
-    % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
     \htag{Addresses}
     \Addr &::= \Multi\IBORROW\Multi\MBORROW\Loc \tag{Locations}
     % \\           &\mid \borrow{\Addr} \tag{Borrows}
