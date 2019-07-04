@@ -333,8 +333,8 @@ cheap in-place mutations.
 that enables using mutable and immutable modifications to
 the board through affine types and borrows.
 The signature differs slightly from the \lstinline/Array/
-signature. For simplicity, the array elements are unrestricted, 
-hence it is sufficent for the array to be affine.
+signature. For simplicity, the array elements are unrestricted, but
+the structure itself remains linear so as to be implemented in terms of \lstinline/Array/.
 The in-place mutation function \lstinline/set_mut/ with type
 \lstinline/&!('a t) * int * 'a -> unit/ works on a mutable borrow  whereas the persistent
 \lstinline/set/ operation has type \lstinline/&('a t) * int * 'a -> 'a t/. It
@@ -355,7 +355,7 @@ initializes an array from a function.
   \begin{subfigure}{0.48\linewidth}
 \begin{lstlisting}
 module type HybArray = sig
-  type ('a : un) t : aff
+  type ('a : un) t : lin
   
   val create : int -> 'a -> 'a t
   val free : 'a t -> unit
@@ -418,7 +418,7 @@ In particular, the \lstinline/try_solution/ function can be used in a loop
 precisely because the \lstinline/set/ function only requires an
 unrestricted immutable borrow of \lstinline/g/, which can be used as
 many times as needed.
-We could even free \lstinline/new_g/ in \cref{line:free:new_g}.
+As \lstinline/g/ is linear we must free it in \cref{line:free:g}.
 
 
 While presented for copy-on-write arrays, the API
@@ -433,7 +433,7 @@ convenient programming style without compromising performance.
     \lstinputlisting[linerange=1-13]{code/sukodu.affe}
   \end{minipage}\hfill
   \begin{minipage}[t]{0.54\linewidth}
-    \lstinputlisting[linerange=15-28,firstnumber=last]{code/sukodu.affe}
+    \lstinputlisting[linerange=15-29,firstnumber=last]{code/sukodu.affe}
   \end{minipage}
   \caption{Excerpt of the Sudoku solver}
   \label{ex:sudoku}
