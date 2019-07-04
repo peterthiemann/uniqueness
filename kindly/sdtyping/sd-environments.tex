@@ -11,16 +11,13 @@
     \E \vdash \Cleq \schm k \Crewrite  C
   }{ \E \vdash \Cleq{\bvar x \schm}{k} \Crewrite  C}
 
-  \inferrule{
-    \E \vdash \Cleq \schm k \Crewrite  C \\
-    \Cleq{\BORROW^n} k  \Crewrite  D
-  }{
-    \E \vdash \Cleq{\svar x \schm^n} k \Crewrite  C \Cand D
+  \inferrule{ }{
+    \E \vdash \Cleq{\svar x \schm^n} k \Crewrite  \Cfalse
   }
 
-  \inferrule{}{\Cleq{\IBORROW^n} k \Crewrite  \Cleq{\kun_n} k}
+  % \inferrule{}{\Cleq{\IBORROW^n} k \Crewrite  \Cleq{\kun_n} k}
 
-  \inferrule{}{\Cleq{\MBORROW^n} k \Crewrite  \Cleq{\kaff_n} k}
+  % \inferrule{}{\Cleq{\MBORROW^n} k \Crewrite  \Cleq{\kaff_n} k}
 
   \inferrule{
     \inferSK{C \Cand C_x} \E \tau {k'} \\
