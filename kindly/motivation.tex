@@ -516,15 +516,17 @@ use : ('a_1:'k_1),('a_2:'k_2),('k_2 <= aff_r) =>
     \label{intf:pool}
 
 \begin{lstlisting}
-let uri = "postgresql://localhost:5432"
-
-(* Create a database connection pool. *)
-let pool = Pool.create (fun () -> Db.connect uri)
-
-(* Use the pool in queries. *)
-let create_user name =
+(* Using the pool in queries. *)
+let create_user pool name =
   Pool.use &pool (fun connection ->
     Db.insert "users" [("name", name)] connection)
+ 
+let uri = "postgresql://localhost:5432"
+let main users =
+  (* Create a database connection pool. *)
+  let pool = Pool.create (fun _ -> Db.connect uri)
+  List.parallel_iter (create_user &pool) users
+  Pool.consume (fun c -> Db.close c)
 \end{lstlisting}
     \caption{Example of use}
     \label{ex:pool}
