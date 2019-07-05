@@ -54,10 +54,10 @@ Finally, constraints are composed of a list of kind inequalities.
 
 \TODO{Do we explain environments here, or push that for typing, later on ?}
 
-Environments are composed of value and type bindings, along with type
-declarations. Type declarations, of the form
-$\tydecl{t}{\kschm}{K}{\tau}$, introduce both a new type constructor $\T{t}$ and
-a data constructor $K$.
+% Environments are composed of value and type bindings, along with type
+% declarations. Type declarations, of the form
+% $\tydecl{t}{\kschm}{K}{\tau}$, introduce both a new type constructor $\T{t}$ and
+% a data constructor $K$.
 
 \begin{figure*}[t]
   \centering
@@ -66,64 +66,6 @@ a data constructor $K$.
   \label{grammar}
 \end{figure*}
 
-\clearpage
-
-\subsection{Annotating regions}
-\label{regionannot}
-
-So far, all \lang programs have been fully annotated with regions information.
-We now show how to infer these regions annotations based on
-optionally-annotated programs.
-First, we extend the region annotation to $\region{S}{E}$ where $S$ is
-a set of variables. This annotation, defined below, is equivalent to nested
-region annotations for each individual variable.
-
-\begin{align*}
-  \region{x;S}{e} &= \region{x}{\region{S}{e}}& \region{\emptyset}{e} &= e\\
-\end{align*}
-
-\Cref{fig:region-annotation} define a rewriting relation $\RannotT{e}{e'}$
-which indicates that an optionally annotated term $e$ can be written
-in a fully annotated term $e'$.
-Through the rule \textsc{Rewrite-Top}, this is defined
-in term of an inductively defined relation
-$\Rannot{e}{e'}{S}$ where $n$ is the current nesting and $S$ is a set of
-variable that are not enclosed in a region yet.
-The base cases are constants, variables and borrows.
-The general idea is to start from the leafs of the syntax tree, create a
-region for each borrow, and enlarge the region as much as possible.
-This is implemented by a depth-first walk of the syntax
-tree which collects each variable that has a corresponding borrow.
-At each step, it rewrites the inner subterms,
-consider which borrow must be enclosed by a region now, and
-return the others for later enclosing. Binders force immediate
-enclosing of the bound variables, as demonstrated in rule \textsc{Rewrite-Lam}.
-For nodes with multiple children, we
-use a scope merge operator to decide if regions should be placed and where.
-This is shown in rule \textsc{Rewrite-Pair}.
-The merge operator, written $\getBorrows{B_l}{B_r}{(S_l,S,S_r)}$, takes
-the sets $B_l$ and $B_r$ returned by rewriting the subterms
-and returns three sets: $S_l$ and $S_r$ indicates the variables
-that should be immediately enclosed by a region on the left and right
-subterms and $S$ indicates the set of the yet-to-be-enclosed variables.
-As an example, the rule \textsc{AnnotRegion-MutLeft} is applied
-when there is an immutable borrow and a mutable borrow. In that case, a
-region is created to enclose the immutable borrow, while the mutable
-borrow is left to be closed later. This is coherent with the rules
-for environment splitting and suspended bindings from \cref{sdtyping}.
-%
-Explicitly annotated regions are handled specially through
-rule \textsc{Rewrite-Region}. In that case, we assume that all inner
-borrows should be enclosed immediately.
-
-\begin{figure*}[!hbt]
-  \centering
-  \input{region-annot}
-  \caption{Automatic region annotation --- $\RannotT{e}{e'}$}
-  \label{fig:region-annotation}
-\end{figure*}
-
-\clearpage
 \subsection{Typing}
 \label{sdtyping}
 
@@ -145,73 +87,75 @@ We will now present the novel aspects of our system which are necessary to handl
 three specific features: binders, borrows, and sharing.
 
 
-\subsubsection{Regions and Borrows}
+\subsubsection{Environments and bindings}
 
-In order to provide good support for imperative programming, \affe allows
-to borrows a resource. Such borrows are constrained to a given
-region.
-In order to support such features, we differentiate several sorts of
-bindings in typing environments.
+One main feature of our system is to control the usage of variables, either
+through
+linearity and affinity, which controls how variables are shared or ignored,
+or through borrows, which allow to circumvent the linearity rules
+in a controlled way.
+In order to check these properties, we introduce several new bindings
+in our typing environments.
 The grammar of type environment (noted $\E$) is shown in \cref{grammar:env}.
 On top of the traditional type and value bindings, noted respectively
 $\bvar{\tvar}{\kschm}$ and $\bvar{x}{\schm}$, we also consider two new
 bindings.
 Borrow bindings $\bvar{\borrow{x}}{\borrowty{k}{\tau}}$ which indicates
 that the borrow $\borrow{x}$ can be used directly, as implemented
-by the rule {\sc Borrow} in \cref{selectrules:borrow}
-Suspended bindings $\svar{x}{\schm}^n$ indicates that $x$ is alive, but
-can not be used immediately.
-In order to use a suspended binding for the variable $x$,
-we need to enter a \emph{region} associated with $x$,
-as shown in the {\sc Region} rule.
+by the rule {\sc Borrow} in \cref{selectrules:borrow}.
+Suspended bindings, noted $\svar{x}{\schm}^n$, indicates that $x$
+cannot be used immediately, but will be usable in a region
+marked with $x$ (as detailed in \cref{sdtyp:regions}).
 
-\TODO{Explain region rule}
+In \lang, many properties are encoded through the use of environment-wide
+constraints. Here we present how to control both unused variables and
+closure captures through such environment constraints, noted $\Cleq{\E}{k}$.
+The intuitive meaning of $\Cleq{\E}{k}$ is that for all bindings
+$\bvar{x}{\tau}$ in $\E$,
+if type $\tau$ has kind $k'$ ($\inferSK{C}{\E}{\tau}{k'}$)
+then $\Cleq{k'}{k}$.
+While this definition is incomplete, it is sufficient to understand
+its use in the {\sc Abs} and {\sc Var} rules shown in \cref{selectrules:binders}.
+%
+The {\sc Var} rule looks up the type scheme of the variable $x$ in
+the environment $\E$
+and instantiate a concrete type through the substitution $\unif$. It then
+checks that the other bindings in $\E$ can safely be discarded by
+ensuring they are not linear. This is achieved through the constraint
+$\Cleq{\E\Sdel{X}}{\kaff_\infty}$.
+%
+The {\sc Lam} constraints must ensures that if the body of the lambda captures
+linear or affine variable, the content will be reflected in the kind
+annotated on the arrow, such as $\tau_2 \tarr{k} \tau_1$.
+In order to do so, we constraint all the bindings of $\E$ to be less than $k$.
+If one of the binding of $\E$ constraints a type whose kind is affine,
+we will derive the constraints $\Cleq{\kaff_n}{k}$, which ensures that
+the kind on the arrow is at least affine.
 
 \begin{figure}[!h]
-  \centering
-  \begin{mathpar}
-    \ruleSDBorrow
-    
-    \ruleSDRegion
-  \end{mathpar}
-  \caption{The {\sc Borrow} and {\sc Region} rules}
-  \label{selectrules:borrow}
-  \vspace{1em}
-
-  \begin{minipage}{0.35\linewidth}
+  \begin{minipage}{0.33\linewidth}
     \begin{align*}
-      \htag{Type environments}
-      \E &::=\ \Eempty \mid \E;B\\
-      \htag{Bindings}
+      \E &::=\ \Eempty \mid \E;B\tag{Environments}\\
       B &::=\ \bnone \tag{Empty} \\
-      &\mid \bvar{x}{\schm}\tag{Variables}\\
-      &\mid \bvar{\borrow{x}}{\borrowty{k}{\tau}}\tag{Borrows}\\
-      &\mid \svar{x}{\schm}^n \tag{Suspended}\\
-      &\mid \bvar{\tvar}{\kschm}\tag{Types}
-      % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
+         &\mid \bvar{x}{\schm}\tag{Variables}\\
+         &\mid \bvar{\borrow{x}}{\borrowty{k}{\tau}}\tag{Borrows}\\
+         &\mid \svar{x}{\schm}^n \tag{Suspended}\\
+         &\mid \bvar{\tvar}{\kschm}\tag{Types}
+         % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
     \end{align*}
     \caption{Type environments}
     \label{grammar:env}
   \end{minipage}\hfill
-  \begin{minipage}{0.6\linewidth}
-    \centering
-    \begin{tabular}
-      {@{}>{$}r<{$}@{ $\Lleftarrow$ }
-      >{$}c<{$}@{ $\rightsquigarrow_n^{x}$ }
-      >{$}l<{$}
-      r}
-
-      {(\kun_n\lk k\lk\kun_\infty)}
-      &{\svar[\IBORROW]{x}{\tau}^n}
-      &{\bvar{\borrow[\IBORROW]{x}}{\borrowty[\IBORROW] k{\tau}}}
-      &Immut\\
-
-      (\kaff_n\lk k\lk\kaff_\infty)
-      &\svar[\MBORROW]{x}{\tau}^n
-      &\bvar{\borrow[\MBORROW]{x}}{\borrowty[\MBORROW] k{\tau}}
-      &Mut
-    \end{tabular}
-    \caption{Borrowing rules for bindings}
+  \begin{minipage}{0.65\linewidth}
+    \begin{mathpar}
+      \ruleSDBorrow
+      \and
+      \ruleSDLam
+      \and
+      \ruleSDVar
+    \end{mathpar}
+    \caption{The {\sc Borrow} rule}
+    \label{selectrules:borrow}
   \end{minipage}
 \end{figure}
 
@@ -219,6 +163,10 @@ as shown in the {\sc Region} rule.
 
 \subsubsection{Copying and Splitting}
 
+Linear and affine types also control the copy of variables.
+We now showcase how this is achieved in \lang through the {\sc Pair} typing rule
+in \cref{sdtyp:pair}.
+\TODO{Explain splitting}
 
 \begin{figure}[!h]
   \centering
@@ -227,11 +175,12 @@ as shown in the {\sc Region} rule.
       \ruleSDPair
     \end{mathpar}
     \caption{The {\sc Pair} rule}
+    \label{sdtyp:pair}
   \end{subfigure}\hfill
   \begin{subfigure}{0.6\linewidth}
     \centering
     \begin{tabular}
-      {@{}>{$}r<{$}@{ $\Lleftarrow$ }
+      {@{}>{$}r<{$}@{ $\vdash_e$ }
       >{$}c<{$}@{ $=$ }
       >{$}c<{$}@{ $\ltimes$ }
       >{$}c<{$}r}
@@ -263,46 +212,87 @@ as shown in the {\sc Region} rule.
 \end{figure}
 
 
-\subsubsection{Bindings and Closures}
+\subsubsection{Regions}
+\label{sdtyp:regions}
 
-One essential aspect of linear types is to control which variables
-are allowed to be unused. This is usually done through \emph{weakening},
-which allow to discard bindings from the environment.
-Another important feature is to control \emph{captures} done by closures.
-In \lang, we enforce both properties through the use of environment-wide
-kind inequalities, which we note $\Cleq{\E}{k}$.
-The intuitive meaning of $\Cleq{\E}{k}$ is that for all bindings
-$\bvar{x}{\tau}$ in $\E$,
-if type $\tau$ has kind $k'$ ($\inferSK{C}{\E}{\tau}{k'}$)
-then $\Cleq{k'}{k}$.
-While this definition is incomplete, it is sufficient to understand
-its use in the {\sc Abs} and {\sc Var} rules shown in \cref{selectrules:binders}.
+In order to provide good support for imperative programming, \affe allows
+to borrow resources.
+Such borrows are constrained to a given syntactic region. We note
+$\region{x}{e}$ for the region allowing borrows of $x$ to be used in $e$
+and where $n$ is the nesting of the region.
+Borrows can not be used outside of a corresponding region.
+These remarks lead to an
+algorithm for automatic region annotation: start from each borrow, create
+a region, and extend it as much as possible while respecting other borrows
+and binders.
+A complete specification of the algorithm is provided in \cref{regionannot}.
+In the rest of this section, we will only consider terms
+with fully annotated regions.
+
+\TODO{Transition}
+
+In order to use a suspended binding for the variable $x$,
+we need to enter a \emph{region} associated with $x$,
+noted $\region{x}{e}$.
+The main idea of region typing (implemented by the {\sc Region} rule)
+is to replace suspended bindings by borrow bindings, typecheck the body
+of the region, and finally ensure that the borrow made available inside
+the region does not leak outside.
+This last check is done by using integer indices that correspond to the nesting
+level of the region. The kind of borrow is annotated with the integer
+corresponding to their region, and a final constraint ensure that
+the return type of the region does not contain such borrow.
+
+We illustrate this on the expression $\region{x}{f(\borrow[\IBORROW]{c})}$.
+The first step is to check that
+$\svar[\IBORROW]{c}{\text{channel}}$ is in $\E$. We then define $\E'$ which
+corresponds to $\E$ where the suspended binding is replaced by a borrow binding.
 %
-The {\sc Var} rule looks up the type scheme of the variable $x$ in
-the environment $\E$
-and instantiate a concrete type through the substitution $\unif$. It then
-checks that the other bindings in $\E$ can safely be discarded by
-ensuring they are not linear. This is achieved through the constraint
-$\Cleq{\E\Sdel{X}}{\kaff_\infty}$.
-%
-The {\sc Lam} constraints must ensures that if the body of the lambda captures
-linear or affine variable, the content will be reflected in the kind
-annotated on the arrow, such as $\tau_2 \tarr{k} \tau_1$.
-In order to do so, we constraint all the bindings of $\E$ to be less than $k$.
-If one of the binding of $\E$ constraints a type whose kind is affine,
-we will derive the constraints $\Cleq{\kaff_n}{k}$, which ensures that
-the kind on the arrow is at least affine.
+This is done by the borrow relation, noted $\lregion{C}{x}{\E}{\E'}$ and
+whose main rules are shown in \cref{env:rule:region}.
+In our case, we consider an immutable binding, so we replace the suspended
+binding by $\bvar{\borrow[\IBORROW]{c}}{\borrowty[\IBORROW]{k}{\text{channel}}}$.
+We must also check that $\entail{C}{(\kun_n\lk k\lk\kun_\infty)}$.
+We can then typecheck the body of the region, $f(\borrow[\IBORROW]{c})$ for our example and check that the borrow made available in the region does not escape.
+This is done by the constraint $\Cleq{\tau}{\klin_{n-1}}$, which ensures
+that the kind of $\tau$ does not contain anything whose kind is ``above $n$''
+(for instance, $\borrowty[\IBORROW]{\kun_n}{\text{channel}}$ would have kind
+$\kun_n$).
 
 \begin{figure}[!h]
-  \centering
-  \begin{mathpar}
-    \ruleSDLam
-    
-    \ruleSDVar
-  \end{mathpar}
-  \caption{The {\sc Lam} and {\sc Var} rules}
-  \label{selectrules:binders}
+  \begin{minipage}{0.35\linewidth}
+    \centering
+    \begin{mathpar}
+      \ruleSDRegion
+    \end{mathpar}
+    \caption{The {\sc Region} rule}
+    \label{selectrules:region}
+  \end{minipage}\hfill
+  \begin{minipage}{0.6\linewidth}
+    \centering
+    \begin{tabular}
+      {@{}>{$}r<{$}@{ $\vdash_e$ }
+      >{$}c<{$}@{ $\rightsquigarrow_n^{x}$ }
+      >{$}l<{$}
+      r}
+
+      {(\kun_n\lk k\lk\kun_\infty)}
+      &{\svar[\IBORROW]{x}{\tau}^n}
+      &{\bvar{\borrow[\IBORROW]{x}}{\borrowty[\IBORROW] k{\tau}}}
+      &Immut\\
+
+      (\kaff_n\lk k\lk\kaff_\infty)
+      &\svar[\MBORROW]{x}{\tau}^n
+      &\bvar{\borrow[\MBORROW]{x}}{\borrowty[\MBORROW] k{\tau}}
+      &Mut
+    \end{tabular}
+    \caption{Borrowing rules for bindings -- $\lregion{C}{x}{\E}{\E'}$}
+    \label{env:rule:borrow}
+  \end{minipage}
 \end{figure}
+
+
+
 
 
 
