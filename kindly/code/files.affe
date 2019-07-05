@@ -1,0 +1,10 @@
+module Files : sig
+  type ('a:'k, 'b) t : lin
+  type R
+  type W
+
+  val open : path -> 'b -> ('a, 'b) t
+  val read : &(('a, R) t) -> 'a
+  val write : &!(('a, W) t) -> 'a -> unit
+  val close : ('a, 'b) t -> unit
+end
