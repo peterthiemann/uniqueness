@@ -1,0 +1,25 @@
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.5\linewidth}
+\begin{lstlisting}
+let for f a  = 
+  let n = Array.length &a in
+  let rec loop f a i = 
+    if i < n then (
+      f &!a i;
+      loop f &!a (i+1)
+    )
+  in
+  loop f &!a 0
+# for : Borrowed m ('a Array.t) tt =>
+  (tt -> int -> unit) -> tt -> unit
+\end{lstlisting}
+    \caption{For loop function for affine arrays}
+    \label{ex:array:for}
+  \end{subfigure}
+\end{figure}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

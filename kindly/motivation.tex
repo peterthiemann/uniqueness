@@ -214,7 +214,7 @@ which is possible because none of the borrows are in scope anymore.
 
 \begin{figure}[tp]
   \centering
-  \begin{subfigure}{0.48\linewidth}
+  \begin{subfigure}[t]{0.48\linewidth}
 \begin{lstlisting}
 module Array : sig
   type ('a : 'k) t : lin
@@ -233,7 +233,7 @@ end
     \caption{Affine arrays}
     \label{sig:array}
   \end{subfigure}\hfill
-  \begin{subfigure}{0.5\linewidth}
+  \begin{subfigure}[t]{0.5\linewidth}
 \begin{lstlisting}
 let mk_fib_array n =
   let a = create n 1 in
@@ -246,82 +246,82 @@ let mk_fib_array n =
 \end{lstlisting}
     \caption{Example of use of affine arrays}
     \label{ex:array}
-  \end{subfigure}
-\end{figure}
-
-\cref{ex:array:region} makes explicit the regions from the example
-indicated by braces as in \lstinline/{| ... |}/.  \lang guarantees that borrows
-never escape the smallest enclosing region.  For instance, in
-\cref{ex:array:region:get}, \lstinline/&a/ does not escape because it
-is consumed in the calls to \lstinline/get/.
-Regions annotations are automatically inserted using
-syntactic information such as borrows and binders (see
-\cref{regionannot} for more information).  Users can also
-annotate regions manually to further restrict the range of a
-borrow. In practice, we have found that region annotations are
-rarely needed with common programming idioms. All regions for the
-examples in this section have been inferred.
-
-
-\begin{figure}
-  \centering
-  % \begin{subfigure}{0.6\linewidth}
 \begin{lstlisting}
-let mk_fib_array n =
-  let a = create n 1 in
-  for i = 2 to n - 1 do {|
-    let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
-    set &!a i x
-  |}
-  done;
-  a(*@\label{ex:array:return}*)
-# mk_fib_array : int -> int Array.t
+let a = create n 1 in
+for i = 2 to n - 1 do {|
+  let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
+  set &!a i x
+|} done;
 \end{lstlisting}
-    \caption{Example from \cref{ex:array} with explicit regions}
+    \caption{Excerpt of \cref{ex:array} with explicit regions}
     \label{ex:array:region}
-  % \end{subfigure}
-\end{figure}
-
-
-
-\begin{figure}
-  \centering
-  \begin{subfigure}{0.5\linewidth}
-\begin{lstlisting}
-let for f a  = 
-  let n = Array.length &a in
-  let rec loop f a i = 
-    if i < n then (
-      f &!a i;
-      loop f &!a (i+1)
-    )
-  in
-  loop f &!a 0
-# for : Borrowed m ('a Array.t) tt =>
-  (tt -> int -> unit) -> tt -> unit
-\end{lstlisting}
-    \caption{For loop function for affine arrays}
-    \label{ex:array:for}
   \end{subfigure}
 \end{figure}
+
+\cref{ex:array:region} uses braces as in \lstinline/{| ... |}/ to
+explicitly state the regions of the example in \cref{ex:array}.  One
+region consists of the header expression of the \lstinline/let/ in
+\cref{ex:array:region:get}. It is contained in another region that
+comprises the body of the \lstinline/for/ loop. \lang guarantees that borrows 
+never escape the smallest enclosing region. It employs a system of
+\emph{indexed kinds} like \lstinline{aff_r} and \lstinline{un_r} where
+$r$ is a positive integer that corresponds to the lexical nesting
+depth of regions. For instance, the type of \lstinline{&!a} in
+\cref{ex:array:set} has kind \lstinline{aff_1} whereas the type of
+\lstinline{&a} in \cref{ex:array:region:get} has kind
+\lstinline{unr_2} and the typing of its region is such that types with
+kind indexes greater than or equal to $2$ cannot escape. 
+
+In \cref{ex:array:region:get} of the example, there is no danger of \lstinline/&a/ escaping because it
+is consumed in the calls to \lstinline/get/.
+Region annotations are automatically inserted using
+syntactic cues such as borrows and binders (see 
+\cref{regionannot}).  Users may manually insert regions to further restrict the range of a
+borrow. In practice, region annotations are
+rarely needed with common programming idioms.
+% All regions for the examples in this section have been inferred.
+
+
+% \begin{figure}
+%   \centering
+%   % \begin{subfigure}{0.6\linewidth}
+% \begin{lstlisting}
+% let mk_fib_array n =
+%   let a = create n 1 in
+%   for i = 2 to n - 1 do {|
+%     let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
+%     set &!a i x
+%   |}
+%   done;
+%   a(*@\label{ex:array:return}*)
+% # mk_fib_array : int -> int Array.t
+% \end{lstlisting}
+%     \caption{Example from \cref{ex:array} with explicit regions}
+%     \label{ex:array:region}
+%   % \end{subfigure}
+% \end{figure}
+
+
+
 
 \subsection{Hybrid programming style}
 
-In the last few years, new persistent data structures
-have been introduced which permit transient mutations, but discourage
-non-linear uses either through degraded performance
-\cite{DBLP:conf/ml/ConchonF07} or
+Recently introduced persistent data structures
+permit transient mutations where
+non-linear uses lead to degraded performance
+\cite{DBLP:conf/ml/ConchonF07} or to
 dynamic and static checks \cite{DBLP:journals/pacmpl/Puente17}.
-In particular, persistent Hash-Array-Mapped-Tries have been used with similar
+In particular, persistent Hash-Array-Mapped-Tries (HAMT) have been used with similar
 APIs in several non-pure functional languages (OCaml, Clojure, \dots).
-Affine types allow us to formalize the performance contract between the programmer
+Affine types help formalize the performance contract between the programmer
 and the library, while borrows avoid the need to thread state explicitly,
-as usually required by an API that enforces immutability.
+as usually required by an API for immutable data types.
 %
-In this section, we show how \lang allows us to define
-a safe API for persistent arrays that support both immutable and mutable features,
-and how it can be used to implement a simple backtracking Sudoku solver.
 
+In this section, we present
+a safe API for persistent arrays that support both immutable and mutable features,
+and use it to implement a backtracking Sudoku solver.
+% show how \lang allows us to define
 The Sudoku solver maintains an array to represent the state of
 the game and uses backtracking when there are several choices to proceed.
 The use of backtracking suggests a persistent data structure for the array.
@@ -423,8 +423,8 @@ As \lstinline/g/ is linear we must free it in \cref{line:free:g}.
 
 While presented for copy-on-write arrays, the API
 can easily be adapted to other persistent data structures with
-transient mutability such as RRB Vectors \cite{DBLP:journals/pacmpl/Puente17}
-or persistent HAMT \cite{bagwell2001ideal,clojurehamt} to provide  a
+transient mutability such as Relaxed-Radix Balance Vectors (RRB) \cite{DBLP:journals/pacmpl/Puente17}
+or persistent HAMTs \cite{bagwell2001ideal,clojurehamt} to provide  a
 convenient programming style without compromising performance.
 
 \begin{figure}
@@ -457,46 +457,78 @@ convenient programming style without compromising performance.
 \subsection{Local data-structures with regions}
 \label{tuto:pool}
 
-We have seen that borrows are limited to a region. In the various examples so
-far, such regions didn't appear in the type signatures explicitly.
-We know present an pool implementation which can store linear objects
-and such region to enforce proper uses of the objects.
-The implementation and interfaces of the \texttt{Pool} module
-are shown in \cref{impl:pool,intf:pool}. A simple example of use
-is shown in \cref{ex:pool}. 
+% We have seen that borrows are limited to a region.
+In the examples so far, regions do not appear in type signatures.
+But for certain programming idioms, we want to extend the scope of a
+region across a function boundary. As an example, 
+we present an interface and implementation of a pool of linear resources where the
+extended scope of the region enforces proper use of the resources.
 
+\cref{intf:pool} contains the interface of the \lstinline/Pool/ module.
 A pool is parameterized by its content. The kind of the pool
 depends on the content: linear content implies
-a linear pool while unrestricted content implies an unrestricted pool.
-The functions \lstinline/Pool.create/ and \lstinline/Pool.consume/ allow
-to build or destroy
-the pool by providing the corresponding functions for the elements
+a linear pool while unrestricted content yields an unrestricted pool.
+The functions \lstinline/Pool.create/ and \lstinline/Pool.consume/
+build/destroy a pool given creators/destructors for the elements
 of the pool.
-The main function is \lstinline/Pool.use/ which
-allow to use an object from the pool.
-\lstinline/Pool.use/ takes a shared borrow of a pool (in order to allow
-for concurrent access) and a function. This function will receive
-a mutable borrow of one arbitrary object of the pool. The typing ensure
-that this borrow is not captured nor kept by the function.
-This is done through a \emph{region} variable $r$ which annotates
-the kinds. Here, the borrow is of type \lstinline/&!(aff_r,'a_1 )/, which indicates
-a mutable borrow with an affine kind. The return type of \lstinline/f/ is bound
-to be of kind \lstinline/'k_2 < aff_r/. Since this is a strict inequality,
-types whose kind mention the region can not be returned.
+The function \lstinline/Pool.use/ is the workhorse of the API, which
+borrows a resource from the pool to a callback.
+It takes a shared borrow of a pool (to enable concurrent access) and a
+callback function.
+The callback receives a mutable borrow of an arbitrary resource from the pool. 
+The typing of the callback ensures
+that this borrow is neither captured nor returned by the function.
 
-The implementation presented in \cref{impl:pool} uses a concurrent queue
-as a bag of elements with atomic add and remove operations.
-The implementation for the \lstinline/Pool.create/ and \lstinline/Pool.consume/
-functions are straightforward.
+This encapsulation is implemented with a universally quantified \emph{kind index variable} $r$.
+The signature prescribes the type \lstinline/&!(aff_r1,'a_1 )/ for the
+mutable borrow of the resource with an affine kind at region nesting $r+1$. The return
+type of the callback is constrained to kind \lstinline/'k_2 <= aff_r/
+so that the callback certainly cannot return the borrowed argument. 
+In a specific use of \lstinline/Pool.use/, the index $r$ gets unified
+with the current nesting level of regions so that the region for the
+callback effectively gets ``inserted'' into the lexical nesting at the callsite.
+
+\cref{ex:pool} shows a simple example of using the \lstinline/Pool/ module.
+
+The implementation in \cref{impl:pool} represents a bag of resourfces
+using a concurrent queue with atomic add and remove operations. 
+The implementation of the \lstinline/Pool.create/ and \lstinline/Pool.consume/
+functions is straightforward.
 The function \lstinline/Pool.use/ first draws
 an element from the pool (or creates a fresh element),
-pass it down to the \lstinline/f/ function, and then add
-it back to the pool.
-We explicitly delimit the region on \cref{line:pool:region} to ensure that
-the return value of \lstinline/f &!o/ do not capture \lstinline/&!o/.
+passes it down to the callback function \lstinline/f/, and returns
+it to the pool afterwards.
+We explicitly delimit the region in \cref{line:pool:region} to ensure that
+the return value of \lstinline/f &!o/ does not capture \lstinline/&!o/.
 
-\begin{figure}[!h]
+\begin{figure}[tp]
   \centering
+  \begin{subfigure}[t]{.55\linewidth}
+\begin{lstlisting}
+type ('a:'k) pool : 'k
+
+create : (unit -> 'a) -> 'a pool
+consume : ('a -> unit) -> 'a pool -> unit
+use : ('a_1:'k_1),('a_2:'k_2),('k_2 <= aff_r) =>
+  &('a_1 pool) -> (&!(aff_r1,'a_1) -{lin}> 'a_2) -{'k_1}> 'a_2
+\end{lstlisting}
+    \caption{Interface}
+    \label{intf:pool}
+
+\begin{lstlisting}
+let uri = "postgresql://localhost:5432"
+
+(* Create a database connection pool. *)
+let pool = Pool.create (fun () -> Db.connect uri)
+
+(* Use the pool in queries. *)
+let create_user name =
+  Pool.use &pool (fun connection ->
+    Db.insert "users" [("name", name)] connection)
+\end{lstlisting}
+    \caption{Example of use}
+    \label{ex:pool}
+  \end{subfigure}~
   \begin{subfigure}[t]{.45\linewidth}
 \begin{lstlisting}
 type ('a:'k) pool : 'k = {
@@ -519,32 +551,6 @@ let use { spawn ; queue } f =
 \end{lstlisting}
     \caption{Implementation}
     \label{impl:pool}
-  \end{subfigure}~
-  \begin{subfigure}[t]{.55\linewidth}
-\begin{lstlisting}
-type ('a:'k) pool : 'k
-
-create : (unit -> 'a) -> 'a pool
-consume : ('a -> unit) -> 'a pool -> unit
-use : ('a_1:'k_1),('a_2:'k_2),('k_1 < aff_r),('k_2 < aff_r) =>
-  &('a_1 pool) -> (&!(aff_r,'a_1) -{lin}> 'a_2) -{'k_1}> 'a_2
-\end{lstlisting}
-    \caption{Interface}
-    \label{intf:pool}
-
-\begin{lstlisting}
-let uri = "postgresql://localhost:5432"
-
-(* Create a database connection pool. *)
-let pool = Pool.create (fun () -> Db.connect uri)
-
-(* Use the pool in queries. *)
-let create_user name =
-  Pool.use &pool (fun connection ->
-    Db.insert "users" [("name", name)] connection)
-\end{lstlisting}
-    \caption{Example of use}
-    \label{ex:pool}
   \end{subfigure}
 
   \caption{The \texttt{Pool} module}
