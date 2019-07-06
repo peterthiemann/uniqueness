@@ -1,86 +1,89 @@
-\section{Type inference}
+\section{Inference}
 
-We now formulate type inference for the \lang language. Type inference is
+We now formulate type inference for \lang. Type inference is
 based on the HM(X) framework~\citep{DBLP:journals/tapos/OderskySW99} which
 presents how to implement Hindley-Milner type inference in a language
 with qualified types and an arbitrary custom constraint language.
-We first present various preliminaries definitions,
-we then show our extension of HM(X) that support a kind system and affine
-types.
+We adapt and extend the rules of HM(X) to support kind inference,
+track linearity and affinity and handle borrow and regions. Furthermore, we
+formulate an appropriate constraint solving algorithm for our constraint
+system such that inference is sound and complete.
+In the rest of this section, we first present various preliminaries definitions
+before showing our kind and type inference judgements
+and our constraint solving algorithm.
 
 \subsection{Preliminaries}
 
-\subsubsection{Usage maps}
+Unlike the syntax-directed version of our type system, knowing which elements
+are input and output or our inference judgement is critical. In the rest
+of this section, when presenting a new judgement
+we will note in \textbf{bold} the input parameters. The rest will then be
+output parameters.
+
+\subsubsection{Usage environments}
+
+% One novelty of our inference  judgement now
+% returns a type environment, which we call ``usage environment'' and commonly
+% note $\Sv$, to summarize how variables and borrows are used inside
+% the expression.
 
 In order to determine if a variable is used in an affine manner, we must track
 its uses and the associated kinds. For instance, in the expression
 $(x,x)$, $x$ is used twice. If $x$ is of type $\tau$, which is of kind $k$,
-we must add the constraint $\Cleq{k}{\kun}$. In order to record uses and kinds,
-our type inference relation will return a ``usage map'', noted $\Sv$,
-which associates each variable to a list of kinds corresponding to each use site
-of the variable.
-We note $\Sone{x}{k_1,\dots,k_n}$ the singleton usage map.
-Common operations on usage maps are defined in \cref{op:usgmap}. We define
-regular set operations such as union
-($\Sv\cup\Sv'$) and intersection ($\Sv\cap\Sv'$), along
-with constraint creation $\Cleq{\Sv}{k_0}$ which indicates that all the kinds
-presents in the usage map $\Sv$ are constrained by the kind $k_0$.
-These operations corresponds roughly to the various parts of the join
-operator on sets $\esplit{}{}$.
+we must add the constraint $\Cleq{k}{\kun}$.
+%
+In order to infer such constraints, our inference judgement will not only
+take an environment as parameter but also return an environment, which
+we call ``usage environment'', and which summarize how variables and borrows
+are used. Usage environments follow the exact same grammar
+as normal environment. In order to distinguish them more easily,
+we will general note them $\Sv$.
 
-\begin{figure}[tp]\centering
-\begin{mathpar}
-  % \Sv\cap\Sv'
-  % &= \left\{ x \to l,l'
-  %   \mid \Sone{x}{l}\in\Sv \text{ and } \Sone{x}{l'}\in\Sv' \right\} \\
-  % \infer
-  % { \forall x \in \Dom{\Sv_1}\cup\Dom{\Sv_2}.\quad
-  %   \bsplit{C_x}{\Sv(x)}{\Sv_1(x)}{\Sv_2(x)}
-  % } 
-  % { \bsplit{(\bigwedge C_x)}{\Sv}{\Sv_1}{\Sv_2} }
-  % &= \Sv\cap\Sv' \sqcup
-  %   (\Sv\Sdel{x' \mid x'\in\Sv'}) \sqcup
-  %   (\Sv'\Sdel{x \mid x\in\Sv})
-  %   &\text{where $\sqcup$ is the disjoint union}\\
-  % \and
-  % \inferrule{}
-  % { \Cleq{\Sv}{k}
-  %   = \bigwedge_{\Sone{x}{\schm}\in\Sv} \Cleq{\schm}{k}
-  % }
-  % \and
-  % \inferrule
-  % { \forall \bshadow{x} \in \Sv, b'\in\Sv'.\quad
-  %   \tregion{C_x}{y}{\bshadow{x}}{b'} }
-  % { \bregion{(\bigwedge C_x)}{y}{\Sv}{\Sv'} }
-  % \and
-  % \inferrule
-  % { \text{if } \operatorname{lenght}(\Sv(x))  = \Cempty{} \wedge  }
-  { \Weaken_{\bvar{x}{\sigma}}(\Sv) =
-    \begin{dcases}
-      \Ctrue& \text{if } x\in\Sv\\
-      \Cleq{\sigma}{\kaff_\infty}&\\
-    \end{dcases}
+In \cref{sdtyping}, we used various relations to split environments in two, or
+transform suspended bindings into borrow binding inside an environment.
+These relations took as argument a constraint which is used to validate
+the environment transformation.
+In the context of inference, we define a new judgements which \emph{infers}
+the constraints required.
+\begin{itemize}
+\item $\bsplit{C}{\Sv}{\bf{\Sv_1}}{\bf{\Sv_2}}$.
+  Given two usage environments (inferred for two subexpressions, for instance)
+  $\Sv_1$ and $\Sv_2$, we return $\Sv$, the merged environment, and $C$, a set
+  of constraints that must be respected.
+  This relation is total and non-ambiguous given $\Sv_1$ and $\Sv_2$
+  and uses the same rules as the one presented in \cref{sdtyping:split}.
+\item $\bregion{C}{\bf{x}}{\Sv}{\bf\Sv'}$.
+  Given a usage environment $\Sv'$ and a variable name $x$, we return
+  $\Sv$ where the borrow binding of $x$ in $\Sv'$, if it exists, is replaced by
+  a suspended binding. We also return $C$, a set of constraints that must
+  be respected.
+  Again, the relation is total and non-ambiguous for any given $\Sv'$ and $x$,
+  and uses the same rules as the one presented in \cref{sdtyping:regions}.
+\end{itemize}
 
-  }
+The relations used for syntax-directed typing can trivially be defined
+in term of these new relations and constraint entailment.
+All relations are fully described in \cref{typ:extra:envs}.
 
-  \inferrule{
-    \inferK{C \Cand C_x} \E \tau {k'} \\
-    D = C \Cand C_x \Cand \Cleq{k'}k
-  }{
-    \E \vdash \Cleq{\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}{k} \Crewrite  D
-  }
-\end{mathpar}
-\caption{Auxiliary rules for inference}
-\label{op:usgmap}
-\end{figure}
+\subsubsection{Constraint normalization}
+
+The HM(X) framework assumes the existence of a $\operatorname{normalize}$
+function which takes a constraint $C$ and a substitution $\psi$ and returns a
+constraint in solved form $C'$,
+and an updated substitution $\unif'$.
+Normalization is supposed to return the ``best'' solution $(C',\unif')$, for
+instance the most general unifier.
+We detail the implementation
+of the normalization function in \cref{infer:solving}. In the meantime, we just
+assume the existence of such a function for our constraint system.
 
 \subsection{Kind inference}
 
 We note $\inferK{(C,\unif)}{\bf{\E}}{\bf{\tau}}{k}$ when type $\tau$ has kind $k$
-in environment $\E$ under constraints $C$ and unifier $\unif$. From an
-algorithmic point of view, $\E$ and $\tau$ are the input parameters of
+in environment $\E$ under constraints $C$ and unifier $\unif$.
+$\E$ and $\tau$ are the input parameters of
 our inference procedure.
-We present the kind inference algorithm as a set of syntax-directed rules in
+We present the kind inference algorithm as a set of rules in
 \cref{rules:kinding}.
 Similar to the syntax-directed rules, higher-kinds are not generally supported
 and can only appear by looking-up the kind scheme of a type constructor,
@@ -90,11 +93,14 @@ Kind schemes are instantiated in the {\sc KVar} rules by creating
 fresh kind variables and the associated substitution.
 {\sc KArr} and {\sc KBorrow} simply returns the kind of the primitive
 arrow and borrow types.
+The $\operatorname{normalize}$ function is used every time several constraints
+must be composed in order to simplify the constraint and return a most general
+unifier.
 
 \begin{figure}[ht]
   \centering
   \input{infer/kinds}
-  \caption{Kind inference algorithm -- $\inferK{(C,\unif)}{\E}{\tau}{(\Multi{k}) k}$}
+  \caption{Kind inference algorithm -- $\inferK{(C,\unif)}{\E}{\tau}{k}$}
   \label{rules:kinding}
 \end{figure}
 
@@ -102,14 +108,13 @@ arrow and borrow types.
 
 \subsection{Type inference}
 
-We reformulate the HM(X) type inference in the context of our affine type
-system. The main difference compared to HM(X) are noted in \addlin{blue}.
-We note $\inferW{\addlin{\Sigma}}{(C,\unif)}{\bf{\E}}{\bf{e}}{\tau}$ when
-$e$\ has type $\tau$ in $\E$ under the constraints $C$ and unifier $\unif$.
-$\Sigma$ is a map which associates free variables in $e$ to
-their kinds.
-As before, $\E$ and $e$ are the input parameters of the inference
-algorithm. The syntax-directed rules are shown in \cref{rules:typing}.
+We note $\inferW{\Sv}{(C,\unif)}{\bf{\E}}{\bf{e}}{\tau}$ when
+$e$\ has type $\tau$ in $\E$ under the constraints $C$ and unifier $\unif$
+with a usage environment $\Sv$. $\E$ and $e$ are the input parameters of our
+inference algorithm.
+The rules are shown in \cref{rules:typing}.
+
+\TODO{Explain/Cut}
 
 \begin{figure*}[htp]
   \input{infer/typing}
@@ -117,9 +122,31 @@ algorithm. The syntax-directed rules are shown in \cref{rules:typing}.
   \label{rules:typing}
 \end{figure*}
 
-\subsection{Normal forms and generalization}
-\label{sec:normalize}
+\begin{figure}[tp]
+  \centering
+  \begin{mathpar}
+    { \Weaken_{\bvar{x}{\sigma}}(\Sv) =
+      \begin{dcases}
+        \Ctrue& \text{if } x\in\Sv\\
+        \Cleq{\sigma}{\kaff_\infty}&\\
+      \end{dcases}
+    }
 
+    \inferrule{
+      \inferK{C \Cand C_x} \E \tau {k'} \\
+      D = C \Cand C_x \Cand \Cleq{k'}k
+    }{
+      \E \vdash \Cleq{\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}{k} \Crewrite  D
+    }
+  \end{mathpar}
+  \caption{Auxiliary rules for inference}
+  \label{op:usgmap}
+\end{figure}
+
+\subsection{Constraint solving}
+\label{infer:normalize}
+
+\TODO{Present the full constraint system}
 
 We now place ourselves in a more general context where kinds are either variables
 or constants belonging to a total bounded lattice $(\mathcal L, \lk_\Lat)$ ie.,
@@ -206,7 +233,9 @@ More precisely, we apply the following steps:
 
 \TODO{Add an example}
 
-\subsubsection{Soundness and Principality}
+\subsection{Soundness and Principality}
+
+\TODO{Simplify/Cut}
 
 \begin{lemma}[Normal form]
   \label{lemma:normalform}
@@ -333,7 +362,6 @@ More precisely, we apply the following steps:
 \end{theorem}
 
 
-\subsection{Principality}
 
 \TODO{}
 

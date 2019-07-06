@@ -71,7 +71,7 @@ description of the system is available in \cref{appendix:sdtyping}.
 In this section, we focus on chosen parts of our system
 through a set of selected rules.
 %
-We first define the following typing, kinding and constraint judgements:
+We introduce the following typing, kinding and constraint judgements:
 \begin{description}
 \item[$\inferS{C}{\E}{e}{\tau}$ --]
   Expression $e$ has type $\tau$ in environment $\E$ under constraints $C$.
@@ -118,6 +118,7 @@ instance $\kaff_n \lk_\Lat \kaff_{n+1}$.
 
 
 \subsubsection{Environments and bindings}
+\label{sdtyping:envs}
 
 \lang aims to control the usage of variables, either
 through
@@ -197,6 +198,7 @@ closure, its use should not induce a capture.
 
 
 \subsubsection{Copying and Splitting}
+\label{sdtyping:split}
 
 Linear and affine types also control the copy of variables.
 To demonstrate how this is achieve in \lang, we show the
@@ -279,7 +281,7 @@ escape, which brings us to the typing rules for regions.
 
 
 \subsubsection{Regions}
-\label{sdtyp:regions}
+\label{sdtyping:regions}
 
 In order to provide good support for imperative programming, \affe allows
 to borrow resources.
