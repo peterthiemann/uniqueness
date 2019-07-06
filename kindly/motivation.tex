@@ -503,7 +503,7 @@ the return value of \lstinline/f &!o/ does not capture \lstinline/&!o/.
 
 \begin{figure}[tp]
   \centering
-  \begin{subfigure}[t]{.55\linewidth}
+  \begin{subfigure}[t]{.58\linewidth}
 \begin{lstlisting}
 type ('a:'k) pool : 'k
 
@@ -524,14 +524,14 @@ let create_user pool name =
 let uri = "postgresql://localhost:5432"
 let main users =
   (* Create a database connection pool. *)
-  let pool = Pool.create (fun _ -> Db.connect uri)
-  List.parallel_iter (create_user &pool) users
+  let pool = Pool.create (fun _ -> Db.connect uri) in
+  List.parallel_iter (create_user &pool) users;
   Pool.consume (fun c -> Db.close c)
 \end{lstlisting}
     \caption{Example of use}
     \label{ex:pool}
   \end{subfigure}~
-  \begin{subfigure}[t]{.45\linewidth}
+  \begin{subfigure}[t]{.43\linewidth}
 \begin{lstlisting}
 type ('a:'k) pool : 'k = {
   spawn : unit -> 'a ;
@@ -540,7 +540,8 @@ type ('a:'k) pool : 'k = {
 
 let create spawn =
   { spawn ; queue = CQueue.create () }
-let consume f c = CQueue.iter f c.queue
+let consume f c =
+  CQueue.iter f c.queue
 
 let use { spawn ; queue } f =
   let o = match CQueue.pop &queue with
