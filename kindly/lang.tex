@@ -314,7 +314,7 @@ whose main rules are shown in \cref{selectrules:region}.
 In our case, we consider an immutable binding, so we replace the suspended
 binding by $\bvar{\borrow[\IBORROW]{c}}{\borrowty[\IBORROW]{k}{\text{channel}}}$.
 We must also check that $\entail{C}{(\kun_n\lk k\lk\kun_\infty)}$.
-We can then typecheck the body of the region, $f(\borrow[\IBORROW]{c})$ for our example and check that the borrow made available in the region does not escape.
+We can then typecheck the body of the region, $f(\borrow[\IBORROW]{c})$ in our example, and check that the borrow made available in the region does not escape.
 This is done by the constraint $\Cleq{\tau}{\klin_{n-1}}$, which ensures
 that the kind of $\tau$ does not contain anything whose kind is ``above $n$''
 (for instance, $\borrowty[\IBORROW]{\kun_n}{\text{channel}}$ would have kind
@@ -352,6 +352,14 @@ $\kun_n$).
   \end{minipage}
 \end{figure}
 
+
+\subsubsection{Kind checking}
+
+\TODO{Present this if we have enough space}
+
+\subsubsection{Pattern matching}
+
+\TODO{Present this if we have enough space}
 
 \clearpage
 \subsection{Semantics}
