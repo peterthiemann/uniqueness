@@ -109,10 +109,23 @@ The type \lstinline/File.t/ is linear. A call like
 \lstinline/fopen "foo"/ returns a linear handle to a newly created
 file, which \emph{must} be closed later using
 \lstinline/close/. Failing to do so is a static type error.
-To write to the file, we must take (mutable) borrows of the handle and
-pass them to the \lstinline/write/
-function. \Cref{fig:writing-files-example} contains an example where
+To write to the file, we must take a (mutable) borrow of the handle and
+pass it to the \lstinline/write/
+function. As mutable borrows must not be duplicated so they are
+classified as affine. This affinity shows up in the annotation of the
+second arrow in the type of \lstinline/write/: a partial application
+\lstinline/write &!h/ captures the affine borrow and hence the
+resulting function must also be handled in an affine way.
+\Cref{fig:writing-files-example} contains an example where
 \lstinline/&!h/ stands for the mutable borrow.
+
+This example demostrates two features of our system.
+\begin{enumerate}
+\item full type inference without annotations in user code
+\item types carry multiplicity annotations in the form of kinds
+\end{enumerate}
+
+More features: kinds can be polymorphic and constrained. 
 
 \subsection{Contributions}
 \label{sec:contributions}
