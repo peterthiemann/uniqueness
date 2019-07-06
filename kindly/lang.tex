@@ -12,9 +12,9 @@ and present a set of rules to infer their placement.
 Finally we emulates region variables
 as a series of nesting indices.
 
-In the rest of this section, we present the syntax (\cref{syntax}),
-a linearity-aware semantics (\cref{sem}), syntax directed typing rules
-(\cref{sdtyping}) and automatic rules for region annotations (\cref{regionannot}).
+In the rest of this section, we present the syntax (\cref{syntax})
+the syntax directed typing rules (\cref{sdtyping})
+and a linearity-aware semantics (\cref{sem}) for \lang.
 
 \subsection{Syntax}
 \label{syntax}
@@ -51,9 +51,6 @@ Type schemes and kind schemes are guarded by a set of constraints.
 %
 Finally, constraints are composed of a list of kind inequalities.
 
-
-\TODO{Do we explain environments here, or push that for typing, later on ?}
-
 % Environments are composed of value and type bindings, along with type
 % declarations. Type declarations, of the form
 % $\tydecl{t}{\kschm}{K}{\tau}$, introduce both a new type constructor $\T{t}$ and
@@ -83,16 +80,49 @@ We first define the following typing, kinding and constraint judgements:
 \item[$\entail{D}{C}$ --] Constraint $D$ implies constraint $C$.
 \end{description}
 
-We will now present the novel aspects of our system which are necessary to handle
-three specific features: binders, borrows, and sharing.
+\subsubsection{Kinds and constraints}
+
+One novel feature or \affe is the use of kinds and qualified types to encode
+linear and affine types. Before explaining the details of our type system, we
+give a quick presentation of the kinds and constraints.
+A kind $k$ can be either a kind variable, $\kvar$, or a constant.
+Each constant is composed of a ``quality'' and a ``level''.
+The quality describes the use pattern of the type and can be
+either unrestricted $\kun$, affine $\kaff$ or linear $\klin$. The level
+describes the nested regions in which it can be used. Levels are represented
+by a natural number of $\infty$.
+$0$ represents the normal scope outside of any region and is often omitted
+(for instance $\kaff_0$ is simply noted $\kaff$).
+$\infty$ is the empty region that is infinitely nested and is mostly used
+as an upper bound.
+For instance, the constraint $\Cleq{\kvar}{\kun_\infty}$ indicates that
+$\kvar$ must be unrestricted, but can be local to a region.
+%
+Just as presented before, constraints present in schemes and type signatures
+are simply a list of atomic constraints, which are composed
+of kind inequalities.
+%
+Our inequality constraints are based on an inequality relation on
+kind constants noted $\lk_\Lat$. This relation forms a lattice
+and  is summarized in
+\cref{sdtyp:lattice}. We have the basic inequalities on qualities:
+$\kun_n \lk_\Lat \kaff_n \lk_\Lat \klin_n$ for arbitrary regions $n$.
+Additionally, the inequality follows the region nesting, for
+instance $\kaff_n \lk_\Lat \kaff_{n+1}$.
+
+\begin{figure*}[!h]
+  \input{infer/lattice}
+  \caption{Lattice inequalities -- $k \lk_\Lat k'$}
+  \label{sdtyp:lattice}
+\end{figure*}
 
 
 \subsubsection{Environments and bindings}
 
-One main feature of our system is to control the usage of variables, either
+\lang aims to control the usage of variables, either
 through
-linearity and affinity, which controls how variables are shared or ignored,
-or through borrows, which allow to circumvent the linearity rules
+linearity and affinity which restrict how variables are shared and ignored,
+or through borrows which allow to circumvent the linearity rules
 in a controlled way.
 In order to check these properties, we introduce several new bindings
 in our typing environments.
@@ -100,20 +130,21 @@ The grammar of type environment (noted $\E$) is shown in \cref{grammar:env}.
 On top of the traditional type and value bindings, noted respectively
 $\bvar{\tvar}{\kschm}$ and $\bvar{x}{\schm}$, we also consider two new
 bindings.
-Borrow bindings $\bvar{\borrow{x}}{\borrowty{k}{\tau}}$ which indicates
+Borrow bindings $\bvar{\borrow{x}}{\borrowty{k}{\tau}}$ indicates
 that the borrow $\borrow{x}$ can be used directly, as implemented
 by the rule {\sc Borrow} in \cref{selectrules:borrow}.
 Suspended bindings, noted $\svar{x}{\schm}^n$, indicates that $x$
 cannot be used immediately, but will be usable in a region
-marked with $x$ (as detailed in \cref{sdtyp:regions}).
+marked with $x$, which we detail in \cref{sdtyp:regions}.
 
-In \lang, many properties are encoded through the use of environment-wide
-constraints. Here we present how to control both unused variables and
+Environments are also used to encode several linearity-related properties
+through \emph{environment-wide constraints}.
+Here we present how to control both unused variables and
 closure captures through such environment constraints, noted $\Cleq{\E}{k}$.
 The intuitive meaning of $\Cleq{\E}{k}$ is that for all bindings
 $\bvar{x}{\tau}$ in $\E$,
-if type $\tau$ has kind $k'$ ($\inferSK{C}{\E}{\tau}{k'}$)
-then $\Cleq{k'}{k}$.
+if type $\tau$ has kind $k'$ (noted $\inferSK{C}{\E}{\tau}{k'}$)
+then the following constraints should hold: $\Cleq{k'}{k}$.
 While this definition is incomplete, it is sufficient to understand
 its use in the {\sc Abs} and {\sc Var} rules shown in \cref{selectrules:binders}.
 %
@@ -122,15 +153,18 @@ the environment $\E$
 and instantiate a concrete type through the substitution $\unif$. It then
 checks that the other bindings in $\E$ can safely be discarded by
 ensuring they are not linear. This is achieved through the constraint
-$\Cleq{\E\Sdel{X}}{\kaff_\infty}$.
-%
-The {\sc Lam} constraints must ensures that if the body of the lambda captures
-linear or affine variable, the content will be reflected in the kind
+$\Cleq{\E\Sdel{x}}{\kaff_\infty}$ which replaces the traditional
+``weakening'' rule found in many type systems.
+
+The {\sc Abs} rule must ensures that if the body of the lambda captures
+linear or affine variables, the content will be reflected in the kind
 annotated on the arrow, such as $\tau_2 \tarr{k} \tau_1$.
 In order to do so, we constraint all the bindings of $\E$ to be less than $k$.
-If one of the binding of $\E$ constraints a type whose kind is affine,
-we will derive the constraints $\Cleq{\kaff_n}{k}$, which ensures that
+If one of the binding of $\E$ contains a type whose kind is affine,
+we will derive the constraints $\Cleq{\kaff}{k}$, which ensures that
 the kind on the arrow is at least affine.
+Note that $x$ is \emph{not} included in $\E$: since it's the argument of the
+closure, its use should not induce a capture.
 
 \begin{figure}[!h]
   \begin{minipage}{0.33\linewidth}
@@ -154,8 +188,9 @@ the kind on the arrow is at least affine.
       \and
       \ruleSDVar
     \end{mathpar}
-    \caption{The {\sc Borrow} rule}
+    \caption{The {\sc Borrow}, {\sc Abs} and {\sc Var} rules}
     \label{selectrules:borrow}
+    \label{selectrules:binders}
   \end{minipage}
 \end{figure}
 
@@ -164,9 +199,39 @@ the kind on the arrow is at least affine.
 \subsubsection{Copying and Splitting}
 
 Linear and affine types also control the copy of variables.
-We now showcase how this is achieved in \lang through the {\sc Pair} typing rule
-in \cref{sdtyp:pair}.
-\TODO{Explain splitting}
+To demonstrate how this is achieve in \lang, we show the
+{\sc Pair} typing rule in \cref{sdtyp:pair}.
+In the {\sc Pair} rule, we split the type environment $\E$ in two parts,
+$\E_1$ and $\E_2$, which are used to typecheck the components of the pair.
+We note the splitting $\lsplit{C}{\E}{\E_1}{\E_2}$ where $C$ is a constraint
+that must be respected for the split to be valid.
+The main splitting rules are shown in \cref{sdtyp:split}. Each
+rule applies to a binding for a given variable. For instance, the
+{\sc Both} rule indicates that if we can prove that $x$ is unrestricted, we
+can duplicate it in both environments.
+Similarly, since immutable borrows are always unrestricted, the
+{\sc Borrow} rule allows to duplicate them arbitrarily.
+The {\sc Left} and {\sc Right} rule allow to move a binding
+to the left or right environment.
+The {\sc Susp} and {\sc SuspB} allow to split off suspended bindings to
+the left environment while conserving access to the binding on the right.
+Such suspended binding can later be turned
+into a borrow inside a region. The asymmetry here must always follow
+the order of execution of the language: in \affe, execution is from left to
+right, which means that a resource can be used as a borrow on the left
+and then as a full resource on the right, assuming that the borrow does not
+escape. The {\sc Susp} rule work with a full resource while the {\sc SuspB}
+rule allow to split off an immutable suspended binding based off a borrow.
+
+Using these various rules, we can distribute the bindings every time an
+expression has multiple sub-expressions such as pairs, function applications
+and let bindings. For instance, in the
+expression
+$\letin{a}{\text{create}\ 10\ x}
+{\introPair{\region[{}]{x}{\app{\text{length}}{\borrow[\IBORROW]{a}}}}{a}}$,
+we use the rule {\sc Susp} to detach a borrow on the left of the pair.
+Naturally, we must here ensure that the borrow on the left of the pair does not
+escape, which brings us to the typing rules for regions.
 
 \begin{figure}[!h]
   \centering
@@ -208,6 +273,7 @@ in \cref{sdtyp:pair}.
 
     \end{tabular}
     \caption{Splitting rules for bindings}
+    \label{sdtyp:split}
   \end{subfigure}
 \end{figure}
 
@@ -218,7 +284,7 @@ in \cref{sdtyp:pair}.
 In order to provide good support for imperative programming, \affe allows
 to borrow resources.
 Such borrows are constrained to a given syntactic region. We note
-$\region{x}{e}$ for the region allowing borrows of $x$ to be used in $e$
+$\region{x}{e}$ the region which allow borrows of $x$ to be used in $e$
 and where $n$ is the nesting of the region.
 Borrows can not be used outside of a corresponding region.
 These remarks lead to an
@@ -229,11 +295,6 @@ A complete specification of the algorithm is provided in \cref{regionannot}.
 In the rest of this section, we will only consider terms
 with fully annotated regions.
 
-\TODO{Transition}
-
-In order to use a suspended binding for the variable $x$,
-we need to enter a \emph{region} associated with $x$,
-noted $\region{x}{e}$.
 The main idea of region typing (implemented by the {\sc Region} rule)
 is to replace suspended bindings by borrow bindings, typecheck the body
 of the region, and finally ensure that the borrow made available inside
@@ -249,7 +310,7 @@ $\svar[\IBORROW]{c}{\text{channel}}$ is in $\E$. We then define $\E'$ which
 corresponds to $\E$ where the suspended binding is replaced by a borrow binding.
 %
 This is done by the borrow relation, noted $\lregion{C}{x}{\E}{\E'}$ and
-whose main rules are shown in \cref{env:rule:region}.
+whose main rules are shown in \cref{selectrules:region}.
 In our case, we consider an immutable binding, so we replace the suspended
 binding by $\bvar{\borrow[\IBORROW]{c}}{\borrowty[\IBORROW]{k}{\text{channel}}}$.
 We must also check that $\entail{C}{(\kun_n\lk k\lk\kun_\infty)}$.
@@ -290,16 +351,6 @@ $\kun_n$).
     \label{env:rule:borrow}
   \end{minipage}
 \end{figure}
-
-
-
-
-
-
-\subsubsection{Constraints}
-
-
-
 
 
 \clearpage
