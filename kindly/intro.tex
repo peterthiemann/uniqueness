@@ -19,32 +19,100 @@ can safely be applied to it. Finally, there is another API call to
 release the resource, which yields the handle invalid.
 Taken to the extreme, each API call changes the state so that a
 different set of API calls is enabled afterwards. 
+Ignoring such life cycle protocols is a common source of errors.
+%% this is about typestate \cite{DBLP:conf/ecoop/BeckmanKA11}.
 
-Ignoring this protocol is a common source of errors
-\TODO{is-there-some-paper?}.
 
-Most statically typed languages do not address this issue.
+Most type systems provide just type soundness, but neglect the
+protocol aspect. The systems that do build on linear types \cite{Girard} and/or
+uniqueness types\cite{DBLP:conf/plilp/BarendsenS95}. A value of linear
+type is guaranteed to be consumed 
+exactly once. That is, a file that has been opened must be closed and
+memory that has been allocated must be released. A value of unique
+type is guaranteed to have a single reference to it.
 
-But linear types do.
+These systems work well if one is prepared to write programs
+functionally in resource-passing style. In this style, all operations
+in the resource's API take the resource as a parameter and return it
+in possibly modified state\cite{DBLP:journals/jfp/AchtenP95}. In
+typestate-oriented programming, they would also modify its type
+\cite{DBLP:conf/oopsla/AldrichSSS09}. Functional session types
+represent a popular example \cite{DBLP:journals/jfp/GayV10}.
 
-But typestate does it. A popular example is session types.
+Explicit resource passing places a heavy burden on the programmer and
+complicates the program structure. For imperative APIs,
+resource-passing style is not an option at all. To this end,
+\citet{DBLP:conf/popl/BoylandR05}  proposed the notion of
+\emph{borrowing} a resource. The idea is that a linear resource can be
+borrowed to a function call, which can work with the resource, but
+cannot release it. Only the original owner of the resource has all
+rights to it and can release it.
 
-Typestate needs to be supported by affinity (or linearity, or
-uniqueness).
+The concepts of ownership and borrowing have grown popular over time
+and they form the foundation of the type system of the Rust language
+\cite{rust}. Rust supports two kinds of borrows of data structures, mutable and immutable
+ones. Mutable borrows enable modification of the data structure
+whereas immutable borrows come only with read access. Moreover, Rust
+manages the lifetime of data and makes sure that the lifetime of a
+borrow is properly contained in the lifetime of its lender. 
 
-But these approaches are restrictive in pratice because [here is an
-example that doesn't work well with existing systems].
+The design of Rust is geared towards programmers with a low-level
+imperative programming background, like C or C++. Its management of
+lifetime supports the manual way of memory management customary in
+these languages very well and makes it safe. However, programmers from
+a managed language background feel alienated from the lack of garbage
+collected data. They would prefer a setting where automatic memory
+management with garbage collection was the default, but where they
+could seemlessly switch to safe, manual resource management if that
+was required.
 
-Borrowing. What is it about and where does it come from?
+As a concrete example, consider a functional programmer who wants to
+safely interact with a C library. Invoking the C functions is easy via
+the existing foreign function interface, but managing the underlying
+resources like malloc'd storage is not: It cannot be left to the
+garbage collector, but the proper calls to \texttt{free()} must be
+ensured by programming conventions.
 
-Immutable and mutable borrows.
-
-What about Rust?
+Our work provides a solution to programmers in this situation. We
+propose an extended type system for ML-like languages that comes with
+linear and affine types, mutable and immutable borrows, but all that
+integrated with full type inference, garbage collected data, and
+ANOTHER FEATURE.
 
 \subsection{A first example}
 \label{sec:first-example}
+\begin{figure}[tp]
+  \begin{subfigure}[t]{0.45\linewidth}
+    \lstinputlisting{code/writefiles.affe}
+    \caption{File API}
+    \label{fig:writing-files-api}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[t]{0.45\linewidth}
+\begin{lstlisting}
+let main () =
+  let h = File.fopen "foo" in
+  write &!h "Hello ";
+  write &!h "world!";
+  File.close h
+\end{lstlisting}
+    \caption{File example}
+    \label{fig:writing-files-example}
+  \end{subfigure}
+  \caption{Writing files}
+  \label{fig:writing-fiules}
+\end{figure}
 
-
+As a first, well-trodden example we consider a very simple API for
+writing files in \cref{fig:writing-files-api}.
+The type \lstinline/File.t/ is linear. A call like
+\lstinline/fopen "foo"/ returns a linear handle to a newly created
+file, which \emph{must} be closed later using
+\lstinline/close/. Failing to do so is a static type error.
+To write to the file, we must take (mutable) borrows of the handle and
+pass them to the \lstinline/write/
+function. \Cref{fig:writing-files-example} contains an example where
+\lstinline/&!h/ stands for the mutable borrow.
 
 \subsection{Contributions}
 \label{sec:contributions}
