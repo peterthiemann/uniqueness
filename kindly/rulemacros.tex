@@ -263,8 +263,8 @@
 \newcommand\ruleIVar{%
   \inferrule[Var$_I$]
   { \bvar{x}{\sigma}\in \E \\
-    \sigma = \forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau} \\
-    (\kvar'_i),(\tvar'_j) \text{ new} \\\\
+    \sigma = \forall \kvar_i \forall (\tvar_j:k_j). \qual{C_x}{\tau} \\
+    \Multi[i]{\kvar'},\Multi[j]{\tvar'} \text{ new} \\\\
     % \addlin{
     % \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{k_j}}{\tau}{k_\tau}
     % }\\
@@ -285,8 +285,8 @@
     \inferW{\Sv_x}{(C',\unif')}
     {\E;\bvar{x}{\tvar}
       % ;\bvar{\tvar}{\kvar_\tvar}
-    }{e}{\tau} \\\\
-    \addlin{ \Sv = \Sv_x \Sdel{x} }\\
+    }{e}{\tau} \\
+    \addlin{ \Sv = \Sv_x \Sdel{x} }\\\\
     D = C'\Cand
     \addlin{\Cleq{\Sv}{\kvar} \Cand \Weaken_{\bvar{x}{\tvar}}(\Sv_x)} \\
     (C,\unif) = \normalize{D}{\unif'}

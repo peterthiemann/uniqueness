@@ -74,7 +74,7 @@ We say that $C$ and $D$ are equivalent, noted $C \equivC D$,
 when $\entail{C}{D}$ and $\entail{D}{C}$.
 \TODO{Give the cylindric properties ?}
 
-\begin{figure}[tp]
+\begin{figure}[btp]
   \centering
   \begin{align*}
     C &::= \Cleq{\tau_1}{\tau_2}
@@ -85,15 +85,12 @@ when $\entail{C}{D}$ and $\entail{D}{C}$.
   \end{align*}
   \caption{The constraint language}
   \label{grammar:constraint}
-\end{figure}
-
-\begin{figure*}[tp]
   \input{infer/lattice}
   \caption{Lattice inequalities -- $k \lk_\Lat k'$}
   \input{infer/entails}
   \caption{Base entailment rules -- $\entail{C}{D}$ }
   \label{rules:entail}
-\end{figure*}
+\end{figure}
 
 
 We note $\SC$ the set of solved forms
