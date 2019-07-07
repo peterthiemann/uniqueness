@@ -96,7 +96,7 @@ values and retain type inference, but the details are quite different.
   between $\alpha\to\beta$ and $\alpha \multimap\beta$ where the
   latter is a function that promises to \emph{use its argument exactly once}.
 \end{enumerate}
-\subsection{A first example}
+\subsection{First examples}
 \label{sec:first-example}
 \begin{figure}[tp]
   \begin{subfigure}[t]{0.45\linewidth}
@@ -130,7 +130,7 @@ static type error.  To write to the file, we must take a (mutable)
 borrow \lstinline/&!h/ of the handle and pass it to the
 \lstinline/write/ function. Mutable borrows are classified as affine:
 they must not be duplicated, but there is no requirement to use
-them. This affinity shows up in the annotation of the second arrow in
+them. This affinity shows up in the annotation \lstinline/-{aff}>/ of the second arrow in
 the type of \lstinline/write/: a partial application like
 \lstinline/write &!h/ captures the affine borrow and hence the
 resulting function must also be handled in an affine way. That is, it
@@ -138,13 +138,15 @@ would be an error to write
 \begin{lstlisting}
   let w = File.write &!h in w "Hello "; w "world!" (* type error *)
 \end{lstlisting}
-as we would be using the affine closure twice.
+as we would be using the affine closure twice. The remaining arrows in
+the API are unrestricted and we write \lstinline/->/ instead of the
+explicitly annotated \lstinline/-{un}>/.
 
 
-This example demonstrates two features of our system.
+This example demonstrates two features of our system:
 \begin{enumerate}
-\item full type inference without annotations in user code
-\item types carry multiplicity annotations in the form of kinds
+\item full type inference without annotations in user code,
+\item types carry multiplicity annotations in the form of kinds.
 \end{enumerate}
 
 In general, kinds can be polymorphic and constrained. Function
@@ -161,9 +163,9 @@ The reading of the type inferred by our system is straightforward. If
 implicitly assume prenex quantification by
 $\forall\kappa\forall\alpha\forall\beta$. In reality, the
 type checker also quantifies over the kinds of $\alpha$ and $\beta$,
-hence the full truth is
+hence the full prefix is
 $\forall\kappa\kappa_1\kappa_2\forall(\alpha:\kappa_1)\forall(\beta:\kappa_2)$,
-which is only revealed if necessary for understanding the type. 
+which is only revealed as much as necessary for understanding the type. 
 \begin{lstlisting}
 let compose f g x = f (g x) 
 # compose : ('k <= 'k_1) => ('b -{'k}> 'c) -> ('a -{'k_1}> 'b) -{'k}> ('a -{'k_1}> 'c)

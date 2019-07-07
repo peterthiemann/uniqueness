@@ -16,7 +16,7 @@ where the program must send two integers, receive an integer, and then
 close the channel. 
 %
 In this context, channels must be used linearly, because every use of
-a channel ``consumes'' one interaction and hence changes the type of the
+a channel ``consumes'' one interaction and  changes the type of the
 channel. That is, after sending two integers on the channel,
 the remaining channel has type \lstinline{?int.end}.
 
@@ -505,8 +505,7 @@ it to the pool afterwards.
 For clarity,
 we explicitly delimit the region in \cref{line:pool:region} to ensure that
 the return value of \lstinline/f &!o/ does not capture \lstinline/&!o/.
-In practice, such annotation is unnecessary, as it would be automatically
-annotated.
+In practice, the type checker inserts this region automatically.
 
 \begin{figure}[tp]
   \centering
