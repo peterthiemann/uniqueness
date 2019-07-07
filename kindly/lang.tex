@@ -1,23 +1,68 @@
 \section{The \lang language}
 
-We now present a formalization of the \lang language featuring
-a minimal ML language with let-polymorphism, abstract types, pairs, and our novel
-linear type system with borrows which uses kinds and qualified types.
-For ease of presentation,
-our formalization makes the following simplifications.
-First, we only consider matching on pairs, instead of arbitrary algebraic
-datatypes. We consider separate operators for borrowing and reborrowing (taking
-the borrow of a borrow). We consider regions to be fully annotated
-and present a set of rules to infer their placement.
-Finally we emulates region variables
-as a series of nesting indices.
+\lang is a minimal ML-like language with
+let-polymorphism, abstract types, and pairs. Its type system manages
+linearity and borrows using kinds and (kind-) constrained types.
+For ease of presentation, we keep the language as simple as possible.
+\begin{itemize}
+\item We showcase pattern matching on pairs rather than algebraic
+  datatypes.
+\item We have separate operators for borrowing and reborrowing (taking
+  the borrow of a borrow).
+\item We assume that regions are explicit in the code. (But we present
+  an algorithm to infer them in \cref{regionannot}.)
+\item We use de Bruijn-indexing to identify regions instead of region
+  variables. 
+\end{itemize}
 
-In the rest of this section, we present the syntax (\cref{syntax})
-the syntax directed typing rules (\cref{sdtyping})
-and a linearity-aware semantics (\cref{sem}) for \lang.
+The rest of this section formalizes  \lang: the syntax (\cref{syntax}),
+the statics in terms of syntax directed typing (\cref{sdtyping}),
+and a dynamics that is linearity-aware (\cref{sem}).
 
 \subsection{Syntax}
 \label{syntax}
+
+
+\Cref{grammar} defines the syntax of \lang. Expressions are as usual
+in an ML-like language.  The novel aspects are match
+specifications, regions, and borrows.
+
+We start from the bottom.
+A borrow $\borrow{x}$ is always taken from a variable $x$. The
+\emph{borrow annotation} $\BORROW$ indicates whether the borrow is mutable
+($\MBORROW$) or immutable ($\IBORROW$). If $x$ is already borrowed,
+then we need to use the reborrow expression $\reborrow{x}$.
+
+A region $\region{x}{e}$ is annotated with its nesting $n$
+and the variable $x$ that may be borrowed in $e$.
+
+A match is indexed with a \emph{match specification} $\etransfm$ that indicates
+whether the match should work on borrows ($\etransfm=\&^b$) or not ($\etransfm=id$).
+
+Many types are indexed with kinds, ranged over by $k$.
+A kind is either a kind variable $\kvar$ or a constant
+(linear $\klin$, affine $\kaff$, or unrestricted $\kun$) indexed
+by a nesting level $n \in \Nat \cup \{\infty\}$.
+
+A type $\tau$ is either a type variable, a function type indexed by a
+kind, 
+a type application $\tapp{t}{\Multi{\tau}}$ of an abstract type constructor
+$\T t$, or a borrowed type  $\borrowty{k}{\tau}$.
+
+Type schemes $\schm$ add quantification over kind
+variables $\kappa$, kinded type variables $\alpha:k$, and constraints
+$C$ to a type, where a constraint is a list of inequalities over
+kinds.
+
+Abstract type constructors possess kind schemes $\kschm$ which relate
+the kinds of the type constructors arguments to the kind of the
+constructed type.
+
+Generally, we write lists with an overbar and (sometimes) an index as
+in $\Multi[i]\tau$.
+
+\paragraph{Previously}
+
 
 Let us first define our conventions and meta-syntactic variables.
 Expressions, types and kinds are noted respectively $e$, $\tau$, and $k$.

@@ -5,7 +5,7 @@
   % |&\ \fix{e}\tag{Fixpoint}\\
   |&\ \introPair{e}{e'} \mid \matchin{x,y}{e}{e'}\tag{Pairs}\\
   |&\ \region{x}{e}\tag{Region}\\
-  |&\ \borrow{x} \mid \reborrow{\tau}\tag{Borrows}\\
+  |&\ \borrow{x} \mid \reborrow{x}\tag{Borrows}\\
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
   % |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
   \htag{Borrows}
@@ -30,7 +30,7 @@
   |&\ \klin_n\tag{Linear kind}\\
   |&\ \kaff_n\tag{Affine kind}\\
   |&\ \kun_n\tag{Unrestricted kind}\\
-  n \in&\ \mathbb N \cup \{\infty\}\\
+  n \in&\ \Nat \cup \{\infty\}\\
   \htag{Type and kind schemes}
   \schm ::=&\ \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau})\\
   \kschm ::=&\ \forall\Multi\kvar.(\qual{C}{\Multi{k} \karr k})
