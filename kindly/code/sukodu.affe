@@ -25,5 +25,5 @@ let rec solve i j g =
         solve new_i new_j new_g
     in
     let cell = Matrix.get (&g,i,j) in
-    IntSet.iter (try_solution &g) cell;
+    IntSet.iter (try_solution &g) cell;(*@\label{line:iter}*)
     free g(*@\label{line:free:g}*)

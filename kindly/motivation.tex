@@ -55,8 +55,8 @@ in Line~\ref{line:session2} takes a channel that is ready to receive a
 value of type \lstinline{'a} and returns a pair of the value a the
 channel at its residual type \lstinline{'S}. It does not matter
 whether \lstinline{'a} is restricted to be linear, in fact
-\lstinline{receive} is polymorphic in the kind of \lstinline{'a} and
-also in the kind of \lstinline{->}. This kind polymorphism is the
+\lstinline{receive} is polymorphic in the kind of \lstinline{'a}.
+This kind polymorphism is the
 default if no constraints are specified.
 %
 The \lstinline{send} operation takes a linear channel and returns a
@@ -224,8 +224,10 @@ module Array : sig
 
   val length : &('a t) -> int
 
-  val get : ('a : un) => &('a t) * int -> 'a
-  val set : ('a : aff) => &!('a t) * int * 'a -> unit
+  val get :
+    ('a : un) => &('a t) * int -> 'a
+  val set :
+    ('a : aff) => &!('a t) * int * 'a -> unit
   
   val map : (&'a -> 'b) -> &('a t) -> 'b t
 end
@@ -269,7 +271,7 @@ $r$ is a positive integer that corresponds to the lexical nesting
 depth of regions. For instance, the type of \lstinline{&!a} in
 \cref{ex:array:set} has kind \lstinline{aff_1} whereas the type of
 \lstinline{&a} in \cref{ex:array:region:get} has kind
-\lstinline{unr_2} and the typing of its region is such that types with
+\lstinline{un_2} and the typing of its region is such that types with
 kind indexes greater than or equal to $2$ cannot escape. 
 
 In \cref{ex:array:region:get} of the example, there is no danger of \lstinline/&a/ escaping because it
@@ -344,8 +346,9 @@ The code in \cref{ex:cow} contains a very simple implementation of
 \lstinline/HybArray/ that represents hybrid arrays
 as regular arrays and uses copy-on-write for persistent
 modifications. The function
-\lstinline/create_from : int -> (int -> 'a) -> 'a Array.t /
-initializes an array from a function.
+\lstinline/mapi : (int -> &'a -> 'b) -> &('a t) -> 'b t /
+is a simple variation on \lstinline/Array.map/ where the mapping function
+takes the position of the element.
 % A more elaborate implementation could use persistent arrays
 % \cite{DBLP:conf/ml/ConchonF07}.
 
@@ -375,11 +378,11 @@ end
 module Cow : HybArray = struct
   include Array
 
-  let set (a, i, x) =
-    let f k =
-      if k = i then x else get (a,k)
+  let set (a, i0, x0) =
+    let f i x =
+      if i = i0 then x0 else x
     in
-    create_from (length a) f
+    Array.mapi f a
   
   let set_mut = Array.set
 end
@@ -401,7 +404,7 @@ the \lstinline/Matrix/ type uses the same API as \lstinline/HybArray/
 but with two indices. 
 Each cell contains an integer set that represent admissible solutions so far.
 The Sudoku solver iterates over the cells and tries each possible solution (\cref{line:try_solution}).
-When a value is picked for the current cell, we create a choicepoint,
+When a value is picked for the current cell, we create a choice point,
 change the cell with an immutable modification (\cref{line:immutset}), and propagate
 the changes with the \lstinline/propagate/ function.
 The \lstinline/propagate/ function uses direct mutation through a
@@ -418,6 +421,7 @@ In particular, the \lstinline/try_solution/ function can be used in a loop
 precisely because the \lstinline/set/ function only requires an
 unrestricted immutable borrow of \lstinline/g/, which can be used as
 many times as needed.
+This would also easily allow parallel iteration on \cref{line:iter}.
 As \lstinline/g/ is linear we must free it in \cref{line:free:g}.
 
 
@@ -490,7 +494,7 @@ callback effectively gets ``inserted'' into the lexical nesting at the callsite.
 
 \cref{ex:pool} shows a simple example of using the \lstinline/Pool/ module.
 
-The implementation in \cref{impl:pool} represents a bag of resourfces
+The implementation in \cref{impl:pool} represents a bag of resources
 using a concurrent queue with atomic add and remove operations. 
 The implementation of the \lstinline/Pool.create/ and \lstinline/Pool.consume/
 functions is straightforward.
@@ -498,8 +502,11 @@ The function \lstinline/Pool.use/ first draws
 an element from the pool (or creates a fresh element),
 passes it down to the callback function \lstinline/f/, and returns
 it to the pool afterwards.
-We explicitly delimit the region in \cref{line:pool:region} to ensure that
+For clarity,
+we explicitly delimit the region in \cref{line:pool:region} to ensure that
 the return value of \lstinline/f &!o/ does not capture \lstinline/&!o/.
+In practice, such annotation is unnecessary, as it would be automatically
+annotated.
 
 \begin{figure}[tp]
   \centering

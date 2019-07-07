@@ -1,14 +1,15 @@
 \section{Inference}
 
-We now formulate type inference for \lang. Type inference is
-based on the HM(X) framework~\citep{DBLP:journals/tapos/OderskySW99} which
-presents how to implement Hindley-Milner type inference in a language
+The main innovation of \affe is its principal type inference.
+We now formulate our inference algorithm
+based on the HM(X) framework~\citep{DBLP:journals/tapos/OderskySW99}.
+HM(X) presents how to implement Hindley-Milner type inference in a language
 with qualified types and an arbitrary custom constraint language.
 We adapt and extend the rules of HM(X) to support kind inference,
-track linearity and affinity and handle borrow and regions. Furthermore, we
+track linearity and handle borrows and regions. Furthermore, we
 formulate an appropriate constraint solving algorithm for our constraint
 system such that inference is sound and complete.
-In the rest of this section, we first present various preliminaries definitions
+We first present various preliminary definitions
 before showing our kind and type inference judgements
 and our constraint solving algorithm.
 
@@ -69,12 +70,13 @@ All relations are fully described in \cref{typ:extra:envs}.
 
 The HM(X) framework assumes the existence of a $\operatorname{normalize}$
 function which takes a constraint $C$ and a substitution $\psi$ and returns a
-constraint in solved form $C'$,
+simplified constraint $C'$,
 and an updated substitution $\unif'$.
 Normalization is supposed to return the ``best'' solution $(C',\unif')$, for
 instance the most general unifier.
 We detail the implementation
-of the normalization function in \cref{infer:solving}. In the meantime, we just
+of the normalization function and its property in \cref{infer:solving}.
+In the meantime, we simply
 assume the existence of such a function for our constraint system.
 
 \subsection{Kind inference}

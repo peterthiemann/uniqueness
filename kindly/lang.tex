@@ -306,7 +306,8 @@ level of the region. The kind of borrow is annotated with the integer
 corresponding to their region, and a final constraint ensure that
 the return type of the region does not contain such borrow.
 
-We illustrate this on the expression $\region{x}{f(\borrow[\IBORROW]{c})}$.
+We illustrate this on the expression $\region{x}{f(\borrow[\IBORROW]{c})}$
+when $c$ is a linear channel.
 The first step is to check that
 $\svar[\IBORROW]{c}{\text{channel}}$ is in $\E$. We then define $\E'$ which
 corresponds to $\E$ where the suspended binding is replaced by a borrow binding.
@@ -323,7 +324,7 @@ that the kind of $\tau$ does not contain anything whose kind is ``above $n$''
 $\kun_n$).
 
 \begin{figure}[!h]
-  \begin{minipage}{0.35\linewidth}
+  \begin{minipage}{0.4\linewidth}
     \centering
     \begin{mathpar}
       \ruleSDRegion
