@@ -85,8 +85,8 @@ when $\entail{C}{D}$ and $\entail{D}{C}$.
   \end{align*}
   \caption{The constraint language}
   \label{grammar:constraint}
-  \input{infer/lattice}
-  \caption{Lattice inequalities -- $k \lk_\Lat k'$}
+  % \input{infer/lattice}
+  % \caption{Lattice inequalities -- $k \lk_\Lat k'$}
   \input{infer/entails}
   \caption{Base entailment rules -- $\entail{C}{D}$ }
   \label{rules:entail}
@@ -97,16 +97,151 @@ We note $\SC$ the set of solved forms
 which can be used inside type and kind schemes.
 We define $\SC$ as $\A$ quotiented by the relation $\equivC$.
 %
-We consider the existence of a function $\operatorname{normalize}$ which takes
-a constraint in $\A$ and a substitution $\psi$ and returns a constraint
-in solved form $C' \in \SC$,
-and an updated substitution. We detail the implementation
-of the normalization function in \cref{infer:solving}
+The normalization function is described in \cref{infer:solving}.
+
+% We consider the existence of a function $\operatorname{normalize}$ which takes
+% a constraint in $\A$ and a substitution $\psi$ and returns a constraint
+% in solved form $C' \in \SC$,
+% and an updated substitution. We detail the implementation
+% of the normalization function in \cref{infer:solving}
 
 % $\mathcal S$ is composed only of kind
 % inequalities \emph{over variables}. For convenience, if $C\in\mathcal S$, we
 % note $C$ as a list of kind inequalities: $\Cleq{\kvar_i}{\kvar_{i'}}^n$.
 % \TODO{Extend the properties of solved forms}
+
+Our goal is to prove that $\CL$ supports all the properties necessary for
+principal type inference, as defined by HM(X).
+
+\begin{lemma}[Normal form]
+  \label{lemma:normalform}
+  Given a constraint $D\in\CL$, a substitution $\phi$ and
+  $(C,\unif) = \normalize{D}{\phi}$,
+  then $\phi\leq\unif$,
+  $C \equivC \unif D$ and
+  $\unif C = C$.
+\end{lemma}
+\begin{proof}
+  % For simplicity, we assume that any substitution has been already applied
+  % to $D$ and that $\phi = id$.
+  Let us partition $\phi$ into a part which affects type variables,
+  $\phi_\tau$, and a part which affects kind variables, $\phi_k$.
+  
+  We note $(C^k,\unif_\tau)$ the result of
+  the modified Herbrand unification on $(D,\phi)$ in step (1).
+  Herbrand unification computes the most general
+  unifier. Our modified Herbrand unification only output additional
+  kind constraints for kind on the arrows and does not change
+  the result of the unification. Thus, we have
+  $\phi_\tau\leq\unif_\tau$,
+  $C^k \equivC \unif_\tau D$ and
+  $\unif_\tau C^k = C^k$.
+  
+  Let $C^{k+}$ be the result after step (2), we trivially have that
+  $\fv{C^{k+}} = \fv{C^k}$ and that $C^{k+} \equivC C^k$.
+
+  Let $C^{A}$ and $\unif_k$ be the results after step (4).
+  By definition, we have $\unif_k C^{k+} \equivC C^{A}$ and
+  $\unif_k C^{A} = C^{A}$. Since $\phi_k$ has already be applied to $C$ before
+  unifying the strongly connected components,
+  we have that $\phi_k\leq\unif_k$.
+
+  Let $\unif = \unif_\tau \meet \unif_k$. Since $\unif_\tau$ and $\unif_k$
+  have disjoint supports,
+  we have $C^{A} = \unif_\tau C^{A} \equivC \unif C^{k+} \equivC \unif D$
+  and $\unif C^{A} = C^{A}$.
+  Furthermore, $\phi_\tau \meet \phi_k \leq \unif_\tau \meet \unif_k$.
+  
+  Steps (5) to (9) all preserve the free variables and the equivalence
+  of constraints, which concludes.
+\end{proof}
+
+\begin{lemma}[Uniqueness]
+  Given $(C_1,\unif_1)$ and $(C_2,\unif_2)$ such that
+  $\unif_1 C_1 \equivC \unif_2 C_2$, then
+  $\normalize{C_1}{\unif_1}$ and $\normalize{C_2}{\unif_2}$
+  are identical up to $\alpha$-renaming.
+\end{lemma}
+\begin{proof}
+  In \cref{lemma:normalform}, we have showed that all the steps of the
+  normalization procedure preserve equivalence.
+  Since $\unif_1 C_1 \equivC \unif_2 C_2$, equivalence between
+  the two results of the normalization procedures is preserved for all steps.
+
+  We note $P(C_a)$ if for all $C = (k, k)'$
+  such that $\entail{C_a}{C}$ and $\nvdash_eC$,
+  we have $C \in {\mathcal R}_a$. 
+
+  Let us note $C_1'$ and $C_2'$ the constraints after step (4). $P(C_1')$ and
+  $P(C_2')$ hold. Indeed, since $C_1'$ and $C_2'$ are only composed
+  of existential quantifications and kind inequalities, the only rules
+  that applies are transitivity and lattice inequalities.
+  After step (2) and (5), the associated relations are fully saturated for these
+  two rules, hence all inequalities that can be deduced from $C_a'$ are already
+  present in the relation.
+
+  The property $P$ is preserved by step (6) since we only remove
+  inequalities that involve existentially quantified variables. Such
+  inequalities could not be picked in $P$.
+  % In (6) we only remove
+  % trivial lattice inequalities.
+
+  Let us note $C''_a$ for $a\in\{1,2\}$ the constraints after step (5).
+  Since there are no more existential variables,
+  we have $C''_a=(k_i,k'_i)_i=\mathcal R''_a$.
+  For any $C=(k,k')$ such that $\entail{}{C}$ and $\entail{C''_a}{C}$,
+  then $C \in (\leq) \subset {\mathcal R}''_a$.
+  Indeed, the only trivial inequalities in our system are equalities of the form
+  $(\kvar, \kvar)$, which were removed in step (4) and the lattice inequalities.
+
+  Let us consider $C = (k,k') \in \mathcal R''_1$.
+  Since $C''_1\equivC C''_2$, we have $\entail{C''_2}{C}$.
+  If $\nvdash_e{C}$, by $P(C''_2)$ we have that
+  $C\in R''_2$.
+  If $\entail{}{C}$, then $C\in (\leq) \subset R''_2$.
+  We conclude that $R''_1 \subset R''_2$.
+  By symmetry, $R''_1 = R''_2$ and $C''_1 = C''_2$.
+
+  This equality is preserved by step (7) and (8)
+  since the transitive reduction of a directed acyclic graph is unique,
+  which concludes.
+\end{proof}
+
+
+\begin{theorem}
+  $\CL$ has the principal constraint property and
+  $\operatorname{normalize}$ computes principal normal forms for $\CL$.
+\end{theorem}
+
+\begin{lemma}
+  For all $C\in\mathcal S$, $\entail{C}{x = x}$ implies
+  $\entail{}{x = x}$.
+\end{lemma}
+\begin{proof}
+  By definition of $\operatorname{normalize}$, We have $C = \Cleq{k}{k'}_i$
+  such that the underlying relation has no cycles.
+  Thus, we can not deduce neither kind nor type equalities from $C$.
+\end{proof}
+
+\begin{lemma}
+  $\CL$ is regular, ie, for $x, x'$ two types or kinds,
+  $\entail{}{\Ceq{x}{x'}}$ implies
+  $\fv{x} = \fv{x'}$
+\end{lemma}
+\begin{proof}
+  The only equalities possibles are between variables (via symmetry) or
+  between constants.
+\end{proof}
+
+
+\begin{theorem}
+  $\CL$ has the principal constraint property and
+  $\operatorname{normalize}$ computes principal normal forms for $\CL$.
+\end{theorem}
+
+This is sufficient to show that $HM(\CL)$ is principal. However,
+we do not use HM(X) directly, but an extended version with kind inference,
+linear and affine types, and borrow.
 
 \subsection{Kinding}
 
@@ -148,6 +283,9 @@ in any other contexts.
     C\E\E\E$; binders $\bsplit Cbbb$}
   \label{fig:sd-borrowing}
 \end{figure}
+
+
+
 
 \subsection{Typing}
 

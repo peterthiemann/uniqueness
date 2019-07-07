@@ -1,6 +1,6 @@
 \section{Inference}
 
-The main innovation of \affe is its principal type inference.
+An important innovation of \affe is its principal type inference.
 We now formulate our inference algorithm
 based on the HM(X) framework~\citep{DBLP:journals/tapos/OderskySW99}.
 HM(X) presents how to implement Hindley-Milner type inference in a language
@@ -9,6 +9,8 @@ We adapt and extend the rules of HM(X) to support kind inference,
 track linearity and handle borrows and regions. Furthermore, we
 formulate an appropriate constraint solving algorithm for our constraint
 system such that inference is sound and complete.
+In addition, our constraint solving algorithm simplifies constraints in a
+principled way.
 We first present various preliminary definitions
 before showing our kind and type inference judgements
 and our constraint solving algorithm.
@@ -166,19 +168,40 @@ The rules are shown in \cref{rules:typing}.
 
 \subsubsection{Constraint desugaring}
 
-
-\begin{figure}[tp]
-  \centering
+\begin{figure}[!htb]
   \begin{mathpar}
+
+  \inferrule{}{ \Cleq{\Eempty}{k} \Crewrite  \Cempty}
+
+  \inferrule{
+    \Cleq\E k \Crewrite  C \\ \E \vdash \Cleq B k \Crewrite  D
+  }{
+    \Cleq{\E; B}{k} \Crewrite  C \Cand D
+  }
+
+  \inferrule{
+    \E \vdash \Cleq \schm k \Crewrite  C
+  }{ \E \vdash \Cleq{\bvar x \schm}{k} \Crewrite  C}
+
+  \inferrule{ }{
+    \E \vdash \Cleq{\svar x \schm^n} k \Crewrite  \Cfalse
+  }
+
+  % \inferrule{}{\Cleq{\IBORROW^n} k \Crewrite  \Cleq{\kun_n} k}
+
+  % \inferrule{}{\Cleq{\MBORROW^n} k \Crewrite  \Cleq{\kaff_n} k}
+
     \inferrule{
       \inferK{C \Cand C_x} \E \tau {k'} \\
       D = C \Cand C_x \Cand \Cleq{k'}k
     }{
-      \E \vdash \Cleq{\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}{k} \Crewrite  D
+      \E \vdash
+      \Cleq{(\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau})}{k} \Crewrite  D
     }
   \end{mathpar}
-  \caption{Auxiliary rules for inference}
-  \label{op:usgmap}
+
+  \caption{Rewriting constraints on environments and types}
+  \label{rule:typing:desugar}
 \end{figure}
 
 \subsection{Constraint solving}
@@ -217,7 +240,8 @@ We can then saturate the relation,
 unify all kinds that are in the same equivalence classes to obtain
 a most general unifier on kind variables,
 remove all existentially quantified variables and
-then minimize back the relation.
+then minimize back the relation and apply various
+simplification rules to make the resulting type easier to understand to users.
 
 More precisely, we apply the following steps:
 \begin{enumerate}
@@ -273,165 +297,19 @@ More precisely, we apply the following steps:
 
 \subsection{Soundness and Principality}
 
-\TODO{Simplify/Cut}
-
-\begin{lemma}[Normal form]
-  \label{lemma:normalform}
-  Given a constraint $D\in\CL$, a substitution $\phi$ and
-  $(C,\unif) = \normalize{D}{\phi}$,
-  then $\phi\leq\unif$,
-  $C \equivC \unif D$ and
-  $\unif C = C$.
-\end{lemma}
-\begin{proof}
-  % For simplicity, we assume that any substitution has been already applied
-  % to $D$ and that $\phi = id$.
-  Let us partition $\phi$ into a part which affects type variables,
-  $\phi_\tau$, and a part which affects kind variables, $\phi_k$.
-  
-  We note $(C^k,\unif_\tau)$ the result of
-  the modified Herbrand unification on $(D,\phi)$ in step (1).
-  Herbrand unification computes the most general
-  unifier. Our modified Herbrand unification only output additional
-  kind constraints for kind on the arrows and does not change
-  the result of the unification. Thus, we have
-  $\phi_\tau\leq\unif_\tau$,
-  $C^k \equivC \unif_\tau D$ and
-  $\unif_\tau C^k = C^k$.
-  
-  Let $C^{k+}$ be the result after step (2), we trivially have that
-  $\fv{C^{k+}} = \fv{C^k}$ and that $C^{k+} \equivC C^k$.
-
-  Let $C^{A}$ and $\unif_k$ be the results after step (4).
-  By definition, we have $\unif_k C^{k+} \equivC C^{A}$ and
-  $\unif_k C^{A} = C^{A}$. Since $\phi_k$ has already be applied to $C$ before
-  unifying the strongly connected components,
-  we have that $\phi_k\leq\unif_k$.
-
-  Let $\unif = \unif_\tau \meet \unif_k$. Since $\unif_\tau$ and $\unif_k$
-  have disjoint supports,
-  we have $C^{A} = \unif_\tau C^{A} \equivC \unif C^{k+} \equivC \unif D$
-  and $\unif C^{A} = C^{A}$.
-  Furthermore, $\phi_\tau \meet \phi_k \leq \unif_\tau \meet \unif_k$.
-  
-  Steps (5) to (9) all preserve the free variables and the equivalence
-  of constraints, which concludes.
-\end{proof}
-
-\begin{lemma}[Uniqueness]
-  Given $(C_1,\unif_1)$ and $(C_2,\unif_2)$ such that
-  $\unif_1 C_1 \equivC \unif_2 C_2$, then
-  $\normalize{C_1}{\unif_1}$ and $\normalize{C_2}{\unif_2}$
-  are identical up to $\alpha$-renaming.
-\end{lemma}
-\begin{proof}
-  In \cref{lemma:normalform}, we have showed that all the steps of the
-  normalization procedure preserve equivalence.
-  Since $\unif_1 C_1 \equivC \unif_2 C_2$, equivalence between
-  the two results of the normalization procedures is preserved for all steps.
-
-  We note $P(C_a)$ if for all $C = (k, k)'$
-  such that $\entail{C_a}{C}$ and $\nvdash_eC$,
-  we have $C \in {\mathcal R}_a$. 
-
-  Let us note $C_1'$ and $C_2'$ the constraints after step (4). $P(C_1')$ and
-  $P(C_2')$ hold. Indeed, since $C_1'$ and $C_2'$ are only composed
-  of existential quantifications and kind inequalities, the only rules
-  that applies are transitivity and lattice inequalities.
-  After step (2) and (5), the associated relations are fully saturated for these
-  two rules, hence all inequalities that can be deduced from $C_a'$ are already
-  present in the relation.
-
-  The property $P$ is preserved by step (6) since we only remove
-  inequalities that involve existentially quantified variables. Such
-  inequalities could not be picked in $P$.
-  % In (6) we only remove
-  % trivial lattice inequalities.
-
-  Let us note $C''_a$ for $a\in\{1,2\}$ the constraints after step (5).
-  Since there are no more existential variables,
-  we have $C''_a=(k_i,k'_i)_i=\mathcal R''_a$.
-  For any $C=(k,k')$ such that $\entail{}{C}$ and $\entail{C''_a}{C}$,
-  then $C \in (\leq) \subset {\mathcal R}''_a$.
-  Indeed, the only trivial inequalities in our system are equalities of the form
-  $(\kvar, \kvar)$, which were removed in step (4) and the lattice inequalities.
-
-  Let us consider $C = (k,k') \in \mathcal R''_1$.
-  Since $C''_1\equivC C''_2$, we have $\entail{C''_2}{C}$.
-  If $\nvdash_e{C}$, by $P(C''_2)$ we have that
-  $C\in R''_2$.
-  If $\entail{}{C}$, then $C\in (\leq) \subset R''_2$.
-  We conclude that $R''_1 \subset R''_2$.
-  By symmetry, $R''_1 = R''_2$ and $C''_1 = C''_2$.
-
-  This equality is preserved by step (7) and (8)
-  since the transitive reduction of a directed acyclic graph is unique,
-  which concludes.
-\end{proof}
-
-
-\begin{theorem}
-  $\CL$ has the principal constraint property and
-  $\operatorname{normalize}$ computes principal normal forms for $\CL$.
-\end{theorem}
-
-\begin{lemma}
-  For all $C\in\mathcal S$, $\entail{C}{x = x}$ implies
-  $\entail{}{x = x}$.
-\end{lemma}
-\begin{proof}
-  By definition of $\operatorname{normalize}$, We have $C = \Cleq{k}{k'}_i$
-  such that the underlying relation has no cycles.
-  Thus, we can not deduce neither kind nor type equalities from $C$.
-\end{proof}
-
-\begin{lemma}
-  $\CL$ is regular, ie, for $x, x'$ two types or kinds,
-  $\entail{}{\Ceq{x}{x'}}$ implies
-  $\fv{x} = \fv{x'}$
-\end{lemma}
-\begin{proof}
-  The only equalities possibles are between variables (via symmetry) or
-  between constants.
-\end{proof}
-
-\begin{theorem}
-  Type inference in $HM(\CL)$ is sound, principal and complete.
-\end{theorem}
-
-
-
-\TODO{}
-
+Our system is an extension of HM(X). Our goal is prove soundness and completeness
+of our inference algorithm with respect to our syntax-directed system, which
+assures us principal type inference.
+We prove two properties:
 \begin{itemize}
-\item Properly ensure that it respects HM(X) (cylindric, \dots)
-\item Show principal type inference:
-  \begin{itemize}
-  \item Principal constraint system
-  \item Regular constraint system: $\Ceq{\tau}{\tau'} \implies \fv{\tau} = \fv{\tau'}$.
-  \item Solved forms are in simplified form.
-    $C\in S, \entail{C}{\Ceq{\tau}{\tau'}} \implies \entail{}{\Ceq{\tau}{\tau'}}$.
-  \end{itemize}
-\item Show equivalence with the logic-based system.
-
+\item Our constraint system respects all the properties required by HM(X)
+  for principal type inference.
+\item Our extended inference algorithm still satisfies the soundness
+  and completeness properties of HM(X). This is achieved by extending
+  the original proofs.
 \end{itemize}
 
-
-% \begin{lemma}
-%   Without loss of generality, we can consider that
-%   kind inequalities in satisfiable constraints
-%   are only done on kind variables. 
-
-%   \begin{proof}
-%     Consider the constraint $\Cleq{k}{k'}\Cand C$.
-%     \begin{itemize}
-%     \item If $k$ and $k'$ are both constants, it can be removed.
-%     \item If the constraint is $\Cleq{\kvar}{\kaff}$ or $\Cleq{\kun}{\kvar}$, it can be removed.
-%     \item If the constraint is $\Cleq{\kvar}{\kun}$ or $\Cleq{\kaff}{\kvar}$, we
-%       can substitute $\kvar$ by its value in $C$.
-%     \end{itemize}
-%   \end{proof}
-% \end{lemma}
+\TODO{State the theorems}
 
 %%% Local Variables:
 %%% mode: latex
