@@ -34,10 +34,10 @@ type is guaranteed to have a single reference to it.
 These systems work well if one is prepared to write programs
 functionally in resource-passing style. In this style, all operations
 in the resource's API take the resource as a parameter and return it
-in possibly modified state\cite{DBLP:journals/jfp/AchtenP95}. In
-typestate-oriented programming, they would also modify its type
-\cite{DBLP:conf/oopsla/AldrichSSS09}. Functional session types
-represent a popular example \cite{DBLP:journals/jfp/GayV10}.
+in possibly modified state~\cite{DBLP:journals/jfp/AchtenP95}. In
+typestate-oriented programming, they would also modify its
+type~\cite{DBLP:conf/oopsla/AldrichSSS09}. Functional session types 
+represent a popular example~\cite{DBLP:journals/jfp/GayV10}. 
 
 Explicit resource passing places a heavy burden on the programmer and
 complicates the program structure. For imperative APIs,
@@ -52,15 +52,16 @@ The concepts of ownership and borrowing have grown popular over time
 and they form the foundation of the type system of the Rust language
 \cite{rust}. Rust supports two kinds of borrows of data structures, mutable and immutable
 ones. Mutable borrows enable modification of the data structure
-whereas immutable borrows come only with read access. Moreover, Rust
-manages the lifetime of data and makes sure that the lifetime of a
+whereas immutable borrows grant read-only access. Mutable borrows are
+exclusive whereas several immutable borrows can be active at the same
+time. Moreover, Rust makes sure that the lifetime of a
 borrow is properly contained in the lifetime of its lender. 
 
 The design of Rust is geared towards programmers with a low-level
 imperative programming background, like C or C++. Its management of
-lifetime supports the manual way of memory management customary in
-these languages very well and makes it safe. However, programmers from
-a managed language background feel alienated from the lack of garbage
+lifetimes supports the manual way of memory management customary in
+these languages very well and makes it safe. However, programmers with
+a background in managed languages feel alienated from the lack of garbage
 collected data. They would prefer a setting where automatic memory
 management with garbage collection was the default, but where they
 could seemlessly switch to safe, manual resource management if that
@@ -79,6 +80,22 @@ linear and affine types, mutable and immutable borrows, but all that
 integrated with full type inference, garbage collected data, and
 ANOTHER FEATURE.
 
+Compared to the most closely related contender in this design space, Linear Haskell
+\cite{DBLP:journals/pacmpl/BernardyBNJS18}, their goals and means are
+similar as both systems permit abstraction over the number of uses of
+values and retain type inference, but the details are quite different.
+\begin{enumerate}
+\item Their multiplicities are either linear or unrestricted whereas
+  we also permit affine values.
+\item Our system supports mutable and immutable borrows, hence the
+  need for affinity.
+\item Our multiplicities are directly attached to the type of the
+  value. For example, in our system the function type \lstinline/'a-{lin}>'b/
+  denotes the type of a \emph{single-use function} that can be called
+  just once, whereas the multiplicities in Linear Haskell choose
+  between $\alpha\to\beta$ and $\alpha \multimap\beta$ where the
+  latter is a function that promises to \emph{use its argument exactly once}.
+\end{enumerate}
 \subsection{A first example}
 \label{sec:first-example}
 \begin{figure}[tp]
@@ -92,8 +109,8 @@ ANOTHER FEATURE.
 \begin{lstlisting}
 let main () =
   let h = File.fopen "foo" in
-  write &!h "Hello ";
-  write &!h "world!";
+  File.write &!h "Hello ";
+  File.write &!h "world!";
   File.close h
 \end{lstlisting}
     \caption{File example}
@@ -103,29 +120,68 @@ let main () =
   \label{fig:writing-fiules}
 \end{figure}
 
-As a first, well-trodden example we consider a very simple API for
-writing files in \cref{fig:writing-files-api}.
-The type \lstinline/File.t/ is linear. A call like
+As a first, well-known example we consider a simplified API for
+writing files shown in \cref{fig:writing-files-api}.  It introduces a
+linear abstract type \lstinline/File.t/. A call like
 \lstinline/fopen "foo"/ returns a linear handle to a newly created
-file, which \emph{must} be closed later using
-\lstinline/close/. Failing to do so is a static type error.
-To write to the file, we must take a (mutable) borrow of the handle and
-pass it to the \lstinline/write/
-function. As mutable borrows must not be duplicated so they are
-classified as affine. This affinity shows up in the annotation of the
-second arrow in the type of \lstinline/write/: a partial application
+file, which \emph{must} be released later on through \lstinline/close/
+as shown in \cref{fig:writing-files-example}. Failing to do so is a
+static type error.  To write to the file, we must take a (mutable)
+borrow \lstinline/&!h/ of the handle and pass it to the
+\lstinline/write/ function. Mutable borrows are classified as affine:
+they must not be duplicated, but there is no requirement to use
+them. This affinity shows up in the annotation of the second arrow in
+the type of \lstinline/write/: a partial application like
 \lstinline/write &!h/ captures the affine borrow and hence the
-resulting function must also be handled in an affine way.
-\Cref{fig:writing-files-example} contains an example where
-\lstinline/&!h/ stands for the mutable borrow.
+resulting function must also be handled in an affine way. That is, it
+would be an error to write
+\begin{lstlisting}
+  let w = File.write &!h in w "Hello "; w "world!" (* type error *)
+\end{lstlisting}
+as we would be using the affine closure twice.
 
-This example demostrates two features of our system.
+
+This example demonstrates two features of our system.
 \begin{enumerate}
 \item full type inference without annotations in user code
 \item types carry multiplicity annotations in the form of kinds
 \end{enumerate}
 
-More features: kinds can be polymorphic and constrained. 
+In general, kinds can be polymorphic and constrained. Function
+application and composition are the archetypical
+examples for functions exploiting that feature.
+\begin{lstlisting}
+let app f x = f x
+# app : ('a -{'k}> 'b) -> ('a -{'k}> 'b)
+\end{lstlisting}
+The reading of the type inferred by our system is straightforward. If
+\lstinline/f/ is a \lstinline/'k/-restricted function, then so is
+\lstinline/app f/. The multiplicities of \lstinline/'a/ and
+\lstinline/'b/ play no role. As usual in ML-like languages, we
+implicitly assume prenex quantification by
+$\forall\kappa\forall\alpha\forall\beta$. In reality, the
+type checker also quantifies over the kinds of $\alpha$ and $\beta$,
+hence the full truth is
+$\forall\kappa\kappa_1\kappa_2\forall(\alpha:\kappa_1)\forall(\beta:\kappa_2)$,
+which is only revealed if necessary for understanding the type. 
+\begin{lstlisting}
+let compose f g x = f (g x) 
+# compose : ('k <= 'k_1) => ('b -{'k}> 'c) -> ('a -{'k_1}> 'b) -{'k}> ('a -{'k_1}> 'c)
+\end{lstlisting}
+Like in \lstinline/app/, the multiplicities of the type variables
+\lstinline/'a,'b,'c/ do not matter. However, the multiplicity
+\lstinline/'k/ of \lstinline/f/ reappears on the second to last arrow
+because \lstinline/compose f/ is a closure that inherits
+\lstinline/f/'s multiplicity. The multiplicities of \lstinline/g/  and
+\lstinline/f/ both influence the multiplicity of the last arrow, so
+that we would expect its annotation to be the least upper bound
+$\kappa \sqcup \kappa_1$. Thanks to subsumption of multiplicities, it
+is sufficient to assume $\kappa \le \kappa_1$ and \lstinline/g/'s
+actual multiplicity gets subsumed to $\kappa_1$. This constraint
+simplification technique is built into our type inference algorithm. Again, the printout
+of the type scheme only mentions the required constraint
+$\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
+\kappa_1$ as well as the kinds of \lstinline/'a,'b,'c/.
 
 \subsection{Contributions}
 \label{sec:contributions}
@@ -133,6 +189,7 @@ More features: kinds can be polymorphic and constrained.
 \begin{itemize}
 \item Type system that encodes linearity and affinity with borrowing
 \item Full type inference for \dots
+\item Constraint simplification
 \item Automatic inference of regions for borrows
 \end{itemize}
 
