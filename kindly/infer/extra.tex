@@ -1,0 +1,34 @@
+\section{Inference rules}
+\label{appendix:infer}
+
+\begin{figure*}[htp]
+  \input{infer/typing}
+  \caption{Type inference algorithm -- $\inferW{\Sigma}{(C,\psi)}{\bf{\E}}{\bf{e}}{\tau}$ }
+  \label{rules:typing}
+\end{figure*}
+
+\begin{figure}[tp]
+  \centering
+  \begin{mathpar}
+    { \Weaken_{\bvar{x}{\sigma}}(\Sv) =
+      \begin{dcases}
+        \Ctrue& \text{if } x\in\Sv\\
+        \Cleq{\sigma}{\kaff_\infty}&\\
+      \end{dcases}
+    }
+
+    \inferrule{
+      \inferK{C \Cand C_x} \E \tau {k'} \\
+      D = C \Cand C_x \Cand \Cleq{k'}k
+    }{
+      \E \vdash \Cleq{\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}{k} \Crewrite  D
+    }
+  \end{mathpar}
+  \caption{Auxiliary rules for inference}
+  \label{op:usgmap}
+\end{figure}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:
