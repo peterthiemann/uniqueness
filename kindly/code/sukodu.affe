@@ -14,7 +14,8 @@ let propagate i j g n =
 
 let rec solve i j g =
   if is_solved &g then
-    Matrix.print &g
+    Matrix.print &g;
+    free g
   else
     let (new_i, new_j) = next_pos (i,j) in
     let try_solution g n =(*@\label{line:try_solution}*)
