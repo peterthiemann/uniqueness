@@ -53,13 +53,12 @@ borrows should be enclosed immediately.
   \label{fig:region-annotation}
 \end{figure*}
 
-\section{Syntax directed typing}
-\label{appendix:sdtyping}
 
-\subsection{Constraint language}
+\section{Constraints}
+\label{appendix:constraints}
 
-\newcommand\A{\mathcal A}
-\newcommand\SC{\mathcal S}
+% \newcommand\A{\mathcal A}
+% \newcommand\SC{\mathcal S}
 
 Let us note $\A$ our constraint system. The full grammar of constraints is
 given in \cref{grammar:constraint}.
@@ -112,6 +111,10 @@ The normalization function is described in \cref{infer:solving}.
 
 Our goal is to prove that $\CL$ supports all the properties necessary for
 principal type inference, as defined by HM(X).
+
+In order to prove this, we first prove that constraint solving
+does compute normal forms, and that such normal forms are unique.
+
 
 \begin{lemma}[Normal form]
   \label{lemma:normalform}
@@ -207,11 +210,7 @@ principal type inference, as defined by HM(X).
   which concludes.
 \end{proof}
 
-
-\begin{theorem}
-  $\CL$ has the principal constraint property and
-  $\operatorname{normalize}$ computes principal normal forms for $\CL$.
-\end{theorem}
+We can now prove all the necessary high level properties.
 
 \begin{lemma}
   For all $C\in\mathcal S$, $\entail{C}{x = x}$ implies
@@ -223,25 +222,33 @@ principal type inference, as defined by HM(X).
   Thus, we can not deduce neither kind nor type equalities from $C$.
 \end{proof}
 
-\begin{lemma}
+\begin{property}
   $\CL$ is regular, ie, for $x, x'$ two types or kinds,
   $\entail{}{\Ceq{x}{x'}}$ implies
   $\fv{x} = \fv{x'}$
-\end{lemma}
+\end{property}
 \begin{proof}
   The only equalities possibles are between variables (via symmetry) or
   between constants.
 \end{proof}
 
+Finally, we can conclude with all the properties we need for
+HM(X):
 
 \begin{theorem}
-  $\CL$ has the principal constraint property and
-  $\operatorname{normalize}$ computes principal normal forms for $\CL$.
+  $\CL$ has the principal constraint property,
+  $\operatorname{normalize}$ computes principal normal forms for $\CL$
+  and $\CL$ is regular.
 \end{theorem}
 
+
 This is sufficient to show that $HM(\CL)$ is principal. However,
-we do not use HM(X) directly, but an extended version with kind inference,
+we do not use HM(X) directly but an extended version with kind inference,
 linear and affine types, and borrow.
+
+
+\section{Syntax directed typing}
+\label{appendix:sdtyping}
 
 \subsection{Kinding}
 
@@ -285,6 +292,41 @@ in any other contexts.
 \end{figure}
 
 
+\begin{figure}[!htb]
+  \begin{mathpar}
+
+  \inferrule{}{ \Cleq{\Eempty}{k} \Crewrite  \Cempty}
+
+  \inferrule{
+    \Cleq\E k \Crewrite  C \\ \E \vdash \Cleq B k \Crewrite  D
+  }{
+    \Cleq{\E; B}{k} \Crewrite  C \Cand D
+  }
+
+  \inferrule{
+    \E \vdash \Cleq \schm k \Crewrite  C
+  }{ \E \vdash \Cleq{\bvar x \schm}{k} \Crewrite  C}
+
+  \inferrule{ }{
+    \E \vdash \Cleq{\svar x \schm^n} k \Crewrite  \Cfalse
+  }
+
+  % \inferrule{}{\Cleq{\IBORROW^n} k \Crewrite  \Cleq{\kun_n} k}
+
+  % \inferrule{}{\Cleq{\MBORROW^n} k \Crewrite  \Cleq{\kaff_n} k}
+
+    \inferrule{
+      \inferK{C \Cand C_x} \E \tau {k'} \\
+      D = C \Cand C_x \Cand \Cleq{k'}k
+    }{
+      \E \vdash
+      \Cleq{(\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau})}{k} \Crewrite  D
+    }
+  \end{mathpar}
+
+  \caption{Rewriting constraints on environments and types}
+  \label{rule:typing:desugar}
+\end{figure}
 
 
 \subsection{Typing}

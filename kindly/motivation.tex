@@ -1,8 +1,5 @@
 \section{Linearity, Affinity, and Borrows at Work}
-
-\TODO{really good examples. first linearity/affinity (files?), then
-  something with borrows (functional arrays), and then something
-  really spaced out that pushes the limit}
+\label{motivation}
 
 \subsection{A session on linearity}
 \label{sec:session-linearity}
@@ -214,7 +211,7 @@ which is possible because none of the borrows are in scope anymore.
 
 \begin{figure}[tp]
   \centering
-  \begin{subfigure}[t]{0.48\linewidth}
+  \begin{subfigure}[t]{0.47\linewidth}
 \begin{lstlisting}
 module Array : sig
   type ('a : 'k) t : lin
@@ -235,7 +232,7 @@ end
     \caption{Affine arrays}
     \label{sig:array}
   \end{subfigure}\hfill
-  \begin{subfigure}[t]{0.5\linewidth}
+  \begin{subfigure}[t]{0.53\linewidth}
 \begin{lstlisting}
 let mk_fib_array n =
   let a = create n 1 in
@@ -248,12 +245,12 @@ let mk_fib_array n =
 \end{lstlisting}
     \caption{Example of use of affine arrays}
     \label{ex:array}
-\begin{lstlisting}
-let a = create n 1 in
-for i = 2 to n - 1 do {|
-  let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
-  set &!a i x
-|} done;
+\begin{lstlisting}[firstnumber=2]
+  let a = create n 1 in
+  for i = 2 to n - 1 do {|
+    let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
+    set &!a i x
+  |} done;
 \end{lstlisting}
     \caption{Excerpt of \cref{ex:array} with explicit regions}
     \label{ex:array:region}
@@ -437,7 +434,7 @@ convenient programming style without compromising performance.
     \lstinputlisting[linerange=1-13]{code/sukodu.affe}
   \end{minipage}\hfill
   \begin{minipage}[t]{0.54\linewidth}
-    \lstinputlisting[linerange=15-29,firstnumber=last]{code/sukodu.affe}
+    \lstinputlisting[linerange=15-30,firstnumber=last]{code/sukodu.affe}
   \end{minipage}
   \caption{Excerpt of the Sudoku solver}
   \label{ex:sudoku}
