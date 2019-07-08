@@ -14,24 +14,87 @@ uniqueness with adoption. In POPL, pages 283–295. ACM, 2005.
 Manuel Fahndrich and Robert DeLine. Adoption and focus: Practical
 linear types for imperative programming. In PLDI, pages 13–24, 2002.
 
-\paragraph{Functional linear of affine type systems}
+\subsubsection{Functional linear of affine type systems}
 
-Alms~\citep{DBLP:conf/popl/TovP11},
-F\degree~\citep{DBLP:conf/tldi/MazurakZZ10},
-Quill~\citep{DBLP:conf/icfp/Morris16},
-Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18},
-Vault\citep{DBLP:conf/pldi/DeLineF01,DBLP:conf/pldi/FahndrichD02}
+Many systems have attempted to combine
+functional programming and linear types in a practical setting.
+One contribution of \lang is to combine several ingredients
+from these different languages and combines them, while still preserving
+complete type inference.
+In addition, none of the following language supports borrows.
 
-Mezzo?
+System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
+extends System F with uses kinds to distinguish
+between linear and unrestricted types.
+\citet{DBLP:conf/tldi/MazurakZZ10} also provide
+(and proves soundness) of a linearity-aware semantics.
+Unlike \lang, System F\degree does not allow
+quantification over kinds which limits its expressivity. For instace, it
+does not admit a most general type for function composition.
+Furthermore, since it is based on System F, it does not admit
+principal type inference.
 
-\paragraph{Borrows}
+Quill~\citep{DBLP:conf/icfp/Morris16} is an Haskell-like language with affine
+types through the use of qualified types.
+Quill does not exposes a kind language, but
+uses typeclass-like mechanism and annotation on arrows.
+It supports both a most general type for function composition and
+principal type inference.
+The combination of type and kind schemes
+and subkinding ocasionally yields significantly simpler
+type in \lang and we posit it strictly subsumes Quill's type system.
+Unlike Quill,
+we provide a linearity-aware semantics and prove its soundness.
+Quill does not support borrows.
+
+% For instance, the type of the constructor
+% in Quill is $\qual{t \geq f}{t \to u \to t * u}$.
+% In Affe, it is simply
+% $\qual{(\alpha:\kvar)\implies \alpha \to \beta \tarr{\kvar} \alpha * \beta$
+% with the kind of $*$ being $\kvar\to\kvar\to\kvar$.
+
+Alms~\citep{DBLP:conf/popl/TovP11} is an ML-like language with rich, kind-based
+affine types and supports abstraction through modules.
+It relies on meet and join operators instead of qualified types, but still
+uses subkinding.
+Their system often relies on existential types to track the identity
+of objects. For instance, they present an array creation
+functions of the type \lstinline/int -> 'a -> \E 'b. ('a, 'b) array/ where
+\lstinline/'a/ are the types of the elements in the array and \lstinline/'b/
+is a type variable that uniquely identifies the array. Unfortunately, due
+to the reliance on existential types, Alms does not support type inference.
+Furthermore, Alms does not support borrow and often rely
+on manual passing of capabilities.
+In our experience, \affe's limited support for existential types through
+regions is sufficient for most of their examples.
+%
+Apart from existential types, Alms' kind system is very complex and
+rely on union and intersection operators and dependent kinds. We believe
+such complexity is unnecessary and that any Alms' kind signature
+can be translated into \lang. For instance the pair type constructor
+has kind $\Pi\alpha\Pi\beta. \langle\alpha\rangle \sqcup \langle\beta\rangle$
+(where $\alpha$ and $\beta$ are types and $\Pi$ is the dependent function)
+in Alms, but simply $\kvar\to\kvar\to\kvar$ in \lang.
+
+
+\paragraph{Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}}
+
+\paragraph{Vault\citep{DBLP:conf/pldi/DeLineF01,DBLP:conf/pldi/FahndrichD02}}
+
+\subsubsection{Borrows}
 
 Rust, Non Lexical lifetimes
 
-\paragraph{Object systems}
+\subsubsection{Object systems}
 \TODO{}
 
 Plaid \&Co by Aldrich and others
+
+\subsubsection{Uniqueness}
+
+\subsubsection{Others}
+
+\paragraph{Mezzo}
 
 \subsection{Qualified Types}
 
@@ -40,7 +103,9 @@ bounded universal and existentials~\citep{DBLP:conf/icfp/Simonet03}
 and GADTs~\citep{DBLP:journals/toplas/SimonetP07},
 and syntactic proof of soundness~\citep{DBLP:journals/entcs/SkalkaP02}.
 
-\subsection{Subtyping and constraints}
+\subsection{Subtyping}
+
+
 
 Flowcaml~\citep{DBLP:conf/popl/PottierS02},
 \citet{DBLP:conf/sas/TrifonovS96}.
