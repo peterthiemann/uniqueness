@@ -2,13 +2,15 @@
 
 An important innovation of \affe is its principal type inference.
 We now formulate our inference algorithm
-based on the HM(X) framework~\citep{DBLP:journals/tapos/OderskySW99}.
-HM(X) presents how to implement Hindley-Milner type inference in a language
-with qualified types and an arbitrary custom constraint language.
-We adapt and extend the rules of HM(X) to support kind inference,
-track linearity and handle borrows and regions. Furthermore, we
-formulate an appropriate constraint solving algorithm for our constraint
-system such that inference is sound and complete.
+based on the $HM(X)$ framework~\citep{DBLP:journals/tapos/OderskySW99}.
+$HM(X)$ presents a Hindley-Milner type system for a language
+with qualified types where constraints are expressed in an arbitrary
+constraint $X$. In particular, given some properties on the constraint system $X$,
+$HM(X)$ ensures principal type inference.
+We apply HM(X) to a concrete constraint language which we name $\CL$.
+We adapt and extend its existing rules to support kind inference,
+track linearity and handle borrows and regions. Finally, we
+formulate an appropriate constraint solving algorithm for $\CL$.
 In addition, our constraint solving algorithm simplifies constraints in a
 principled way.
 We first present various preliminary definitions
@@ -253,53 +255,13 @@ on the projection operators in HM inference.
   \label{rule:infer:let}
 \end{figure}
 
-\subsubsection{Constraint desugaring}
-
-\TODO{Present this if there is space}
-
-\begin{figure}[!htb]
-  \begin{mathpar}
-
-  \inferrule{}{ \Cleq{\Eempty}{k} \Crewrite  \Cempty}
-
-  \inferrule{
-    \Cleq\E k \Crewrite  C \\ \E \vdash \Cleq B k \Crewrite  D
-  }{
-    \Cleq{\E; B}{k} \Crewrite  C \Cand D
-  }
-
-  \inferrule{
-    \E \vdash \Cleq \schm k \Crewrite  C
-  }{ \E \vdash \Cleq{\bvar x \schm}{k} \Crewrite  C}
-
-  \inferrule{ }{
-    \E \vdash \Cleq{\svar x \schm^n} k \Crewrite  \Cfalse
-  }
-
-  % \inferrule{}{\Cleq{\IBORROW^n} k \Crewrite  \Cleq{\kun_n} k}
-
-  % \inferrule{}{\Cleq{\MBORROW^n} k \Crewrite  \Cleq{\kaff_n} k}
-
-    \inferrule{
-      \inferK{C \Cand C_x} \E \tau {k'} \\
-      D = C \Cand C_x \Cand \Cleq{k'}k
-    }{
-      \E \vdash
-      \Cleq{(\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau})}{k} \Crewrite  D
-    }
-  \end{mathpar}
-
-  \caption{Rewriting constraints on environments and types}
-  \label{rule:typing:desugar}
-\end{figure}
-
 \subsection{Constraint solving}
 \label{infer:solving}
 
 \newcommand\A{\mathcal A}
 \newcommand\SC{\mathcal S}
 
-Before presenting our constraint solving algorithms,
+Before presenting our constraint solving algorithm,
 we place ourselves in a more general context where kinds are either variables
 or constants belonging to a total bounded lattice $(\mathcal L, \lk_\Lat)$ ie.,
 a lattice which admits a total order and upper and lower bounds ($l^\top$ and $l^\bot$).
@@ -436,15 +398,20 @@ More precisely, we apply the following steps:
 
 \TODO{Add example}
 
-This algorithm is complete and computes principal normal forms.
-It can be completed by a set of ``best-effort'' simplification
-rules which help reduce the size of inferred signatures
-\citep{DBLP:conf/popl/PottierS02,DBLP:conf/aplas/Simonet03}.
+Our algorithm is complete, computes principal normal forms,
+and already simplifies constraints significantly
+(notably thanks to steps 6, 7 and 8).
+It can be easily extended with further simplification phases.
 In particular, our implementation and all the signatures presented in
 \cref{motivation} use a variance-based simplification
-where all covariants variables are replaced by their upper bounds
-and contra-variant variables are replaced by their lower bounds.
-
+where all covariant (resp. contravariant) variables are replaced by their
+lower (resp. upper) bounds.
+Remarkably, all the simplification mechanisms presented
+here (including the variance-based one) are complete.
+It is also possible to add ``best-effort'' simplification
+rules which help reduce the size of inferred signatures even further
+\citep{DBLP:conf/aplas/Simonet03}.
+%
 We now show that this algorithms is well-behaved with respect to entailment
 and computes unique normal forms.
 
