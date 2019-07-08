@@ -309,7 +309,112 @@ We prove two properties:
   the original proofs.
 \end{itemize}
 
-\TODO{State the theorems}
+This section only states the theorems (and the necessary definitions).
+Details and proofs are provided in \cref{appendix:constraints,appendix:infer}.
+
+\subsubsection{Constraint system}
+
+We requires three properties from our constraint solving algorithms: it should
+compute normal firms, such normal forms should be unique, and the
+system should be regular.
+
+\begin{property}[Principal normal form]
+  Normalization computes principal normal forms for $\CL$, i.e. 
+  given a constraint $D\in\CL$, a substitution $\phi$ and
+  $(C,\unif) = \normalize{D}{\phi}$,
+  then $\phi\leq\unif$,
+  $C \equivC \unif D$ and
+  $\unif C = C$.
+\end{property}
+
+\begin{property}[Principal constraints]
+  $\CL$ has the principal constraint property, i.e.
+  for every $D\in\CL$, and a substitution $\unif$,
+  either $D$ does not have a normal form, or it has
+  a principal normal form.
+\end{property}
+
+\begin{property}[Regular constraint system]
+  $\CL$ is regular, ie, for $x, x'$ two types or kinds,
+  $\entail{}{\Ceq{x}{x'}}$ implies
+  $\fv{x} = \fv{x'}$
+\end{property}
+
+The proofs are given in \cref{appendix:constraints}. These three properties
+are sufficient to state that $HM(\CL)$ provides principal type inference.
+However, we do not use HM(X) directly, but an extension with kind inference
+and affine types and borrows.
+We now show that HM(X)'s completeness and soundness theorems are still valid on
+this extended system.
+
+\subsection{Inference algorithm}
+
+The first theorem states that our inference algorithm is sound
+with respect to the syntax directed type system.
+
+\begin{theorem}[Soundness of inference]
+  Given a type environment $\E$ and a term $e$,\\
+  if $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$
+  then $\inferS{C}{\unif\Sv}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$.
+\end{theorem}
+
+Note here that the syntax-directed derivation holds with the usage environment $\Sv$ instead of the originally provided environment $\E$. Indeed,
+$\E$ does not contain suspended and borrow bindings, since those
+are discovered on the fly and recorded in $\Sv$.
+
+The second theorem states that our algorithm is complete: for any given
+syntax directed typing derivation, our inference algorithm can find
+a derivation that gives a type at least as general.
+For this, we need first to provide a few additional definitions.
+
+\begin{definition}
+  Given a set of variable $U$ and $\unif$, $\unif'$ and $\phi$
+  substitutions. \\
+  Then
+  $\unif \leq^{\phi}_{U} \unif'$ iff $(\phi \circ \unif)|_{U} = \unif'|_U$.
+\end{definition}
+
+\begin{definition}
+  Given a constraints $C$ and two schemes
+  $\schm = \forall \Multi\tvar. \qual{D}{\tau}$ and
+  $\schm' = \forall \Multi\tvar'. \qual{D'}{\tau'} $.
+  Then $\entail{C}{\schm \preceq \schm'}$
+  iff $\entail{C}{\subst{\tvar}{\tau''} D}$
+  and $\entail{C\Cand D'}{\Cleq{\subst{\tvar}{\tau''}\tau}{\tau'}}$
+\end{definition}
+
+\begin{definition}
+A flattened environment,
+noted $\Eflat\E$, is the environment
+where all the binders are replace by normal ones. More formally:
+\begin{align*}
+  \Eflat\E
+  &= \left\{ \bvar{x}{\tau} \mid
+    \bvar{x}{\tau}\in\E
+    \vee \bvar{\borrow{x}}{\borrowty{k}{\tau}}\in\E
+    \vee \svar{x}{\tau}^n\in\E
+    \right\} \cup \left\{ \bvar{\tvar}{k} \mid \bvar{\tvar}{k}\in\E \right\}
+\end{align*}
+\end{definition}
+
+
+We can then state the completeness theorem.
+
+\begin{theorem}[Completeness]
+  Let $\inferS{C'}{\unif'\E}{e}{\schm'}$ a typing derivation,
+  then $\inferW{\Sv}{(C,\unif)}{\Eflat\E}{e}{\tau}$
+  for some substitution $\unif$, constraint $C$ and type $\tau$ such
+  that
+  \begin{align*}
+    (C_\schm,\schm) &= \generalize{C}{\unif\E}{\tau}
+    &\unif &\leq^{\phi}_{\fv{\E}} \unif'
+    &\entail{C'&}{\phi C}
+    &\entail{C'&}{\phi \schm \preceq \schm'}
+    % &( C, \schm, \unif) &\leq (C',\schm',\unif')
+  \end{align*}
+\end{theorem}
+
+The proofs are given in \cref{appendix:infer}.
 
 %%% Local Variables:
 %%% mode: latex

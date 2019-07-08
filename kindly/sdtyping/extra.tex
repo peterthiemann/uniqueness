@@ -57,6 +57,7 @@ borrows should be enclosed immediately.
 \label{appendix:sdtyping}
 
 \subsection{Constraint language}
+\label{appendix:constraints}
 
 \newcommand\A{\mathcal A}
 \newcommand\SC{\mathcal S}
@@ -112,6 +113,10 @@ The normalization function is described in \cref{infer:solving}.
 
 Our goal is to prove that $\CL$ supports all the properties necessary for
 principal type inference, as defined by HM(X).
+
+In order to prove this, we first prove that constraint solving
+does compute normal forms, and that such normal forms are unique.
+
 
 \begin{lemma}[Normal form]
   \label{lemma:normalform}
@@ -207,11 +212,7 @@ principal type inference, as defined by HM(X).
   which concludes.
 \end{proof}
 
-
-\begin{theorem}
-  $\CL$ has the principal constraint property and
-  $\operatorname{normalize}$ computes principal normal forms for $\CL$.
-\end{theorem}
+We can now prove all the necessary high level properties.
 
 \begin{lemma}
   For all $C\in\mathcal S$, $\entail{C}{x = x}$ implies
@@ -223,24 +224,28 @@ principal type inference, as defined by HM(X).
   Thus, we can not deduce neither kind nor type equalities from $C$.
 \end{proof}
 
-\begin{lemma}
+\begin{property}
   $\CL$ is regular, ie, for $x, x'$ two types or kinds,
   $\entail{}{\Ceq{x}{x'}}$ implies
   $\fv{x} = \fv{x'}$
-\end{lemma}
+\end{property}
 \begin{proof}
   The only equalities possibles are between variables (via symmetry) or
   between constants.
 \end{proof}
 
+Finally, we can conclude with all the properties we need for
+HM(X):
 
 \begin{theorem}
-  $\CL$ has the principal constraint property and
-  $\operatorname{normalize}$ computes principal normal forms for $\CL$.
+  $\CL$ has the principal constraint property,
+  $\operatorname{normalize}$ computes principal normal forms for $\CL$
+  and $\CL$ is regular.
 \end{theorem}
 
+
 This is sufficient to show that $HM(\CL)$ is principal. However,
-we do not use HM(X) directly, but an extended version with kind inference,
+we do not use HM(X) directly but an extended version with kind inference,
 linear and affine types, and borrow.
 
 \subsection{Kinding}
