@@ -303,7 +303,7 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
     \Addresses{\Perm_1} \subseteq \Dom{\Store_1}
     \\\label{eq:3}
     \SE_1 \vdash r_1 : \tau_2\tarr{k}\tau_1
-    \\
+    \\\label{eq:10}
     \Reach{\Store_1}{r_1} \subseteq \Perm_1
   \end{gather}
   \begin{itemize}
@@ -405,7 +405,7 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
     \Addresses{\Perm_2} \subseteq \Dom{\Store_2}
     \\\label{eq:8}
     \SE_2 \vdash r_2 : \tau_2
-    \\
+    \\\label{eq:11}
     \Reach{\Store_2}{r_2} \subseteq \Perm_2
   \end{gather}
   \begin{itemize}
@@ -436,6 +436,7 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
   
   Finally, we establish the assumptions for the recursive call 
   @eval delta_2 pi_2 gamma'(x'-:>r_2) i' e'@.
+  To this end, let $\VEnv_3 = \VEnv' (x'\mapsto r_2)$.
   \begin{itemize}
   \item $\inferS{C'}{\E'\bvar{x'}{\tau_2}}{e'}{\tau_1}$
 
@@ -451,8 +452,68 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
     holds by \eqref{eq:7}.
   \item  $\Addresses{\Perm_2} \subseteq \Dom{\Store_2}$\\
     by \eqref{eq:9}.
-  \item $\Reach{\Store_2}{\Active{\VEnv'}, \MutableBorrows{\VEnv'}, \ImmutableBorrows{\VEnv'}} \subseteq \Perm_2$
+  \item $\Reach{\Store_2}{\Active{\VEnv_3}, \MutableBorrows{\VEnv_3}, \ImmutableBorrows{\VEnv_3}} \subseteq \Perm_2$\\
+    This fact follows from (\ref{eq:10}) becase $\VEnv'$ is contained
+    in the closure for $r_1$ and $\Store_1 \le \Store_2$. Moreover,
+    either the closure is unreachable from $\VEnv_2$ or it is
+    immutable, so that the permissions are retained to $\Perm_2$.
+    For $r_2$ bound to $x'$, we obtain this from (\ref{eq:11}).
+  \item Incoming Resources: Let $\REACH_3 = \Reach{\Store_2}{\VEnv_3}$.
+    \begin{itemize}
+    \item 
+      For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store_2}{\Active{\VEnv_3}}} >0$,
+      if $\Affine{\SE_2}\Loc$ then $\MultiNumber\Loc{\REACH_3}= 1$
+    \item For all $\Loc$ such that $
+      \MultiNumber\Loc{\Reach{\Store_2}{\MutableBorrows{\VEnv_3}}} >0$, it
+      must be that $\MultiNumber\Loc{\REACH_3}=1$.
+    \end{itemize}
+  \item $i'<i$ and  @eval delta_2 pi_2 gamma' i' e'@ terminates
+    with $R_3 \ne \TimeOut$.
+  % \item  $i\in\Nat$ and $\Store_2, \Perm_2, \VEnv' (x'\mapsto r_2) \vdash {e'}
+  %   \Downarrow^i R_3$ and $R_3\ne \TimeOut$.
   \end{itemize}
+  Hence, we can apply the inductive hypothesis and obtain
+  $\Store_3$, $\Perm_3$, $r_3$, $\SE_3$ such that
+  \begin{gather}
+    R_3 = \Ok{\Store_3, \Perm_3, r_3}
+    \\
+    \SE_2 \le \SE_3 \qquad
+    \Store_2 \le \Store_3 \qquad
+    \vdash \Store_3 :  \SE_3
+    \\
+    \Addresses{\Perm_3} \subseteq \Dom{\Store_3}
+    \\
+    \SE_3 \vdash r_3 : \tau_1
+    \\
+    \Reach{\Store_3}{r_3} \subseteq \Perm_3
+  \end{gather}
+  ***
+  \begin{itemize}
+  \item Outside: For all $\Loc \in \Dom{\Store_2} \setminus
+    \Reach{\Store_2}{\VEnv_2}$ it must be that 
+    $\Store_2(\Loc) = \Store_1 (\Loc)$
+    and $\Loc\in\Perm_1' \Leftrightarrow \Loc\in\Perm_2$ 
+  \item Immutables: For all $\Loc \in
+    \Reach{\Store_2}{\ImmutableBorrows{\VEnv_2}}$ it must be that
+    $\Loc\in\Dom{\Store_1}$, 
+    $\Store_2 (\Loc) = \Store_1 (\Loc)$
+    and $\Loc\in{\Perm_1'} \Leftrightarrow \Loc\in\Perm_2$ 
+  \item Resources:
+    Let $\REACH_2' =\Reach{\Store_2}{\Active{\VEnv_2}}$.
+    For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_2} >0$ and $n' =
+    \MultiNumber\Loc{\REACH_2'}$, 
+    \begin{itemize}
+    \item if $\Affine{\SE_2}\Loc$ then $n=1$ and $n'\le 1$,
+    \item if $\Linear{\SE_2}\Loc$ then $n=1$ and $n' = 0$,
+    \item if $n'=0$, then $\Loc\notin\Perm_2$.
+    \end{itemize}
+  \item Immutables: For all $\Loc \in \Reach
+    {\Store_2}{\Active{\VEnv_2}}$, if $\neg\Writeable{\SE_2}\Loc$ then
+    $\Store_2 (\ell) = \Store_1 (\ell)$ and $\Loc\in \Perm_2$.
+  \item No thin air permission: For all $\Loc\in \Perm_2$, $\Loc
+    \in \Perm_1' \cup  \Dom{\Store_2} \setminus \Dom{\Store_1}$.
+  \end{itemize}
+
 \end{proof}
 \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
