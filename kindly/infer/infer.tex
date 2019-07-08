@@ -347,7 +347,7 @@ and affine types and borrows.
 We now show that HM(X)'s completeness and soundness theorems are still valid on
 this extended system.
 
-\subsection{Inference algorithm}
+\subsubsection{Inference algorithm}
 
 The first theorem states that our inference algorithm is sound
 with respect to the syntax directed type system.
@@ -367,14 +367,14 @@ syntax directed typing derivation, our inference algorithm can find
 a derivation that gives a type at least as general.
 For this, we need first to provide a few additional definitions.
 
-\begin{definition}
+\begin{definition}[More general unifier]
   Given a set of variable $U$ and $\unif$, $\unif'$ and $\phi$
   substitutions. \\
   Then
   $\unif \leq^{\phi}_{U} \unif'$ iff $(\phi \circ \unif)|_{U} = \unif'|_U$.
 \end{definition}
 
-\begin{definition}
+\begin{definition}[Instance relation]
   Given a constraints $C$ and two schemes
   $\schm = \forall \Multi\tvar. \qual{D}{\tau}$ and
   $\schm' = \forall \Multi\tvar'. \qual{D'}{\tau'} $.
@@ -383,7 +383,7 @@ For this, we need first to provide a few additional definitions.
   and $\entail{C\Cand D'}{\Cleq{\subst{\tvar}{\tau''}\tau}{\tau'}}$
 \end{definition}
 
-\begin{definition}
+\begin{definition}[Flattened Environment]
 A flattened environment,
 noted $\Eflat\E$, is the environment
 where all the binders are replace by normal ones. More formally:
