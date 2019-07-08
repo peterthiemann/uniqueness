@@ -40,7 +40,7 @@ take an environment as parameter but also return an environment, which
 we call ``usage environment'', and which summarize how variables and borrows
 are used. Usage environments follow the exact same grammar
 as normal environment. In order to distinguish them more easily,
-we will general note them $\Sv$.
+we note them $\Sv$.
 
 In \cref{sdtyping}, we used various relations to split environments in two, or
 transform suspended bindings into borrow binding inside an environment.
@@ -116,12 +116,44 @@ We note $\inferW{\Sv}{(C,\unif)}{\bf{\E}}{\bf{e}}{\tau}$ when
 $e$\ has type $\tau$ in $\E$ under the constraints $C$ and unifier $\unif$
 with a usage environment $\Sv$. $\E$ and $e$ are the input parameters of our
 inference algorithm.
-The rules are shown in \cref{rules:typing}.
-
-\TODO{Explain/Cut}
+We revisit the syntax-directed rules presented in \cref{sdtyping} to highlight the
+novelties
+of our inference algorithm and the differences with the syntax-directed
+system.
 
 \subsubsection{Environments and bindings}
 \label{infer:envs}
+
+In our syntax directed system presented in \cref{sdtyping}, we ensured
+that linear variables are not discarded at the \emph{leafs}, through
+the {\sc Var} rule. In the inference algorithm, we operate in the opposite
+direction: we collect data from the leafs, and only enforce linearity
+at \emph{binders}. This is reflected in the {\sc Var$_I$} and
+{\sc Abs$_I$} rules presented in \cref{rule:infer:envs}.
+Typing for variables is very similar to traditional (non-affine) ML
+typing. The only difference is that we collect
+the fact that $x$ was used with the scheme $\schm$ by returning
+a usage environment $\Sv = \{ \bvar{x}{\schm} \}$.
+%
+This usage environment is in turn used at each binder to enforce proper
+usage of linear variable via the $\Weaken$ property.
+We demonstrate how this is achieved for lambda expressions
+in the {\sc Abs$_I$} rule.
+First, we typecheck the body of the lambda and obtain a usage
+environment $\Sv_x$. Just like in the syntax directed,
+we introduce the constraint
+$\Cleq{\Sv\Sdel{x}}{\kvar}$ which properly accounts for captures in
+the body of the lambda expression. We also introduce the constraint
+$\Weaken_{\bvar{x}{\sigma}}(\Sv)$. If $x$ was used $e$, $x$ is present
+in $\Sv$ and this constraint is empty. Otherwise, if $x$ is
+\emph{not} present in $\Sv$, its type should not have a linear
+kind, which is enforced by the constraints $\Cleq{\sigma}{\kaff_\infty}$.
+The $\Weaken$ constraint is introduce at each binding point in the program
+such as let-bindings and pattern matching.
+
+Note again here the use of normalization on complex constraints to ensure
+that the inference algorithm always return the simplest possible
+constraints and unifiers.
 
 \begin{figure}[!h]
   \begin{mathpar}
@@ -141,32 +173,89 @@ The rules are shown in \cref{rules:typing}.
 \end{figure}
 
 
-\subsubsection{Copying and Splitting}
+\subsubsection{Splitting and Regions}
 \label{infer:split}
+\label{infer:regions}
+
+
+As noted previously, in our inference algorithm, we infer
+usage environments which describes how variables are used. In
+\cref{sdtyping}, we described the {\sc Pair} and {\sc Region} rules, and their
+respective actions on the environment. We now see the inference version
+of these rules in \cref{rule:infer:envrules}.
+While the rules are quite similar to the original version, the usage
+environment $\Sv$ is now an \emph{output} of the algorithm.
+As such, we use the ``inference'' version of the relations on
+environment,
+$\bsplit{C}{\Sv}{\bf{\Sv_1}}{\bf{\Sv_2}}$ and $\bregion{C}{\bf{x}}{\Sv}{\bf\Sv'}$,
+which returns the necessary constraints and
+are total and non ambiguous for their input parameters ($\Sv_1, \Sv_2$ and $\Sv'$, respectively).
+We then simply collect all the constraints and normalize them.
 
 \begin{figure}[!h]
   \centering
   \begin{mathpar}
     \ruleIPair
+    
+    \ruleIRegion
   \end{mathpar}
-  \caption{The {\sc Pair$_I$} rule}
-  \label{rule:infer:pair}
+  \caption{The {\sc Pair$_I$} and {\sc Region$_I$} rules}
+  \label{rule:infer:envrules}
 \end{figure}
 
-\subsubsection{Regions}
-\label{infer:regions}
+\subsubsection{Generalization and constraints}
 
+
+So far, constraints have only been composed of a list of kind inequalities.
+The internal language of constraints used for inference is in fact
+richer.
+To illustrate this, we now show the inference rule for let-bindings
+in \cref{rule:infer:let}.
+This rule combines several ingredients previously seen:
+since let expressions are binders, we use $\Weaken$ on the bound
+identifier $x$. Since let-expressions contain
+two subexpressions, so we use the environment splitting relation,
+$\bsplit{C_s}{\Sv}{\Sv_1}{(\Sv_2 \Sdel{x})}$. We carefully remove the $x$ from
+the left environment, since it is not available outside of the expression
+$e_2$, and thus should not be part of the returned usage environment.
+
+As per tradition in ML languages, generalization is performed
+on let-bindings.
+Following HM(X), we note $(C_\schm, \schm) = \generalize{C}{\E}{\tau}$
+the pair of a constraint and a scheme resulting from
+generalization. The definition is provided in \cref{rule:infer:let}.
+The type scheme $\schm$ is created by quantifying over all the appropriate
+free variables and the current constraints.
+The generated constraint $C_\schm$ uses a new projection operator,
+noted $\Cproj{\tvar}{D}$, which
+allow the creation of local variables inside the constraints.
+This allow to encapsulate all the quantified variables in the global constraints.
+It also reflect the fact that there
+should exists at least one solution for $C$ for the scheme to be valid.
+\citet{DBLP:journals/tapos/OderskySW99} give a detailed account
+on the projection operators in HM inference.
 
 \begin{figure}[!h]
   \centering
   \begin{mathpar}
-    \ruleIRegion
+    \ruleILet
+
+    {\generalize{C}{\E}{\tau} =
+      (\Cproj{\Multi{\kvar},\Multi{\tvar}}{C},
+      \forall \Multi{\kvar},\Multi{\tvar}.\qual{C}{\tau})
+
+      \text{ where }
+
+      \Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}
+    }
   \end{mathpar}
-  \caption{The {\sc Region$_I$} rule}
-  \label{rule:infer:region}
+  \caption{The {\sc Let$_I$} rule}
+  \label{rule:infer:let}
 \end{figure}
 
 \subsubsection{Constraint desugaring}
+
+\TODO{Present this if there is space}
 
 \begin{figure}[!htb]
   \begin{mathpar}
@@ -207,29 +296,81 @@ The rules are shown in \cref{rules:typing}.
 \subsection{Constraint solving}
 \label{infer:solving}
 
-\TODO{Present the full constraint system}
+\newcommand\A{\mathcal A}
+\newcommand\SC{\mathcal S}
 
-We now place ourselves in a more general context where kinds are either variables
+Before presenting our constraint solving algorithms,
+we place ourselves in a more general context where kinds are either variables
 or constants belonging to a total bounded lattice $(\mathcal L, \lk_\Lat)$ ie.,
 a lattice which admits a total order and upper and lower bounds ($l^\top$ and $l^\bot$).
 We note lattice elements $l$ and $\glb_i l_i$ (resp. $\lub_i l_i$)
 the greatest lower bound (resp. least upper bound) in $\mathcal L$.
 %
-Let $\CL$ the set of constraints in this lattice. We consider the
-following base entailment rules in this system:
-\begin{center}
-  \begin{mathpar}
-    \inferrule{l \lk_\Lat l'}{\entail{}{\Cleq{l}{l'}}}
-    \and
-    \inferrule{}{\entail{}{\Cleq{k}{l^\top}}}
-    \and
-    \inferrule{}{\entail{}{\Cleq{l^\bot}{k}}}
-  \end{mathpar}
-\end{center}
+Let $\CL$ the set of constraints in this lattice.
+The full grammar of constraints is shown in \cref{grammar:constraint}.
+Constraints are made of kind inequalities, conjunctions and
+projections, as shown previously, along with type unification
+constraints. Since types might contain kinds (for instance, on the arrows),
+type unification is oriented and noted $\leq$.
 
+As before, entailment is noted $\entail{C}{D}$,
+where $D$ is a consequence of the constraints $C$.
+We say that $C$ and $D$ are equivalent, noted $C \equivC D$,
+when $\entail{C}{D}$ and $\entail{D}{C}$.
+The base rules for entailment are given in \cref{rules:entail}.
+The rules for classic Herbrand unification and
+projection operators are omitted for brevity (see
+\citep{DBLP:journals/tapos/OderskySW99} for
+details).
 
+\begin{figure}[!h]
+  \centering
+  \begin{minipage}{0.32\linewidth}
+    \begin{align*}
+      C &::= \Cleq{\tau_1}{\tau_2} \\
+        &\mid \Cleq{k_1}{k_2} \tag{Inequalities} \\
+        &\mid C_1 \Cand C_2  \tag{Conjunction}\\
+        &\mid \Cproj{\tvar}{C} 
+        \mid \Cproj{\kvar}{C} \tag{Projection} 
+    \end{align*}
+    \caption{The constraint language}
+    \label{grammar:constraint}
+  \end{minipage}\hfill
+  \begin{minipage}{0.64\linewidth}
+    \begin{mathpar}
+      \inferrule{}{\entail{}{\Cleq{k}{l^\top}}}
+      \and
+      \inferrule{}{\entail{}{\Cleq{l^\bot}{k}}}
+      \and
+      \inferrule
+      {}{ \entail{}{\Cleq{\kvar}{\kvar}} }
+      \and
+      \inferrule
+      { \forall i,\ \entail{C}{\Ceq{\tau_i}{\tau_i}}\\
+      }
+      { \entail{C}{\Cleq{\tapp{t}{(\tau_i)}}{\tapp{t}{(\tau'_i)}}} }
+      \and
+      \inferrule{l \lk_\Lat l'}{\entail{}{\Cleq{l}{l'}}}
+      \and
+      \inferrule
+      { \entail{C}{\Cleq{\tau'_1}{\tau_1}}\\
+        \entail{C}{\Cleq{\tau_2}{\tau'_2}}\\
+        \entail{C}{\Cleq{k}{k'}}
+      }
+      { \entail{C}{\Cleq{\tau_1\tarr{k}\tau_2}{\tau'_1\tarr{k'}\tau'_2}} }
+    \end{mathpar}
+    \caption{Base entailment rules -- $\entail{C}{D}$ }
+    \label{rules:entail}
+  \end{minipage}
+\end{figure}
 
-The normalization procedure is noted $\normalize{C_0}{\unif_0}$ where
+We define the set of solved formed
+$\mathcal S$ as the set of constraints $\CL$ quantified by $\equivC$.
+We will show later that such constraints are in fact only composed of
+kind inequalities, and thus correspond to the syntactic constraints
+used in type and kind schemes.
+%
+We now define our normalization procedure, noted $\normalize{C_0}{\unif_0}$ where
 $C_0\in \CL$ is a set of constraints and $\unif_0$ is a substitution.
 It returns a constraint $C \in \mathcal S$ in
 solved form and a unifier $\unif$.
@@ -293,30 +434,19 @@ More precisely, we apply the following steps:
   and $\unif =  \unif_\tau \meet \unif_k$.
 \end{enumerate}
 
-\TODO{Add an example}
+\TODO{Add example}
 
-\subsection{Soundness and Principality}
+This algorithm is complete and computes principal normal forms.
+It can be completed by a set of ``best-effort'' simplification
+rules which help reduce the size of inferred signatures
+\citep{DBLP:conf/popl/PottierS02,DBLP:conf/aplas/Simonet03}.
+In particular, our implementation and all the signatures presented in
+\cref{motivation} use a variance-based simplification
+where all covariants variables are replaced by their upper bounds
+and contra-variant variables are replaced by their lower bounds.
 
-Our system is an extension of HM(X). Our goal is prove soundness and completeness
-of our inference algorithm with respect to our syntax-directed system, which
-assures us principal type inference.
-We prove two properties:
-\begin{itemize}
-\item Our constraint system respects all the properties required by HM(X)
-  for principal type inference.
-\item Our extended inference algorithm still satisfies the soundness
-  and completeness properties of HM(X). This is achieved by extending
-  the original proofs.
-\end{itemize}
-
-This section only states the theorems (and the necessary definitions).
-Details and proofs are provided in \cref{appendix:constraints,appendix:infer}.
-
-\subsubsection{Constraint system}
-
-We requires three properties from our constraint solving algorithms: it should
-compute normal firms, such normal forms should be unique, and the
-system should be regular.
+We now show that this algorithms is well-behaved with respect to entailment
+and computes unique normal forms.
 
 \begin{property}[Principal normal form]
   Normalization computes principal normal forms for $\CL$, i.e. 
@@ -347,8 +477,12 @@ and affine types and borrows.
 We now show that HM(X)'s completeness and soundness theorems are still valid on
 this extended system.
 
-\subsubsection{Inference algorithm}
+\subsection{Soundness and Principality}
 
+We now show that our extended inference algorithm still satisfies the soundness
+and completeness properties of HM(X). This is achieved by extending
+the original proofs.
+%
 The first theorem states that our inference algorithm is sound
 with respect to the syntax directed type system.
 

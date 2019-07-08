@@ -53,14 +53,12 @@ borrows should be enclosed immediately.
   \label{fig:region-annotation}
 \end{figure*}
 
-\section{Syntax directed typing}
-\label{appendix:sdtyping}
 
-\subsection{Constraint language}
+\section{Constraints}
 \label{appendix:constraints}
 
-\newcommand\A{\mathcal A}
-\newcommand\SC{\mathcal S}
+% \newcommand\A{\mathcal A}
+% \newcommand\SC{\mathcal S}
 
 Let us note $\A$ our constraint system. The full grammar of constraints is
 given in \cref{grammar:constraint}.
@@ -247,6 +245,10 @@ HM(X):
 This is sufficient to show that $HM(\CL)$ is principal. However,
 we do not use HM(X) directly but an extended version with kind inference,
 linear and affine types, and borrow.
+
+
+\section{Syntax directed typing}
+\label{appendix:sdtyping}
 
 \subsection{Kinding}
 

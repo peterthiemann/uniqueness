@@ -20,10 +20,10 @@
     \\\\
     (C,\unif) =
     \normalize
-    {C_0\Cand \Multi[j]{C} \Cand \Multi[j]{\Cleq{k'_j}{k_j}}}
+    {C_0\Cand \Multi[j]{C} \Cand \Multi[j]{\Ceq{k'_j}{k_j}}}
     {\unif_0\meet \Multi[j]{\unif}}
   }
-  { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tapp{t}{(\tau_j)}}{\unif k} }
+  { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tapp{t}{\Multi[j]{\tau}}}{\unif k} }
   \and
   \inferrule[KBorrow]
   { }{ \inferK{(\Ctrue,\emptyset)}{\E}{\borrowty{k}{\tau}}{k}}
