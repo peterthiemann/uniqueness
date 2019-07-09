@@ -104,6 +104,7 @@ let borrowed : address -> borrow -> address sem =
      | (Imm :: bs) ->
         Error ("trying to take mutable borrow of immutable borrow")
 
+let (<.>) = borrowed
 
 let rec vlookup : venv -> ident -> result sem =
   fun gamma x ->
@@ -300,8 +301,8 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* (k', r_1', r_2') = getstpair w in
      let* rho_1 = getaddress r_1' in
      let* rho_2 = getaddress r_2' in
-     let* rho_1' = borrowed rho_1 b in
-     let* rho_2' = borrowed rho_2 b in
+     let* rho_1' = rho_1 <.> b in
+     let* rho_2' = rho_2 <.> b in
      let pi_1' = (((pi_1 <-> rho_1) <-> rho_2) <+> rho_1') <+> rho_2' in
      let r_1'' = RADDR rho_1' in
      let r_2'' = RADDR rho_2' in
@@ -315,7 +316,8 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
      let*? () = rho <|= pi in
-     let* rho' = borrowed rho b in
+     let* rho' = rho <.> b in
+     let gamma' = gamma.+(x -:>RADDR rho') in
      let pi' = (pi <-> rho) <+> rho' in
      let* (delta_1, pi_1, r_1) = eval delta pi' gamma i' e_1 in
      let pi_1' = (pi <-> rho') <+> rho in
@@ -325,7 +327,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
   | Borrow (b, x) ->
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
-     let* rho' = borrowed rho b in
+     let* rho' = rho <.> b in
      let*? () = rho' <|= pi in
      Ok (delta, pi, RADDR rho')
   (**)

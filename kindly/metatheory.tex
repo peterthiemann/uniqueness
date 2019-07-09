@@ -105,15 +105,15 @@
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
-    \IBORROW r : \tau} 
+    \IBORROW r : \schm} 
   {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
-    \ImmutableBorrows\VEnv[ x\mapsto \IBORROW r], \Suspended\VEnv : \E\bvar{\borrow[\IBORROW] x}{\borrowty[\IBORROW] k{ \tau}} }
+    \ImmutableBorrows\VEnv[ x\mapsto \IBORROW r], \Suspended\VEnv : \E\bvar{\borrow[\IBORROW] x}{\borrowty[\IBORROW] k{ \schm}} }
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
-    \MBORROW r : \tau}
+    \MBORROW r : \schm}
   {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv[ x\mapsto \MBORROW r],
-    \ImmutableBorrows\VEnv : \E\bvar{\borrow[\MBORROW] x}{\borrowty[\MBORROW] k{ \tau}} }
+    \ImmutableBorrows\VEnv : \E\bvar{\borrow[\MBORROW] x}{\borrowty[\MBORROW] k{ \schm}} }
 \end{mathpar}
 \paragraph{Extending environments and stores}
 \begin{mathpar}
@@ -572,7 +572,19 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
   We need to establish the assumptions for the recursive call
   @eval delta pi' gamma i' e_1@.
   \begin{itemize}
-  \item $\inferS{C}{\E'}{e}{\tau}$
+  \item $\inferS{C}{\E'}{e}{\tau}$ by inversion of typing.
+  \item To establish $\SE \vdash \VEnv' : \E'$, we find that
+    $\lregion{C}{x}{\E}{\E'}$ only changes the $x$ entry of $\E$ to
+    ${\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau_x}}}$ in
+    $\E'$ where $C \vdash_e {(\BORROW_n\lk k\lk\BORROW_\infty)}$. This
+    change moves the entry for $x$ from $\Suspended\VEnv$ to either
+    $\MutableBorrows\VEnv$ or $\ImmutableBorrows\VEnv$. The same
+    happens in the semantics by mapping updating $\VEnv$ to $\VEnv'$. 
+  \item $\vdash \Store : \SE$ by assumption.
+  \item $\Addresses{\Perm'} \subseteq \Dom\Store$: we only change
+    $\rho$ to $\rho'$, but their raw location is the same.
+  \item $\Reach\Store{\Active{\VEnv'}, \MutableBorrows{\VEnv'}, \ImmutableBorrows{\VEnv'}} \subseteq \Perm'$
+  \item 
   \end{itemize}
 
 \end{proof}
