@@ -19,17 +19,20 @@ linear types for imperative programming. In PLDI, pages 13–24, 2002.
 Many systems have attempted to combine
 functional programming and linear types in a practical setting.
 One contribution of \lang is to combine several ingredients
-from these different languages and combines them, while still preserving
+from these different languages while still preserving
 complete type inference.
-In addition, none of the following language supports borrows.
+Many of the following languages supports linear or affine types, but rarely
+both. In many cases, it is easy to adapt a system to support both, as
+\lang does.
+None of the following languages support borrows.
 
 System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
-extends System F with uses kinds to distinguish
+extends System F with kinds to distinguish
 between linear and unrestricted types.
 \citet{DBLP:conf/tldi/MazurakZZ10} also provide
 (and proves soundness) of a linearity-aware semantics.
-Unlike \lang, System F\degree does not allow
-quantification over kinds which limits its expressivity. For instace, it
+Unlike \lang, System F\degree{} does not allow
+quantification over kinds which limits its expressivity. For instance, it
 does not admit a most general type for function composition.
 Furthermore, since it is based on System F, it does not admit
 principal type inference.
@@ -40,9 +43,8 @@ Quill does not exposes a kind language, but
 uses typeclass-like mechanism and annotation on arrows.
 It supports both a most general type for function composition and
 principal type inference.
-The combination of type and kind schemes
-and subkinding ocasionally yields significantly simpler
-type in \lang and we posit it strictly subsumes Quill's type system.
+We believe every Quill's kind signature can be expressed in \lang by leveraging
+kind inequalities.
 Unlike Quill,
 we provide a linearity-aware semantics and prove its soundness.
 Quill does not support borrows.
@@ -54,30 +56,67 @@ Quill does not support borrows.
 % with the kind of $*$ being $\kvar\to\kvar\to\kvar$.
 
 Alms~\citep{DBLP:conf/popl/TovP11} is an ML-like language with rich, kind-based
-affine types and supports abstraction through modules.
-It relies on meet and join operators instead of qualified types, but still
-uses subkinding.
+affine types and ML modules.
 Their system often relies on existential types to track the identity
 of objects. For instance, they present an array creation
-functions of the type \lstinline/int -> 'a -> \E 'b. ('a, 'b) array/ where
-\lstinline/'a/ are the types of the elements in the array and \lstinline/'b/
-is a type variable that uniquely identifies the array. Unfortunately, due
-to the reliance on existential types, Alms does not support type inference.
+functions of type \lstinline/int -> 'a -> \E 'b. ('a, 'b) array/ where
+\lstinline/'a/ is the elements' type and \lstinline/'b/
+is a unique identifier of the array.
+Due to the reliance on existentials, Alms does not support complete type inference.
 Furthermore, Alms does not support borrow and often rely
 on manual passing of capabilities.
 In our experience, \affe's limited support for existential types through
-regions is sufficient for most of their examples.
+regions is sufficient for a large majority of examples and provides
+a more convenient programming style for imperative code.
 %
-Apart from existential types, Alms' kind system is very complex and
-rely on union and intersection operators and dependent kinds. We believe
-such complexity is unnecessary and that any Alms' kind signature
-can be translated into \lang. For instance the pair type constructor
+Apart from existential types, Alms relies
+on union and intersection operators and dependent kinds while
+\lang uses qualified types.
+We believe most of Alms' kind signatures can be expressed equivalently in
+our system: for instance the pair type constructor
 has kind $\Pi\alpha\Pi\beta. \langle\alpha\rangle \sqcup \langle\beta\rangle$
 (where $\alpha$ and $\beta$ are types and $\Pi$ is the dependent function)
-in Alms, but simply $\kvar\to\kvar\to\kvar$ in \lang.
+in Alms and $\kvar\to\kvar\to\kvar$ in \lang thanks
+to subkinding.
+%
+Finally, Alms provides excellent support for abstraction through
+modules by allowing to keep some type unrestricted inside a module, but
+exposing it as affine. We support a similar programming style, which
+we showcase in \cref{motivation}.
 
-
-\paragraph{Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}}
+Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18} aims
+to retrofit Haskell with linear types.
+Linear Haskell introduces a new notion
+of ``linear arrows'', noted $\multimap$ similar to linear logic,
+which are functions who use their argument exactly once.
+By contrast, in \lang linearity is only decided
+by the kinds, and $\tarr{\klin}$ simply denotes \emph{single-use functions}.
+This design, while easy to retrofit on top of an existing compiler
+such as GHC, has several disadvantages,
+as highlighted by the long discussion in the GHC proposal\footnote{
+  See the in-depth discussion starting here: \url{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}}.
+Most relevant to \lang:
+\begin{itemize}
+\item Their system does not admit subtyping for arrows and leverages
+  $\eta$-expansion to allow passing unrestricted functions in linear
+  contexts. This is acceptable in a non-strict language such as
+  Haskell but can not be used in a strict setting.
+\item
+  While the GHC proposal implements \emph{some} type inference,
+  their algorithm is not formalized and not proved complete.
+\item
+  Linear Haskell promotes a ``bracket pattern'', similar to CPS-style such as 
+  \lstinline/withFile : path -> (file ->. file) -> unit/.
+  \lang follows System F\degree, Quill and Alms and
+  adopts a more direct style, where types themselves are
+  described as affine/linear.
+  We believe this leads to a more natural programming style
+  and makes reasoning about linearity in the context of abstraction much easier.
+% \item
+%   Due to the previous remark, ensuring that a given object is never
+%   aliased is fairly difficult in Linear Haskell, as one would need to ensure
+%   that no non-linear function can manipulate it. On the other
+\end{itemize}
 
 \paragraph{Vault\citep{DBLP:conf/pldi/DeLineF01,DBLP:conf/pldi/FahndrichD02}}
 
