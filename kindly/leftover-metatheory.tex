@@ -1,0 +1,242 @@
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{proof}
+  The proof is by induction on the evaluation judgment $\Store, \Perm,
+  \VEnv \vdash {e} \Downarrow^i R$.
+  
+  The base case is trivial as $\Store, \Perm, \VEnv \vdash {e}
+  \Downarrow^0 \TimeOut$.
+
+  For indexes greater than zero we have a case distinction over all applicable execution
+  rules.
+
+  \textbf{Case }$\ruleSConst$.
+  The claim is immediate.
+
+  \textbf{Case }$\ruleSVar$.
+  The claim is immediate.
+
+  \textbf{Case }$\ruleSTApp$.
+  
+  By assumption, we have that $\SE \vdash \Loc : \E (x)$ so that
+  $\E(x) =
+  \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$.
+  All conclusions hold: $\SE \le \SE' = \SE[\Loc' \mapsto
+  (\tau_2\tarr{k}\tau_1)[\Multi[i]{\kvar} \mapsto \Multi[i]{ k},
+  \Multi[j]{\alpha} \mapsto \Multi[j]{t}]]$;
+  $\vdash \Store' : \SE'$;
+  $\Perm' \subseteq \Dom{\Store'}$;
+  $\SE' \vdash \Loc' : \tau$;
+  and $\Loc' \in \Perm' \Sadd{\Loc'}$.
+
+  \textbf{Case }$\ruleSPLam$.
+
+  By assumption $\SE \vdash     \ilam {\Multi[i]{\kvar}}{\Multi[j]{\tvar}}Ck xe
+  : \schm$ where $\schm =
+  \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$. Let
+  $\SE'  = \SE[\Loc \mapsto \schm]$.
+  Then $\SE \le \SE'$ and $\vdash\Store' : \SE'$.
+  Moreover, $\SE' \vdash \Loc : \schm$ and $\Loc \in \Perm
+  \Sadd{\Loc}$ as required.
+  
+  \clearpage
+  \textbf{Case }$\ruleSApp$.
+
+  By assumption $\ruleSDApp$.
+
+  \begin{itemize}
+  \item By splitting of $\E$, we have that $\VEnv = \VEnv_1 +
+    \VEnv_1'$ such that  $\SE \vdash \VEnv_1 : \E_1$
+  \item $\vdash \Store : \SE$
+  \item $\Reach\Store{\VEnv_1} \subseteq \Reach\Store{\VEnv} \subseteq
+    \Perm \subseteq \Dom\Store$ 
+  \item $\Addresses{\VEnv_1'} \subseteq \Dom\Store$ and
+    $\Dom{\VEnv_1} \cap \Dom{\VEnv_1'}=\emptyset$
+  \item $\Store, \Perm, \VEnv_1 + \VEnv_1' \vdash {e_1}
+    \Downarrow^i R_1$
+  \end{itemize}
+  If $R_1 = \TimeOut$, then $R = \TimeOut$, too.
+  Otherwise induction yields that
+  $\exists$ $\Store_1$, $\Perm_1$, $r_1$, $\SE_1$ such that
+  \begin{itemize}
+  \item
+    $R_1 = \Ok{\Store_1, \Perm_1, r_1}$  
+  \item $\SE \le \SE_1$, $\Store \le \Store_1$,
+    $\vdash \Store_1 : \SE_1$ 
+  \item $\Perm_1 \subseteq \Dom{\Store_1}$
+  \item $\SE_1 \vdash r_1 : \tau_2\tarr{k}\tau_1$
+  \item $\Reach{\Store_1}{r_1} \subseteq \Perm_1$ and by inverting the
+    previous typing, we 
+    know that $r_1 = \Loc$ hence $\Loc \in \Perm_1$ 
+  \item For all $\Loc \in \Reach{\Store_1}{\VEnv_1'}$ it
+    must be that $\Store_1 (\Loc) = \Store (\Loc)$ and
+    $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1$
+  \end{itemize}
+  By inversion of the store typing we also know that $\Store_1 (\Loc)
+  = (\VEnv'',\lam[k]{x}{e})$, for some $\VEnv''$, $k$, $x$, and
+  $e$.
+  To establish the assumptions for the evaluation for $e_2$, we reason
+  as follows
+  \begin{itemize}
+  \item By splitting of $\E$, we have that $\VEnv = \VEnv_2 +
+    \VEnv_2'$ such that  $\SE_1 \vdash \VEnv_2 : \E_2$ (because $\SE\le\SE_1$)
+  \item $\vdash \Store_1 : \SE_1$ (by the previous IH)
+  \item $\Perm_1' \subseteq \Dom{\Store_1}$ (by the previous IH)
+  \item To see that
+    $\Reach{\Store_1}{\VEnv_2} \subseteq \Perm_1'$ \\
+    Suppose that $\Loc' \in \Reach{\Store_1}{\VEnv_2}$.
+    \begin{itemize}
+    \item If $\Loc' \in \Reach{\Store_1}{\VEnv_1'} \subseteq
+      \Reach\Store{\VEnv_1'} \subseteq \Reach\Store\VEnv$, then $\Loc'
+      \in \Perm_1'$ (as $\Loc' \ne \Loc$ which is either new or taken
+      from $\Reach{\Store_1}{\VEnv_1}$).
+    \item If
+      $\Loc \in \Reach{\Store_1}{\VEnv_1'} \cap
+      \Reach{\Store_1}{\VEnv_1}$, then ${\entail {} {k \le \kun}}$
+      must hold by splitting, which means that $\Loc$ is not writeable
+      so that $\Loc\in\Perm_1'$.
+    \item If $\Loc' \in \Reach{\Store_1}{\VEnv_1}$, then splitting
+      enforces that $\neg\Writeable{\SE_1}{\Loc'}$, hence $\Loc' \in \Perm_1'$.
+    \end{itemize}
+  \item $\Addresses{\VEnv_2'} \subseteq \Dom{\Store} \subseteq \Dom{\Store_1}$ and
+    $\Dom{\VEnv_2} \cap \Dom{\VEnv_2'}=\emptyset$ by construction
+  \item $\Store_1, \Perm_1', \VEnv_2 + \VEnv_2' \vdash {e_2}
+    \Downarrow^i R_2$
+  \end{itemize}
+  If $R_2 = \TimeOut$, then $R = \TimeOut$, too.
+  Otherwise induction yields that
+  $\exists$ $\Store_2$, $\Perm_2$, $r_2$, $\SE_2$ such that
+  \begin{itemize}
+  \item
+    $R_2 = \Ok{\Store_2, \Perm_2, r_2}$  
+  \item $\SE_1 \le \SE_2$, $\Store_1 \le \Store_2$,
+    $\vdash \Store_2 : \SE_2$ 
+  \item $\Perm_2 \subseteq \Dom{\Store_2}$
+  \item $\SE_2 \vdash r_2 : \tau_2$
+  \item $\Reach{\Store_2}{r_2} \subseteq \Perm_2$
+  \item For all $\Loc \in \Reach{\Store_2}{\VEnv_2'}$ it must be that
+    $\Store_2 (\Loc) = \Store_1 (\Loc)$
+    and $\Loc\in\Perm_1' \Leftrightarrow \Loc\in\Perm_2$ 
+  \item For all $\Loc \in \Reach{\Store_2}{\VEnv_2}$,
+    if $\neg \Writeable{\SE_2}\Loc $ then
+    $\Store_2 (\Loc) = \Store_1 (\Loc)$
+    and $\Loc\in\Perm_1' \Leftrightarrow \Loc\in\Perm_2$ 
+  \end{itemize}
+
+  It remains to establish the assumptions for the evaluation of $e$.
+  \begin{itemize}
+  \item $\exists C'', \E''$ such that
+    $\inferS{C''}{\E'';\bvar{x}{\tau_2}}{e}{\tau_1}$ and
+    $\addlin{\entail{C''}{\Cleq{\E''}{k}}}$
+  \item Moreover $\SE_2 \vdash \VEnv'' : \E''$ because $\SE \le \SE_2$
+  \item $\vdash \Store_2 : \SE_2$ \quad (by previous IH)
+  \item $\Perm_2 \subseteq \Dom{\Store_2}$
+  \item To see that $\Reach{\Store_2}{\VEnv''}\subseteq \Perm_2$:
+  \\
+  Suppose that $\Loc' \in \Reach{\Store_2}{\VEnv''}$.
+  Clearly $\Loc' \in \Reach{\Store_1}{\Loc}$, the address of the
+  closure, and $\Loc' \in \Perm_1'$ by the inductive hypothesis for
+  evaluating $e_1$.
+  \begin{itemize}
+  \item If $\neg\Writeable{\SE_2}{\Loc'}$,
+    then $\Loc' \in \Perm_2$ (because it was never removed from
+    $\Perm$)
+  \item If $\Writeable{\SE_2}{\Loc'}$, then $k$ must be restricted and
+    evaluation of $e_2$ could not remove it from $\Perm_2$ because
+    $\Loc' \notin \Reach{\Store_1}{\VEnv_1}$.
+  \end{itemize}
+  \item For $\VEnv'$ we take $\emptyset$, which fulfills all assumptions
+  \item $\Store_2, \Perm_2, \VEnv'' + \emptyset \vdash {e}\Downarrow^i R_3$
+  \end{itemize}
+  If $R_3 = \TimeOut$, then $R = \TimeOut$, too.
+  Otherwise induction yields that
+  $\exists$ $\Store_3$, $\Perm_3$, $r_3$, $\SE_3$ such that
+  \begin{itemize}
+  \item
+    $R_3 = \Ok{\Store_3, \Perm_3, r_3}$  
+  \item $\SE_2 \le \SE_3$, $\Store_2 \le \Store_3$,
+    $\vdash \Store_3 : \SE_3$ 
+  \item $\Perm_3 \subseteq \Dom{\Store_3}$
+  \item $\SE_3 \vdash r_3 : \tau_1$
+  \item $\Reach{\Store_3}{r_3} \subseteq \Perm_3$
+  \item Frame condition is void as the ignored part of the environment
+    is $\emptyset$.
+  \end{itemize}
+
+  From the above, we need to conclude that
+  $\exists$ $\Store' = \Store_3$, $\Perm' = \Perm_3$, $r' = r_3$,
+  $\SE' = \SE_3$ such that
+  \begin{itemize}
+  \item
+    $R = \Ok{\Store', \Perm', r'}$  
+  \item $\SE \le \SE'$, $\Store \le \Store'$,
+    $\vdash \Store' : \SE'$, the first two by transitivity of $\le$
+    and the last by the IH for evaluating $e$
+  \item $\Perm' \subseteq \Dom{\Store'}$ (by last IH)
+  \item $\SE' \vdash r' : \tau_1$ (by last IH)
+  \item $\Reach{\Store'}{r'} \subseteq \Perm'$ (by last IH)
+  \item For all $\Loc \in \Reach{\Store'}{\VEnv'}$ it must be that
+    $\Store' (\Loc) = \Store (\Loc)$
+    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
+  \item For all $\Loc \in \Reach{\Store'}{\VEnv}$,
+    if $\neg \Writeable{\SE'}\Loc $ then
+    $\Store' (\Loc) = \Store (\Loc)$
+    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$ 
+  \end{itemize}
+  
+
+  \clearpage
+  \textbf{Case }$\ruleSLet$.
+
+  \textbf{Case }$\ruleSPair$.
+
+  \textbf{Case }$\ruleSMatchLocation$.
+
+  \textbf{Case }$\ruleSMatchBorrow$.
+
+  \clearpage
+  \textbf{Case }$\ruleSRegion$.
+
+  We assume that
+  \begin{itemize}
+  \item $\inferS{C}{\E}{\region{\Sone x \BORROW}{e}}{\tau}$
+  \item $\SE \vdash \VEnv, \MutableBorrows\VEnv : \E$ \\
+    ($\MutableBorrows\VEnv$ contains suspended
+    bindings which we cannot use, although we have the permission)
+  \item $\vdash \Store : \SE$
+  \item $\Reach\Store{\VEnv, \MutableBorrows\VEnv} \subseteq \Perm \subseteq \Dom\Store$\\
+    (we have permission for suspended bindings)
+  \item  $\VEnv'$ with $\Addresses{\VEnv'}
+    \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
+    \\
+    (that would be the enclosing frame)
+  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv + \MutableBorrows\VEnv +
+    \VEnv' \vdash {\region{\Sone x \BORROW}{e}}
+    \Downarrow^{i+1} R$ and $R\ne \TimeOut$.
+  \end{itemize}
+  
+  We apply inversion to the typing: 
+  
+  $\ruleSDRegion$.
+
+  We see that $x \in \Dom{\MutableBorrows\VEnv}$.
+  
+  Hence, $\E'$ is mostly equal to $\E$ but $\svar x{\tau_x}$ is
+  replaced by $\bvar {\borrow x}{\borrowty{k} {\tau_x}}$.
+
+  (PT: but how is $k$ chosen? Is it $k_\tau$?)
+
+  So $\VEnv' = \VEnv[x \mapsto \MutableBorrows\VEnv (x)b]$ and
+  $\MutableBorrows\VEnv' = \MutableBorrows\VEnv \Sdel x$
+
+\clearpage
+  \textbf{Case }$\ruleSBorrow$.
+
+  \textbf{Case }$\ruleSCreate$.
+
+  \textbf{Case }$\ruleSDestroy$.
+
+  \textbf{Case }$\ruleSObserve$.
+
+  \textbf{Case }$\ruleSUpdate$.
+\end{proof}
