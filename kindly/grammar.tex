@@ -4,7 +4,7 @@
   e ::=&\ c \mid x \mid \app{e}{e'} \mid \lam{x}{e} \mid \letin{x}{e}{e'}\\
   % |&\ \fix{e}\tag{Fixpoint}\\
   |&\ \introPair{e}{e'} \mid \matchin{x,y}{e}{e'}\tag{Pairs}\\
-  |&\ \region{x}{e}\tag{Region}\\
+  |&\ \region{\Sone x\BORROW}{e}\tag{Region}\\
   |&\ \borrow{x} \mid \reborrow{x}\tag{Borrows}\\
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
   % |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\

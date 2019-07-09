@@ -9,7 +9,7 @@ a set of variables. This annotation, defined below, is equivalent to nested
 region annotations for each individual variable.
 
 \begin{align*}
-  \region{x;S}{e} &= \region{x}{\region{S}{e}}& \region{\emptyset}{e} &= e\\
+  \region{\Sone x\BORROW;S}{e} &= \region{\Sone x\BORROW}{\region{S}{e}}& \region{\emptyset}{e} &= e\\
 \end{align*}
 
 \Cref{fig:region-annotation} define a rewriting relation $\RannotT{e}{e'}$

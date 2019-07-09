@@ -120,7 +120,7 @@
     \Store, (\Perm \Sdel\Addr) \Sadd{\sborrow{\Addr}}, \VEnv \vdash e
     \Downarrow^{#1} \Ok{\Store', \Perm', r}
   }{
-    \Store, \Perm, \VEnv \vdash \region{x}{e}
+    \Store, \Perm, \VEnv \vdash \region{\Sone x \BORROW}{e}
     \Downarrow^{#1+1} \Ok{ \Store', (\Perm' \Sdel{\sborrow\Addr})\Sadd\Addr, r}
   }
 }
@@ -242,7 +242,7 @@
     \addlin{ \lregion{C_r}{x}{\E}{\E'} }\\\\
     \inferS{C}{\E'}{e}{\tau} \\
     \entail C {\Cleq{\tau}{\klin_{n-1}}} \\
-  }  { \inferS{C}{\E}{\region{x}{e}}{\tau} }
+  }  { \inferS{C}{\E}{\region{\Sone x \BORROW}{e}}{\tau} }
 }
 
 \newcommand\ruleSDBorrow{
@@ -384,7 +384,7 @@
     \addlin{ \bregion{C_r}{x}{\Sv}{\Sv'} }\\
     D = C' \Cand C_\tau \Cand \Cleq{k_\tau}{\klin_{n-1}} \Cand C_r\\
     (C,\unif) = \normalize{D}{\unif' \mostgeneral \unif_\tau}\\    
-  }  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{x}{e}}{\tau} }
+  }  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{\Sone x \BORROW}{e}}{\tau} }
 }
 
 %%% Local Variables:

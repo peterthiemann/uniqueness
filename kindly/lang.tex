@@ -33,8 +33,7 @@ A borrow $\borrow{x}$ is always taken from a variable $x$. The
 ($\MBORROW$) or immutable ($\IBORROW$). If $x$ is already borrowed,
 then we need to use the reborrow expression $\reborrow{x}$.
 
-A region $\region{x}{e}$ is annotated with its nesting $n$
-and the variable $x$ that may be borrowed in $e$.
+A region $\region{\Sone x\BORROW}{e}$ is annotated with its nesting $n$, the variable $x$ that may be borrowed in $e$, and the kind of borrow $\BORROW$.
 
 A match is indexed with a \emph{match specification} $\etransfm$ that indicates
 whether the match should work on borrows ($\etransfm=\&^b$) or not ($\etransfm=id$).
@@ -61,40 +60,40 @@ constructed type.
 Generally, we write lists with an overbar and (sometimes) an index as
 in $\Multi[i]\tau$.
 
-\paragraph{Previously}
+% \paragraph{Previously}
 
 
-Let us first define our conventions and meta-syntactic variables.
-Expressions, types and kinds are noted respectively $e$, $\tau$, and $k$.
-Variables, type variables and kind variables are noted
-respectively $x$, $\tvar$ and $\kvar$. Types and kind schemes
-are noted $\schm$ and $\kschm$.
-In the rest of the text, we will write lists with a bar and an index, for
-instance $\Multi[i]{\tau}$.
-Kind constants are noted in bold capital letters, such as $\kaff$ for affine.
+% Let us first define our conventions and meta-syntactic variables.
+% Expressions, types and kinds are noted respectively $e$, $\tau$, and $k$.
+% Variables, type variables and kind variables are noted
+% respectively $x$, $\tvar$ and $\kvar$. Types and kind schemes
+% are noted $\schm$ and $\kschm$.
+% In the rest of the text, we will write lists with a bar and an index, for
+% instance $\Multi[i]{\tau}$.
+% Kind constants are noted in bold capital letters, such as $\kaff$ for affine.
 
-The syntax of \lang is presented in \cref{grammar} and follows
-traditional ML languages with let bindings.
-Borrows, noted $\borrow{e}$, are annotated with a specification indicating
-if a borrow is immutable ($\IBORROW$) or mutable ($\MBORROW$).
-We also distinguish reborrows, which are noted $\reborrow{e}$.
-Match are indexed with a specification which can be either $\&^b$
-(which $b$ a borrow specification) or $id$, indicating if the match
-should operate on borrows or not.
-Regions, noted $\region{x}{e}$ are annotated with their nesting ($n$)
-and the variable whose borrow they enclose ($x$).
-%
-$\tapp{t}{\Multi{\tau}}$ denotes a type application where
-$\T t$ is an abstract type constructor.
-Arrow and borrow types are annotated with a kind, noted $\tau \tarr{k} \tau$
-and $\borrowty{k}{\tau}$ respectively.
-%
-Kinds can be either a kind variable $\kvar$, or constants
-(linear $\klin$, affine $\kaff$ or unrestricted $\kun$) indexed
-by a nesting level represented by a member of $N \cup \{\infty\}$.
-Type schemes and kind schemes are guarded by a set of constraints.
-%
-Finally, constraints are composed of a list of kind inequalities.
+% The syntax of \lang is presented in \cref{grammar} and follows
+% traditional ML languages with let bindings.
+% Borrows, noted $\borrow{e}$, are annotated with a specification indicating
+% if a borrow is immutable ($\IBORROW$) or mutable ($\MBORROW$).
+% We also distinguish reborrows, which are noted $\reborrow{e}$.
+% Match are indexed with a specification which can be either $\&^b$
+% (which $b$ a borrow specification) or $id$, indicating if the match
+% should operate on borrows or not.
+% Regions, noted $\region{\Sone x\BORROW}{e}$ are annotated with their nesting ($n$)
+% and the variable whose borrow they enclose ($x$).
+% %
+% $\tapp{t}{\Multi{\tau}}$ denotes a type application where
+% $\T t$ is an abstract type constructor.
+% Arrow and borrow types are annotated with a kind, noted $\tau \tarr{k} \tau$
+% and $\borrowty{k}{\tau}$ respectively.
+% %
+% Kinds can be either a kind variable $\kvar$, or constants
+% (linear $\klin$, affine $\kaff$ or unrestricted $\kun$) indexed
+% by a nesting level represented by a member of $N \cup \{\infty\}$.
+% Type schemes and kind schemes are guarded by a set of constraints.
+% %
+% Finally, constraints are composed of a list of kind inequalities.
 
 % Environments are composed of value and type bindings, along with type
 % declarations. Type declarations, of the form
@@ -275,7 +274,7 @@ expression has multiple sub-expressions such as pairs, function applications
 and let bindings. For instance, in the
 expression
 $\letin{a}{\text{create}\ 10\ x}
-{\introPair{\region[{}]{x}{\app{\text{length}}{\borrow[\IBORROW]{a}}}}{a}}$,
+{\introPair{\region[{}]{\Sone x\IBORROW}{\app{\text{length}}{\borrow[\IBORROW]{a}}}}{a}}$,
 we use the rule {\sc Susp} to detach a borrow on the left of the pair.
 Naturally, we must here ensure that the borrow on the left of the pair does not
 escape, which brings us to the typing rules for regions.
@@ -331,7 +330,7 @@ escape, which brings us to the typing rules for regions.
 In order to provide good support for imperative programming, \affe allows
 to borrow resources.
 Such borrows are constrained to a given syntactic region. We note
-$\region{x}{e}$ the region which allow borrows of $x$ to be used in $e$
+$\region{\Sone x\BORROW}{e}$ the region which allow borrows of $x$ to be used in $e$
 and where $n$ is the nesting of the region.
 Borrows can not be used outside of a corresponding region.
 These remarks lead to an
@@ -351,7 +350,7 @@ level of the region. The kind of borrow is annotated with the integer
 corresponding to their region, and a final constraint ensure that
 the return type of the region does not contain such borrow.
 
-We illustrate this on the expression $\region{x}{f(\borrow[\IBORROW]{c})}$
+We illustrate this on the expression $\region{\Sone x\IBORROW}{f(\borrow[\IBORROW]{c})}$
 when $c$ is a linear channel.
 The first step is to check that
 $\svar[\IBORROW]{c}{\text{channel}}$ is in $\E$. We then define $\E'$ which

@@ -476,42 +476,103 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
   $\Store_3$, $\Perm_3$, $r_3$, $\SE_3$ such that
   \begin{gather}
     R_3 = \Ok{\Store_3, \Perm_3, r_3}
-    \\
+    \\\label{eq:12}
     \SE_2 \le \SE_3 \qquad
     \Store_2 \le \Store_3 \qquad
     \vdash \Store_3 :  \SE_3
-    \\
+    \\\label{eq:13}
     \Addresses{\Perm_3} \subseteq \Dom{\Store_3}
-    \\
+    \\\label{eq:14}
     \SE_3 \vdash r_3 : \tau_1
-    \\
+    \\\label{eq:15}
     \Reach{\Store_3}{r_3} \subseteq \Perm_3
   \end{gather}
-  ***
   \begin{itemize}
   \item Outside: For all $\Loc \in \Dom{\Store_2} \setminus
-    \Reach{\Store_2}{\VEnv_2}$ it must be that 
-    $\Store_2(\Loc) = \Store_1 (\Loc)$
-    and $\Loc\in\Perm_1' \Leftrightarrow \Loc\in\Perm_2$ 
+    \Reach{\Store_3}{\VEnv_3}$ it must be that 
+    $\Store_3(\Loc) = \Store_2 (\Loc)$
+    and $\Loc\in\Perm_2 \Leftrightarrow \Loc\in\Perm_3$ 
   \item Immutables: For all $\Loc \in
-    \Reach{\Store_2}{\ImmutableBorrows{\VEnv_2}}$ it must be that
-    $\Loc\in\Dom{\Store_1}$, 
-    $\Store_2 (\Loc) = \Store_1 (\Loc)$
-    and $\Loc\in{\Perm_1'} \Leftrightarrow \Loc\in\Perm_2$ 
+    \Reach{\Store_3}{\ImmutableBorrows{\VEnv_3}}$ it must be that
+    $\Loc\in\Dom{\Store_2}$, 
+    $\Store_3 (\Loc) = \Store_2 (\Loc)$
+    and $\Loc\in{\Perm_2} \Leftrightarrow \Loc\in\Perm_3$ 
   \item Resources:
-    Let $\REACH_2' =\Reach{\Store_2}{\Active{\VEnv_2}}$.
-    For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_2} >0$ and $n' =
-    \MultiNumber\Loc{\REACH_2'}$, 
+    Let $\REACH_3' =\Reach{\Store_3}{\Active{\VEnv_3}}$.
+    For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_3} >0$ and $n' =
+    \MultiNumber\Loc{\REACH_3'}$, 
     \begin{itemize}
     \item if $\Affine{\SE_2}\Loc$ then $n=1$ and $n'\le 1$,
     \item if $\Linear{\SE_2}\Loc$ then $n=1$ and $n' = 0$,
-    \item if $n'=0$, then $\Loc\notin\Perm_2$.
+    \item if $n'=0$, then $\Loc\notin\Perm_3$.
     \end{itemize}
   \item Immutables: For all $\Loc \in \Reach
-    {\Store_2}{\Active{\VEnv_2}}$, if $\neg\Writeable{\SE_2}\Loc$ then
-    $\Store_2 (\ell) = \Store_1 (\ell)$ and $\Loc\in \Perm_2$.
-  \item No thin air permission: For all $\Loc\in \Perm_2$, $\Loc
-    \in \Perm_1' \cup  \Dom{\Store_2} \setminus \Dom{\Store_1}$.
+    {\Store_3}{\Active{\VEnv_2}}$, if $\neg\Writeable{\SE_2}\Loc$ then
+    $\Store_3 (\ell) = \Store_2 (\ell)$ and $\Loc\in \Perm_3$.
+  \item No thin air permission: For all $\Loc\in \Perm_3$, $\Loc
+    \in \Perm_2 \cup  \Dom{\Store_3} \setminus \Dom{\Store_2}$.
+  \end{itemize}
+  From this we can finally conclude the inductive step.
+
+  Let $\Store' = \Store_3$, $\Perm' = \Perm_3$, $r' = r_3$, and $\SE'
+  = \SE_3$. Clearly $R' = R_3$ hence
+  \begin{itemize}
+  \item $R' = \Ok{\Store', \Perm', r'}$
+  \item by transitivity, $\Store \le \Store'$ and $\SE \le \SE'$
+  \item by (\ref{eq:12}), $\vdash \Store' : \SE'$
+  \item by (\ref{eq:13}), $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
+  \item by (\ref{eq:14}), $\SE' \vdash r' : \tau_1$
+  \item by (\ref{eq:15}), $\Reach{\Store'}{r'} \subseteq \Perm'$
+  \item Outside: Let $\Loc \in \Dom{\Store} \setminus
+    \Reach{\Store'}{\VEnv}$ and show that that 
+    $\Store' (\Loc) = \Store (\Loc)$
+    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
+
+    Inspecting the ``Outside'' cases for the subterms, we find that
+    all of them only modify (permissions of) objects reachable from
+    $\VEnv$ or newly allocated ones. Hence, the claim follows.
+  \item Immutables: Let $\Loc \in
+    \Reach{\Store'}{\ImmutableBorrows\VEnv}$ and show that
+    $\Loc\in\Dom\Store$, 
+    $\Store' (\Loc) = \Store (\Loc)$
+    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
+
+    By definition of splitting, $\ImmutableBorrows{\VEnv_1} =
+    \ImmutableBorrows{\VEnv_2} = \ImmutableBorrows\VEnv$. Moreover,
+    $\VEnv_3$ refers to objects reachable from $\VEnv_1$ and $\VEnv_2$
+    or that are new. By the inductive hypothesis on each
+    subevaluation, contents and permissions of the immutable objects
+    remain the same.
+  \item Resources:
+    Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
+    For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
+    \MultiNumber\Loc{\REACH'}$, 
+    \begin{itemize}
+    \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
+    \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
+    \item if $n'=0$, then $\Loc\notin\Perm'$.
+    \end{itemize}
+    Follows from the inductive hypotheses on the subevaluations.
+  \item Immutables: For all $\Loc \in \Reach
+    {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Loc$ then
+    $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm'$.
+
+    Follows from Immutable and Outside conditions of the subevaluations.
+  \item No thin air permission: For all $\Loc\in \Perm'$, $\Loc
+    \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
+
+    Immediate.
+  \end{itemize}
+
+  \textbf{case $e$ of}
+  \lstsemrule{sregion}
+
+  By assumption $\ruleSDRegion$.
+
+  We need to establish the assumptions for the recursive call
+  @eval delta pi' gamma i' e_1@.
+  \begin{itemize}
+  \item $\inferS{C}{\E'}{e}{\tau}$
   \end{itemize}
 
 \end{proof}
@@ -716,7 +777,7 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
 
   We assume that
   \begin{itemize}
-  \item $\inferS{C}{\E}{\region{x}{e}}{\tau}$
+  \item $\inferS{C}{\E}{\region{\Sone x \BORROW}{e}}{\tau}$
   \item $\SE \vdash \VEnv, \MutableBorrows\VEnv : \E$ \\
     ($\MutableBorrows\VEnv$ contains suspended
     bindings which we cannot use, although we have the permission)
@@ -727,7 +788,8 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
     \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
     \\
     (that would be the enclosing frame)
-  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv + \MutableBorrows\VEnv + \VEnv' \vdash {\region{x}{e}}
+  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv + \MutableBorrows\VEnv +
+    \VEnv' \vdash {\region{\Sone x \BORROW}{e}}
     \Downarrow^{i+1} R$ and $R\ne \TimeOut$.
   \end{itemize}
   
