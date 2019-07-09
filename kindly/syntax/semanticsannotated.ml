@@ -311,14 +311,14 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      Ok (delta_2, pi_2', r_2)
   (**)
   (* rule sregion *)
-  | Region (e_1, x, n, b) ->
+  | Region (e, x, n, b) ->
      let i' = i - 1 in
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
      let* rho' = rho <.> b in
      let gamma' = gamma.+(x -:>RADDR rho') in
      let pi' = (pi <+> rho') in
-     let* (delta_1, pi_1, r_1) = eval delta pi' gamma' i' e_1 in
+     let* (delta_1, pi_1, r_1) = eval delta pi' gamma' i' e in
      let pi_1' = (pi_1 <-> rho') in
      Ok (delta_1, pi_1', r_1)
   (**)
