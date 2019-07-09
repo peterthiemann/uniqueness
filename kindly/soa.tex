@@ -91,10 +91,9 @@ of ``linear arrows'', noted $\multimap$ similar to linear logic,
 which are functions who use their argument exactly once.
 By contrast, in \lang linearity is only decided
 by the kinds, and $\tarr{\klin}$ simply denotes \emph{single-use functions}.
-This design, while easy to retrofit on top of an existing compiler
-such as GHC, has several disadvantages,
-as highlighted by the long discussion in the GHC proposal\footnote{
-  See the in-depth discussion starting here: \url{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}}.
+This design is easy to retrofit on top of an existing compiler
+such as GHC, but has several disadvantages\footnote{
+  See the in-depth discussion attached to the GHC proposal starting here: \url{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}}.
 Most relevant to \lang:
 \begin{itemize}
 \item Their system does not admit subtyping for arrows and leverages
@@ -102,16 +101,26 @@ Most relevant to \lang:
   contexts. This is acceptable in a non-strict language such as
   Haskell but can not be used in a strict setting.
 \item
-  While the GHC proposal implements \emph{some} type inference,
+  While the GHC proposal implements some type inference,
   their algorithm is not formalized and not proved complete.
 \item
-  Linear Haskell promotes a ``bracket pattern'', similar to CPS-style such as 
-  \lstinline/withFile : path -> (file ->. file) -> unit/.
+  Linear Haskell promotes a CPS-style such as 
+  \lstinline/withFile : path -> (file ->. file) ->. unit/
+  to ensure that files are only used linearly.
   \lang follows System F\degree, Quill and Alms and
-  adopts a more direct style, where types themselves are
+  adopts a direct style, where types themselves are
   described as affine/linear.
   We believe this leads to a more natural programming style
-  and makes reasoning about linearity in the context of abstraction much easier.
+  and ease modular reasoning about linearity.
+  In particular, using abstraction through modules,
+  programmers only need consider the module
+  implementation to ensure that some linear
+  resource is properly handled.
+\item
+  Linear Haskell introduces a notion of linear monad to express
+  imperative code conveniently. Again, this solution is suitable in Haskell,
+  but less appropriate in other contexts. Our borrow system allow
+  to provide a more free-form programming style for imperative code.
 % \item
 %   Due to the previous remark, ensuring that a given object is never
 %   aliased is fairly difficult in Linear Haskell, as one would need to ensure
