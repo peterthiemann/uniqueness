@@ -45,7 +45,7 @@ type exp = Const of int
          | Pair of kind * exp * exp * splitting
          | Match of ident * ident * exp * exp * splitting
          | Matchborrow of ident * ident * exp * exp * splitting
-         | Region of exp * ident * int * borrow
+         | Region of exp * int * ident * borrow
          | Borrow of borrow * ident
          | Create of exp
          | Destroy of exp
@@ -311,7 +311,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      Ok (delta_2, pi_2', r_2)
   (**)
   (* rule sregion *)
-  | Region (e, x, n, b) ->
+  | Region (e, n, x, b) ->
      let i' = i - 1 in
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
@@ -323,7 +323,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      Ok (delta_1, pi_1', r_1)
   (**)
   (* previous *)
-  | Region (e_1, x, n, b) ->
+  | Region (e_1, n, x, b) ->
      let i' = i - 1 in
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
