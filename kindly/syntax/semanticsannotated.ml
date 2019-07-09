@@ -346,8 +346,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
   (* rule sborrow *)
   | Borrow (b, x) ->
      let* RADDR rho = gamma.!(x) in
-     let*? () = rho <?> b in
-     let*? () = rho <|= pi in
+     let*? () = rho <?> b && rho <|= pi in
      Ok (delta, pi, RADDR rho)
   (**)
   | Borrow (b, x) ->
