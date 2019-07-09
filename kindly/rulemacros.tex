@@ -217,7 +217,7 @@
 
 \newcommand\ruleSDPair{
   \inferrule[Pair]
-  { \addlin{\lsplit{C}{\E}{\E_1}{\E_2}} \\
+  { \addlin{\lsplit{C}{\E}{\E_1}{\E_2}} \\\\
     \inferS{C}{\E_1}{e_1}{\tau_1} \\
     \inferS{C}{\E_2}{e_2}{\tau_2}
   }
@@ -247,7 +247,9 @@
 
 \newcommand\ruleSDBorrow{
   \inferrule[Borrow]
-  { \bvar{\borrow x}{\borrowty k\tau} \in \E }
+  { \bvar{\borrow x}{\borrowty k\tau} \in \E \\
+    \entail C {\addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}} \\
+  }
   { \inferS{C}{\E}{\borrow{x}}{\borrowty{k}{\tau}} }
 }
 \newcommand\ruleSDReBorrow{

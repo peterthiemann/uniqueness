@@ -13,7 +13,13 @@
   \and
   \ruleSDLam
   \and
+  \ruleSDBorrow
+  \and
+  \ruleSDReBorrow
+  \and
   \ruleSDPair
+  \and
+  \ruleSDRegion
   \and
   \ruleSDApp
   \and
@@ -40,13 +46,7 @@
   { \inferS{C}
     {\E}{\matchin{x,x'}{e_1}{e_2}}{\tau_2} }
   \and
-  \ruleSDBorrow
-  \and
-  \ruleSDReBorrow
-  \and
   %
-  \ruleSDRegion
-  \and
   %
   % \inferrule[Elim]
   % { \tvar,(\kvar'_i),(\tvar'_j)\text{ new}\\
