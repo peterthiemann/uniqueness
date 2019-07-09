@@ -24,7 +24,8 @@ Ignoring such life cycle protocols is a common source of errors.
 
 
 Most type systems provide just type soundness, but neglect the
-protocol aspect. The systems that do build on linear types \cite{Girard} and/or
+
+protocol aspect. The systems that do build on linear types \cite{DBLP:journals/tcs/Girard87} and/or
 uniqueness types\cite{DBLP:conf/plilp/BarendsenS95}. A value of linear
 type is guaranteed to be consumed 
 exactly once. That is, a file that has been opened must be closed and
@@ -189,10 +190,19 @@ $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 \label{sec:contributions}
 
 \begin{itemize}
-\item Type system that encodes linearity and affinity with borrowing
-\item Full type inference for \dots
-\item Constraint simplification
-\item Automatic inference of regions for borrows
+\item A type system that encodes linearity and affinity with
+  borrowing. The type system is polymorphic with respect to types as
+  well as kinds that express constraint on the number of uses of a value.
+\item An extension of the HM(X) framework
+  \cite{DBLP:journals/tapos/OderskySW99} with kinds, regions, and
+  multiplicity constraints that supports full, prinicipal type inference.
+\item Constraint simplification techniques.
+\item Automatic inference of regions for borrows.
+\item We implemented the type inference algorithm including all
+  constraint simplification and extended with pattern matching. A
+  webfront for the algorithm is available, its URL is given in the
+  non-anonymous supplementary material, and we plan to submit it for
+  artifact evaluation.
 \end{itemize}
 
 %%% Local Variables:

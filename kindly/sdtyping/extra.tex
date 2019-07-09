@@ -53,14 +53,12 @@ borrows should be enclosed immediately.
   \label{fig:region-annotation}
 \end{figure*}
 
-\section{Syntax directed typing}
-\label{appendix:sdtyping}
 
-\subsection{Constraint language}
+\section{Constraints}
 \label{appendix:constraints}
 
-\newcommand\A{\mathcal A}
-\newcommand\SC{\mathcal S}
+% \newcommand\A{\mathcal A}
+% \newcommand\SC{\mathcal S}
 
 Let us note $\A$ our constraint system. The full grammar of constraints is
 given in \cref{grammar:constraint}.
@@ -248,6 +246,10 @@ This is sufficient to show that $HM(\CL)$ is principal. However,
 we do not use HM(X) directly but an extended version with kind inference,
 linear and affine types, and borrow.
 
+
+\section{Syntax directed typing}
+\label{appendix:sdtyping}
+
 \subsection{Kinding}
 
 We note $\inferSK{C}{\E}{\tau}{k}$
@@ -290,6 +292,41 @@ in any other contexts.
 \end{figure}
 
 
+\begin{figure}[!htb]
+  \begin{mathpar}
+
+  \inferrule{}{ \Cleq{\Eempty}{k} \Crewrite  \Cempty}
+
+  \inferrule{
+    \Cleq\E k \Crewrite  C \\ \E \vdash \Cleq B k \Crewrite  D
+  }{
+    \Cleq{\E; B}{k} \Crewrite  C \Cand D
+  }
+
+  \inferrule{
+    \E \vdash \Cleq \schm k \Crewrite  C
+  }{ \E \vdash \Cleq{\bvar x \schm}{k} \Crewrite  C}
+
+  \inferrule{ }{
+    \E \vdash \Cleq{\svar x \schm^n} k \Crewrite  \Cfalse
+  }
+
+  % \inferrule{}{\Cleq{\IBORROW^n} k \Crewrite  \Cleq{\kun_n} k}
+
+  % \inferrule{}{\Cleq{\MBORROW^n} k \Crewrite  \Cleq{\kaff_n} k}
+
+    \inferrule{
+      \inferK{C \Cand C_x} \E \tau {k'} \\
+      D = C \Cand C_x \Cand \Cleq{k'}k
+    }{
+      \E \vdash
+      \Cleq{(\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau})}{k} \Crewrite  D
+    }
+  \end{mathpar}
+
+  \caption{Rewriting constraints on environments and types}
+  \label{rule:typing:desugar}
+\end{figure}
 
 
 \subsection{Typing}

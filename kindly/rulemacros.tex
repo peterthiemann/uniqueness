@@ -269,13 +269,13 @@
     % \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{k_j}}{\tau}{k_\tau}
     % }\\
     % D = C_x\Cand C_\tau \\
-    \unif = [\kvar_i\mapsto \kvar'_i,\tvar_j \mapsto \tvar'_j]\\
-    (C,\unif') =
-    \normalize{C_x}{\unif}
+    \unif' = [\kvar_i\mapsto \kvar'_i,\tvar_j \mapsto \tvar'_j]\\
+    (C,\unif) =
+    \normalize{C_x}{\unif'}
   }
   { \inferW
     {\addlin{\bvar{x}{\sigma}}}
-    {(C,\unif'|_{\fv{\E}})}{\E}{x}{\unif'\tau} }
+    {(C,\unif|_{\fv{\E}})}{\E}{x}{\unif\tau} }
 }
 \newcommand\ruleIAbs{%
   \inferrule[Abs$_I$]
@@ -291,7 +291,7 @@
     \addlin{\Cleq{\Sv}{\kvar} \Cand \Weaken_{\bvar{x}{\tvar}}(\Sv_x)} \\
     (C,\unif) = \normalize{D}{\unif'}
   }
-  { \inferW{\addlin{\Sv}}{(C,\unif\Sdel{\tvar})}{\E}
+  { \inferW{\addlin{\Sv}}{(C,\unif\Sdel{\tvar,\kvar})}{\E}
     {\lam{x}{e}}{\unif(\tvar)\tarr{\unif(\kvar)}\tau} }
 }
 \newcommand\ruleIApp{%
