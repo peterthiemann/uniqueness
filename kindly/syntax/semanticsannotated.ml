@@ -106,6 +106,16 @@ let borrowed : address -> borrow -> address sem =
 
 let (<.>) = borrowed
 
+let checkborrowed : address -> borrow -> bool =
+  fun (Address (bs, ell)) b ->
+  match bs with
+    [] ->
+     false
+  | (b' :: _) ->
+     (b = b')
+
+let (<?>) = checkborrowed
+
 let rec vlookup : venv -> ident -> result sem =
   fun gamma x ->
   match gamma with
@@ -313,8 +323,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
   (* rule sregion *)
   | Region (e, n, x, b) ->
      let i' = i - 1 in
-     let* rx = gamma.!(x) in
-     let* rho = getaddress rx in
+     let* RADDR rho = gamma.!(x) in
      let* rho' = rho <.> b in
      let gamma' = gamma.+(x -:>RADDR rho') in
      let pi' = (pi <+> rho') in
@@ -336,12 +345,17 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      Ok (delta_1, pi_1', r_1)
   (* rule sborrow *)
   | Borrow (b, x) ->
+     let* RADDR rho = gamma.!(x) in
+     let*? () = rho <?> b in
+     let*? () = rho <|= pi in
+     Ok (delta, pi, RADDR rho)
+  (**)
+  | Borrow (b, x) ->
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
      let* rho' = rho <.> b in
      let*? () = rho' <|= pi in
      Ok (delta, pi, RADDR rho')
-  (**)
   (* rule screate *)
   | Create (e_1) ->
      let i' = i - 1 in
