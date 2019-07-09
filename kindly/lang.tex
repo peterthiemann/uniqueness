@@ -378,22 +378,32 @@ $\kun_n$).
   \end{minipage}\hfill
   \begin{minipage}{0.6\linewidth}
     \centering
-    \begin{tabular}
-      {@{}>{$}r<{$}@{ $\vdash_e$ }
-      >{$}c<{$}@{ $\rightsquigarrow_n^{x}$ }
-      >{$}l<{$}
-      r}
+    % \begin{tabular}
+    %   {@{}>{$}r<{$}@{ $\vdash_e$ }
+    %   >{$}c<{$}@{ $\rightsquigarrow_n^{x}$ }
+    %   >{$}l<{$}
+    %   r}
 
-      {(\kun_n\lk k\lk\kun_\infty)}
-      &{\svar[\IBORROW]{x}{\tau}^n}
-      &{\bvar{\borrow[\IBORROW]{x}}{\borrowty[\IBORROW] k{\tau}}}
-      &Immut\\
+    %   (\kun_n\lk k\lk\kun_\infty)
+    %   &{\svar[\IBORROW]{x}{\tau}^n}
+    %   &{\bvar{\borrow[\IBORROW]{x}}{\borrowty[\IBORROW] k{\tau}}}
+    %   &Immut\\
 
-      (\kaff_n\lk k\lk\kaff_\infty)
-      &\svar[\MBORROW]{x}{\tau}^n
-      &\bvar{\borrow[\MBORROW]{x}}{\borrowty[\MBORROW] k{\tau}}
-      &Mut
-    \end{tabular}
+    %   (\kaff_n\lk k\lk\kaff_\infty)
+    %   &\svar[\MBORROW]{x}{\tau}^n
+    %   &\bvar{\borrow[\MBORROW]{x}}{\borrowty[\MBORROW] k{\tau}}
+    %   &Mut
+    % \end{tabular}
+    \begin{mathpar}
+      \inferrule{
+        \entail{C}{(\BORROW_n\lk k\lk \BORROW_\infty)}\\
+        \BORROW\in\left\{\kun;\kaff\right\}
+      }{
+        \lregion{C}{}
+        {\svar[\BORROW]{x}{\tau}^n}
+        {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau}}}
+      }
+    \end{mathpar}
     \caption{Borrowing rules for bindings -- $\lregion{C}{x}{\E}{\E'}$}
     \label{env:rule:borrow}
   \end{minipage}

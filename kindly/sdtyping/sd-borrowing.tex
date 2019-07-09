@@ -4,24 +4,20 @@
   }{
     \bregion{C_r}{x}{\E;\svar{x}{\tau}^n}{\E; b}
   }
+  
+  \inferrule[EBorrow-Binder]{
+    \BORROW\in\left\{\kun;\kaff\right\}
+  }{
+    \bregion{(\BORROW_n\lk k\lk \BORROW_\infty)}{}
+    {\svar[\BORROW]{x}{\tau}^n}
+    {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau}}}
+  }
 
   \inferrule[EBorrow-Check]{
     \bregion{D}{x}{\E;\svar{x}{\tau}^n}{\E; b} \\
     \entail{C}{D}
   }{
     \lregion{C}{x}{\E;\svar{x}{\tau}^n}{\E; b}
-  }
-\end{mathpar}
-\hrulefill
-\begin{mathpar}
-  \inferrule[BSplit-Immut]{}{
-    \bregion{(\kun_n\lk k\lk\kun_\infty)}{}
-    {\svar[\IBORROW]{x}{\tau}^n}{\bvar{\borrow[\IBORROW]{x}}{\borrowty[\IBORROW] k{\tau}}}
-  }
-  \and
-  \inferrule[BSplit-Mut]{}{
-    \bregion{(\kaff_n\lk k\lk\kaff_\infty)}{}
-    {\svar[\MBORROW]{x}{\tau}^n}{\bvar{\borrow[\MBORROW]{x}}{\borrowty[\MBORROW] k{\tau}}}
   }
 \end{mathpar}
 %%% Local Variables:

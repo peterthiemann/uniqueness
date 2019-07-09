@@ -34,8 +34,8 @@
 
   \inferrule[BSplit-Imm-Borrow]{}{
     \bsplit {\Cempty}
-    {\bvar{\borrow[i]{x}}{\schm}}
-    {\bvar{\borrow[i]{x}}{\schm}}{\bvar{\borrow[i]{x}}{\schm}}
+    {\bvar{\borrow[\IBORROW]{x}}{\schm}}
+    {\bvar{\borrow[\IBORROW]{x}}{\schm}}{\bvar{\borrow[\IBORROW]{x}}{\schm}}
   }
 
   \inferrule[BSplit-To-Borrow]{}{
