@@ -315,14 +315,25 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let i' = i - 1 in
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
+     let* rho' = rho <.> b in
+     let gamma' = gamma.+(x -:>RADDR rho') in
+     let pi' = (pi <+> rho') in
+     let* (delta_1, pi_1, r_1) = eval delta pi' gamma' i' e_1 in
+     let pi_1' = (pi_1 <-> rho') in
+     Ok (delta_1, pi_1', r_1)
+  (**)
+  (* previous *)
+  | Region (e_1, x, n, b) ->
+     let i' = i - 1 in
+     let* rx = gamma.!(x) in
+     let* rho = getaddress rx in
      let*? () = rho <|= pi in
      let* rho' = rho <.> b in
      let gamma' = gamma.+(x -:>RADDR rho') in
      let pi' = (pi <-> rho) <+> rho' in
-     let* (delta_1, pi_1, r_1) = eval delta pi' gamma i' e_1 in
+     let* (delta_1, pi_1, r_1) = eval delta pi' gamma' i' e_1 in
      let pi_1' = (pi <-> rho') <+> rho in
      Ok (delta_1, pi_1', r_1)
-  (**)
   (* rule sborrow *)
   | Borrow (b, x) ->
      let* rx = gamma.!(x) in
