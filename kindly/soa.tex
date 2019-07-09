@@ -1,7 +1,5 @@
 \section{Related work}
 
-\subsection{Substructural type systems}
-
 Haller, P., Odersky, M.: Capabilities for Uniqueness and Borrowing
 \cite{DBLP:conf/ecoop/HallerO10}
 
@@ -12,7 +10,7 @@ uniqueness with adoption. In POPL, pages 283–295. ACM, 2005.
 \cite{DBLP:conf/popl/BoylandR05}
 
 
-\subsubsection{Functional languages}
+\subsection{Substructural type-system in functional languages}
 
 Many systems have attempted to combine
 functional programming and linear types in a practical setting.
@@ -133,20 +131,13 @@ to do with a type system. This makes it far more expressive than \lang, but
 also quite harder to use, and precludes any form of complete type
 inference.
 
-\subsubsection{Other systems}
+\subsection{Other substructural systems}
 
-Vault~\citep{DBLP:conf/pldi/DeLineF01}
-is a low-level language which uses typestate along with \emph{keys}
-to track ownership. It also introduces a novel paradigm
-called \emph{adoption and focus} \citep{DBLP:conf/pldi/FahndrichD02}
-which allow restricting the scope of linear objects
-(adoption) or temporarily treating them as non-linear (focus).
-These mechanisms serve a similar purpose as borrows, but are tracked
-much more precisely thanks to the use of typestate and pre/post-conditions,
-which makes it very expressive (at the cost of some verbosity).
-However, Vault is mostly geared towards traditional imperative programming:
-functions can't capture linear objects and it does not support
-type inference.
+Linear and affine discipline have also been used in non-functional
+settings, notably in the context of low-level imperative programming
+and object systems. In particular, \lang uses borrows and regions
+which were initially developed in objects or
+imperatives settings~\citep{DBLP:conf/popl/BoylandR05,DBLP:conf/pldi/GrossmanMJHWC02}.
 
 Rust~\citep{rust} is the first
 mainstream language to popularize the idea of borrowing and ownership
@@ -162,12 +153,25 @@ a core language for Rust which formalizes its ownership discipline
 including non-lexical lifetimes, which we look forward to use to improve
 our borrowing system.
 
+Vault~\citep{DBLP:conf/pldi/DeLineF01}
+is a low-level language which uses typestate along with \emph{keys}
+to track ownership. It also introduces a novel paradigm
+called \emph{adoption and focus} \citep{DBLP:conf/pldi/FahndrichD02}
+which allow restricting the scope of linear objects
+(adoption) or temporarily treating them as non-linear (focus).
+These mechanisms serve a similar purpose as borrows, but are tracked
+much more precisely thanks to the use of typestate and pre/post-conditions,
+which makes it very expressive (at the cost of some verbosity).
+However, Vault is mostly geared towards traditional imperative programming:
+functions can't capture linear objects and it does not support
+type inference.
+
 Plaid \&Co by Aldrich and others
 
 \subsection{Type-system features}
 
-\lang strongly relies on qualified types~\cite{DBLP:journals/scp/Jones94}
-to introduce the necessary kind equalities in our system. In
+\lang relies on qualified types~\cite{DBLP:journals/scp/Jones94}
+to introduce the necessary kind equalities for linear types. In
 particular, we use HM(X)~\citep{DBLP:journals/tapos/OderskySW99} which
 allow to use qualified type in an ML-like language with complete
 type inference.
@@ -178,12 +182,12 @@ and syntactic proof of soundness~\citep{DBLP:journals/entcs/SkalkaP02}.
 This makes us confident that the system developed in \lang
 could be applied to larger and more complex languages such as OCaml.
 
-The subtyping discipline we develop in \lang is very similar
+The subtyping discipline used in \lang is very similar
 to structural subtyping, where the only subtyping (or here, subkinding)
 is at the leafs.
 Such discipline is known to be friendly to inference and has be used in many
 contexts, including OCaml itself, and has been combined
-with constraints~\citet{DBLP:journals/tapos/OderskySW99,DBLP:conf/sas/TrifonovS96}.
+with constraints~\citep{DBLP:journals/tapos/OderskySW99,DBLP:conf/sas/TrifonovS96}.
 In particular, Flowcaml~\citep{DBLP:conf/popl/PottierS02}
 extends OCaml with security levels forming a lattice and supports type inference.
 In \lang, we repurpose these ideas to check for linearity and affinity.
@@ -192,7 +196,7 @@ notions to solve lattice-based constraints, which we partially use
 in our constraint solving algorithm. Our main contribution
 is the design of a kind language specialized for checking linearity
 and sufficient simple to make
-all simplification rules complete, which allows to keep our type signature simple.
+all simplification rules complete, which allows to keep type signatures simple.
 
 
 %%% Local Variables:
