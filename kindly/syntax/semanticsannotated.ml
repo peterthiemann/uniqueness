@@ -219,6 +219,8 @@ let (-->) : 'a list -> 'a var list -> subst = assert false
 let (./{}) : 'a -> subst -> 'a = assert false
 
 let (<=>) : constr -> constr -> bool = assert false
+let (<<=) : kind -> kind -> kind * kind =
+  fun k1 k2 -> k1, k2
 
 let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) sem =
   fun delta pi gamma i e ->
@@ -241,12 +243,11 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
     let* w = delta.*(ell) in
     let* (gamma', kappas', cstr', k', x', e') = getstpoly w in
     let pi' =
-      if cstr'./{ks --> kappas'} <=> [(k', KUNR None)]./{ks --> kappas'}  
+      if cstr'./{ks-->kappas'} <=> [(k' <<= KUNR None)]./{ks-->kappas'}  
       then pi 
       else pi <-> !$ ell
     in
-    let w = STCLOSURE (gamma', k'./{ks --> kappas'},
-                       x', e'./{ks --> kappas'}) in
+    let w = STCLOSURE (gamma', k'./{ks-->kappas'}, x', e'./{ks-->kappas'}) in
     let* (ell', delta') = salloc delta w in
     Ok (delta', pi' <+> !$ ell', RADDR !$ ell')
   (**)
