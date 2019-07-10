@@ -1,11 +1,6 @@
-\subsection{Inference}
+\newcommand\mcase[1]{\noindent\textbf{Case }#1\\\noindent}
 
-In this section, we show that our type inference algorithm is sound and complete.
-The various theorems and their proofs are direct adaptations
-of the equivalent statements for HM(X).
-
-\subsection{Constraints}
-
+\subsection{Soundness}
 
 \begin{lemma}
   \label{lemma:constrsubst}
@@ -16,15 +11,13 @@ of the equivalent statements for HM(X).
   \end{proof}
 \end{lemma}
 
-\subsubsection{Soundness}
-
 \begin{lemma}
   \label{lemma:constrimply}
   Given a typing derivation $\inferS{C}{\E}{e}{\tau}$ and
   a constraint $D \in \mathcal S$ in solved form such that $\entail{D}{C}$, then
   $\inferS{D}{\E}{e}{\tau}$
   \begin{proof}
-    TODO
+    By induction over the typing derivation
   \end{proof}
 \end{lemma}
 
@@ -52,7 +45,7 @@ where all the binders are replace by normal ones. More formally:
     \bvar{x}{\tau}\in\E
     \vee \bvar{\borrow{x}}{\borrowty{k}{\tau}}\in\E
     \vee \svar{x}{\tau}^n\in\E
-    \right\}
+    \right\} \cup \left\{ \bvar{\tvar}{k} \mid \bvar{\tvar}{k}\in\E \right\}
 \end{align*}
 
 \begin{lemma}
@@ -85,9 +78,13 @@ where all the binders are replace by normal ones. More formally:
   if $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$
   then $\inferS{C}{\unif\Sv}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$.
 \begin{proof}
-  \newcommand\mcase[1]{\noindent\textbf{Case }#1\\\noindent}
   We proceed by induction over the derivation of $\vdash_w$.
-  
+  Most of the cases follow the proofs from HM(X) closely.
+  For brevity, we showcase three rules: the treatment of binders
+  and weakening, where our inference algorithm differ significantly
+  from the syntax directed rule, and the $Pair$ case
+  which showcase the treatment of environment splitting.
+    
   \mcase{$\ruleIVar$}
   
   We have $\Sv = \Sone{x}{\sigma}$.
@@ -134,62 +131,62 @@ where all the binders are replace by normal ones. More formally:
 
   % $\ruleSDLam$
 
-  \mcase{$\ruleIApp$}
+  % \mcase{$\ruleIApp$}
 
-  By induction, we have 
-  $\inferS{C_1}{\unif_1\Sv_1}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
-  and $\unif_1 \tau_1 = \tau_1$
-  and 
-  $\inferS{C_2}{\unif_2\Sv_2}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
-  and $\unif_2 \tau_2 = \tau_2$.
-  %
-  By normalization, $\entail{C}{D}$, $\unif \leq \unif'$ and $\unif C = C$.
-  By \cref{lemma:constrimply} and by substitution, we have
-  $\inferS{C}{\unif\Sv_1}{e_1}{\unif\tau_1}$ and
-  $\inferS{C}{\unif\Sv_2}{e_2}{\unif\tau_2}$.
-  We directly have that
-  $\bsplit{\unif C_s}{\unif \Sv}{\Sv_1}{\unif\Sv_2}$
-  and by \cref{lemma:constrimply}, $\entail{\unif C}{\unif C_s}$.
-  %
-  Finally, since the constraint $\Cleq{\tau_1}{\tau_2\tarr{\kvar}\tvar}$
-  has been solved by normalization,
-  we have $\unif'\tau_1 = \unif\tau_2\tarr{k}\unif\tvar$ for some kind $k$.
-  By rule $App$, we obtain
-  $\inferS{C}
-  {\unif\Sv}{\app{e_1}{e_2}}{\unif(\tvar)}$,
-  which concludes.
-  \\
+  % By induction, we have 
+  % $\inferS{C_1}{\unif_1\Sv_1}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
+  % and $\unif_1 \tau_1 = \tau_1$
+  % and 
+  % $\inferS{C_2}{\unif_2\Sv_2}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
+  % and $\unif_2 \tau_2 = \tau_2$.
+  % %
+  % By normalization, $\entail{C}{D}$, $\unif \leq \unif'$ and $\unif C = C$.
+  % By \cref{lemma:constrimply} and by substitution, we have
+  % $\inferS{C}{\unif\Sv_1}{e_1}{\unif\tau_1}$ and
+  % $\inferS{C}{\unif\Sv_2}{e_2}{\unif\tau_2}$.
+  % We directly have that
+  % $\bsplit{\unif C_s}{\unif \Sv}{\Sv_1}{\unif\Sv_2}$
+  % and by \cref{lemma:constrimply}, $\entail{\unif C}{\unif C_s}$.
+  % %
+  % Finally, since the constraint $\Cleq{\tau_1}{\tau_2\tarr{\kvar}\tvar}$
+  % has been solved by normalization,
+  % we have $\unif'\tau_1 = \unif\tau_2\tarr{k}\unif\tvar$ for some kind $k$.
+  % By rule $App$, we obtain
+  % $\inferS{C}
+  % {\unif\Sv}{\app{e_1}{e_2}}{\unif(\tvar)}$,
+  % which concludes.
+  % \\
   
 
-  \mcase{$\ruleILet$}
+  % \mcase{$\ruleILet$}
 
-  By induction, we have 
-  $\inferS{C_1}{\unif_1\Sv_1}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
-  and $\unif_1 \tau_1 = \tau_1$
-  and 
-  $\inferS{C_2}{\unif_2\Sv_2}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
-  and $\unif_2 \tau_2 = \tau_2$.
-  %
-  By definition of $\text{gen}$, $\entail{C_\schm}{C_1}$.
-  %
-  By normalization, $\entail{C}{D}$, $\unif \leq \unif'$ and $\unif C = C$.
-  By \cref{lemma:constrimply} and by substitution, we have
-  $\inferS{C}{\unif\Sv_1}{e_1}{\unif\tau_1}$ and
-  $\inferS{C}{\unif\Sv_2}{e_2}{\unif\tau_2}$.
-  %
+  % By induction, we have 
+  % $\inferS{C_1}{\unif_1\Sv_1}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
+  % and $\unif_1 \tau_1 = \tau_1$
+  % and 
+  % $\inferS{C_2}{\unif_2\Sv_2}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
+  % and $\unif_2 \tau_2 = \tau_2$.
+  % %
+  % By definition of $\text{gen}$, $\entail{C_\schm}{C_1}$.
+  % %
+  % By normalization, $\entail{C}{D}$, $\unif \leq \unif'$ and $\unif C = C$.
+  % By \cref{lemma:constrimply} and by substitution, we have
+  % $\inferS{C}{\unif\Sv_1}{e_1}{\unif\tau_1}$ and
+  % $\inferS{C}{\unif\Sv_2}{e_2}{\unif\tau_2}$.
+  % %
 
-  \TODO{}
+  % \TODO{}
   
-  $
-  \inferrule[Let]
-  { \inferS{C \Cand D}{\E_1}{e_1}{\tau_1} \\
-    (C_\schm,\schm) = \generalize{D}{\E}{\tau_1}\\
-    \entail{C}{C_\schm} \\
-    \inferS{C}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\
-    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
-  }
-  { \inferS{C}
-    {\E}{\letin{x}{e_1}{e_2}}{\tau_2} }$
+  % $
+  % \inferrule[Let]
+  % { \inferS{C \Cand D}{\E_1}{e_1}{\tau_1} \\
+  %   (C_\schm,\schm) = \generalize{D}{\E}{\tau_1}\\
+  %   \entail{C}{C_\schm} \\
+  %   \inferS{C}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\
+  %   \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
+  % }
+  % { \inferS{C}
+  %   {\E}{\letin{x}{e_1}{e_2}}{\tau_2} }$
   
   \mcase{$\ruleIPair$}
 
@@ -214,26 +211,236 @@ where all the binders are replace by normal ones. More formally:
   which concludes.
   \\
 
-  \mcase{$\ruleIMatch$}
+  % \mcase{$\ruleIMatch$}
 
-  \mcase{$\ruleIBorrow$}
+  % \mcase{$\ruleIBorrow$}
 
-  We trivially have
-  $\bvar{\borrow x}{\borrowty{\unif(k)}{\unif(\tau)}} \in \unif\Sv$.
-  By induction, we have $\unif C = C$ and $\unif(\tau) = \tau$.
-  Since $\kvar$ is new, $\unif(\kvar) = \kvar$.
-  By rule $Borrow$, we obtain
-  $\inferS{C}{\unif\Sv}{\borrow{x}}{\borrowty{\kvar}{\tau}}$,
-  which concludes.
-  \\
+  % We trivially have
+  % $\bvar{\borrow x}{\borrowty{\unif(k)}{\unif(\tau)}} \in \unif\Sv$.
+  % By induction, we have $\unif C = C$ and $\unif(\tau) = \tau$.
+  % Since $\kvar$ is new, $\unif(\kvar) = \kvar$.
+  % By rule $Borrow$, we obtain
+  % $\inferS{C}{\unif\Sv}{\borrow{x}}{\borrowty{\kvar}{\tau}}$,
+  % which concludes.
+  % \\
 
-  \mcase{$\ruleIRegion$}
+  % \mcase{$\ruleIRegion$}
   
 \end{proof}
 \end{theorem}
 
+\subsection{Completeness}
 
-\subsubsection{Completeness}
+We now state our algorithm is complete: for any given
+syntax directed typing derivation, our inference algorithm can find
+a derivation that gives a type at least as general.
+For this, we need first to provide a few additional definitions.
+
+\begin{definition}[More general unifier]
+  Given a set of variable $U$ and $\unif$, $\unif'$ and $\phi$
+  substitutions. \\
+  Then
+  $\unif \leq^{\phi}_{U} \unif'$ iff $(\phi \circ \unif)|_{U} = \unif'|_U$.
+\end{definition}
+
+\begin{definition}[Instance relation]
+  Given a constraints $C$ and two schemes
+  $\schm = \forall \Multi\tvar. \qual{D}{\tau}$ and
+  $\schm' = \forall \Multi\tvar'. \qual{D'}{\tau'} $.
+  Then $\entail{C}{\schm \preceq \schm'}$
+  iff $\entail{C}{\subst{\tvar}{\tau''} D}$
+  and $\entail{C\Cand D'}{\Cleq{\subst{\tvar}{\tau''}\tau}{\tau'}}$
+\end{definition}
+
+We also extend the instance relation to environments $\E$.
+
+
+We now describe the interactions between splitting and the
+various other operations.
+
+\begin{lemma}
+  \label{split:flat}
+  Given $\bsplit{C}{\E}{\E_1}{\E_2}$, Then $\Eflat\E = \Eflat\E_1 \cup \Eflat\E_2$.
+  \begin{proof}
+    By induction over the splitting derivation.
+  \end{proof}
+\end{lemma}
+
+
+\begin{lemma}
+  \label{split:gen}
+  Given $\lsplit{C}{\E_1}{\E_2}{\E_3}$,
+  $\bsplit{C'}{\E'_1}{\E'_2}{\E'_3}$
+  and $\unif$ such that
+  $\E'_i\subset\E''_i$ and $\entail{}{\unif\E''_i \preceq \E_i}$
+  for $i\in\{1;2;3\}$.
+
+  Then $\entail{C}{\unif C'}$.
+\begin{proof}
+  By induction over the derivation of $\bsplit{C'}{\E'_1}{\E'_2}{\E'_3}$.
+\end{proof}
+\end{lemma}
+
+
+We can arbitrarily extend the initial typing environment in an inference
+derivation, since
+it is not used to check linearity.
+
+\begin{lemma}
+  \label{infer:extend}
+  Given $\inferW{\Sv}{(C,\unif)}{\Eflat\E}{e}{\tau}$ and $\E'$ such
+  that $\E \subseteq \E'$, then $\inferW{\Sv}{(C,\unif)}{\Eflat\E'}{e}{\tau}$
+  \begin{proof}
+    By induction over the type inference derivation.
+  \end{proof}
+\end{lemma}
+
+Finally, we present the completeness theorem.
+
+\begin{theorem}[Completeness]
+  Given $\inferS{C'}{\E'}{e}{\tau'}$ and
+  $\entail{}{\unif'\E \preceq \E'}$.
+  Then $$\inferW{\Sv}{(C,\unif)}{\Eflat\E}{e}{\tau}$$
+  for some environment $\Sv$,
+  substitution $\unif$, constraint $C$ and type $\tau$ such
+  that
+  \begin{align*}
+    \unif &\leq^{\phi}_{\fv{\E}} \unif'
+    &\entail{C'&}{\phi C}
+    &\entail{&}{\phi \schm \preceq \schm'}
+    &\Sv&\subset\E
+    % &( C, \schm, \unif) &\leq (C',\schm',\unif')
+  \end{align*}
+  where $\schm' = \generalize{C'}{\E'}{\tau'}$
+  and $\schm = \generalize{C}{\E}{\tau}$
+\end{theorem}
+\begin{proof}
+  Most of the difficulty of this proof comes from proper handling of
+  instanciation and generalization for type-schemes.
+  This part is already proven
+  by \citet{sulzmann1997proofs} in the context
+  of HM(X). As before, we will only present few cases
+  which highlights the handling of bindings and environments.
+  For clarity, we will only present the part of the proof that
+  only directly relate to the new aspect introduced by \lang.
+  %
+  \\
+
+  % \mcase{$\ruleSDVar$}
+
+  % $\ruleIVar$
+
+  
+  \mcase{$
+    \inferrule[Abs]
+    { 
+      \inferS{C'}
+      {\E'_x;\bvar{x}{\tau'_2}}{e}{\tau'_1} \\
+      \addlin{\entail{C}{\Cleq{\E'_x}{k}}}
+    }
+    { \inferS{C'}{\E'_x}
+      {\lam[k]{x}{e}}{\tau'_2\tarr{k}\tau'_1} }
+    $ and $\entail{}{\unif'\E \preceq \E'}$.}
+
+  Let us pick $\tvar$ and $\kvar$ fresh.
+  Wlog, we choose $\unif'(\tvar) = \tau_2$ and $\unif'(\kvar) = k$
+  so that $\entail{}{\unif'\E_x \preceq \E'_x}$.
+  By induction:
+  \begin{align*}
+    \inferW{\Sv_x}{(C,\unif)}{\Eflat\E_x;\bvar{x}{\tvar}&}{e}{\tau}
+    &\unif &\leq^{\phi}_{\fv{\E_x}\cup\{\tvar;\kvar\}} \unif'
+    &\entail{C'&}{\phi C}
+    &\entail{&}{\phi \schm \preceq \schm'}
+  \end{align*}
+  \begin{align*}
+    \Sv_x&\subset\E_x;\bvar{x}{\tvar}
+    &\schm' &= \generalize{C'}{\E_x';\bvar{x}{\tau'_2}}{\tau'_1}
+    &\schm &= \generalize{C}{\E_x;\bvar{x}{\tvar}}{\tau_1}
+  \end{align*}
+
+  Let $C_a = C\Cand \Cleq{\Sv}{\kvar} \Cand \Weaken_{\bvar{x}{\tvar}}(\Sv_x)$
+  and 
+  By definition, $\unif_D\Sdel{\alpha;\kvar} \leq^{\phi_D}_{\fv{\E_x}} \unif$
+  which means we have
+  $\unif_D\Sdel{\alpha;\kvar} \leq^{\phi\circ\phi_D}_{\fv{\E_x}} \unif'$.
+  We also have that $\Sv_x\Sdel{x}\subset \E_x$.
+  
+  Since $\entail{C}{\Cleq{\E'_x}{k}}$, we have $\entail{C}{\unif'\Cleq{\Sv}{\kvar}}$.
+  If $x\in\Sv_x$, then $\Weaken_{\bvar{x}{\tvar}}(\Sv_x) = \Ctrue$.
+  Otherwise we can show by induction
+  that $\entail{C'}{\unif'\Weaken_{\bvar{x}{\tvar}}(\Sv_x)}$.
+  We also have $\unif C = C$, which gives us $\entail{C'}{\unif'(C_a)}$.
+  We can deduce
+  $\entail{C'}{\unif'(C_a)}$.\\
+  This means $(C',\unif')$ is a normal form of $C_a$, so a principal normal form
+  exists. Let $(D,\unif_D) = \normalize{C_a}{\unif\Sdel{\alpha;\kvar}}$.
+  By the property of principal normal forms,
+  we have $\entail{C'}{\rho D}$ and
+  $\unif_D \leq^{\rho}_{\fv{\E_x}} \unif'$.  
+  
+  By application of {\sc Abs$_I$}, we have
+  $\inferW{\Sv_x\Sdel{x}}{(C,\unif_D\Sdel{\tvar,\kvar})}{\Eflat\E_x}
+  {\lam{x}{e}}{\unif_D(\tvar)\tarr{\unif_D(\kvar)}\tau_1}$.\\
+  The rest of the proof proceeds as in the original HM(X) proof.
+  \\
+
+  % $\ruleIAbs$
+
+  \mcase{$
+    \inferrule[Pair]
+    { 
+      \inferS{C'}{\E'_1}{e_1}{\tau'_1} \\
+      \inferS{C'}{\E'_2}{e_2}{\tau'_1} \\
+      \lsplit{C}{\E'}{\E'_1}{\E'_2}
+    }
+    { \inferS{C'}
+      {\E'}{\app{e_1}{e_2}}{\tyPair{\tau'_1}{\tau'_2}} }
+    $ and $\entail{}{\unif'\E \preceq \E'}$}
+
+  The only new elements compared to HM(X) is
+  the environment splitting.
+  By induction:
+  \begin{align*}
+    \inferW{\Sv_1}{(C_1,\unif_1)}{\Eflat\E_1&}{e}{\tau_1}
+    &\unif_1 &\leq^{\phi_2}_{\fv{\E}} \unif'_1
+    &\entail{C'&}{\phi C_1}
+    &\entail{&}{\phi_2 \schm_1 \preceq \schm'_1}
+  \end{align*}
+  \begin{align*}
+    \Sv_1&\subset\E_1
+    &\schm'_1 &= \generalize{C'}{\E'_1}{\tau'_1}
+    &\schm_1 &= \generalize{C}{\E_1}{\tau_1}
+  \end{align*}
+  and
+  \begin{align*}
+    \inferW{\Sv_2}{(C_2,\unif_2)}{\Eflat\E_2&}{e}{\tau_2}
+    &\unif_2 &\leq^{\phi_2}_{\fv{\E}} \unif'_2
+    &\entail{C'&}{\phi C_2}
+    &\entail{&}{\phi_2 \schm_2 \preceq \schm'_2}
+  \end{align*}
+  \begin{align*}
+    \Sv_2&\subset\E_2
+    &\schm'_2 &= \generalize{C'}{\E'_2}{\tau'_2}
+    &\schm_2 &= \generalize{C}{\E_2}{\tau_2}
+  \end{align*}
+
+
+  By \cref{split:flat,infer:extend}, we have
+  \begin{align*}
+    \inferW{\Sv_1}{(C_1,\unif_1)}{\Eflat\E&}{e}{\tau_1}
+    &\inferW{\Sv_2}{(C_2,\unif_2)}{\Eflat\E&}{e}{\tau_2}
+  \end{align*}
+
+  Let $\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}$.
+  We know that $\entail{}{\unif'\E \preceq \E'}$,
+  $\entail{}{\unif'_i\E_i \preceq \E'_i}$ and $\Sv_i\subset\E_i$.
+  By \cref{split:gen},
+  we have $\entail{C}{\unif' C_s}$.
+  The rest of the proof follows HM(X). 
+
+\end{proof}
+
+
 
 %%% Local Variables:
 %%% mode: latex

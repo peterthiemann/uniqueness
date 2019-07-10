@@ -1,11 +1,13 @@
 \section{Inference}
+\label{inference}
 
-An important innovation of \affe is its principal type inference.
+An important contribution of \affe is its principal type inference.
 We now formulate our inference algorithm
 based on the $HM(X)$ framework~\citep{DBLP:journals/tapos/OderskySW99}.
-$HM(X)$ presents a Hindley-Milner type system for a language
+$HM(X)$ is a Hindley-Milner type system for a language
 with qualified types where constraints are expressed in an arbitrary
-constraint $X$. In particular, given some properties on the constraint system $X$,
+theory $X$.
+Most important, given some properties on the constraint system $X$,
 $HM(X)$ ensures principal type inference.
 We apply HM(X) to a concrete constraint language which we name $\CL$.
 We adapt and extend its existing rules to support kind inference,
@@ -122,6 +124,7 @@ We revisit the syntax-directed rules presented in \cref{sdtyping} to highlight t
 novelties
 of our inference algorithm and the differences with the syntax-directed
 system.
+As before, the complete type inference rules are shown in \cref{appendix:infer}.
 
 \subsubsection{Environments and bindings}
 \label{infer:envs}
@@ -509,7 +512,7 @@ We can then state the completeness theorem.
   \begin{align*}
     (C_\schm,\schm) &= \generalize{C}{\unif\E}{\tau}
     &\unif &\leq^{\phi}_{\fv{\E}} \unif'
-    &\entail{C'&}{\phi C}
+    &\entail{C'&}{\phi C_\schm}
     &\entail{C'&}{\phi \schm \preceq \schm'}
     % &( C, \schm, \unif) &\leq (C',\schm',\unif')
   \end{align*}

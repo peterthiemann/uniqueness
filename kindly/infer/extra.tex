@@ -1,32 +1,36 @@
-\section{Inference rules}
+\section{Type Inference}
 \label{appendix:infer}
 
-\begin{figure*}[htp]
+\begin{figure*}[p]
   \input{infer/typing}
-  \caption{Type inference algorithm -- $\inferW{\Sigma}{(C,\psi)}{\bf{\E}}{\bf{e}}{\tau}$ }
-  \label{rules:typing}
+  \caption{Type inference rules -- $\inferW{\Sigma}{(C,\psi)}{\bf{\E}}{\bf{e}}{\tau}$ }
+  \label{rules:typing:full}
 \end{figure*}
 
-\begin{figure}[tp]
-  \centering
-  \begin{mathpar}
-    { \Weaken_{\bvar{x}{\sigma}}(\Sv) =
-      \begin{dcases}
-        \Ctrue& \text{if } x\in\Sv\\
-        \Cleq{\sigma}{\kaff_\infty}&\\
-      \end{dcases}
-    }
+In this appendix, we provide the complete type inference rules
+and show that our type inference algorithm is sound and complete.
+The kinding and constraints rules are already shown in \cref{inference}.
+The type inference rules are shown in \cref{rules:typing:full}.
+The various theorems and their proofs are direct adaptations
+of the equivalent statements for HM(X) \citep{sulzmann1997proofs}.
 
-    \inferrule{
-      \inferK{C \Cand C_x} \E \tau {k'} \\
-      D = C \Cand C_x \Cand \Cleq{k'}k
-    }{
-      \E \vdash \Cleq{\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}{k} \Crewrite  D
-    }
-  \end{mathpar}
-  \caption{Auxiliary rules for inference}
-  \label{op:usgmap}
-\end{figure}
+\clearpage
+% \begin{figure}[tp]
+%   \centering
+%   \begin{mathpar}
+
+%     % \inferrule{
+%     %   \inferK{C \Cand C_x} \E \tau {k'} \\
+%     %   D = C \Cand C_x \Cand \Cleq{k'}k
+%     % }{
+%     %   \E \vdash \Cleq{\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}{k} \Crewrite  D
+%     % }
+%   \end{mathpar}
+%   \caption{Auxiliary rules for inference}
+%   \label{op:usgmap}
+% \end{figure}
+
+\input{infer/metatheory}
 
 %%% Local Variables:
 %%% mode: latex
