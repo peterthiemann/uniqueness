@@ -253,52 +253,16 @@ Capturing a suspended binding is forbidden.
 
 \subsubsection{Copying and Splitting}
 \label{sdtyping:split}
-
-Linear and affine types also control the copy of variables.
-To demonstrate how this is achieve in \lang, we show the
-{\sc Pair} typing rule in \cref{sdtyp:pair}.
-In the {\sc Pair} rule, we split the type environment $\E$ in two parts,
-$\E_1$ and $\E_2$, which are used to typecheck the components of the pair.
-We note the splitting $\lsplit{C}{\E}{\E_1}{\E_2}$ where $C$ is a constraint
-that must be respected for the split to be valid.
-The main splitting rules are shown in \cref{sdtyp:split}. Each
-rule applies to a binding for a given variable. For instance, the
-{\sc Both} rule indicates that if we can prove that $x$ is unrestricted, we
-can duplicate it in both environments.
-Similarly, since immutable borrows are always unrestricted, the
-{\sc Borrow} rule allows to duplicate them arbitrarily.
-The {\sc Left} and {\sc Right} rule allow to move a binding
-to the left or right environment.
-The {\sc Susp} and {\sc SuspB} allow to split off suspended bindings to
-the left environment while conserving access to the binding on the right.
-Such suspended binding can later be turned
-into a borrow inside a region. The asymmetry here must always follow
-the order of execution of the language: in \affe, execution is from left to
-right, which means that a resource can be used as a borrow on the left
-and then as a full resource on the right, assuming that the borrow does not
-escape. The {\sc Susp} rule work with a full resource while the {\sc SuspB}
-rule allow to split off an immutable suspended binding based off a borrow.
-
-Using these various rules, we can distribute the bindings every time an
-expression has multiple sub-expressions such as pairs, function applications
-and let bindings. For instance, in the
-expression
-$\letin{a}{\text{create}\ 10\ x}
-{\introPair{\region[{}]{\Sone x\IBORROW}{\app{\text{length}}{\borrow[\IBORROW]{a}}}}{a}}$,
-we use the rule {\sc Susp} to detach a borrow on the left of the pair.
-Naturally, we must here ensure that the borrow on the left of the pair does not
-escape, which brings us to the typing rules for regions.
-
-\begin{figure}[!h]
+\begin{figure}[tp]
   \centering
-  \begin{subfigure}{0.35\linewidth}
+  \begin{minipage}{0.35\linewidth}
     \begin{mathpar}
       \ruleSDPair
     \end{mathpar}
     \caption{The {\sc Pair} rule}
     \label{sdtyp:pair}
-  \end{subfigure}\hfill
-  \begin{subfigure}{0.6\linewidth}
+  \end{minipage}\hfill
+  \begin{minipage}{0.6\linewidth}
     \centering
     \begin{tabular}
       {@{}>{$}r<{$}@{ $\vdash_e$ }
@@ -310,6 +274,11 @@ escape, which brings us to the typing rules for regions.
       &\bvar{x}{\schm}&\bvar{x}{\schm}&\bvar{x}{\schm}
       &Both\\[2mm]
 
+      {\Cempty}&
+      {\bvar{\borrow[\IBORROW]{x}}{\schm}}&
+      {\bvar{\borrow[\IBORROW]{x}}{\schm}}&{\bvar{\borrow[\IBORROW]{x}}{\schm}}
+      &Borrow\\[2mm]
+
       {\Cempty}&{\bvar{x}{\schm}}&{\bvar{x}{\schm}}&{\bnone}
       &Left\\
       {\Cempty}&{\bvar{x}{\schm}}&{\bnone}&{\bvar{x}{\schm}}
@@ -320,64 +289,55 @@ escape, which brings us to the typing rules for regions.
 
       {\Cempty}&
       {\bvar{\borrow x} \schm}&{\svar[\IBORROW] x \schm^n}&{\bvar{\borrow x} \schm}
-      &SuspB\\[2mm]
-
-      {\Cempty}&
-      {\bvar{\borrow[i]{x}}{\schm}}&
-      {\bvar{\borrow[i]{x}}{\schm}}&{\bvar{\borrow[i]{x}}{\schm}}
-      &Borrow\\
+      &SuspB\\
 
     \end{tabular}
     \caption{Splitting rules for bindings}
     \label{sdtyp:split}
-  \end{subfigure}
+  \end{minipage}
 \end{figure}
+
+The {\sc Pair} typing rule in \cref{sdtyp:pair} demonstrates how \lang
+deals with duplication and dropping of values.
+The splitting $\lsplit{C}{\E}{\E_1}{\E_2}$ in the rule decomposes the
+type environment $\E$ in two parts, $\E_1$ and $\E_2$, which are used
+to typecheck the components of the pair. 
+The constraint $C$ characterizes a valid  splitting.
+
+\cref{sdtyp:split} shows the action of the splitting rules on single
+bindings. If $x$'s type is unrestricted, then
+the {\sc Both} rule indicates that we can duplicate it.
+Similarly, unrestricted borrows can be duplicated according to rule
+{\sc Borrow}.
+The {\sc Left} and {\sc Right} rules are always applicable and move a binding
+either to the left or right environment.
+The rules {\sc Susp} and {\sc SuspB} split off suspended bindings to
+the left while conserving access to the binding on the right.
+A suspended binding can later be turned
+into a borrow inside a region. Splitting of suspended bindings is
+asymmetric. It must follow the order of execution from left to right,
+which means that a resource can be used first as a borrow on the left 
+and then later as a full resource on the right. The {\sc Susp} rule
+works with a full resource while the {\sc SuspB} 
+rule splits off an immutable suspended binding from a borrow.
+
+Splitting applies whenever an
+expression has multiple subexpressions:  pairs, function applications,
+and let bindings. For instance, in the
+expression
+$\letin{a}{\text{create}\ 10\ x}
+{\introPair{\region[{}]{\Sone x\IBORROW}{\app{\text{length}}{\borrow[\IBORROW]{a}}}}{a}}$,
+the rule {\sc Susp} splits off a borrow from  the resource
+\lstinline/a/ to use it in the left component of the pair.
+As usual, a borrow cannot be active in the same scope as its resource.
+The \emph{region} around its use ensures that the borrow in the left component does not
+escape, which brings us to next topic.
+
 
 
 \subsubsection{Regions}
 \label{sdtyping:regions}
-
-In order to provide good support for imperative programming, \affe allows
-to borrow resources.
-Such borrows are constrained to a given syntactic region. We note
-$\region{\Sone x\BORROW}{e}$ the region which allow borrows of $x$ to be used in $e$
-and where $n$ is the nesting of the region.
-Borrows can not be used outside of a corresponding region.
-These remarks lead to an
-algorithm for automatic region annotation: start from each borrow, create
-a region, and extend it as much as possible while respecting other borrows
-and binders.
-A complete specification of the algorithm is provided in \cref{regionannot}.
-In the rest of this section, we will only consider terms
-with fully annotated regions.
-
-The main idea of region typing (implemented by the {\sc Region} rule)
-is to replace suspended bindings by borrow bindings, typecheck the body
-of the region, and finally ensure that the borrow made available inside
-the region does not leak outside.
-This last check is done by using integer indices that correspond to the nesting
-level of the region. The kind of borrow is annotated with the integer
-corresponding to their region, and a final constraint ensure that
-the return type of the region does not contain such borrow.
-
-We illustrate this on the expression $\region{\Sone x\IBORROW}{f(\borrow[\IBORROW]{c})}$
-when $c$ is a linear channel.
-The first step is to check that
-$\svar[\IBORROW]{c}{\text{channel}}$ is in $\E$. We then define $\E'$ which
-corresponds to $\E$ where the suspended binding is replaced by a borrow binding.
-%
-This is done by the borrow relation, noted $\lregion{C}{x}{\E}{\E'}$ and
-whose main rules are shown in \cref{selectrules:region}.
-In our case, we consider an immutable binding, so we replace the suspended
-binding by $\bvar{\borrow[\IBORROW]{c}}{\borrowty[\IBORROW]{k}{\text{channel}}}$.
-We must also check that $\entail{C}{(\kun_n\lk k\lk\kun_\infty)}$.
-We can then typecheck the body of the region, $f(\borrow[\IBORROW]{c})$ in our example, and check that the borrow made available in the region does not escape.
-This is done by the constraint $\Cleq{\tau}{\klin_{n-1}}$, which ensures
-that the kind of $\tau$ does not contain anything whose kind is ``above $n$''
-(for instance, $\borrowty[\IBORROW]{\kun_n}{\text{channel}}$ would have kind
-$\kun_n$).
-
-\begin{figure}[!h]
+\begin{figure}[tp]
   \begin{minipage}{0.4\linewidth}
     \centering
     \begin{mathpar}
@@ -418,6 +378,46 @@ $\kun_n$).
     \label{env:rule:borrow}
   \end{minipage}
 \end{figure}
+
+Borrowing is crucial to support an imperative programming style.
+To guarantee the validity of a borrow, its lifetime must be properly contained in its
+ancestors lifetime. \lang ensures proper nesting of lifetimes by using
+regions. The expression $\region{\Sone x\BORROW}{e}$ indicates a 
+region at nesting level $n$ in which a $\BORROW$-borrow can be taken of $x$.
+
+The typing for a region (see the {\sc Region} rule in \ref{selectrules:region})
+replaces suspended bindings by borrow bindings, typechecks the body
+of the region, and finally ensures that the borrow does not leak outside.
+This last check is done with integer indices that correspond to the nesting
+level of the region. The kind of a borrow is indexed with the level
+corresponding to its region and the constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures that
+the return type of the region must live at some enclosing, lower level.
+
+As an example, consider the expression $\region{\Sone x\IBORROW}{f(\borrow[\IBORROW]{c})}$
+where $c$ is a linear channel.
+The first step is to check that
+$\svar[\IBORROW]{c}{\text{channel}}$ is in $\E$. We then define $\E'$ which
+corresponds to $\E$ where the suspended binding is replaced by a borrow binding.
+%
+This is done by the borrow relation, noted $\lregion{C}{x}{\E}{\E'}$ and
+whose main rules are shown in \cref{selectrules:region}.
+In our case, we consider an immutable binding, so we replace the suspended
+binding by $\bvar{\borrow[\IBORROW]{c}}{\borrowty[\IBORROW]{k}{\text{channel}}}$.
+We must also check that $\entail{C}{(\kun_n\lk k\lk\kun_\infty)}$.
+We can then typecheck the body of the region, $f(\borrow[\IBORROW]{c})$ in our example, and check that the borrow made available in the region does not escape.
+This is done by the constraint $\Cleq{\tau}{\klin_{n-1}}$, which ensures
+that the kind of $\tau$ does not contain anything whose kind is ``above $n$''
+(for instance, $\borrowty[\IBORROW]{\kun_n}{\text{channel}}$ would have kind
+$\kun_n$).
+
+
+These remarks lead to an
+algorithm for automatic region annotation: start from each borrow, create
+a region, and extend it as much as possible while respecting other borrows
+and binders.
+A complete specification of the algorithm is provided in \cref{regionannot}.
+In the rest of this section, we will only consider terms
+with fully annotated regions.
 
 
 \subsubsection{Kind checking}
