@@ -366,8 +366,8 @@ escape, which brings us to next topic.
     % \end{tabular}
     \begin{mathpar}
       \inferrule{
-        \entail{C}{(\BORROW_n\lk k\lk \BORROW_\infty)}\\
-        \BORROW\in\left\{\kun;\kaff\right\}
+        \entail{C}{(\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)}\\
+        \BORROW\in\left\{\kun,\kaff\right\}
       }{
         \lregion{C}{}
         {\svar[\BORROW]{x}{\tau}^n}
@@ -385,39 +385,44 @@ ancestors lifetime. \lang ensures proper nesting of lifetimes by using
 regions. The expression $\region{\Sone x\BORROW}{e}$ indicates a 
 region at nesting level $n$ in which a $\BORROW$-borrow can be taken of $x$.
 
-The typing for a region (see the {\sc Region} rule in \ref{selectrules:region})
-replaces suspended bindings by borrow bindings, typechecks the body
+The typing for a region (see the {\sc Region} rule in \cref{selectrules:region})
+replaces suspended bindings by borrow bindings
+(\cref{env:rule:borrow}), typechecks the body 
 of the region, and finally ensures that the borrow does not leak outside.
-This last check is done with integer indices that correspond to the nesting
-level of the region. The kind of a borrow is indexed with the level
-corresponding to its region and the constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures that
+This last check is done with indices that correspond to the nesting
+level of the region. The kind $k$ of the borrow is indexed with the level $n$
+corresponding to its region, thanks to the constraint $(\BORROW_n\lk
+k)$, and the constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures that 
 the return type of the region must live at some enclosing, lower level.
 
 As an example, consider the expression $\region{\Sone x\IBORROW}{f(\borrow[\IBORROW]{c})}$
-where $c$ is a linear channel.
-The first step is to check that
-$\svar[\IBORROW]{c}{\text{channel}}$ is in $\E$. We then define $\E'$ which
-corresponds to $\E$ where the suspended binding is replaced by a borrow binding.
-%
-This is done by the borrow relation, noted $\lregion{C}{x}{\E}{\E'}$ and
-whose main rules are shown in \cref{selectrules:region}.
-In our case, we consider an immutable binding, so we replace the suspended
-binding by $\bvar{\borrow[\IBORROW]{c}}{\borrowty[\IBORROW]{k}{\text{channel}}}$.
-We must also check that $\entail{C}{(\kun_n\lk k\lk\kun_\infty)}$.
-We can then typecheck the body of the region, $f(\borrow[\IBORROW]{c})$ in our example, and check that the borrow made available in the region does not escape.
-This is done by the constraint $\Cleq{\tau}{\klin_{n-1}}$, which ensures
-that the kind of $\tau$ does not contain anything whose kind is ``above $n$''
-(for instance, $\borrowty[\IBORROW]{\kun_n}{\text{channel}}$ would have kind
-$\kun_n$).
+where $c$ is a linear channel in an environment $\E$.
+The first step is to check that $\svar[\IBORROW]{c}{\text{channel}}$
+is in $\E$.
+When entering the region, rule \TirName{Region} imposes
+$\lregion{C}{x}{\E}{\E'}$, which defines $\E'$
+corresponding to $\E$ where the suspended binding is replaced by the
+borrow binding  $\bvar{\borrow[\IBORROW]{c}}{\borrowty[\IBORROW]{k}{\text{channel}}}$.
+To constrain the borrow to this region we impose the constraint
+$\entail{C}{(\kun_n\lk k) \wedge (\lk\kun_\infty)}$, which affirms
+that the borrow is unrestricted, but can only be used in nesting
+levels $n$ and higher.  
+WIth that setup we typecheck the body of the region,
+$f(\borrow[\IBORROW]{c})$.
+The constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures
+that the kind of $\tau$ does not contain anything whose kind is
+``above level $n$'' and thus confines the borrow to the region
+(for instance, $\borrowty[\IBORROW]{\kun_n}{\text{c}}$ has kind
+$\kun_n$ and thus cannot be returned).
 
 
-These remarks lead to an
-algorithm for automatic region annotation: start from each borrow, create
-a region, and extend it as much as possible while respecting other borrows
-and binders.
-A complete specification of the algorithm is provided in \cref{regionannot}.
-In the rest of this section, we will only consider terms
-with fully annotated regions.
+As it would be cumbersome to markup regions manually, we developed an
+algorithm that starts from each borrow, creates a region around it,
+and extends it as much as possible while respecting other borrows
+and binders. The algorithm (see \cref{regionannot}) also provides the region's level
+and variable annotation. 
+Henceforth, we consider terms with fully annotated regions.
+
 
 
 \subsubsection{Kind checking}
