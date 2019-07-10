@@ -451,7 +451,7 @@ this extended system.
 
 We now show that our extended inference algorithm still satisfies the soundness
 and completeness properties of HM(X). This is achieved by extending
-the original proofs.
+the original proofs from HM(X), which is done in \cref{appendix:infer}.
 %
 The first theorem states that our inference algorithm is sound
 with respect to the syntax directed type system.
@@ -518,7 +518,21 @@ We can then state the completeness theorem.
   \end{align*}
 \end{theorem}
 
-The proofs are given in \cref{appendix:infer}.
+Finally, principality is a direct application of completeness to
+toplevel programs.
+
+\begin{corollary}[Principality]
+  Let $\inferS{\Ctrue}{\E}{e}{\schm}$ a closed typing judgement.\\
+  Then $\inferW{\Sv}{(C,\unif)}{\Eflat\E}{e}{\tau}$
+  such that:
+  \begin{align*}
+    (\Ctrue,\schm_o) &= \generalize{C}{\unif\E}{\tau}
+    &\entail{&}{\schm_o \preceq \schm}
+    % &( C, \schm, \unif) &\leq (C',\schm',\unif')
+  \end{align*}
+
+  
+\end{corollary}
 
 %%% Local Variables:
 %%% mode: latex
