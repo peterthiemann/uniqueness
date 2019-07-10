@@ -161,61 +161,7 @@ a kind variable or it relates two kind variables.
 
 \subsubsection{Environments and bindings}
 \label{sdtyping:envs}
-
-\lang aims to control the usage of variables, either
-through
-linearity and affinity which restrict how variables are shared and ignored,
-or through borrows which allow to circumvent the linearity rules
-in a controlled way.
-In order to check these properties, we introduce several new bindings
-in our typing environments.
-The grammar of type environment (noted $\E$) is shown in \cref{grammar:env}.
-On top of the traditional type and value bindings, noted respectively
-$\bvar{\tvar}{\kschm}$ and $\bvar{x}{\schm}$, we also consider two new
-bindings.
-Borrow bindings $\bvar{\borrow{x}}{\borrowty{k}{\tau}}$ indicates
-that the borrow $\borrow{x}$ can be used directly, as implemented
-by the rule {\sc Borrow} in \cref{selectrules:borrow}.
-Suspended bindings, noted $\svar{x}{\schm}^n$, indicates that $x$
-cannot be used immediately, but will be usable in a region
-marked with $x$, which we detail in \cref{sdtyping:regions}.
-
-Environments are also used to encode several linearity-related properties
-through \emph{environment-wide constraints}.
-Here we present how to control both unused variables and
-closure captures through such environment constraints, noted $\Cleq{\E}{k}$.
-The intuitive meaning of $\Cleq{\E}{k}$ is that for all bindings
-$\bvar{x}{\tau}$ in $\E$,
-if type $\tau$ has kind $k'$ (noted $\inferSK{C}{\E}{\tau}{k'}$)
-then the following constraints should hold: $\Cleq{k'}{k}$.
-Borrow bindings follow the exact same rules, but suspended bindings
-are forbidden in such constraints.
-While this definition is incomplete, it is sufficient to understand
-its use in the {\sc Abs} and {\sc Var} rules shown in \cref{selectrules:binders}.
-%
-The {\sc Var} rule looks up the type scheme of the variable $x$ in
-the environment $\E$
-and instantiate a concrete type through the substitution $\unif$. It then
-checks that the other bindings in $\E$ can safely be discarded by
-ensuring they are not linear. This is achieved through the constraint
-$\Cleq{\E\Sdel{x}}{\kaff_\infty}$ which replaces the traditional
-``weakening'' rule found in many type systems.
-
-The {\sc Abs} rule must ensures that if the body of the lambda captures
-linear or affine variables, the content will be reflected in the kind
-annotated on the arrow, such as $\tau_2 \tarr{k} \tau_1$.
-In order to do so, we constraint all the bindings of $\E$ to be less than $k$.
-If one of the binding of $\E$ contains a type whose kind is affine,
-we will derive the constraints $\Cleq{\kaff}{k}$, which ensures that
-the kind on the arrow is at least affine.
-Capturing a borrow is perfectly allowed here: the kind of the borrow
-will be reflected on the arrow which will restrict the closure
-to the region of the borrow. Capturing a \emph{suspended} binding, however,
-is forbidden.
-Note that $x$ is \emph{not} included in $\E$: since it's the argument of the
-closure, its use should not induce a capture.
-
-\begin{figure}[!h]
+\begin{figure}[tp]
   \begin{minipage}{0.33\linewidth}
     \begin{align*}
       \E &::=\ \Eempty \mid \E;B\tag{Environments}\\
@@ -242,6 +188,66 @@ closure, its use should not induce a capture.
     \label{selectrules:binders}
   \end{minipage}
 \end{figure}
+
+\lang controls the use of variables by supporting new modes of
+binding in a type environment $\E$.
+Its definition is given in  \cref{grammar:env}.
+In addition to standard bindings of type variables to kind schemes,
+$\bvar{\tvar}{\kschm}$,  and value bindings, $\bvar{x}{\schm}$, there
+are suspended bindings and borrow bindings.
+A suspended binding, $\svar{x}{\schm}^n$, indicates that $x$ is
+earmarked for a borrowing use in a nested region
+marked with $x$ (see \cref{sdtyping:regions}), but
+cannot be used directly.
+A borrow binding, $\bvar{\borrow{x}}{\borrowty{k}{\schm}}$, replaces
+such a suspended binding on entry to the $x$-region. It indicates 
+that the borrow $\borrow{x}$ can be used directly. The kind $k$
+restricts the lifetime of the borrow to the region (see \cref{selectrules:borrow}).
+
+% , either
+% through
+% linearity and affinity which restrict how variables are shared and ignored,
+% or through borrows which allow to circumvent the linearity rules
+% in a controlled way.
+% In order to check these properties, we introduce several new bindings
+% in our typing environments.
+% The grammar of type environment (noted $\E$) is shown in \cref{grammar:env}.
+
+% Environments are also used to encode several linearity-related properties
+% through \emph{environment-wide constraints}.
+Constraints on an environment control substructural properties by
+restricting the types of variables.  The constraint $\Cleq{\E}{k}$
+abbreviates $\Cleq\schm k$, for all $\bvar{x}{\schm}$
+% $\svar{x}\schm$, and $\bvar{\borrow{x}}{\borrowty{k'}{\schm}}$
+in $\E$, which in turn means that $k' \lk k$ where $k'$ is the kind of
+the variable's type scheme.
+Borrow bindings follow the exact same rules, but suspended bindings
+are forbidden in an environment $\E$ constrained like that.
+This intuitive explanation is sufficient to understand
+the {\sc Abs} and {\sc Var} rules shown in
+\cref{selectrules:binders}. 
+
+The {\sc Var} rule looks up the type scheme of the variable $x$ in
+the environment $\E$
+and instantiates it using the substitution $\unif$. The rule also
+checks that the other bindings in $\E$ can be safely discarded by
+imposing the constraint $\Cleq{\E\Sdel{x}}{\kaff_\infty}$. 
+It enforces that all remaining bindings (except $x$) are affine or
+unrestricted and can therefore be discarded.
+
+The {\sc Abs} rule ensures that the kind annotation on the arrow type
+($\tau_2 \tarr{k} \tau_1$) reflects the restrictions on the captured variables.
+To do so, the rule imposes the constraint $\Cleq\E k$.
+If, for instance, any binding in $\E$ is affine, it gives rise to the
+constraint $\Cleq{\kaff_n}{k}$, so that  the arrow kind is at least
+affine at nesting level $n$.
+Capturing a borrow is perfectly fine: the kind of the borrow is also a
+lower bound of the arrow kind $k$ which restricts the closure
+to the region of the borrow.
+Capturing a suspended binding is forbidden.
+% Note that $x$ is \emph{not} included in $\E$: since it's the argument of the
+% closure, its use should not induce a capture.
+
 
 
 

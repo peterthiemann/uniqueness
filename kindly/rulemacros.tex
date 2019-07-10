@@ -191,10 +191,10 @@
 \newcommand\ruleSDVar{%
   \inferrule[Var]
   { \bvar{x}{
-      \forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}
+      \forall \Multi{\kvar_i} \forall (\Multi{\tvar_j:k_j}).\ \qual{C_x}{\tau}
     }
     \in \E \\\\
-    \unif = [\kvar_i\mapsto k_i,\tvar_j \mapsto \tau_j] \\
+    \unif = [\Multi{\kvar_i\mapsto k_i},\Multi{\tvar_j \mapsto \tau_j}] \\
     \entail C {\unif(C_x) \Cand \addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}} \\
     % \addlin{
     %   \inferSK{C}{\E}{\unif \tau}{k_\tau}
