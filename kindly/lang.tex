@@ -5,19 +5,19 @@ let-polymorphism, abstract types, and pairs. Its type system manages
 linearity and borrows using kinds and (kind-) constrained types.
 For ease of presentation, we keep the language as simple as possible.
 \begin{itemize}
-\item We showcase pattern matching on pairs rather than algebraic
+\item Pattern matching is demonstrated on pairs rather than algebraic
   datatypes.
-\item We have separate operators for borrowing and reborrowing (taking
+\item There are separate operators for borrowing and reborrowing (taking
   the borrow of a borrow).
-\item We assume that regions are explicit in the code. (But we present
+\item Regions are assumed to be explicit in the code. (But we present
   an algorithm to infer them in \cref{regionannot}.)
-\item We use de Bruijn-indexing to identify regions instead of region
+\item Regions are identified using de Bruijn-indexing instead of region
   variables. 
 \end{itemize}
 
 The rest of this section formalizes  \lang: the syntax (\cref{syntax}),
 the statics in terms of syntax directed typing (\cref{sdtyping}),
-and a dynamics that is linearity-aware (\cref{sem}).
+and a dynamics that is linearity- and resource-aware (\cref{sem}).
 
 \subsection{Syntax}
 \label{syntax}
@@ -110,53 +110,51 @@ in $\Multi[i]\tau$.
 \subsection{Typing}
 \label{sdtyping}
 
-We now present the essential parts of our \lang's type system. A complete
-description of the system is available in \cref{appendix:sdtyping}.
-In this section, we focus on chosen parts of our system
-through a set of selected rules.
+In this section, we focus on the essential and novel parts of the type system. A complete
+description is available in \cref{appendix:sdtyping}.
+% In this section, we focus on chosen parts of our system
+% through a set of selected rules.
 %
-We introduce the following typing, kinding and constraint judgements:
+We discuss judgments for typing, kinding, and constraint entailment:
 \begin{description}
 \item[$\inferS{C}{\E}{e}{\tau}$ --]
   Expression $e$ has type $\tau$ in environment $\E$ under constraints $C$.
 \item[$\inferSK{C}{\E}{\tau}{k}$ --]
   Type $\tau$ has kind $k$ in environment $\E$ under constraints $C$.
-\item[$\entail{D}{C}$ --] Constraint $D$ implies constraint $C$.
+\item[$\entail{D}{C}$ --] Constraint $D$ entails constraint $C$.
 \end{description}
 
 \subsubsection{Kinds and constraints}
 
-One novel feature or \affe is the use of kinds and qualified types to encode
-linear and affine types. Before explaining the details of our type system, we
-give a quick presentation of the kinds and constraints.
-A kind $k$ can be either a kind variable, $\kvar$, or a constant.
+\affe uses of kinds and constrained types to indicate
+linear and affine types.
+% Before explaining the details of our type system, we
+% give a quick presentation of the kinds and constraints.
+A kind $k$ is either a kind variable, $\kvar$, or a constant.
 Each constant is composed of a ``quality'' and a ``level''.
-The quality describes the use pattern of the type and can be
-either unrestricted $\kun$, affine $\kaff$ or linear $\klin$. The level
-describes the nested regions in which it can be used. Levels are represented
-by a natural number of $\infty$.
-$0$ represents the normal scope outside of any region and is often omitted
-(for instance $\kaff_0$ is simply noted $\kaff$).
-$\infty$ is the empty region that is infinitely nested and is mostly used
-as an upper bound.
+The quality describes the use pattern of the type. It can be
+unrestricted $\kun$, affine $\kaff$, or linear $\klin$. The level  $n \in \Nat \cup \{\infty\}$
+describes the nested regions in which the value can be used.
+Level $0$ refers to the top-level scope outside any region; we often elide it
+and write $\kaff$ for $\kaff_0$. Level
+$\infty$ refers to an empty region that is infinitely nested.
 For instance, the constraint $\Cleq{\kvar}{\kun_\infty}$ indicates that
 $\kvar$ must be unrestricted, but can be local to a region.
-%
-Just as presented before, constraints present in schemes and type signatures
-are simply a list of atomic constraints, which are composed
-of kind inequalities.
-%
-Our inequality constraints are based on an inequality relation on
-kind constants noted $\lk_\Lat$. This relation forms a lattice
-and  is summarized in
-\cref{sdtyp:lattice}. We have the basic inequalities on qualities:
-$\kun_n \lk_\Lat \kaff_n \lk_\Lat \klin_n$ for arbitrary regions $n$.
-Additionally, the inequality follows the region nesting, for
-instance $\kaff_n \lk_\Lat \kaff_{n+1}$.
 
-\begin{figure*}[!h]
+Kinds form a lattice with an ordering that implements two principles
+(see \cref{sdtyp:lattice}). First, unrestricted values may be used
+where affine ones are expected and affine ones are less restricted
+than linear one as reflected in \TirName{Lat-UA} and \TirName{Lat-AL}.
+Second, values usable at level $n$ may be used at any more deeply
+nested level $n'$ (where $n\le\infty$ for any $n$) as defined in the \TirName{Lat-X-Level} axioms. 
+
+Constraints are conjunctions of inequality constraints over this kind
+lattice. In most uses, a constraint gives an upper or lower bound for
+a kind variable or it relates two kind variables.
+
+\begin{figure*}[tp]
   \input{infer/lattice}
-  \caption{Lattice inequalities -- $k \lk_\Lat k'$}
+  \caption{Lattice ordering -- $k \lk_\Lat k'$}
   \label{sdtyp:lattice}
 \end{figure*}
 
