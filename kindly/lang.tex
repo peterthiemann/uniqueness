@@ -436,10 +436,130 @@ Henceforth, we consider terms with fully annotated regions.
 \clearpage
 \subsection{Semantics}
 \label{sem}
-
 \input{internal-grammar}
-\input{fig-reduction}
+
+\lstMakeShortInline[style=rule]@
+
+In this section, we present the dynamics of \lang in big-step
+functional
+style~\cite{siek13:_type_safet_three_easy_lemmas,DBLP:conf/esop/OwensMKT16,
+  DBLP:conf/popl/AminR17}. It is given as a function
+@eval \Store \Perm \VEnv i e@ 
+that manipulates the semantic objects defined in
+\cref{fig:syntax-internal-language}. 
+To demonstrate resource handling, the semantics comes with an abstract
+notion of linear resources that can be created, destroyed, observed
+(through unrestricted borrows), and
+updated (through affine borrows). 
+
+Expressions $e$ need to be elaborted with some kind and constraint
+annotations. Polymorphic functions give rise to elaborated
+abstractions which abstract over kind variables $\Multi\kappa$ and
+which are tagged with a kind $k$ indicating their usage restriction
+(linear, affine, etc). Their use
+gives rise to elaborated application where the instantiation of these
+kind variables is given. Pairs also come with a kind tag $k$
+indicating the usage restriction.
+
+Addresses $\Addr$ are composed of a raw location $\Loc$, which is just
+a pointer into a store, and a stack of modifiers that indicates the
+borrows that have been taken from the original object. From the raw
+location, we may take affine borrows and reborrowed. Once we have
+taken an unrestricted borrow (from a raw location or a borrowed one),
+then we can take further unrestricted borrows from it, but no more
+affine ones.
+
+A permission $\Perm$ is a set of addresses. During evaluation it
+contains the set of addresses that may be accessed. For each raw
+location, there is only ever one address inside of $\Perm$.
+
+A result $r$ is either an address or a constant (e.g., a number). All
+non-trivial values are boxed in the sense that they are represented by
+the address of their actual content.
+
+A value environment $\VEnv$ is a mapping from variables to results. 
+
+A storable $W$ is a particular object that can be stored. There are five
+kinds of storable. A poly closure represents a polymorphic
+function. It consists of an environment and the components of an
+elaborated abstraction. Similarly, a closure represents a monomorphic
+function and it elides kind variables and the constraint. A pair
+consists of a kind and two results. A resource is just an indirection
+to another result and the $\blob $ fills a released location.
+
+Finally, the store $\Store$ is a mapping from raw locations to
+storables. It comes with a function
+@salloc : store -> storable -> (loc * store)@ such that
+@salloc delta w@ allocates a free location in @delta@ and fills it with
+storable $w$. It returns the location and the updated store.
+
+
+The evaluation function is indexed by a step count so that each
+invocation is guaranteed to terminate either with an error, a timeout,
+or a meaningful result. Hence its return type is a monad
+\lstinline/'a sem/ which combines error reporting, timeout, and a
+result of type \lstinline/'a/:
+\begin{lstlisting}
+type 'a sem = Error of string | TimeOut | Ok of 'a
+# eval : store -> perm -> venv -> int -> exp -> (store * perm * result) sem
+\end{lstlisting}
+It evaluates the given expression in the context of an initial store, a
+permission to use addresses in the store, a value environment, and a
+step count. If successful, it returns the final store, the remaining
+permissions, and the actual result.
+
 \input{fig-code}
+ 
+We give some excerpts of the definition of @eval@ in
+\cref{fig:big-step-interpretation} and leave the full 
+definition for the appendix~\cref{sec:semant-defin}. The appendix also
+contains the semantics 
+in traditional notation, which does not make the monadic nature of
+evaluation explicit.
+
+The definition uses concrete OCaml syntax with some pretty
+printing. The pervasive \lstinline/let*/ operator acts as monadic bind
+for the \lstinline/sem/ monad. The function header of @eval@ checks
+whether time is up and otherwise proceeds processing the expression.
+
+The @Varinst@ case corresponds to the elaborated application. It
+obtains the variable's value, checks that it is a location, checks the
+permission (the @let*?@ clause), obtains the storable $w$ at that
+location, and checks that it is an STPOLY. Then it updates the
+permission: if the STPOLY closure is unrestricted, then the location
+remains in the permission set, otherwise it is removed. Finally, we
+allocate a new monomorphic closure, add it to the permissions, and
+return the pointer as the result along with the updated store and
+permissions.
+
+The @App@ case implements function application. Compared to the syntax
+it comes with an annotation @sp@ which contains evidence of the
+environment splitting in the application rule. This evidence takes the
+form of two sets of variables from the domain of @gamma@.
+
+To execute an application, we first apply the splitting to @gamma@ and
+evaluate subterm @e_1@ with its part of the environment and the
+decremented timer @i'@. The result must be a location that we are
+permitted to use. Moreover, there must be a monomorphic STCLOS stored
+at that location. The permission to further use this closure is
+withdrawn unless the closure is unrestricted. Finally, we evaluate the
+argument, then the function body, and return its result.
+
+The @Pair@ case does not present any new features, but it
+corresponds to the \TirName{Pair} typing rule.
+
+The @Region@ case implements a region. It obtains the address for @x@,
+the suspended binding, and extends it with the intended borrow
+$\BORROW$. This extension may fail if we try to take an affine borrow
+of an unrestricted borrow. Next, we rebind @x@ to the borrow's
+address, extend the permission accordingly, and execute the region's
+body.  Finally, we withdraw the permission and return the result.
+
+The @Borrow@ case obtains the address for @x@, checks that it is a
+borrow of the correct mode $\BORROW$ and whether it is permitted to
+use it. It just returns the address.
+
+\lstDeleteShortInline@
 
 %%% Local Variables:
 %%% mode: latex

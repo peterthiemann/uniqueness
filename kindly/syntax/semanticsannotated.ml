@@ -3,12 +3,12 @@ type ident = string
 
 type splitting = ident list * ident list
 
-type raw_loc = int
+type loc = int
 type borrow = Imm | Mut
 
-type address = Address of borrow list * raw_loc
+type address = Address of borrow list * loc
 
-let loc : raw_loc -> address =
+let loc : loc -> address =
   fun ell -> Address ([], ell)
 
 type result = RADDR of address | RCONST of int | RVOID
@@ -38,8 +38,8 @@ type schm = SCHM of kappas * (alpha * kind) list * constr * ty
 
 type exp = Const of int
          | Var of ident
-         | VARINST of ident * kind list * ty list
-         | POLYLAM of kappas * constr * kind * ident * exp
+         | Varinst of ident * kind list
+         | Polylam of kappas * constr * kind * ident * exp
          | App of exp * exp * splitting
          | Let of ident * exp * exp * splitting
          | Pair of kind * exp * exp * splitting
@@ -55,14 +55,14 @@ type exp = Const of int
 
 type storable
   = STPOLY of venv * kappas * constr * kind * ident * exp
-  | STCLOSURE of venv * kind * ident * exp
+  | STCLOS of venv * kind * ident * exp
   | STPAIR of kind * result * result
-  | STRESOURCE of result
+  | STRSRC of result
   | STRELEASED
 
 (* hashtable and next free location *)
 module Store = Map.Make(Int)
-type store = Store of storable Store.t * raw_loc
+type store = Store of storable Store.t * loc
 
 type perm = address list
 
@@ -137,19 +137,19 @@ let vsplit : venv -> splitting -> venv * venv =
   fun gamma (vs1, vs2) ->
   vrestrict gamma vs1, vrestrict gamma vs2
 
-let salloc : store -> storable -> (raw_loc * store) sem =
+let salloc : store -> storable -> (loc * store) =
   fun delta w ->
   match delta with
     Store (htable, nexta) ->
-      Ok (nexta, Store (Store.add nexta w htable, nexta+1))
+    (nexta, Store (Store.add nexta w htable, nexta+1))
 
-let slookup : store -> raw_loc -> storable sem =
+let slookup : store -> loc -> storable sem =
   fun (Store (htable, _)) ell ->
   match Store.find_opt ell htable with
   | Some x -> Ok x
   | None -> Error "illegal store location"
 
-let supdate : store -> raw_loc -> storable -> store sem =
+let supdate : store -> loc -> storable -> store sem =
   fun (Store (htable, limit)) ell w ->
   let htable' = Store.add ell w htable in
   Ok (Store (htable', limit))
@@ -157,13 +157,13 @@ let supdate : store -> raw_loc -> storable -> store sem =
 let (.*()) = slookup
 let (.*()<-) = supdate
 
-let getraw_loc : result -> raw_loc sem =
+let getraw_loc : result -> loc sem =
   fun r ->
   match r with
     RADDR (Address ([], rl)) -> Ok rl
   | _ -> Error ("raw location expected")
 
-let getborrowed_loc : result -> (borrow * borrow list * raw_loc) sem =
+let getborrowed_loc : result -> (borrow * borrow list * loc) sem =
   fun r ->
   match r with
     RADDR (Address (b :: bs, ell)) -> Ok (b, bs, ell)
@@ -183,13 +183,13 @@ let getstpoly : storable -> (venv * kappas * constr * kind * ident * exp) sem =
   | _ ->
      Error ("expected STPOLY")
 
-let getstclosure : storable -> (venv * kind * ident * exp) sem =
+let getstclos : storable -> (venv * kind * ident * exp) sem =
   fun w ->
   match w with
-    STCLOSURE (gamma, k, x, e) ->
+    STCLOS (gamma, k, x, e) ->
     Ok (gamma, k, x, e)
   | _ ->
-     Error ("expected STCLOSURE")
+     Error ("expected STCLOS")
 
 let getstpair : storable -> (kind * result * result) sem =
   fun w ->
@@ -199,11 +199,11 @@ let getstpair : storable -> (kind * result * result) sem =
   | _ ->
      Error ("expected STPAIR")
 
-let getstresource : storable -> result sem =
+let getstrsrc : storable -> result sem =
   fun w ->
   match w with
-    STRESOURCE (r) -> Ok r
-  | _ -> Error ("expected STRESOURCE")
+    STRSRC (r) -> Ok r
+  | _ -> Error ("expected STRSRC")
 
 let (let*?) : bool -> (unit -> 'b sem) -> 'b sem =
   fun b f ->
@@ -222,10 +222,12 @@ let (<=>) : constr -> constr -> bool = assert false
 let (<<=) : kind -> kind -> kind * kind =
   fun k1 k2 -> k1, k2
 
+  (* eval header *)
 let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) sem =
   fun delta pi gamma i e ->
   if i=0 then TimeOut else
   match e with
+  (**)
   (* rule const *)
   | Const (c) -> 
     Ok (delta, pi, RCONST c)
@@ -236,7 +238,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
     Ok (delta, pi, r)
   (**)
   (* rule varinst *)
-  | VARINST (x, ks, tys) ->
+  | Varinst (x, ks) ->
     let* rx = gamma.!(x) in
     let* ell = getraw_loc rx in
     let*? () = !$ ell <|= pi in
@@ -247,14 +249,14 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
       then pi 
       else pi <-> !$ ell
     in
-    let w = STCLOSURE (gamma', k'./{ks-->kappas'}, x', e'./{ks-->kappas'}) in
-    let* (ell', delta') = salloc delta w in
+    let w = STCLOS (gamma', k'./{ks-->kappas'}, x', e'./{ks-->kappas'}) in
+    let (ell', delta') = salloc delta w in
     Ok (delta', pi' <+> !$ ell', RADDR !$ ell')
   (**)
   (* rule polylam *)
-  | POLYLAM (kappas, cstr, k, x', e') ->
+  | Polylam (kappas, cstr, k, x', e') ->
      let w = STPOLY (gamma, kappas, cstr, k, x', e') in
-     let* (ell', delta') = salloc delta w in
+     let (ell', delta') = salloc delta w in
      Ok (delta', pi <+> !$ ell', RADDR !$ ell')
   (**)
   (* rule sapp *)
@@ -263,8 +265,9 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* ell_1 = getraw_loc r_1 in
+     let*? () = !$ ell_1 <|= pi_1 in
      let* w = delta_1.*(ell_1) in
-     let* (gamma', k', x', e') = getstclosure w in
+     let* (gamma', k', x', e') = getstclos w in
      let pi_1' = (if k' <= KUNR None then pi_1 else pi_1 <-> !$ ell_1) in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1' gamma_2 i' e_2 in
      let* (delta_3, pi_3, r_3) = eval delta_2 pi_2 gamma'.+(x'-:> r_2) i' e' in
@@ -285,7 +288,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 gamma_2 i' e_2 in
      let w = STPAIR (k, r_1, r_2) in
-     let* (ell', delta') = salloc delta w in
+     let (ell', delta') = salloc delta w in
      Ok (delta_2, pi_2 <+> !$ ell', RADDR !$ ell')
   (**)
   (* rule smatch *)
@@ -360,8 +363,8 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
   | Create (e_1) ->
      let i' = i - 1 in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
-     let w = STRESOURCE (r_1) in
-     let* (ell', delta') = salloc delta w in
+     let w = STRSRC (r_1) in
+     let (ell', delta') = salloc delta w in
      let pi_1' = pi <+> !$ ell' in
      Ok (delta_1, pi_1', RADDR !$ ell')
   (**)
@@ -371,7 +374,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
      let* ell = getraw_loc r_1 in
      let* w = delta_1.*(ell) in
-     let* r = getstresource w in
+     let* r = getstrsrc w in
      let* delta_1' = delta_1.*(ell) <- STRELEASED in
      let pi_1' = pi_1 <-> !$ ell in
      Ok (delta_1', pi_1', RVOID)
@@ -383,7 +386,7 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let* (b, _, ell) = getborrowed_loc r_1 in
      let*? () = (b = Imm) in
      let* w = delta_1.*(ell) in
-     let* r = getstresource w in
+     let* r = getstrsrc w in
      Ok (delta_1, pi_1, r)
   (**)
   (* rule supdate *)
@@ -396,9 +399,9 @@ let rec eval : store -> perm -> venv -> int -> exp -> (store * perm * result) se
      let*? () = (b = Mut) in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 gamma_2 i' e_2 in
      let* w = delta_2.*(ell) in
-     let* r = getstresource w in
+     let* r = getstrsrc w in
      let*? () = rho <|= pi_2 in
-     let* delta_2' = delta_2.*(ell) <- STRESOURCE (r_2) in
+     let* delta_2' = delta_2.*(ell) <- STRSRC (r_2) in
      let pi_2' = pi_2 <-> rho in
      Ok (delta_2', pi_2', RVOID)
   (**)

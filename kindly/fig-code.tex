@@ -1,14 +1,21 @@
 \begin{figure}
+  \begin{minipage}[t]{0.52\linewidth}
+    \lstinputlisting[style=rule,linerange=eval\ header-(**)]
+    {syntax/semanticsannotated.ml}
   \lstsemrule{varinst}
   \medskip
-  \lstsemrule{sapp}
-  \medskip
   \lstsemrule{spair}
+  \end{minipage}
+  \begin{minipage}[t]{0.47\linewidth}
+  \lstsemrule{sapp}
+  % \lstsemrule{spair}
   \medskip
   \lstsemrule{sregion}
   \medskip
   \lstsemrule{sborrow}
-  \caption{Big-step Interpretation}
+  \end{minipage}
+  \caption{Big-step interpretation}
+  \label{fig:big-step-interpretation}
 \end{figure}
 
 
