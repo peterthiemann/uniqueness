@@ -1,4 +1,5 @@
 \begin{mathpar}
+
   \inferrule{}{ \Cleq{\Eempty}{k} \Crewrite  \Cempty}
 
   \inferrule{
@@ -6,24 +7,37 @@
   }{
     \Cleq{\E; B}{k} \Crewrite  C \Cand D
   }
+  \\
 
   \inferrule{
     \E \vdash \Cleq \schm k \Crewrite  C
   }{ \E \vdash \Cleq{\bvar x \schm}{k} \Crewrite  C}
 
+  \inferrule{
+  }{ \E \vdash \Cleq{\bvar{\borrow{x}}{\borrowty{k'}{\tau}}}{k} \Crewrite  \Cleq{k'}{k}}
+
   \inferrule{ }{
     \E \vdash \Cleq{\svar x \schm^n} k \Crewrite  \Cfalse
   }
-
+  % 
   % \inferrule{}{\Cleq{\IBORROW^n} k \Crewrite  \Cleq{\kun_n} k}
-
+  % 
   % \inferrule{}{\Cleq{\MBORROW^n} k \Crewrite  \Cleq{\kaff_n} k}
-
+  
+  \inferrule{
+    \inferK{C \Cand C_x} \E \tau {k'} \\
+    D = C \Cand C_x \Cand \Cleq{k'}k
+  }{
+    \E  \operatorname{\vdash_w}
+    \Cleq{(\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau})}{k} \Crewrite  D
+  }
+  
   \inferrule{
     \inferSK{C \Cand C_x} \E \tau {k'} \\
     D = C \Cand C_x \Cand \Cleq{k'}k
   }{
-    \E \vdash \Cleq{\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}{k} \Crewrite  D
+    \E \operatorname{\vdash_s}
+    \Cleq{\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau}}{k} \Crewrite  D
   }
 
 \end{mathpar}
