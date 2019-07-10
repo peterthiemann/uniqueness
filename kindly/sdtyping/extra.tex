@@ -5,7 +5,7 @@ So far, all \lang programs have been fully annotated with regions information.
 We now show how to infer these regions annotations based on
 optionally-annotated programs.
 First, we extend the region annotation to $\region{S}{E}$ where $S$ is
-a set of variables. This annotation, defined below, is equivalent to nested
+a map from variables to borrow indicator $b$. This annotation, defined below, is equivalent to nested
 region annotations for each individual variable.
 
 \begin{align*}
@@ -13,12 +13,12 @@ region annotations for each individual variable.
 \end{align*}
 
 \Cref{fig:region-annotation} define a rewriting relation $\RannotT{e}{e'}$
-which indicates that an optionally annotated term $e$ can be written
-in a fully annotated term $e'$.
+which indicates that an optionally annotated term $e$ can be rewritten
+as a fully annotated term $e'$.
 Through the rule \textsc{Rewrite-Top}, this is defined
 in term of an inductively defined relation
 $\Rannot{e}{e'}{S}$ where $n$ is the current nesting and $S$ is a set of
-variable that are not enclosed in a region yet.
+variable that are not yet enclosed in a region.
 The base cases are constants, variables and borrows.
 The general idea is to start from the leafs of the syntax tree, create a
 region for each borrow, and enlarge the region as much as possible.
@@ -217,7 +217,7 @@ We can now prove all the necessary high level properties.
   $\entail{}{x = x}$.
 \end{lemma}
 \begin{proof}
-  By definition of $\operatorname{normalize}$, We have $C = \Cleq{k}{k'}_i$
+  By definition of $\operatorname{normalize}$, We have $C = \Multi{\Cleq{k}{k'}}$
   such that the underlying relation has no cycles.
   Thus, we can not deduce neither kind nor type equalities from $C$.
 \end{proof}
