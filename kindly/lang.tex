@@ -190,6 +190,8 @@ The intuitive meaning of $\Cleq{\E}{k}$ is that for all bindings
 $\bvar{x}{\tau}$ in $\E$,
 if type $\tau$ has kind $k'$ (noted $\inferSK{C}{\E}{\tau}{k'}$)
 then the following constraints should hold: $\Cleq{k'}{k}$.
+Borrow bindings follow the exact same rules, but suspended bindings
+are forbidden in such constraints.
 While this definition is incomplete, it is sufficient to understand
 its use in the {\sc Abs} and {\sc Var} rules shown in \cref{selectrules:binders}.
 %
@@ -208,6 +210,10 @@ In order to do so, we constraint all the bindings of $\E$ to be less than $k$.
 If one of the binding of $\E$ contains a type whose kind is affine,
 we will derive the constraints $\Cleq{\kaff}{k}$, which ensures that
 the kind on the arrow is at least affine.
+Capturing a borrow is perfectly allowed here: the kind of the borrow
+will be reflected on the arrow which will restrict the closure
+to the region of the borrow. Capturing a \emph{suspended} binding, however,
+is forbidden.
 Note that $x$ is \emph{not} included in $\E$: since it's the argument of the
 closure, its use should not induce a capture.
 
