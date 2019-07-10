@@ -1,54 +1,37 @@
-\begin{mathpar}
-  \inferrule[AnnotRegion-Empty]{}{
-    \getBorrows{\Sempty}{\Sempty}{\Sempty,\Sempty,\Sempty}
-  }
+\centering
+\begin{tabular}
+  {@{}>{$}c<{$}@{ $\oplus$ }
+  >{$}c<{$}@{ $=$ }
+  >{$}c<{$}@{ $,$ }
+  >{$}c<{$}@{ $,$ }
+  >{$}c<{$}l}
+% 
+  {\Sone{x}{b}}
+  &{\Cempty}
+  &\Cempty&\Sone{x}{b}&\Cempty
+  &AnnotRegion-Left\\
+  % 
+  {\Cempty}
+  &{\Sone{x}{b}}
+  &\Cempty&\Sone{x}{b}&\Cempty
+  &AnnotRegion-Right\\
+  % 
+  {\Sone{x}{\IBORROW}}
+  &{\Sone{x}{\IBORROW}}
+  &\Cempty&\Sone{x}{\IBORROW}&\Cempty
+  &AnnotRegion-Immut\\
+  % 
+  {\Sone{x}{\IBORROW}}
+  &{\Sone{x}{\MBORROW}}
+  &\Sone{x}{\IBORROW}&\Sone{x}{\MBORROW}&\Cempty
+  &AnnotRegion-MutLeft\\
+  % 
+  {\Sone{x}{\MBORROW}}
+  &{\Sone{x}{b}}
+  &\Sone{x}{\MBORROW}&\Cempty&\Sone{x}{b}
+  &AnnotRegion-MutRight
+\end{tabular}
 
-  \inferrule[AnnotRegion-Nonempty]{
-    \getBorrows{B_1}{B_2}{S_1,S,S_2}\\
-    \getBorrows{b_1}{b_2}{S'_1,S',S'_2}
-  }{
-    \getBorrows{B_1;b_1}{B_2;b_2}
-    {S_1\Sunion S'_1,S\Sunion S',S_2\Sunion S'_2}
-  }
-\end{mathpar}
-\hrulefill
-\begin{mathpar}
-  \inferrule[AnnotRegion-Left]{}{
-    \getBorrows
-    {\Sone{x}{b}}
-    {\Cempty}
-    {\Cempty,\Sone{x}{b},\Cempty}
-  }
-  
-  \inferrule[AnnotRegion-Right]{}{
-    \getBorrows
-    {\Cempty}
-    {\Sone{x}{b}}
-    {\Cempty,\Sone{x}{b},\Cempty}
-  }
-  
-  \inferrule[AnnotRegion-Immut]{}{
-    \getBorrows
-    {\Sone{x}{\IBORROW}}
-    {\Sone{x}{\IBORROW}}
-    {\Cempty,\Sone{x}{\IBORROW},\Cempty}
-  }
-  
-  \inferrule[AnnotRegion-MutLeft]{}{
-    \getBorrows
-    {\Sone{x}{\IBORROW}}
-    {\Sone{x}{\MBORROW}}
-    {\Sone{x}{\IBORROW},\Sone{x}{\MBORROW},\Cempty}
-  }
-  
-  \inferrule[AnnotRegion-MutRight]{}{
-    \getBorrows
-    {\Sone{x}{\MBORROW}}
-    {\Sone{x}{b}}
-    {\Sone{x}{\MBORROW},\Cempty,\Sone{x}{b}}
-  }
-  
-\end{mathpar}
 \hrulefill
 \begin{mathpar}
   \inferrule
@@ -72,6 +55,12 @@
   { \Rannot
     {\letin{x}{e_1}{e_2}}
     {\letin{x}{\region{S_1}{e'_1}}{\region{S'_2}{e'_2}}}{S} }
+
+  \inferrule[Rewrite-Lam]
+  { \Rannot{e}{e'}{B} \\
+    B_x = B\Sonly{x}
+  }
+  { \Rannot{\lam{x}{e}}{\lam{x}{\region{B_x}{e'}}}{B\Sdel{x}} }
   
 
   \inferrule
@@ -87,12 +76,6 @@
   { \Rannot{e}{e'}{B} }
   { \Rannot{\regionS{e}}{\region{B}{e'}}{\Sempty} }
 
-  \inferrule[Rewrite-Lam]
-  { \Rannot{e}{e'}{B} \\
-    B_x = B\Sonly{x}
-  }
-  { \Rannot{\lam{x}{e}}{\lam{x}{\region{B_x}{e'}}}{B\Sdel{x}} }
-
   \inferrule[Rewrite-Pair]
   { \forall i,\ \Rannot{e_i}{e'_i}{B_i} \\
     \getBorrows{B_1}{B_2}{S_1,S,S_2}
@@ -101,6 +84,13 @@
     {\introPair{e_1}{e_2}}
     {\introPair{\region{S_1}{e'_1}}{\region{S_2}{e'_2}}}
     {S} }
+
+  \inferrule[AnnotRegion]{
+    \forall i,\ \getBorrows{b_i}{b'_i}{S^l_i,S^m_i,S^r_i}
+  }{
+    \getBorrows{\Multi[i]{b}}{\Multi[i]{b'}}
+    {\cup_i S^l_i, \cup_i S^m_i, \cup_i S^r_i}
+  }
 
   \inferrule[Rewrite-Top]
   { \Rannot[1]{e}{e'}{S} }

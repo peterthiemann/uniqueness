@@ -1,5 +1,6 @@
-\section{Annotating regions}
+\section{Automatic region annotation}
 \label{regionannot}
+
 
 So far, all \lang programs have been fully annotated with regions information.
 We now show how to infer these regions annotations based on
@@ -7,11 +8,18 @@ optionally-annotated programs.
 First, we extend the region annotation to $\region{S}{E}$ where $S$ is
 a map from variables to borrow indicator $b$. This annotation, defined below, is equivalent to nested
 region annotations for each individual variable.
-
+%
 \begin{align*}
   \region{\Sone x\BORROW;S}{e} &= \region{\Sone x\BORROW}{\region{S}{e}}& \region{\emptyset}{e} &= e\\
 \end{align*}
-
+%
+\begin{figure*}[b]
+  \centering
+  \input{region-annot}
+  \caption{Automatic region annotation --- $\RannotT{e}{e'}$}
+  \label{fig:region-annotation}
+\end{figure*}
+%
 \Cref{fig:region-annotation} define a rewriting relation $\RannotT{e}{e'}$
 which indicates that an optionally annotated term $e$ can be rewritten
 as a fully annotated term $e'$.
@@ -46,12 +54,6 @@ Explicitly annotated regions are handled specially through
 rule \textsc{Rewrite-Region}. In that case, we assume that all inner
 borrows should be enclosed immediately.
 
-\begin{figure*}[!hbt]
-  \centering
-  \input{region-annot}
-  \caption{Automatic region annotation --- $\RannotT{e}{e'}$}
-  \label{fig:region-annotation}
-\end{figure*}
 
 
 \section{Constraints}
@@ -73,7 +75,7 @@ We say that $C$ and $D$ are equivalent, noted $C \equivC D$,
 when $\entail{C}{D}$ and $\entail{D}{C}$.
 \TODO{Give the cylindric properties ?}
 
-\begin{figure}[btp]
+\begin{figure}[!btp]
   \centering
   \begin{align*}
     C &::= \Cleq{\tau_1}{\tau_2}
@@ -111,8 +113,7 @@ The normalization function is described in \cref{infer:solving}.
 
 Our goal is to prove that $\CL$ supports all the properties necessary for
 principal type inference, as defined by HM(X).
-
-In order to prove this, we first prove that constraint solving
+We first prove that constraint solving
 does compute normal forms, and that such normal forms are unique.
 
 
@@ -245,6 +246,7 @@ HM(X):
 This is sufficient to show that $HM(\CL)$ is principal. However,
 we do not use HM(X) directly but an extended version with kind inference,
 linear and affine types, and borrow.
+We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
 
 
 \section{Syntax directed typing}
