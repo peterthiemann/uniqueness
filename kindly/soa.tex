@@ -39,8 +39,8 @@ Quill does not exposes a kind language, but
 uses typeclass-like mechanism and annotation on arrows.
 It supports both a most general type for function composition and
 principal type inference.
-We believe every Quill's kind signature can be expressed in \lang by leveraging
-kind inequalities.
+We were able to express the type signatures of all Quill examples
+in \lang by leveraging kind inequalities.
 Unlike Quill,
 we provide a linearity-aware semantics and prove its soundness.
 Quill does not support borrows.
@@ -52,21 +52,20 @@ Quill does not support borrows.
 % with the kind of $*$ being $\kvar\to\kvar\to\kvar$.
 
 Alms~\citep{DBLP:conf/popl/TovP11} is an ML-like language with rich, kind-based
-affine types and ML modules.
+affine types and ML modules, similar to \lang.
 Their system often relies on existential types to track the identity
-of objects. For instance, they present an array creation
-functions of type \lstinline/int -> 'a -> \E 'b. ('a, 'b) array/ where
-\lstinline/'a/ is the elements' type and \lstinline/'b/
-is a unique identifier of the array.
+of objects. For instance
+\lstinline/Array.create : int -> 'a -> \E 'b. ('a, 'b) array/ where
+\lstinline/'b/ uniquely identify of the array.
 Due to the reliance on existentials, Alms does not support complete type inference.
 Furthermore, Alms does not support borrow and often rely
 on manual passing of capabilities.
 In our experience, \affe's limited support for existential types through
-regions is sufficient for a large majority of examples and provides
+regions is sufficient to express Alms' examples and leads to
 a more convenient programming style for imperative code.
 %
-Apart from existential types, Alms relies
-on union and intersection operators and dependent kinds while
+Kind-wise, Alms relies
+on unions, intersections and dependent kinds while
 \lang uses qualified types.
 We believe most of Alms' kind signatures can be expressed equivalently in
 our system: for instance the pair type constructor
@@ -91,16 +90,16 @@ This design is easy to retrofit on top of an existing compiler
 such as GHC, but has several disadvantages\footnote{
   See the in-depth discussion attached to the GHC proposal starting here: \url{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}}.
 Most relevant to \lang:
-\begin{itemize}
+\begin{itemize}[leftmargin=*]
 \item Their system does not admit subtyping for arrows and leverages
-  $\eta$-expansion to allow passing unrestricted functions in linear
-  contexts. This is acceptable in a non-strict language such as
+  $\eta$-expansion to pass unrestricted functions in linear
+  contexts. This works in a non-strict language such as
   Haskell but can not be used in a strict setting.
 \item
   While the GHC proposal implements some type inference,
-  their algorithm is not formalized and is not complete.
+  it is neither formalized nor complete.
 \item
-  Linear Haskell promotes a CPS style with functions such as 
+  Linear Haskell promotes a continuation-passing style with functions such as 
   \lstinline/withFile : path -> (file ->. file) ->. unit/
   to ensure that files are only used linearly.
   \lang follows System F\degree, Quill and Alms and
@@ -109,9 +108,9 @@ Most relevant to \lang:
   We believe this leads to a more natural programming style
   and ease modular reasoning about linearity.
   In particular, using abstraction through modules,
-  programmers only need consider the module
-  implementation to ensure that some linear
-  resource is properly handled.
+  programmers only need to consider the module
+  implementation to ensure that linear
+  resources are properly handled.
 % \item
 %   Linear Haskell introduces a notion of linear monad to express
 %   imperative code conveniently. Again, this solution is suitable in Haskell,
@@ -148,25 +147,23 @@ an ML module system.
 Rust's lifetime system is more explicit and more expressive than \lang,
 however Rust does not provide type inference
 and only provides \emph{partial} lifetime inference.
-Recently, \citet{DBLP:journals/corr/abs-1903-00982} presented Oxide,
-a core language for Rust which formalizes its ownership discipline
-including non-lexical lifetimes, which we look forward to use to improve
-our borrowing system.
+Recently, \citet{DBLP:journals/corr/abs-1903-00982}
+formalized Rust's ownership discipline, including non-lexical lifetimes.
+We believe this work
+could help us improve our handling of regions and of successive exclusive borrows.
 
 Vault~\citep{DBLP:conf/pldi/DeLineF01}
-is a low-level language which uses typestate along with \emph{keys}
-to track ownership. It also introduces a novel paradigm
-called \emph{adoption and focus} \citep{DBLP:conf/pldi/FahndrichD02}
-which allow restricting the scope of linear objects
-(adoption) or temporarily treating them as non-linear (focus).
-These mechanisms serve a similar purpose as borrows, but are tracked
-much more precisely thanks to the use of typestate and pre/post-conditions,
-which makes it very expressive (at the cost of some verbosity).
-However, Vault is mostly geared towards traditional imperative programming:
-functions can't capture linear objects and it does not support
-type inference.
-
-Plaid \&Co by Aldrich and others
+and Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}
+leverage typestate and capabilities
+to express very rich properties in objects and protocols.
+These systems are designed for either low-level or object-oriented
+programming, and do not immediately lend themselves to a more functional
+style. Furthermore, while their type-systems are much more
+powerful than \affe's, they require many annotations by the programmer
+and do not support any inference.
+It could however be interesting to expand \affe with limited
+forms of typestate as a local, opt-in feature that would provide
+more expressivity at the cost of inference.
 
 \subsection{Type-system features}
 
