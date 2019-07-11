@@ -1,13 +1,14 @@
 \section{Related work}
 \label{sec:related-work}
-Haller, P., Odersky, M.: Capabilities for Uniqueness and Borrowing
-\cite{DBLP:conf/ecoop/HallerO10}
 
-Sing\#
+% Haller, P., Odersky, M.: Capabilities for Uniqueness and Borrowing
+% \cite{DBLP:conf/ecoop/HallerO10}
 
-John Tang Boyland and William Retert. Connecting effects and
-uniqueness with adoption. In POPL, pages 283–295. ACM, 2005.
-\cite{DBLP:conf/popl/BoylandR05}
+% Sing\#
+
+% John Tang Boyland and William Retert. Connecting effects and
+% uniqueness with adoption. In POPL, pages 283–295. ACM, 2005.
+% \cite{DBLP:conf/popl/BoylandR05}
 
 
 \subsection{Substructural type-systems in functional languages}
@@ -79,34 +80,35 @@ modules by allowing to keep some type unrestricted inside a module, but
 exposing it as affine. We support a similar programming style, which
 we showcase in \cref{motivation}.
 
-Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18} aims
-to retrofit Haskell with linear types.
-Linear Haskell introduces a new notion
-of ``linear arrows'', noted $\multimap$ similar to linear logic,
-which are functions who use their argument exactly once.
+The goal of Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
+(LH) is to retrofit linear types to Haskell.
+LH introduces a new notion
+of ``linear arrows'', written $\multimap$ similar to linear logic,
+which are functions that \emph{use} their argument exactly once.
 % By contrast, in \lang linearity is only decided
 % by the kinds, and $\tarr{\klin}$ simply denotes \emph{single-use functions}.
 This design is easy to retrofit on top of an existing compiler
-such as GHC, but has several disadvantages\footnote{
+such as GHC, but there are quite controversial discussions about it\footnote{
   See the in-depth discussion attached to the GHC proposal starting here: \url{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}}.
 Most relevant to \lang:
 \begin{itemize}[leftmargin=*]
-\item Their system does not admit subtyping for arrows and leverages
+\item LH does not admit subtyping for arrows and requires
   $\eta$-expansion to pass unrestricted functions in linear
-  contexts. This works in a non-strict language such as
-  Haskell but can not be used in a strict setting.
+  contexts. This approach is acceptable in a non-strict language such as
+  Haskell but changes the semantics in a strict setting.
 \item
-  While the GHC proposal implements some type inference,
+  The GHC implementation of LH performs type inference, but
   it is neither formalized nor complete.
 \item
-  Linear Haskell promotes a continuation-passing style with functions such as 
+  LH promotes a continuation-passing style with functions such as 
   \lstinline/withFile : path -> (file ->. file) ->. unit/
-  to ensure that files are only used linearly.
-  \lang follows System F\degree, Quill and Alms and
-  adopts a direct style, where types themselves are
-  described as affine or linear.
-  We believe this leads to a more natural programming style
-  and ease modular reasoning about linearity.
+  to ensure linear use of resources. This style leads to problems with
+  placing the annotation on, e.g., the IO monad.
+  \lang follows System F\degree, Quill, and Alms, all of which support
+  resource handling in direct style, where types themselves are
+  described as affine or linear. (Or course, continuation-passing
+  style is also supported.)
+  We expect that the direct approach eases modular reasoning about linearity.
   In particular, using abstraction through modules,
   programmers only need to consider the module
   implementation to ensure that linear
@@ -123,20 +125,21 @@ Most relevant to \lang:
 \end{itemize}
 
 Mezzo~\citep{DBLP:phd/hal/Protzenko14} is an ML-like language
-with an extremely rich capability system which allows it to encode numerous
+with an extremely rich capability system which is able to encode numerous
 properties akin to separation logic~\citep{DBLP:conf/lics/Reynolds02}.
-The main contribution of Mezzo is to push the boundary of what is possible
-to do with a type system. This makes it far more expressive than \lang, but
-also quite harder to use, and precludes any form of complete type
-inference.
+Mezzo explores the  boundaries of the design space of type systems for
+resources. Hence, it is more expressive than \lang, but
+much harder to use. The Mezzo typechecker relies on explicit
+annotations and it is not known whether type inference for Mezzo is possible.
 
 \subsection{Other substructural type-systems}
 
 Linear and affine discipline have also been used in non-functional
 settings, notably in the context of low-level imperative programming
 and object systems. In particular, \lang uses borrows and regions
-which were initially developed in objects or
-imperatives settings~\citep{DBLP:conf/popl/BoylandR05,DBLP:conf/pldi/GrossmanMJHWC02}.
+which were initially developed in the context of imperative and
+object-oriented
+programming~\citep{DBLP:conf/popl/BoylandR05,DBLP:conf/pldi/GrossmanMJHWC02}. 
 
 Rust~\citep{rust} is the first
 mainstream language to popularize the idea of borrowing and ownership
@@ -166,18 +169,23 @@ forms of typestate as a local, opt-in feature that would provide
 more expressivity at the cost of inference.
 
 \subsection{Type-system features}
-
-\lang relies on qualified types~\cite{DBLP:journals/scp/Jones94}
-to introduce the necessary kind equalities for linear types. In
+%
+\lang relies on constrained types
+to introduce the kind inequalities required for linear types. In
 particular, we use HM(X)~\citep{DBLP:journals/tapos/OderskySW99} which
-allow to use qualified type in an ML-like language with complete
+allow to use constrained types in an ML-like language with complete
 type inference.
 HM(X) has been shown to be compatible with subtyping,
-bounded universal and existentials~\citep{DBLP:conf/icfp/Simonet03}
+bounded universal and existentials~\citep{DBLP:conf/icfp/Simonet03},
 GADTs~\citep{DBLP:journals/toplas/SimonetP07},
-and syntactic proof of soundness~\citep{DBLP:journals/entcs/SkalkaP02}.
-This makes us confident that the system developed in \lang
+and there exists a syntactic soundness proof~\citep{DBLP:journals/entcs/SkalkaP02}.
+These results make us confident that the system developed in \lang
 could be applied to larger and more complex languages such as OCaml.
+
+Alternatively, we could have based the system on qualified
+types~\cite{DBLP:journals/scp/Jones94}, similarly to Quill. This
+choice would also be sustainable as qualified types is part of the
+foundation of Haskell's type system.
 
 The subtyping discipline used in \lang is very similar
 to structural subtyping, where the only subtyping (or here, subkinding)
