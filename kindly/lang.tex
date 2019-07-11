@@ -32,9 +32,9 @@ A borrow $\borrow{x}$ is always taken from a variable $x$. The
 \emph{borrow annotation} $\BORROW$ indicates whether the borrow is mutable
 ($\MBORROW$) or immutable ($\IBORROW$). If $x$ is already borrowed,
 then we need to use the reborrow expression $\reborrow{x}$.
-
+%
 A region $\region{\Sone x\BORROW}{e}$ is annotated with its nesting $n$, the variable $x$ that may be borrowed in $e$, and the kind of borrow $\BORROW$.
-
+%
 A match is indexed with a \emph{match specification} $\etransfm$ that indicates
 whether the match should work on borrows ($\etransfm=\&^b$) or not ($\etransfm=id$).
 
@@ -100,7 +100,7 @@ in $\Multi[i]\tau$.
 % $\tydecl{t}{\kschm}{K}{\tau}$, introduce both a new type constructor $\T{t}$ and
 % a data constructor $K$.
 
-\begin{figure*}[t]
+\begin{figure*}[b]
   \centering
   \input{grammar}
   \caption{Syntax}
