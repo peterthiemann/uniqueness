@@ -464,14 +464,16 @@ The first theorem states that our inference algorithm is sound
 with respect to the syntax directed type system.
 
 \begin{theorem}[Soundness of inference]
-  Given a type environment $\E$ and a term $e$,\\
-  if $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$
-  then $\inferS{C}{\unif\Sv}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$.
+  Given a type environment $\E$ containing only value bindings,
+  $\E|_\tau$ containing only type binding and a term $e$,\\
+  if $\inferW{\Sv}{(C,\unif)}{\E;\E_\tau}{e}{\tau}$
+  then $\inferS{C}{\unif(\Sv;\E_\tau)}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$
 \end{theorem}
 
-Note here that the syntax-directed derivation holds with the usage environment $\Sv$ instead of the originally provided environment $\E$. Indeed,
+The syntax-directed derivation holds with the usage environment $\Sv$ instead of the originally provided environment $\E$. Indeed,
 $\E$ does not contain suspended and borrow bindings, since those
-are discovered on the fly and recorded in $\Sv$.
+are discovered on the fly and recorded in $\Sv$. The type binding, however,
+are directly taken from the syntax-directed derivation.
 
 The second theorem states that our algorithm is complete: for any given
 syntax directed typing derivation, our inference algorithm can find

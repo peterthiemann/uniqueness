@@ -74,9 +74,10 @@ where all the binders are replace by normal ones. More formally:
 
 
 \begin{theorem}[Soundness of inference]
-  Given a type environment $\E$ and a term $e$,\\
-  if $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$
-  then $\inferS{C}{\unif\Sv}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$.
+  Given a type environment $\E$ containing only value bindings,
+  $\E|_\tau$ containing only type binding and a term $e$,\\
+  if $\inferW{\Sv}{(C,\unif)}{\E;\E_\tau}{e}{\tau}$
+  then $\inferS{C}{\unif(\Sv;\E_\tau)}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$
 \begin{proof}
   We proceed by induction over the derivation of $\vdash_w$.
   Most of the cases follow the proofs from HM(X) closely.
@@ -94,13 +95,14 @@ where all the binders are replace by normal ones. More formally:
   $\entail C \unif'(C_x) \Cand \Cleq{\unif_x\Sv\Sdel{x}}{\kaff_\infty}$,
   $\unif' \leq \unif$ and $\unif'C = C$.
   By definition, $\unif_x\unif' = \unif'$.
-  By rule $Var$, we obtain $\inferS{C}{\unif_x\Sv}{x}{\unif_x\unif'\tau}$, which concludes.
+  By rule $Var$, we obtain
+  $\inferS{C}{\unif_x(\Sv;\E_\tau)}{x}{\unif_x\unif'\tau}$, which concludes.
   \\
   
   \mcase{$\ruleIAbs$}
 
   By induction, we have
-  $\inferS{C'}{\Sv_x}{e}{\tau}$, $\unif C = C$
+  $\inferS{C'}{\Sv_x;\E_\tau}{e}{\tau}$, $\unif C = C$
   and $\unif \tau = \tau$.\\
   By definition of normalize and \cref{lemma:constrsubst}, we have
   $\entail{C}{C'\Cand\Cleq{\unif'\Sv}{\unif'\kvar} \Cand \Weaken_{x}(\unif'\Sv_x)}$ and
@@ -112,21 +114,21 @@ where all the binders are replace by normal ones. More formally:
   \item If $x\in\Sv_x$, then $\Weaken_{x}(\unif\Sv_x) = \Ctrue$
     and by \cref{lemma:env:flat}, $\Sv_x = \Sv;\bvar{x}{\alpha}$.
     We can deduce that
-    $\inferS{C'\Cand \Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x)}{\unif\Sv;\bvar{x}{\unif(\tvar)}}{e}{\tau}$.
+    $\inferS{C'\Cand \Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x)}{\unif\Sv;\E_\tau;\bvar{x}{\unif(\tvar)}}{e}{\tau}$.
   \item If $x\notin\Sv_x$, then $\Sv = \Sv_x$ and 
     $\Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x) = \Cleq{\unif\tvar}{\kaff_\infty}$.
     By \cref{lemma:typ:weakening},
     we have that
-    $\inferS{C'\Cand \Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x)}{\unif\Sv;\bvar{x}{\unif(\tvar)}}{e}{\tau}$
+    $\inferS{C'\Cand \Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x)}{\unif\Sv;\E_\tau;\bvar{x}{\unif(\tvar)}}{e}{\tau}$
   \end{enumerate}
   % By \cref{lemma:env:flat}, we know that if $x\in\Sv_x$, then 
   % By \cref{lemma:typ:weakening,}, we deduce
   % that
   % $\inferS{C'\Cand \Weaken_{x}(\unif\Sv_x)}{\unif\Sv;\bvar{x}{\unif(\tvar)}}{e}{\tau}$.
   By \cref{lemma:constrimply}, we
-  have $\inferS{C}{\unif\Sv;\bvar{x}{\unif(\tvar)}}{e}{\tau}$.\\
+  have $\inferS{C}{\unif(\Sv;\E_\tau);\bvar{x}{\unif(\tvar)}}{e}{\tau}$.\\
   By rule $Abs$, we obtain
-  $\inferS{C}{\unif\Sv}{\lam{x}{e}}{\unif(\tvar)\tarr{\unif(\kvar)}\tau}$ which concludes.
+  $\inferS{C}{\unif(\Sv;\E_\tau)}{\lam{x}{e}}{\unif(\tvar)\tarr{\unif(\kvar)}\tau}$ which concludes.
   \\
 
   % $\ruleSDLam$
@@ -191,12 +193,14 @@ where all the binders are replace by normal ones. More formally:
   \mcase{$\ruleIPair$}
 
   By induction, we have 
-  $\inferS{C_1}{\unif_1\Sv_1}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
+  $\inferS{C_1}{\unif_1(\Sv_1;\E^1_\tau)}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
   and $\unif_1 \tau_1 = \tau_1$
   and 
-  $\inferS{C_2}{\unif_2\Sv_2}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
+  $\inferS{C_2}{\unif_2(\Sv_2;\E^2_\tau)}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
   and $\unif_2 \tau_2 = \tau_2$.
   %
+  Wlog, we can rename the type $\E^1_\tau$ and $\E^2_\tau$ to be disjoint
+  and define $\E_\tau = \E^1_\tau \cup \E^2_\tau$.
   By normalization, $\entail{C}{D}$, $\unif \leq \unif'$ and $\unif C = C$.
   By \cref{lemma:constrimply} and by substitution, we have
   $\inferS{C}{\unif\Sv_1}{e_1}{\unif\tau_1}$ and
@@ -207,7 +211,7 @@ where all the binders are replace by normal ones. More formally:
   %
   By rule $Pair$, we obtain
   $\inferS{C}
-  {\unif\Sv}{\app{e_1}{e_2}}{\unif(\tyPair{\tvar_1}{\tvar_2}))}$,
+  {\unif(\Sv;\E_\tau)}{\app{e_1}{e_2}}{\unif(\tyPair{\tvar_1}{\tvar_2}))}$,
   which concludes.
   \\
 
