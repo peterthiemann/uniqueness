@@ -438,7 +438,7 @@ Henceforth, we consider terms with fully annotated regions.
 \label{sem}
 \input{internal-grammar}
 
-\lstMakeShortInline[style=rule]@
+\lstMakeShortInline[style=rule,columns=flexible,basicstyle=\normalsize\normalfont]@
 
 In this section, we present the dynamics of \lang in big-step
 functional
@@ -501,7 +501,7 @@ or a meaningful result. Hence its return type is a monad
 result of type \lstinline/'a/:
 \begin{lstlisting}
 type 'a sem = Error of string | TimeOut | Ok of 'a
-# eval : store -> perm -> venv -> int -> exp -> (store * perm * result) sem
+val eval : store -> perm -> venv -> int -> exp -> (store * perm * result) sem
 \end{lstlisting}
 It evaluates the given expression in the context of an initial store, a
 permission to use addresses in the store, a value environment, and a
@@ -518,7 +518,7 @@ in traditional notation, which does not make the monadic nature of
 evaluation explicit.
 
 The definition uses concrete OCaml syntax with some pretty
-printing. The pervasive \lstinline/let*/ operator acts as monadic bind
+printing. The pervasive @let*@ operator acts as monadic bind
 for the \lstinline/sem/ monad. The function header of @eval@ checks
 whether time is up and otherwise proceeds processing the expression.
 
