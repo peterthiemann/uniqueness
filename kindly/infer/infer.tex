@@ -84,7 +84,14 @@ In the meantime, we simply
 assume the existence of such a function for our constraint system.
 
 \subsection{Kind inference}
-
+%
+\begin{figure}[t]
+  \centering
+  \input{infer/kinds}
+  \caption{Kind inference algorithm -- $\inferK{(C,\unif)}{\E}{\tau}{k}$}
+  \label{rules:kinding}
+\end{figure}
+%
 We note $\inferK{(C,\unif)}{\bf{\E}}{\bf{\tau}}{k}$ when type $\tau$ has kind $k$
 in environment $\E$ under constraints $C$ and unifier $\unif$.
 $\E$ and $\tau$ are the input parameters of
@@ -103,12 +110,6 @@ The $\operatorname{normalize}$ function is used every time several constraints
 must be composed in order to simplify the constraint and return a most general
 unifier.
 
-\begin{figure}[ht]
-  \centering
-  \input{infer/kinds}
-  \caption{Kind inference algorithm -- $\inferK{(C,\unif)}{\E}{\tau}{k}$}
-  \label{rules:kinding}
-\end{figure}
 
 
 
@@ -128,7 +129,24 @@ As before, the complete type inference rules are shown in \cref{appendix:infer}.
 
 \subsubsection{Environments and bindings}
 \label{infer:envs}
-
+%
+\begin{figure}[tp]
+  \begin{mathpar}
+    { \Weaken_{\bvar{x}{\sigma}}(\Sv) =
+      \begin{dcases}
+        \Ctrue&\text{if } x\in\Sv\\
+        \Cleq{\sigma}{\kaff_\infty}&\\
+      \end{dcases}
+    }
+    \and
+    \ruleIVar
+    \and
+    \ruleIAbs
+  \end{mathpar}
+  \caption{The {\sc Abs$_I$} and {\sc Var$_I$} rules}
+  \label{rule:infer:envs}
+\end{figure}
+%
 In our syntax-directed system, we ensured
 that linear variables are not discarded at the \emph{leafs}, through
 the {\sc Var} rule. In the inference algorithm, we operate in the opposite
@@ -160,28 +178,22 @@ Finally, we use normalization on complex constraints to ensure
 that the inference algorithm always return the simplest possible
 constraints and unifiers.
 
-\begin{figure}[!h]
-  \begin{mathpar}
-    { \Weaken_{\bvar{x}{\sigma}}(\Sv) =
-      \begin{dcases}
-        \Ctrue&\text{if } x\in\Sv\\
-        \Cleq{\sigma}{\kaff_\infty}&\\
-      \end{dcases}
-    }
-    \and
-    \ruleIVar
-    \and
-    \ruleIAbs
-  \end{mathpar}
-  \caption{The {\sc Abs$_I$} and {\sc Var$_I$} rules}
-  \label{rule:infer:envs}
-\end{figure}
 
 
 \subsubsection{Splitting and Regions}
 \label{infer:split}
 \label{infer:regions}
-
+\begin{figure}[tb]
+  \centering
+  \begin{mathpar}
+    \ruleIPair
+    
+    \ruleIRegion
+  \end{mathpar}
+  \caption{The {\sc Pair$_I$} and {\sc Region$_I$} rules}
+  \label{rule:infer:envrules}
+\end{figure}
+%
 We now present the inference version
 of the {\sc Pair} and {\sc Region} rules in \cref{rule:infer:envrules}.
 While the rules are quite similar to the original version, the usage
@@ -194,20 +206,26 @@ As appropriate for inference, these relations
 are total and non ambiguous for their input parameters ($\Sv_1, \Sv_2$ and $\Sv'$, respectively).
 We then collect all constraints and normalize them.
 
-\begin{figure}[!h]
+\subsubsection{Generalization and constraints}
+%
+\begin{figure}[tbp]
   \centering
   \begin{mathpar}
-    \ruleIPair
-    
-    \ruleIRegion
+    \ruleILet
+
+    {\generalize{C}{\E}{\tau} =
+      (\Cproj{\Multi{\kvar},\Multi{\tvar}}{C},
+      \forall \Multi{\kvar},\Multi{\tvar}.\qual{C}{\tau})
+
+      \text{ where }
+
+      \Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}
+    }
   \end{mathpar}
-  \caption{The {\sc Pair$_I$} and {\sc Region$_I$} rules}
-  \label{rule:infer:envrules}
+  \caption{The {\sc Let$_I$} rule}
+  \label{rule:infer:let}
 \end{figure}
-
-\subsubsection{Generalization and constraints}
-
-
+%
 So far, constraints have only been composed of a list of kind inequalities.
 The internal language of constraints used for inference is in fact
 richer.
@@ -237,23 +255,6 @@ should exists at least one solution for $C$ for the scheme to be valid.
 \citet{DBLP:journals/tapos/OderskySW99} give a detailed account
 on the projection operators in HM inference.
 
-\begin{figure}[!h]
-  \centering
-  \begin{mathpar}
-    \ruleILet
-
-    {\generalize{C}{\E}{\tau} =
-      (\Cproj{\Multi{\kvar},\Multi{\tvar}}{C},
-      \forall \Multi{\kvar},\Multi{\tvar}.\qual{C}{\tau})
-
-      \text{ where }
-
-      \Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}
-    }
-  \end{mathpar}
-  \caption{The {\sc Let$_I$} rule}
-  \label{rule:infer:let}
-\end{figure}
 
 \subsection{Constraint solving}
 \label{infer:solving}
