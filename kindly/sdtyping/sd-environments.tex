@@ -9,14 +9,14 @@
   }
   \\
 
-  \inferrule{
+  \inferrule[ConstrBinding]{
     \E \vdash \Cleq \schm k \Crewrite  C
   }{ \E \vdash \Cleq{\bvar x \schm}{k} \Crewrite  C}
 
-  \inferrule{
+  \inferrule[ConstrBorrow]{
   }{ \E \vdash \Cleq{\bvar{\borrow{x}}{\borrowty{k'}{\tau}}}{k} \Crewrite  \Cleq{k'}{k}}
 
-  \inferrule{ }{
+  \inferrule[ConstrSusp]{ }{
     \E \vdash \Cleq{\svar x \schm^n} k \Crewrite  \Cfalse
   }
   % 
@@ -24,7 +24,7 @@
   % 
   % \inferrule{}{\Cleq{\MBORROW^n} k \Crewrite  \Cleq{\kaff_n} k}
   
-  \inferrule{
+  \inferrule[ConstrSD]{
     \inferK{C \Cand C_x} \E \tau {k'} \\
     D = C \Cand C_x \Cand \Cleq{k'}k
   }{
@@ -32,7 +32,7 @@
     \Cleq{(\forall \kvar_i \forall (\tvar_j:k_j).\ \qual{C_x}{\tau})}{k} \Crewrite  D
   }
   
-  \inferrule{
+  \inferrule[ConstrI]{
     \inferSK{C \Cand C_x} \E \tau {k'} \\
     D = C \Cand C_x \Cand \Cleq{k'}k
   }{

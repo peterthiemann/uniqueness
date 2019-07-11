@@ -1,3 +1,4 @@
+\begin{minipage}{0.38\linewidth}
 \begin{mathpar}
   \inferrule[ESplit-Empty]{}{
     \bsplit{\Cempty}\Eempty\Eempty\Eempty
@@ -17,36 +18,67 @@
     \lsplit{C}{\E}{\E_1}{\E_2}
   }
 \end{mathpar}
-\hrulefill
-\begin{mathpar}
-  \inferrule[BSplit-Both]{}{
-    \bsplit {\Cleq{\schm}{\kun_\infty}}
-    {\bvar{x}{\schm}} {\bvar{x}{\schm}} {\bvar{x}{\schm}}
-  }
+\end{minipage}\vrule~
+\begin{minipage}{0.6\linewidth}
+    \begin{tabular}
+      {@{}>{$}r<{$}@{ $\Lleftarrow$ }
+      >{$}c<{$}@{ $=$ }
+      >{$}c<{$}@{ $\ltimes$ }
+      >{$}c<{$}r}
+      
+      \Cleq{\schm}{\kun_\infty}
+      &\bvar{x}{\schm}&\bvar{x}{\schm}&\bvar{x}{\schm}
+      &Both\\[2mm]
 
-  \inferrule[BSplit-Left]{}{
-    \bsplit {\Cempty} {\bvar{x}{\schm}} {\bvar{x}{\schm}} {\bnone}
-  }
+      {\Cempty}&
+      {\bvar{\borrow[\IBORROW]{x}}{\schm}}&
+      {\bvar{\borrow[\IBORROW]{x}}{\schm}}&{\bvar{\borrow[\IBORROW]{x}}{\schm}}
+      &Borrow\\[2mm]
 
-  \inferrule[BSplit-Right]{}{
-    \bsplit {\Cempty} {\bvar{x}{\schm}} {\bnone} {\bvar{x}{\schm}}
-  }
+      {\Cempty}&{\bvar{x}{\schm}}&{\bvar{x}{\schm}}&{\bnone}
+      &Left\\
+      {\Cempty}&{\bvar{x}{\schm}}&{\bnone}&{\bvar{x}{\schm}}
+      &Right\\[2mm]
 
-  \inferrule[BSplit-Imm-Borrow]{}{
-    \bsplit {\Cempty}
-    {\bvar{\borrow[\IBORROW]{x}}{\schm}}
-    {\bvar{\borrow[\IBORROW]{x}}{\schm}}{\bvar{\borrow[\IBORROW]{x}}{\schm}}
-  }
+      {\Cempty}&{\bvar x \schm}&{\svar x \schm^n}&{\bvar x \schm}
+      &Susp\\
 
-  \inferrule[BSplit-To-Borrow]{}{
-    \bsplit {\Cempty}{\bvar x \schm}{\svar x \schm^n}{\bvar x \schm}
-  }
+      {\Cempty}&
+      {\bvar{\borrow x} \schm}&{\svar[\IBORROW] x \schm^n}&{\bvar{\borrow x} \schm}
+      &SuspB\\
 
-  \inferrule[BSplit-To-Imm]{}{
-    \bsplit {\Cempty}
-    {\bvar{\borrow x} \schm}{\svar[\IBORROW] x \schm^n}{\bvar{\borrow x} \schm}
-  }
-\end{mathpar}
+    \end{tabular}
+\end{minipage}
+
+% \begin{mathpar}
+%   \inferrule[BSplit-Both]{}{
+%     \bsplit {\Cleq{\schm}{\kun_\infty}}
+%     {\bvar{x}{\schm}} {\bvar{x}{\schm}} {\bvar{x}{\schm}}
+%   }
+
+%   \inferrule[BSplit-Left]{}{
+%     \bsplit {\Cempty} {\bvar{x}{\schm}} {\bvar{x}{\schm}} {\bnone}
+%   }
+
+%   \inferrule[BSplit-Right]{}{
+%     \bsplit {\Cempty} {\bvar{x}{\schm}} {\bnone} {\bvar{x}{\schm}}
+%   }
+
+%   \inferrule[BSplit-Imm-Borrow]{}{
+%     \bsplit {\Cempty}
+%     {\bvar{\borrow[\IBORROW]{x}}{\schm}}
+%     {\bvar{\borrow[\IBORROW]{x}}{\schm}}{\bvar{\borrow[\IBORROW]{x}}{\schm}}
+%   }
+
+%   \inferrule[BSplit-To-Borrow]{}{
+%     \bsplit {\Cempty}{\bvar x \schm}{\svar x \schm^n}{\bvar x \schm}
+%   }
+
+%   \inferrule[BSplit-To-Imm]{}{
+%     \bsplit {\Cempty}
+%     {\bvar{\borrow x} \schm}{\svar[\IBORROW] x \schm^n}{\bvar{\borrow x} \schm}
+%   }
+% \end{mathpar}
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../main"

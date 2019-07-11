@@ -270,13 +270,19 @@ or constants belonging to a total bounded lattice $(\mathcal L, \lk_\Lat)$ ie.,
 a lattice which admits a total order and upper and lower bounds ($l^\top$ and $l^\bot$).
 We note lattice elements $l$ and $\glb_i l_i$ (resp. $\lub_i l_i$)
 the greatest lower bound (resp. least upper bound) in $\mathcal L$.
+The lattice used in \lang which was presented
+in \cref{sdtyping} is a total bounded lattice with
+$l^\top = \klin_\infty$ and $l^\bot = \kun_0$.
 %
-Let $\CL$ the set of constraints in this lattice.
+Let $\CL$ the set of constraints in such arbitrary lattice $mathcal L$.
 The full grammar of constraints is shown in \cref{grammar:constraint}.
 Constraints are made of kind inequalities, conjunctions and
 projections, as shown previously, along with type unification
 constraints. Since types might contain kinds (for instance, on the arrows),
 type unification is oriented and noted $\leq$.
+For simplicity, we consider all type constructors
+invariant in their parameters
+and define $\Ceq{\tau}{\tau'}$ as $\Cleq{\tau}{\tau'} \wedge \Cleq{\tau'}{\tau}$.
 
 As before, entailment is noted $\entail{C}{D}$,
 where $D$ is a consequence of the constraints $C$.
@@ -288,7 +294,7 @@ projection operators are omitted for brevity (see
 \citep{DBLP:journals/tapos/OderskySW99} for
 details).
 
-\begin{figure}[!h]
+\begin{figure}[!bt]
   \centering
   \begin{minipage}{0.32\linewidth}
     \begin{align*}
@@ -301,14 +307,15 @@ details).
     \caption{The constraint language}
     \label{grammar:constraint}
   \end{minipage}\hfill
-  \begin{minipage}{0.64\linewidth}
+  \begin{minipage}{0.66\linewidth}
     \begin{mathpar}
-      \inferrule{}{\entail{}{\Cleq{k}{l^\top}}}
-      \and
-      \inferrule{}{\entail{}{\Cleq{l^\bot}{k}}}
+      \inferrule
+      {\forall i,\ \entail{C}{\Cleq{l_i}{k}}}
+      {\entail{C}{\Cleq{\wedge_i l_i}{k}}}
       \and
       \inferrule
-      {}{ \entail{}{\Cleq{\kvar}{\kvar}} }
+      {\forall i,\ \entail{C}{\Cleq{k}{l_i}}}
+      {\entail{C}{\Cleq{k}{\vee_i l_i}}}
       \and
       \inferrule
       { \forall i,\ \entail{C}{\Ceq{\tau_i}{\tau_i}}\\

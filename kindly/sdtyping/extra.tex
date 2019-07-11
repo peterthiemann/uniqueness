@@ -62,20 +62,36 @@ borrows should be enclosed immediately.
 % \newcommand\A{\mathcal A}
 % \newcommand\SC{\mathcal S}
 
-Let us note $\A$ our constraint system. The full grammar of constraints is
-given in \cref{grammar:constraint}.
-$\A$ is defined as the smallest cylindric term constraint system that
-satisfies the axiom shown in \cref{rules:entail}.
-We follows the traditional HM(X) formulation
-with conjunctions, projections and type inequalities.
-The new element specific to our approach are kind inequalities.
+Our system is defined in \cref{infer:solving}.
+As before, we note $\CL$ our constraint system for an arbitrary
+total bounded lattice $(\mathcal L, \lk_\Lat)$.
 Entailment is noted $\entail{C}{D}$, where $D$ is a consequence of the
 constraints $C$.
 We say that $C$ and $D$ are equivalent, noted $C \equivC D$,
 when $\entail{C}{D}$ and $\entail{D}{C}$.
-\TODO{Give the cylindric properties ?}
+Following HM(X), we define a cylindric constraint system as
+a system which respects the following properties for any variable $x$:
+\begin{align*}
+  \entail{C&}{\Cproj{x}{C}}
+  &\entail{C}{D} &\implies \entail{\Cproj{x}C}{\Cproj{x}D}\\
+  \Cproj{x}{(C\wedge \Cproj{x}D)}&\equivC \Cproj{x}{C} \wedge \Cproj{x}D
+  & \Cproj{x}{\Cproj{y}D}&\equivC \Cproj{y}{\Cproj{x}D}
+\end{align*}
 
-\begin{figure}[!btp]
+Furthermore, we define a term rewriting system as a system where, for every
+types $\tau$,$\tau'$, there exists an equality predicates $\Ceq{\tau}{\tau'}$
+which is reflexive, transitive, stable under substitution and such that,
+for any predicate $P$:
+\begin{align*}
+  \entail{\Ceq{x}{y}\wedge \Cproj{x}C \wedge \Ceq{x}{y}&}{C}
+  &\subst{x}{\tau}{P} &\equivC \Cproj{x}P \wedge \Ceq{x}{\tau}
+                        \text{ where } x\notin\fv{\tau}
+\end{align*}
+$\CL$ is defined as the smallest cylindric term constraint system that
+satisfies the axiom shown in \cref{rules:entail}.
+We define  $\Ceq{\tau}{\tau'}$ as $\Cleq{\tau}{\tau'} \wedge \Cleq{\tau'}{\tau}$.
+%
+\begin{figure}[!b]
   \centering
   \begin{align*}
     C &::= \Cleq{\tau_1}{\tau_2}
@@ -92,11 +108,10 @@ when $\entail{C}{D}$ and $\entail{D}{C}$.
   \caption{Base entailment rules -- $\entail{C}{D}$ }
   \label{rules:entail}
 \end{figure}
-
-
+%
 We note $\SC$ the set of solved forms
 which can be used inside type and kind schemes.
-We define $\SC$ as $\A$ quotiented by the relation $\equivC$.
+We define $\SC$ as $\CL$ quotiented by the relation $\equivC$.
 %
 The normalization function is described in \cref{infer:solving}.
 
@@ -254,6 +269,14 @@ We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
 
 \subsection{Kinding}
 
+\begin{figure}[!h]
+  \centering
+  \input{sdtyping/sd-kinds}
+  \caption{Syntax-directed kinding rule --
+    $\inferSK{C}{\E}{\tau}{k}$}
+  \label{rules:sd-kinding}
+\end{figure}
+
 We note $\inferSK{C}{\E}{\tau}{k}$
 when $\tau$ has kind $k$ in environment $\E$ under constraints $C$.
 The rules are shown in \cref{rules:sd-kinding}.
@@ -267,40 +290,59 @@ the syntax of the types. Kind arrows can only appear when looking
 up the kind scheme of a type constructor $\T t$. Kind arrows are forbidden
 in any other contexts.
 
-
-\begin{figure}[ht]
-  \centering
-  \input{sdtyping/sd-kinds}
-  \caption{Syntax-directed kinding rule --
-    $\inferSK{C}{\E}{\tau}{k}$}
-  \label{rules:sd-kinding}
-\end{figure}
-
 \subsection{Environments}
 \label{typ:extra:envs}
 
-\begin{figure}[tp]
+In \cref{sdtyping}, we only gave a partial description of
+the splitting and borrowing relations on environments,
+$\lsplit C\E\E\E$ and $\lregion C{x}\E\E$.
+The complete definitions are shown on \cref{fig:sd-splitting,fig:sd-borrowing}.
+All the definitions are made in term of the inference version, which
+returns a fresh constraints. The solving version then simply
+uses entailment, as shown in rule {\sc ESplit-Check} and
+{\sc EBorrow-Check}.
+The remaining new rules are dedicated to iterating over the environment.
+
+\cref{fig:contraints-environments-types} defines
+the rewriting relation on environment constraints,
+noted $\Cleq\E k \Crewrite  C$ which rewrites a constraint of the form
+$\Cleq\E k$ into $C$. It proceeds by iterating over the environment
+and expending the constraints for each binding.
+Suspended bindings are rejected ({\sc ConstrSusp}).
+Borrow bindings directly use the annotated kind ({\sc ConstrBorrow}).
+Other bindings uses the underlying type scheme ({\sc ConstrBinding}).
+Type schemes are constrained by first inferring the kind, and then
+emitting the constraint ({\sc ConstrSD} and {\sc ConstrI}).
+
+
+\begin{figure}[!tb]
   \input{sdtyping/sd-splitting}
   \caption{Splitting --- environments $\lsplit
     C\E\E\E$; binders $\bsplit Cbbb$}
   \label{fig:sd-splitting}
-\end{figure}
-
-\begin{figure}[tp]
   \input{sdtyping/sd-borrowing}
   \caption{Borrowing --- environments $\lregion
     C{x}\E\E$; binders $\bregion C{x}bb$}
   \label{fig:sd-borrowing}
+  \input{sdtyping/sd-environments}
+  \caption{Rewriting constraints on environments --- $\Cleq\E k \Crewrite  C$}
+  \label{fig:contraints-environments-types}
 \end{figure}
 
 \subsection{Typing}
 
-\begin{figure*}[tp]
-  \input{sdtyping/sd-environments}
-  \caption{Rewriting constraints on environments and types}
-  \label{fig:contraints-environments-types}
-\end{figure*}
-\begin{figure*}[tp]
+The rules for syntax directed typing are shown in \cref{fig:syntax-directed-typing}
+and follow the presentation given in \cref{sdtyping}.
+As usual in HM type systems, introduction of type-schemes
+is included in the {\sc Let} rule via generalization.
+We define $\generalize{C}{\E}{\tau} =
+(\Cproj{\Multi{\kvar},\Multi{\tvar}}{C},
+\forall \Multi{\kvar},\Multi{\tvar}.\qual{C}{\tau})$
+where
+$\Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}$.
+
+
+\begin{figure*}[hbtp]
   \input{sdtyping/sd-typing}
   \caption{Syntax-directed typing rules}
   \label{fig:syntax-directed-typing}
