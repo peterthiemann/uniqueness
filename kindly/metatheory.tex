@@ -2,13 +2,47 @@
 \section{Metatheory}
 \label{sec:metatheory}
 
+\lstMakeShortInline[style=rule]@
 
-We write $\Addresses{\VEnv}$ for the function that extracts addresses
-from the range of the variable environment.
+We are interested in several connections between the type system and
+the operational semantics. The type soundness result states
+that the semantics returns values of the form predicted by the type
+system. It makes use of several standard notions like store typing
+$\vdash \Store : \SE$ and agreement of the results in the value environment
+with the type environment $\SE \vdash \VEnv:\E$ that we define
+formally in the appendix~\cref{sec:metatheory:proofs}. The
+non-standard part is the handling of permissions. With
+$\Addresses\Perm$ we extract the underlying raw locations from the
+permissions and with $\Reach\Store\VEnv$ we transitively trace the
+addresses reachable from $\VEnv$ in store $\Store$. We write
+$\SE\le\SE'$ and $\Store \le \Store'$ for extending the domain of the
+store type and of the store, respectively.
 
-We write $\Reach\Store\VEnv \subseteq \Dom\Store$ for the function
-that computes all store addresses reachable from $\Addresses\VEnv$
-assuming that $\Addresses\VEnv \subseteq \Dom\Store$. 
+\begin{theorem}
+  Suppose that
+  \begin{itemize}
+  \item $\inferS{C}{\E}{e}{\tau}$
+  \item $\SE \vdash \VEnv : \E$
+  \item $\vdash \Store : \SE$
+  \item $\Addresses\Perm \subseteq \Dom\Store$
+  \item $\Reach\Store{\VEnv} \subseteq \Perm$
+  \item  $i\in\Nat$ and
+    $R = $@eval delta pi gamma i e@
+    with $R\ne \TimeOut$.
+  \end{itemize}
+  Then,
+  $\exists$ $\Store'$, $\Perm'$, $r'$, $\SE'$ such that
+  \begin{itemize}
+  \item
+    $R = \Ok{\Store', \Perm', r'}$  
+  \item $\SE \le \SE'$, $\Store \le \Store'$,
+    $\vdash \Store' : \SE'$ 
+  \item $\SE' \vdash r' : \tau$
+  \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
+  \item $\Reach{\Store'}{r'} \subseteq \Perm'$
+  \end{itemize}
+\end{theorem}
+
 
 We write $\Writeable\SE\Loc$ to express that the type of location
 $\Loc$ permits changing its content. For example,
@@ -116,6 +150,9 @@ $M$, let $\MultiNumber x M$ be the number of times $x$ occurs in $M$.
     \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
   \end{itemize}
 \end{theorem}
+
+\lstDeleteShortInline@
+
 
 %%% Local Variables:
 %%% mode: latex

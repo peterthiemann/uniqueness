@@ -131,6 +131,56 @@
   \VEnv : \E$.
 \end{lemma}
 
+We write $\Addresses{\VEnv}$ for the function that extracts raw locations
+from the range of the variable environment. It needs to be defined for
+addresses, results, and environments.
+
+\begin{align*}
+  \Addresses{\Multi\IBORROW\Multi\MBORROW\Loc} &= \{ \Loc \} \\
+  \Addresses{c} &= \{ \} \\
+  \Addresses\Eempty &= \{\} \\
+  \Addresses{\VEnv( x \mapsto r)} &= \Addresses\VEnv \cup \Addresses r
+\end{align*}
+
+We write $\Reach\Store\VEnv \subseteq \Dom\Store$ for the function
+that computes all addresses reachable from $\Addresses\VEnv$
+assuming that $\Addresses\VEnv \subseteq \Dom\Store$. It is defined in
+two steps. First a helper function 
+for addresses, results, storables, and environments.
+
+\begin{align*}
+  \RS\Store\Eempty &= \Eempty \\
+  \RS\Store{\VEnv (x \mapsto r)} &= \RS\Store\VEnv \cup
+                                      \RS\Store r \\
+  \RS\Store\Addr &= \{ \Addr \}  \\
+  \RS\Store c &= \{ \} \\
+  \RS\Store{\text{STPOLY}(\VEnv, \silam
+  {\Multi\kvar}{\Multi\tvar}Ckx{e})} &=
+                                       \RS\Store\VEnv
+  \\
+  \RS\Store{\text{STCLOS}(\VEnv, \slam[k]xe)} &=
+                                                   \RS\Store\VEnv
+  \\
+  \RS\Store{\text{STPAIR}\spair[k]{r_1}{r_2}} &=
+                                                   \RS\Store{r_1}
+                                                   \cup \RS\Store{r_2}
+  \\
+  \RS\Store{\text{STRSRC}(r)} &=
+                                   \RS\Store r
+  \\
+  \RS\Store{\blob} &= \{ \}
+\end{align*}
+
+This set is closed transitively by store lookup: We define the set
+$\Reach\Store\VEnv = \REACH$ as follow.
+\begin{align*}
+  \REACH &\supseteq \RS\Store\VEnv \\
+  \REACH &\supseteq \RS\Store w & \text{if }
+                                     \Multi\IBORROW\Multi\MBORROW\Loc
+                                     \in \REACH \wedge w = \Store (\Loc)
+\end{align*}
+
+
 \begin{theorem}
   Suppose that
   \begin{itemize}
