@@ -438,7 +438,7 @@ Henceforth, we consider terms with fully annotated regions.
 \label{sec:sem}
 \input{internal-grammar}
 
-\lstMakeShortInline[style=rule,columns=flexible,basicstyle=\normalsize\normalfont]@
+\lstMakeShortInline[style=rule,basicstyle=\normalsize\normalfont]@
 
 In this section, we present the dynamics of \lang in big-step
 functional
@@ -464,7 +464,7 @@ indicating the usage restriction.
 Addresses $\Addr$ are composed of a raw location $\Loc$, which is just
 a pointer into a store, and a stack of modifiers that indicates the
 borrows that have been taken from the original object. From the raw
-location, we may take affine borrows and reborrowed. Once we have
+location, we may take affine borrows and reborrows. Once we have
 taken an unrestricted borrow (from a raw location or a borrowed one),
 then we can take further unrestricted borrows from it, but no more
 affine ones.
@@ -489,8 +489,8 @@ to another result and the $\blob $ fills a released location.
 
 Finally, the store $\Store$ is a mapping from raw locations to
 storables. It comes with a function
-@salloc : store -> storable -> (loc * store)@ such that
-@salloc delta w@ allocates a free location in @delta@ and fills it with
+@salloc@ of type @store -> storable -> (loc * store)@ such that
+@salloc delta@ @w@ allocates a free location in @delta@ and fills it with
 storable $w$. It returns the location and the updated store.
 
 
@@ -512,7 +512,7 @@ permissions, and the actual result.
  
 We give some excerpts of the definition of @eval@ in
 \cref{fig:big-step-interpretation} and leave the full 
-definition for the appendix~\cref{sec:semant-defin}. The appendix also
+definition for \cref{sec:semant-defin}. The appendix also
 contains the semantics 
 in traditional notation, which does not make the monadic nature of
 evaluation explicit.
