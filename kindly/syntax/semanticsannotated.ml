@@ -157,7 +157,7 @@ let supdate : store -> loc -> storable -> store sem =
 let (.*()) = slookup
 let (.*()<-) = supdate
 
-let getraw_loc : result -> loc sem =
+let getloc : result -> loc sem =
   fun r ->
   match r with
     RADDR (Address ([], rl)) -> Ok rl
@@ -242,7 +242,7 @@ let rec eval
   (* rule varinst *)
   | Varinst (x, ks) ->
     let* rx = gamma.!(x) in
-    let* ell = getraw_loc rx in
+    let* ell = getloc rx in
     let*? () = !$ ell <|= pi in
     let* w = delta.*(ell) in
     let* (gamma', kappas', cstr', k', x', e') = getstpoly w in
@@ -266,7 +266,7 @@ let rec eval
      let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
-     let* ell_1 = getraw_loc r_1 in
+     let* ell_1 = getloc r_1 in
      let*? () = !$ ell_1 <|= pi_1 in
      let* w = delta_1.*(ell_1) in
      let* (gamma', k', x', e') = getstclos w in
@@ -298,7 +298,7 @@ let rec eval
      let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
-     let* ell = getraw_loc r_1 in
+     let* ell = getloc r_1 in
      let* w = delta_1.*(ell) in
      let* (k', r_1', r_2') = getstpair w in
      let pi_1' =
@@ -374,7 +374,7 @@ let rec eval
   | Destroy (e_1) ->
      let i' = i - 1 in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
-     let* ell = getraw_loc r_1 in
+     let* ell = getloc r_1 in
      let* w = delta_1.*(ell) in
      let* r = getstrsrc w in
      let* delta_1' = delta_1.*(ell) <- STRELEASED in

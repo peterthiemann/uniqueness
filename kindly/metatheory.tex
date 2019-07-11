@@ -1,4 +1,3 @@
-\clearpage{}
 \section{Metatheory}
 \label{sec:metatheory}
 
@@ -20,28 +19,43 @@ store type and of the store, respectively.
 
 \begin{theorem}[Type Soundness]\label{theorem:type-soundness}
   Suppose that
-  \begin{itemize}
-  \item $\inferS{C}{\E}{e}{\tau}$
-  \item $\SE \vdash \VEnv : \E$
-  \item $\vdash \Store : \SE$
-  \item $\Addresses\Perm \subseteq \Dom\Store$
-  \item $\Reach\Store{\VEnv} \subseteq \Perm$
-  \item  $i\in\Nat$ and
+  % \begin{itemize}
+  % \item
+    $\inferS{C}{\E}{e}{\tau}$,
+  % \item
+    $\SE \vdash \VEnv : \E$,
+  % \item
+    $\vdash \Store : \SE$,
+  % \item
+    $\Addresses\Perm \subseteq \Dom\Store$,
+  % \item
+    $\Reach\Store{\VEnv} \subseteq \Perm$,
+  % \item
+    $i\in\Nat$ and
     $R = $@eval delta pi gamma i e@
     with $R\ne \TimeOut$.
-  \end{itemize}
+  % \end{itemize}
+
   Then,
   $\exists$ $\Store'$, $\Perm'$, $r'$, $\SE'$ such that
-  \begin{itemize}
-  \item
-    $R = \Ok{\Store', \Perm', r'}$  
-  \item $\SE \le \SE'$, $\Store \le \Store'$,
-    $\vdash \Store' : \SE'$ 
-  \item $\SE' \vdash r' : \tau$
-  \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
-  \item $\Reach{\Store'}{r'} \subseteq \Perm'$
-  \end{itemize}
+  % \begin{itemize}
+  % \item
+    $R = \Ok{\Store', \Perm', r'}$,
+  % \item
+    $\SE \le \SE'$, $\Store \le \Store'$,
+    $\vdash \Store' : \SE'$,
+  % \item
+    $\SE' \vdash r' : \tau$,
+  % \item
+    $\Addresses{\Perm'} \subseteq \Dom{\Store'}$,
+  % \item
+    $\Reach{\Store'}{r'} \subseteq \Perm'$.
+  % \end{itemize}
 \end{theorem}
+
+As customary with the functional style of semantics, the proof of the
+theorem is by functional induction on the evaluation judgment, which
+is indexed by the strictly decreasing counter $i$.
 
 Further bookkeeping is needed to demonstrate the substructural
 properties. The permission set is the first set. It contains the set
@@ -70,119 +84,66 @@ With these concepts, we can refine the assumption of
 \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
   \begin{itemize}
   \item 
-    For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active\VEnv}} >0$,
-    if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc\REACH= 1$
-  \item For all $\Loc$ such that $
-    \MultiNumber\Loc{\Reach{\Store}{\MutableBorrows\VEnv}} >0$, it
-    must be that $\MultiNumber\Loc\REACH=1$.
-  \item For all $\Loc$ such that $
-    \MultiNumber\Loc{\Reach{\Store}{\Suspended\VEnv}} >0$, it
-    must be that $\MultiNumber\Loc\REACH=1$.
+    For all $\Addr$ such that $\MultiNumber\Addr{\Reach{\Store}{\Active\VEnv}} >0$,
+    if $\Affine{\SE}\Addr$ then $\MultiNumber\Addr\REACH= 1$
+  \item For all $\Addr$ such that $
+    \MultiNumber\Addr{\Reach{\Store}{\MutableBorrows\VEnv}} >0$, it
+    must be that $\MultiNumber\Addr\REACH=1$.
+  \item For all $\Addr$ such that $
+    \MultiNumber\Addr{\Reach{\Store}{\Suspended\VEnv}} >0$, it
+    must be that $\MultiNumber\Addr\REACH=1$.
   \end{itemize}
 \end{itemize}
 Thus, we do not require permission for suspended bindings in the
 environment. Moreover, affine (or linear)  resources, affine
 borrows, and suspended bindings must be reached exactly once by
 incoming references. I.e., there is no restriction on unrestricted
-borrows and other resources. The function $\Affine{\SE}\Loc$ checks
+borrows and other resources. The function $\Affine{\SE}\Addr$ checks
 affinity of a resource by inspecting the store type (see
 \cref{sec:metatheory:proofs}). 
 
 This refined assumption enables the following additional conclusions,
-again stated in the context of \cref{theorem:type-soundness}.
+again stated in the context of \cref{theorem:type-soundness}. Function
+$\Linear{\SE}\Addr$ is defined analogously to  $\Affine{\SE}\Addr$.  As
+in the semantics, the location of an address is defined by $\text{getloc}
+(\Multi\IBORROW\Multi\MBORROW\Loc) = \Loc$. 
 \begin{itemize}
-\item Outside: For all $\Loc \in \Dom{\Store} \setminus
-  \Reach{\Store'}{\VEnv}$ it must be that 
+\item Outside:
+  For all $\Loc \in \Dom{\Store} \setminus \text{getloc} (\Reach{\Store'}{\VEnv})$ it must be that 
   $\Store' (\Loc) = \Store (\Loc)$
-  and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
-  %% must be \Store because \Perm has no idea of \Perm'
-\item Immutables: For all $\Loc \in
-  \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be 
+  and for all $\Addr$ with $\text{getloc }\Addr=\Loc$ it must be that
+  $\Addr\in\Perm \Leftrightarrow \Addr\in\Perm'$. 
+\item Immutables: For all $\Addr \in
+  \Reach{\Store'}{\ImmutableBorrows\VEnv}$ 
+  and $\Loc = \text{getloc }\Addr$
+  it must be 
   $\Loc\in\Dom\Store$, 
   $\Store' (\Loc) = \Store (\Loc)$
-  and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
+  and $\Addr\in\Perm \Leftrightarrow \Addr\in\Perm'$.
 \item Resources:
   Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
-  For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
-  \MultiNumber\Loc{\REACH'}$, 
+  For all $\Addr$ such that $n= \MultiNumber\Addr\REACH >0$ and $n' =
+  \MultiNumber\Addr{\REACH'}$, 
   \begin{itemize}
-  \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
-  \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
-  \item if $n'=0$, then $\Loc\notin\Perm'$.
+  \item if $\Affine{\SE}\Addr$ then $n=1$ and $n'\le 1$,
+  \item if $\Linear{\SE}\Addr$ then $n=1$ and $n' = 0$,
+  \item if $n'=0$, then $\Addr\notin\Perm'$.
   \end{itemize}
-\item ReadOnly: For all $\Loc \in \Reach
-  {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Loc$ then
-  $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm'$.
-\item No thin air permission: For all $\Loc\in \Perm'$, $\Loc
+\item ReadOnly: For all $\Addr \in \Reach
+  {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Addr$
+  and $\Loc = \text{getloc }\Addr$
+  then
+  $\Store' (\ell) = \Store (\ell)$ and $\Addr\in \Perm'$.
+\item No thin air permission: For all $\Addr\in \Perm'$, $\Addr
   \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
 \end{itemize}
-Functions $\Linear{\SE}\Loc$ and $\Writeable\SE\Loc$ are defined analogously to
-$\Affine{\SE}\Loc$. Intuitively, 
-
-%%% !!!! TBC !!!!
-
-\clearpage{}
-\begin{theorem}
-  Suppose that
-  \begin{itemize}
-  \item $\inferS{C}{\E}{e}{\tau}$
-  \item $\SE \vdash \VEnv : \E$
-  \item $\vdash \Store : \SE$
-  \item $\Addresses\Perm \subseteq \Dom\Store$
-  \item $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv} \subseteq \Perm$
-  % \item  $\VEnv'$ with $\Addresses{\VEnv'}
-  %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
-  \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
-    \begin{itemize}
-    \item 
-      For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active\VEnv}} >0$,
-      if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc\REACH= 1$
-    \item For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store}{\MutableBorrows\VEnv}} >0$, it
-      must be that $\MultiNumber\Loc\REACH=1$.
-    \item For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store}{\Suspended\VEnv}} >0$, it
-      must be that $\MultiNumber\Loc\REACH=1$.
-    \end{itemize}
-  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv \vdash {e}
-    \Downarrow^i R$ and $R\ne \TimeOut$.
-  \end{itemize}
-  Then,
-  $\exists$ $\Store'$, $\Perm'$, $r'$, $\SE'$ such that
-  \begin{itemize}
-  \item
-    $R = \Ok{\Store', \Perm', r'}$  
-  \item $\SE \le \SE'$, $\Store \le \Store'$,
-    $\vdash \Store' : \SE'$ 
-  \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
-  \item $\SE' \vdash r' : \tau$
-  \item $\Reach{\Store'}{r'} \subseteq \Perm'$
-  \item Outside: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store'}{\VEnv}$ it must be that 
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
-    %% must be \Store because \Perm has no idea of \Perm'
-  \item Immutables: For all $\Loc \in
-    \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
-    $\Loc\in\Dom\Store$, 
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
-  \item Resources:
-    Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
-    For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
-    \MultiNumber\Loc{\REACH'}$, 
-    \begin{itemize}
-    \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
-    \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
-    \item if $n'=0$, then $\Loc\notin\Perm'$.
-    \end{itemize}
-  \item Immutables: For all $\Loc \in \Reach
-    {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Loc$ then
-    $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm'$.
-  \item No thin air permission: For all $\Loc\in \Perm'$, $\Loc
-    \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
-  \end{itemize}
-\end{theorem}
+The additional conclusions state frame conditions for unreachable
+locations (Outside) and for read-only reachable locations
+(Immutables). The (Resources) clause affirms that linearity and
+affinity are respected. (ReadOnly) affirms that unrestricted values
+are never overwritten. Finally, no permissions are conceived out of
+thin air: either they have been passed in from the context or they
+belong to locations created during evaluation of the expression.
 
 \lstDeleteShortInline@
 
