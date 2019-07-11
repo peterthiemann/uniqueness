@@ -58,6 +58,24 @@ borrows should be enclosed immediately.
 
 \section{Constraints}
 \label{appendix:constraints}
+%
+\begin{figure}[tb]
+  \centering
+  \begin{align*}
+    C &::= \Cleq{\tau_1}{\tau_2}
+        \mid \Cleq{k_1}{k_2}
+        \mid C_1 \Cand C_2
+        \mid \Cproj{\tvar}{C}
+        \mid \Cproj{\kvar}{C}
+  \end{align*}
+  \caption{The constraint language}
+  \label{grammar:constraint}
+  % \input{infer/lattice}
+  % \caption{Lattice inequalities -- $k \lk_\Lat k'$}
+  \input{infer/entails}
+  \caption{Base entailment rules -- $\entail{C}{D}$ }
+  \label{rules:entail}
+\end{figure}
 
 % \newcommand\A{\mathcal A}
 % \newcommand\SC{\mathcal S}
@@ -96,24 +114,6 @@ which can be used inside type and kind schemes.
 We define $\SC$ as $\CL$ quotiented by the relation $\equivC$.
 %
 The normalization function is described in \cref{infer:solving}.
-%
-\begin{figure}[!hb]
-  \centering
-  \begin{align*}
-    C &::= \Cleq{\tau_1}{\tau_2}
-        \mid \Cleq{k_1}{k_2}
-        \mid C_1 \Cand C_2
-        \mid \Cproj{\tvar}{C}
-        \mid \Cproj{\kvar}{C}
-  \end{align*}
-  \caption{The constraint language}
-  \label{grammar:constraint}
-  % \input{infer/lattice}
-  % \caption{Lattice inequalities -- $k \lk_\Lat k'$}
-  \input{infer/entails}
-  \caption{Base entailment rules -- $\entail{C}{D}$ }
-  \label{rules:entail}
-\end{figure}
 
 \subsection{Example of constraint solving and simplification}
 \label{solving:example}
@@ -264,8 +264,8 @@ We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
 \label{appendix:sdtyping}
 
 \subsection{Kinding}
-
-\begin{figure}[!h]
+%
+\begin{figure}[tb]
   \centering
   \input{sdtyping/sd-kinds}
   \caption{Syntax-directed kinding rule --
