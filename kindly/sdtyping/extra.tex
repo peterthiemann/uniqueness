@@ -80,7 +80,7 @@ a system which respects the following properties for any variable $x$:
 
 Furthermore, we define a term rewriting system as a system where, for every
 types $\tau$,$\tau'$, there exists an equality predicates $\Ceq{\tau}{\tau'}$
-which is reflexive, transitive, stable under substitution and such that,
+which is symmetric, reflexive, transitive, stable under substitution and such that,
 for any predicate $P$:
 \begin{align*}
   \entail{\Ceq{x}{y}\wedge \Cproj{x}C \wedge \Ceq{x}{y}&}{C}
@@ -91,7 +91,13 @@ $\CL$ is defined as the smallest cylindric term constraint system that
 satisfies the axiom shown in \cref{rules:entail}.
 We define  $\Ceq{\tau}{\tau'}$ as $\Cleq{\tau}{\tau'} \wedge \Cleq{\tau'}{\tau}$.
 %
-\begin{figure}[!b]
+We note $\SC$ the set of solved forms
+which can be used inside type and kind schemes.
+We define $\SC$ as $\CL$ quotiented by the relation $\equivC$.
+%
+The normalization function is described in \cref{infer:solving}.
+%
+\begin{figure}[!hb]
   \centering
   \begin{align*}
     C &::= \Cleq{\tau_1}{\tau_2}
@@ -108,23 +114,13 @@ We define  $\Ceq{\tau}{\tau'}$ as $\Cleq{\tau}{\tau'} \wedge \Cleq{\tau'}{\tau}$
   \caption{Base entailment rules -- $\entail{C}{D}$ }
   \label{rules:entail}
 \end{figure}
-%
-We note $\SC$ the set of solved forms
-which can be used inside type and kind schemes.
-We define $\SC$ as $\CL$ quotiented by the relation $\equivC$.
-%
-The normalization function is described in \cref{infer:solving}.
 
-% We consider the existence of a function $\operatorname{normalize}$ which takes
-% a constraint in $\A$ and a substitution $\psi$ and returns a constraint
-% in solved form $C' \in \SC$,
-% and an updated substitution. We detail the implementation
-% of the normalization function in \cref{infer:solving}
+\subsection{Example of constraint solving and simplification}
+\label{solving:example}
 
-% $\mathcal S$ is composed only of kind
-% inequalities \emph{over variables}. For convenience, if $C\in\mathcal S$, we
-% note $C$ as a list of kind inequalities: $\Cleq{\kvar_i}{\kvar_{i'}}^n$.
-% \TODO{Extend the properties of solved forms}
+\input{infer/exampleconstr}
+
+\subsection{Principal constraint system}
 
 Our goal is to prove that $\CL$ supports all the properties necessary for
 principal type inference, as defined by HM(X).

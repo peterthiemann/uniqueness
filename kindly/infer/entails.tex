@@ -8,9 +8,6 @@
   \inferrule
   {\forall i,\ \entail{C}{\Cleq{k}{l_i}}}
   {\entail{C}{\Cleq{k}{\vee_i l_i}}}
-  \and
-  \inferrule
-  {}{ \entail{}{\Cleq{\kvar}{\kvar}} }
   % \and
   % \inferrule
   % {\Cleq{k}{k'} \in C}{ \entail{C}{\Cleq{k}{k'}} }
@@ -24,7 +21,12 @@
   % \inferrule
   % { \entail{C}{D} }
   % { \entail{C}{\Cproj{x}{D}} }
-  \\
+  \and
+  \inferrule
+  { \entail{C}{\Cleq{k}{k'} \Cand \Cleq{\tau}{\tau'}}
+  }
+  { \entail{C}{\Cleq{\borrowty{k}{\tau}}{\borrowty{k'}{\tau'}}} }
+  \and
   \inferrule
   { \entail{C}{\Cleq{\tau'_1}{\tau_1}}\\
     \entail{C}{\Cleq{\tau_2}{\tau'_2}}\\
@@ -36,11 +38,6 @@
   { \forall i,\ \entail{C}{\Ceq{\tau_i}{\tau_i}}\\
   }
   { \entail{C}{\Cleq{\tapp{t}{\Multi[i]\tau}}{\tapp{t}{\Multi[i]{\tau'}}}} }
-  \and
-  \inferrule
-  { \entail{C}{\Cleq{k}{k'} \Cand \Cleq{\tau}{\tau'}}
-  }
-  { \entail{C}{\Cleq{\borrowty{k}{\tau}}{\borrowty{k'}{\tau'}}} }
   % \and
   % \inferrule
   % { \entail{C}{\Cleq{k}{k'}} \\
@@ -52,6 +49,9 @@
   % { \entail{C}{\Ckind{\tau_0\tarr{k}\tau_1}}{k'}}
   % \and
   % \text{Completion to form a cylindric constraint system.}
+  \and
+  \inferrule
+  {}{ \leq \text{ transitive, reflexive} }
 \end{mathpar}
 
 %%% Local Variables:
