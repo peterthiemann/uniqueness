@@ -1,0 +1,491 @@
+POPL 2020 Paper #235 Reviews and Comments
+===========================================================================
+Paper #235 Kindly Bent to Free Us
+
+
+Review #235A
+===========================================================================
+
+Overall merit
+-------------
+C. Weak Reject
+
+Reviewer expertise
+------------------
+X. Expert
+
+Paper summary
+-------------
+This paper describes Affe, an ML-like language supporting linear, affine, and unrestricted types, along with borrowing of linear and affine values, in a language with type inference and principal typing.  The paper first gives a number of examples of programs written with Affe, making use of its capabilities, then switches to metatheory.  A core version of Affe is formalized, using kinds to separate different substructural modes for types, and an extension of HM(X) is given that can handle the language.  The language is proven type-safe, and the extension to HM(X) is proven sound, complete, and to have the principal typing property.
+
+Strengths
+---------
+- Highly timely, relevant project
+- Very elegant integration of substructural types, borrowing, and regions
+- Very well-written introduction and overview
+
+Weaknesses
+----------
+- The interaction between region indices and nesting order sounds important from the writing, and is critical for soundness in related region systems, but not checked here.  Either the paper gives confusing intuition, or is unsound.
+
+Comments for author
+-------------------
+I really, really *want* to accept this paper.  It's a great topic, and I love the approach.  Most of the paper is exceptionally well-written and clear, though I'm unsure how easy it would be for someone who hasn't worked with HM(X) to follow that part of the paper; I'll leave it to other reviewers to judge that.
+
+But I have significant questions about the handling of how region indices ensure borrows are appropriately scoped.  I suspect this is a matter of unclear exposition that could easily be corrected, rather than a true soundness issue, but without knowing for sure I can't yet recommend acceptance.  Good answers to my questions for the authors' response would lead me to upgrade my score, possibly significantly.
+
+## Region Variable Nesting, Principality
+
+How is proper nesting of regions enforced?  For the lifetime check in the REGION rule to be sound, it *must* be the case that any time two regions nest, the inner region has a larger index than the enclosing region; otherwise by indexing regions "backwards" a program could smuggle a borrowed value out of a region.  But I cannot find where this is checked in the type system; REGION and the borrowing rule in Figure 14 just take the index for granted and use it constrain other things; they don't perform any consistency checks on n.  I cannot find where it is enforced during inference.  I cannot find where it is enforced during region introduction in Appendix A.  But this is critical for soundness!  Please explain how this is checked in your response.  What part of the system rejects $\{|\ldots\{|\ldots|\}^2|\}^3$ but accepts $\{|\ldots\{|\ldots|\}^3|\}^2$ (or the reverse, in case I've misunderstood the DeBruijn ordering)?  This is especially puzzling to me in the case where one defines a function with a certain index on a region in its body, but then calls it in a context where that region index should be invalid.  Traditional region type systems (e.g., Tofte-Talpin) use abstract region variables with a set of "capabilities" to regions, rather than a totally-ordered set specifically to avoid this kind of problem.
+
+The only thing I can think of is that maybe it doesn't matter: it took me a while to figure out the subtle interplay between Figures 13 and 14: When borrowing x for a region labelled n, Figure 14 will give the borrow a lifetime k that is greater than or equal to n, but the lifetime check in Figure 13 requires a lifetime strictly less than n, which can never be satisfied by the borrow.  But in that case, do the index choices matter at all?  It's certainly possible to reject programs, such as $\{|~\{|\&!x|\}^3~|\}^5_{\{x\mapsto A\}}$, which is a safe program but will reject returning the borrow of x because it has a larger lifetime index than the index of the inner prompt.  Is this the correct understanding of the region indexes?  Because if so, the discussion of nesting levels needs to be revised; the current version leads to confusion.
+
+Related to this: on page 17, the first bullet point (the second inference judgment defined in Section 4.1) has an n ($\leadsto^{\bf x}_n$).  The paper says the x is an input, and the lack of bolding suggests n is an output.  Is it?  Where does it come from?  Figure 30 doesn't seem to do anything meaningful with n.
+
+I also have suspicions about the statement of the "extension" to theorem 5.1 that addresses substructural restrictions; I'll call this Theorem F.2 based on its name in the supplementary material (it's not properly named in the main paper).  The conclusion of this theorem adds a Resources clause that talks about the number of times things are reachable from *parts* of the runtime environment, based on affinity/linearity.  But these parts are always treated separately.  For example, if the type system permitted an immutable borrow to stick around forever, the immutable borrow would be treated in the Immutables clause, and the original would be treated in the Resources clause (which only considers reachability from linear/affine-typed variables), and the possibility that the two alias wouldn't seem to be considered.  So even if the type system is indeed sound in all expected ways (not only in the Theorem 5.1 sense), I don't think this is really the statement we want for a theorem about preserving linearity/affinity; it's too weak.  
+
+A less critical matter: How do region indices interact with principality?  I get the sense that your inference is principal *for a given choice of region indices*.  But of course, some choices of region indices seem better than others for reuse --- e.g., a region that nests under more regions correctly is better; am I understanding correctly?
+
+
+## DeBruijn Indexed Region Variables
+
+This is a lesser comment, there's no need to respond to this in the rebuttal.
+
+Section 3 says the paper uses DeBruijn style indexing for regions, but it's not clear exactly what this means.  DeBruijn indexing for variable binding represents variables by counting how many abstractions "out" from the use the relevant binder is.  But it's not clear what the analogy is for regions.  My first intuition was that indices would increase going outwards, with the inner-most regions given index 0, which also seems useful for principal typing.  But the paper seems to assume that index of a region is the depth of region nesting it lives under: the outermost region(s) in a program are indexed 0, the next level of regions within those are index 1, etc.  This is consistent with the REGION rule, which checks that the result is still valid outside the terminating region by checking it is from a smaller region than the one being terminated.  This cost me some confusion and I suspect I won't be the only one; please explicitly state your interpretation of DeBruijn along the lines of how I did.
+
+## Miscellaneous
+
+- The proof of F.2 seems to omit the cases of the semantics that might modify the heap
+- I cannot find type rules for Create/Observe/Destroy in the supplementary material (my apologies if I missed them somewhere).
+
+Questions for authors’ response
+---------------------------------
+- How is proper nesting of regions enforced, for both the type system and region inference in Appendix A?  And for the example I asked about above ( $\{|\ldots\{|\ldots|\}^2|\}^3$ )? Or does the paper simply give a nesting intuition that's not necessary because the indices don't actually matter for soundness?
+- Please explain why/whether Theorem F.2's statement properly enforces linearity
+
+
+
+Review #235B
+===========================================================================
+
+Overall merit
+-------------
+C. Weak Reject
+
+Reviewer expertise
+------------------
+Y. Knowledgeable
+
+Paper summary
+-------------
+The paper presents a declarative type system, big-step semantics, and
+type inference algorithm for the core of Affe, an extension of ML to
+support linear and affine types as well as Rust-style borrowing of
+affine resources.
+
+Strengths
+---------
+* Practical design for programming with linear resources that is
+  better behaved than some of the alternatives.
+
+* Nice motivating examples.
+
+Weaknesses
+----------
+* Incomplete typing rules
+
+* Missing details from the explanation of the big-step semantics make
+  it hard to follow.
+
+* The writing is quite rough in places to the extent of being
+  difficult to understand.
+
+* Systematically fails to use the notation for input parameters.
+
+Comments for author
+-------------------
+Affe seems like an interesting and well thought out design. With some
+work I think you have most of what you need for a good paper. However,
+as it stands the presentation of the formalism (particularly the
+semantics) isn't up to scratch. There are too many omissions and typos
+for me to be quite sure what is being described.
+
+I'd prefer to see all of the typing rules together in the body of the
+paper. It's a little hard to follow what's going on otherwise.
+
+It's good to push boring details into the appendix, but the body of
+the paper needs to be sufficiently self-contained that the high-level
+ideas can be followed without reading the appendix. In some places I
+found this a struggle.
+
+Having a notation to emphasise which parameters are inputs is a good
+idea. But then failing to use that notation or getting it wrong just
+makes things more confusing for the reader.
+
+It's clear that unrestricted (immutable) and affine (mutable) borrows
+are useful (as they are in Rust). Given that linearity is used
+elsewhere in your language, it's natural to wonder whether linear
+borrows might also have their uses. Have you considered this as a
+possibility?
+
+You mention in the abstract that Affe supports type abstraction
+through modules. I think you were wise not to include modules in the
+formalism in the body of paper, but I do wonder whether, in practice,
+the module system interacts in interesting ways with the novel
+features of Affe.
+
+It seems that Affe is quite similar to Quill - at least in terms of
+the desirable properties both systems satisfy. Do you think one could
+just as easily extend Quill with support for regions and borrowing? Do
+you have a feel for the relative pros and cons of using kinds as in
+Affe versus using the typeclass-like mechanism of Quill?
+
+
+25: "of of"
+
+25: "suceed"
+
+161: what's a "webfront"?
+
+Section 2: I found the motivating examples quite compelling.
+
+222: "arrows types"
+
+231: You haven't defined "fork"
+
+469: Try rephrasing using singular forms.
+
+477: What do the $s$ and $e$ subscripts stand for?
+
+Figure 8: Why not define a syntactic category Q for qualities (then
+you only need 1 Lat-Q-Level rule rather than 3)?
+
+611: "to next topic"
+
+614: "its ancestors lifetime"
+
+627: "<= U-infinity" - missing $k$
+
+628: "WIth"
+
+678: I think $W$ should be $w$
+
+Figure 16: Far too much is left unexplained here. I know "let*" is
+some kind of monadic bind, but it should be formally defined. What is
+"let*?"? Where's the definition of "exp"?
+
+729: Please at least define the return and bind for the monad!
+
+761: "HM(X)" should be "HM(X)'s"
+
+768: Your usage of the verb "to note" throughout the rest of the paper
+is not valid English.
+
+768: You are already using bold for qualities, so the new notation
+seems problematic.
+
+778: "infers"
+
+782: "same rules as the one"
+
+Figure 17: Why have you not highlighted the input parameters in the
+judgement?
+
+803: "term"
+
+813: You appear to be failing to apply your own rules about inputs
+being bold - and continue to get it wrong in other places in the
+paper. Here $\tau$ is an input - or at least that's what you write in
+the very next sentence!
+
+815: What exactly does "not generally supported" mean?
+
+826: What does $\Gamma$ only regular and type bindings mean?
+
+865: "leafs"
+
+869: The Weak function returns false only if weakening is both
+necessary and not possible (due to linearity). Why not explain the
+high-level idea rather than simply repeating the definition in the
+text?
+
+871: "the syntax directed"
+
+875: "is introduce at"
+
+Figure 20: you need to write parentheses around collections of
+quantifiers. I really struggled to parse the definition of gen at
+first!
+
+894: "environment"
+
+895: "which return"
+
+909: Existentials may bind type variables and kind variables. Say so!
+
+911: "allow to" should be "allows us to"
+
+911: "It also reflect the"
+
+912: "exists"
+
+951: "Herband"
+
+952: This doesn't look right to me. Do you mean $\overline{\kappa}$
+rather than $\kappa_i$?
+
+985: "this algorithms"
+
+1012: "type binding"
+
+1024: "binders are replace"
+
+1202: "sufficient simple"
+
+1202: "allows to"
+
+
+
+Review #235C
+===========================================================================
+
+Overall merit
+-------------
+D. Strong Reject
+
+Reviewer expertise
+------------------
+X. Expert
+
+Paper summary
+-------------
+The paper proposes a linear/affine type system for an ML-like language, extended with regions and
+Rust-style borrowing.
+
+Strengths
+---------
+ + The addition of borrowing to a formal linear/affine language is interesting and practically useful.
+ + The adaptation of [Morris 2016]-style constraints to kinds is more idiomatic for ML-style langauges.
+
+Weaknesses
+----------
+ - Several of the paper's example argue for the inadequacy of its support for regions and borrowing.
+ - The applications of subsumption and simplification (seem to) over-restrict the meaning of types.
+ - The formalization is incomplete.
+
+Comments for author
+-------------------
+The paper sets out a reasonable collection of goals: it adapts the [Morris 2016] style of linearity
+constraints to an ML-like language, and extends them with support for Rust-style borrowing.
+Unfortunately, for this reviewer, the paper itself fell short of realizing those goals.
+
+ * Simplification and subkinding
+
+Early on, the paper gives the example
+
+    let app f x = f x
+    # app : (a -k-> b) -> (a -k-> b)
+
+The authors claim this type is the most general type for application.  But it is not: the result
+function could be more restricted than the input function.  A more serious difficulty arises in the
+next example:
+
+    let compose f g x = f (g x)
+    # compose : (k <= k1) => (b -k-> c) -> (a -k1-> b) -k-> (a -k1-> c)
+
+This allows one to compose, for example, an affine function with a linear function to get a linear
+function.  But it does NOT allow one to compose a linear function with an affine function to get a
+linear function.  The authors comment that one might 'expect' the see a lub here; however, it is
+very unclear that their alternative captures the same meaning.
+
+ * Regions and borrowing
+
+Borrowing is clearly an important development in linear programming, and it's good to see formal
+characterizations of borrowing in linear functional languages.  However, the support for borrowing
+here seems to be insufficient to cover several of the authors motivating examples.  The authors
+introduce session types as one example of linear types.  Can session-typed channels be borrowed?  It
+seems unlikely that the types would stay synchronized if they could.  But if not, doesn't this
+suggesting that the model of borrowing here is insufficient?
+
+ * Formalization
+
+The formalization is too incomplete to meaningfully evaluate.  For example, while there are rules to
+introduce borrow bindings, there are no rules to consume them.  Can borrowed values really only be
+as arguments to primitives?  Perhaps this is where the distinction between "borrow matches" and
+"normal matches" would become relevant, but there is neither a typing rule nor a discussion of
+matches.  The final example in the previous section argued for the use of region index variables;
+the introduction to section 3 suggests that this will be accessed by de Bruijn-indexing, but that
+seems absent from Fig. 7 and from the discussion.  The discussion of borrow bindings (&b x : &b(k,
+s))---incidentally, according to Fig. 7, borrow bindings contain types, not schemes, so this is
+ill-formed---says that k will be used to limit the use borrow binding, referring to Fig. 10.  But
+the only use of k in Fig. 10 seems to be in the Borrow rule, where it is unconstrained by the rest
+of the rule.  And so on.
+
+I realize that space is limited, and the authors have provided supplemental materials.  However,
+these issues do not seem to me to be details; they seem to be central to understanding the
+contributions of the paper.  So, I find their omission from the body of the paper very troubling.
+
+ * Related work
+
+The characterization of some of the related work is imprecise:
+
+System F-pop does not have multiple types for a single composition function; as it is based on
+System F, functions arguments must be type annotated.  It does have multiple variations on the
+composition function, each with incomparable types.
+
+[Morris 2016] does include a linearity-aware semantics for Quill, along with the corresponding proof
+of type soundness.
+
+Most of the contrast with Alms seems shaky---the paper doesn't make clear how many of Alms examples
+can be expressed in Affe, or how much less expressive Affe's kind system actually is.  The
+comparison to modules in Alms seems entirely off-base: section 2 does not give implementations of
+the Array module, where such a comparison would be meaningful.  The hybrid array comparison shows
+the opposite: how copying can be used to build unrestricted types out of restricted types, an
+observation that goes back at least to Gan, Tov and Morrisett at LINEARITY 2014.
+
+
+
+Review #235D
+===========================================================================
+
+Overall merit
+-------------
+B. Weak Accept
+
+Reviewer expertise
+------------------
+Y. Knowledgeable
+
+Paper summary
+-------------
+This paper presents Affe: an ML extension with linear and affine types and borrowing.
+The kind of an type in Affe expresses whether it must be treated in a linear, affine or unrestricted way and the lexical block in which it remains alive.
+In addition to defining the language's syntax, type system and operational semantics, the paper offers a full principal type inference, formalizes it and proves its metatheoretical results
+Finally, a proof-of-concept implementation is apparently available online (though I have not tried it).
+
+Strengths
+---------
+* the technical results appear very impressive: a fully formalized and apparently quite general type inference algorithm for a language with linear and affine types and borrowing
+
+* the technical results appear very solid (although I haven't checked proofs)
+
+* a broad discussion of related work that appears thorough to my non-expert eye.
+
+* the meta-theoretical results appear complete: I can't think of an additional property that I would have liked to see proven
+
+Weaknesses
+----------
+* the paper does not make explicit novelty claims of the form "To the best of our knowledge, this is the first X with Y but not Z."
+
+* it is not always clear why certain things are discussed, e.g. the examples in section 2 appear not novel or Affe-specific.
+
+* the paper would strongly benefit from more examples that explain why the type inference algorithm works the way it does.
+
+* some notations could have been chosen more intuitively
+
+* the paper contains a lot of technical material to digest with not very many examples, particularly in the sections on operational semantics and type inference.
+
+* the paper would benefit from explaining technical choices in more detail, for example, *why* is the operational semantics (Fig. 16) defined in the very particular style with explicit allocation of locations for every object.
+
+Comments for author
+-------------------
+I find this paper technically very impressive.
+Affe seems very well-designed ML extension, offers a rather complete set of features (linear, affine types and borrowing, kinds expressing linearity and lifetime, polymorphism, kind polymorphism etc.).
+Additionally, the type inference is fully formalized, well-designed, and comes with soundness and completeness proofs.
+What I find less strong about this paper is the writing.
+It is not so much poorly written, but in my opinion, it has a lot of technical material to discuss and spends valuable space on the wrong topics.
+Particularly, many of the examples in section 2 appear not novel or even very Affe-specific.
+At the same time, the sections discussing the most technically hard aspects of Affe (operational semantics and type inference) are very dry and would benefit strongly from more intuitions and examples.
+In summary, even though I find this paper's technical results valuable and impressive, there remains a lot that can be improved about the writing.
+As such, I'm assigning this paper a weak accept, and if we accept the paper, I think this should be predicated on the authors improving the writing in the second round-resubmission.
+
+
+Major comments:
+
+l151-163: I would prefer for you to not just list what you provide, but also explicitly claim what you consider novel about these things.
+  For example, your RW suggests this is the first type system with linear and affine types but also a formalized, complete type inference.
+
+section 2.1-2.3: these techniques are not new, right?
+  Please explain why you are presenting them?
+  Do you think they explain something particular to Affe or are they just intended to argue usefulness of linear/affine typing in general?
+  I think the usefulness of linear/affine typing is well-accepted and this space would better be spent on discussing examples that explain why inference of linear/affine type systems with borrowing is hard and how your approach works.
+
+general: I would be interested in your thoughts on how your approach relates to GADTs, the unavoidable loss of principal types in their presence and the OutsideIn(X) framework discussed in the OutsideIn(X) paper:
+  https://www.cambridge.org/core/journals/journal-of-functional-programming/article/outsideinx-modular-type-inference-with-local-assumptions/65110D74CF75563F91F9C68010604329
+  From a more high-level point of view: many languages (e.g. Haskell) appear to be abandoning the original ML goal of complete type inference with all type annotations ultimately omittable.
+  Would your type inference have been significantly easier if full type inference was not a goal, but instead, a very limited amount of type annotations were acceptable?
+  Or do those sort of compromises only become necessary in the presence of GADTs?
+  Also, are GADTs combinable with linearity and would that add extra complications?
+
+General comments:
+
+l54: "For imperative APIs, resource-passing style is not an option at all."
+  It's unclear to me what you mean here.
+  Isn't it folklore that you can use a world-passing style in linear languages to model imperative APIs in a similar style than what you've discussed for resources?
+  This is, for example, discussed in section 2.7 of Bernardy et al. [2018]
+
+l85: "hence the need for affinity": It's not clear here how borrows imply the need for affinity
+
+l135: "α : κ₁": shouldn't α be of kind * or Setₖ for some k, as it's used as the domain of a function?
+  Same remark for β.
+
+l170-179: in the text, you use the syntax "!int.!int.?int.end", but the formal syntax on l175-179 has the type before the exclamation/question mark.
+  Please align.
+
+l184: why call this type constructor st, why not chan?
+
+l211-213: I found it hard to understand why the type of add_service doesn't have some form of linearity annotation.
+  I suspect it's not necessary because the function will be invoked only once even when the result is used more than once, so there's no need to make the result linear.
+  I think it would be a good idea to explain some intuition about this to your readers.
+
+l222-223: I don't like the syntax for Affe arrow types.
+  To me, the syntax $\xrightarrow{k}$ intuitively suggests a function that uses its argument according to multiplicity k, not the real interpretation, which says that *the function itself* must be used according to multiplicity k.
+  I suspect my interpretation is more standard in other languages with linear/affine types, e.g. "A -o B" in separation logic indicates that A is used linearly and "->." in linear haskell means that the function will treat its result linearly.
+  A syntax like "k (A -> B)" or "[k] A -> B" would make more sense to me for your interpretation.
+
+l498-502: after reading this paragraph, I absolutely do not understand what suspended bindings and borrow bindings are suspended to do.
+  Please take some more time to explain this properly, perhaps after you explain the more easy to understand parts of the type system.
+
+Fig. 19 p.18: where have you defined the syntax for constraints?
+
+Section 4: In all of your judgements, I think it would help a lot if it were clearer which of the arguments are input and which are output arguments.
+  Couldn't you try to find a more consistent syntax for this.
+  Perhaps you could use colors to indicate this, or put all output parameters to the right of a squiggly arrow symbol or something similar?
+
+l929: "We define the hset of ... =_e": I don't understand this sentence at all (how do you quantify by an equality symbol, what does "solved formed S" mean?).
+
+section 6.1: I think you should also mention Granule and graded modal type theory here.
+  see https://dl.acm.org/citation.cfm?id=3352468.3341714
+
+Small comments:
+l25: "suceed": succeed
+
+l275: "such a set": such as set
+
+l207-218: I don't like how this figure is right in the middle of a paragraph.
+  Please don't use latex placement modifiers like "[h!]", but just let it do its job of finding a nice spot for your figures.
+
+l337: "It takes": unclear what it refers to
+
+l377: "can captures"
+
+l628: "WIth": With
+
+l711: "salloc δ w": salloc δ₂ w?
+  also on l712: "Ok(δ₂)": Ok(δ')?
+
+l779: "which infers": which infer
+
+l839: why the word "new" rather than "fresh", as is more standard?
+
+l1021: "a constraints": constraint
+
+l1114: "an Haskell-like": a Haskell-like
+
+l1122: "where β uniquely identify of the array": grammar problem
+
+l1145: "Or course"
+
+l1196: "has be used": been
+
+l1196: "including OCaml itself": why "itself"?
