@@ -4,12 +4,12 @@ Thanks to the reviewers for their thoughtful comments.
 
 > How is proper nesting of regions enforced, for both the type system and region inference in Appendix A?  And for the example I asked about above ( $\{|\ldots\{|\ldots|\}^2|\}^3$ )? Or does the paper simply give a nesting intuition that's not necessary because the indices don't actually matter for soundness?
 
-We assume that region annotations are inserted by the automatic
-annotation phase provided in Appendix A before passing the program to
-the type checker. 
-Unfortunately, the annotation rules have a typo: The recursive
-call in "Rewrite-Region" should be on $n+1$.
-Insertion of annotations is completely deterministic (which solves principality concerns)
+We absolutely agree that proper nesting of region indices is critical.
+We assume that region annotations are handled out of the type system, through
+our automatic annotation pass provided in Appendix A.
+Unfortunately, the rules provided have a typo: The recursive
+call in "Rewrite-Region" should be $n+1$.
+This pass is then completely deterministic (which solves principality concerns)
 and ensures that indices grow as regions are nested (which rules out all the given
 problematic examples).
 This is sufficient since there is no
