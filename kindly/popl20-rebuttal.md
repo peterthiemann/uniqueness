@@ -1,4 +1,9 @@
-Thanks to the reviewers for their thoughtful comments.
+Thanks to the reviewers for their thoughtful comments. Were the paper to be accepted, we would take their comments into account and revise our article in the following manner:
+- Streamline the description of examples in Section 2 to focus on Affe's novelties
+- Present automatic region annotation in the body of the article, and clarifies its role in the type system.
+- Present the pattern matching rules, both typing and semantic.
+- Improve the explanation through new examples for the semantics and the type inference (an example for constraint solving is already present in the appendix).
+
 
 # Reviewer A
 
@@ -23,7 +28,7 @@ more sophisticated region system with abstract variables, as suggested
 by the reviewer.
 
 We agree that our assumption should be made clearer and will improve
-the respective  explanations.
+the associated explanations.
 
 > Please explain why/whether Theorem F.2's statement properly enforces linearity
 
@@ -38,11 +43,7 @@ For instance, the `File.t` type presented in Figure 1a could be implemented
 as a file descriptor (i.e., an integer), which is unrestricted. Subsumption
 then allow the unrestricted type to be exposed as affine.
 Such mechanism allow programmers to implement their own primitives on
-abstract types.
-As usual with type-level programming, they must also ensure
-the soundness of such primitives
-Modules and subsumption are used similarly in Alms, and allow
-to emulate the `unsafe` construct in Rust.
+abstract types. Programmers are then in charge of ensuring soundness of such primitives. This feature, which is also present in Alms, allows to partially emulate Rust's `unsafe` construct.
 
 # Reviewer C
 
@@ -78,7 +79,7 @@ Dealing with borrows for session-typed channels would require a major
 extension with typestates, which is notoriously incompatible with type
 inference. 
 However, one could contemplate operations to extract channel metadata
-(IP , bytes sent, etc) from a  shared borrow of a channel as in 
+(IP , bytes sent, etc) from a shared borrow of a channel as in 
 `get_address: &(_ channel) -> ip_address`, 
 which is typable in Affe.
 As the main reference to the channel cannot be used while a borrow is active, such
