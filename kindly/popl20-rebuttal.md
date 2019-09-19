@@ -1,6 +1,7 @@
-Thanks to the reviewers for their thoughtful comments. Were the paper to be accepted, we would take their comments into account and revise our article in the following manner:
+Thanks to the reviewers for their thoughtful comments. 
+Were the paper to be accepted, we would take their comments into account and revise our article in the following manner:
 - Streamline the description of examples in Section 2 to focus on Affe's novelties
-- Present automatic region annotation in the body of the article, and clarifies its role in the type system.
+- Present automatic region annotation in the body of the article and clarify its role in the type system.
 - Present the pattern matching rules, both typing and semantic.
 - Improve the explanation through new examples for the semantics and the type inference (an example for constraint solving is already present in the appendix).
 
@@ -32,7 +33,27 @@ the associated explanations.
 
 > Please explain why/whether Theorem F.2's statement properly enforces linearity
 
-Peter??
+We don't understand the construction outlined by the reviewer. We
+believe that the situation cannot arise because the
+different parts of the environment are always disjoint. The
+Region/SRegion rule moves a binding from the resource part to a borrow
+part (mutable or immutable). This part of the formalization is
+unfortunately a bit opaque as it is hidden in the environment
+formation (L 2113-2123).
+The Region typing rule transforms the typing context (for example, L
+2375); the corresponding transformation of the run-time environment is
+left implicit.
+
+We will try to improve the writeup for this issue in the revision.
+
+> The proof of F.2 seems to omit the cases of the semantics that might
+> modify the heap
+
+We put the cases that we felt were most important.
+
+> I cannot find type rules for Create/Observe/Destroy in the supplementary material (my apologies if I missed them somewhere).
+
+That's an unfortunate editing mistake.
 
 # Reviewer B
 
@@ -102,7 +123,26 @@ topic if the article is accepted.
 
 > Related work
 
-????
+Correct, Quill comes with a usage-counting semantics. What we meant to
+say is that their semantics isn't store based.
+
+Alms is a seminal work that supports many interesting examples, but it
+comes with a heavy price in terms of complexity (e.g., dependent
+kinds, lub operator in types) and it is not suitable for type
+inference. Most of the examples in the Alms paper exploit the
+genericity of existentials to, e.g., connect resources with
+capabilities. As Affe doesn't have unrestricted existentials, the
+corresponding examples are unlikely to work in Affe as they are stated
+in the Alms paper.
+
+The examples in section 2 are not aimed at comparing with Alms, rather
+we want to demonstrate that the idea put forward in the Alms paper (to
+annotate abstract types in module signatures) also works with Affe's
+type inference.
+
+We will insert a citation of the Gan, Tov, and Morrisett paper with
+the copy-on-write array.
+
 
 # Reviewer D
 
