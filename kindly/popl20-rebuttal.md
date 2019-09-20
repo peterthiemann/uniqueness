@@ -142,9 +142,7 @@ inference. The corresponding examples are unlikely to work in Affe as
 they are stated in the Alms paper.
 
 The examples in section 2 are not aimed at comparing with Alms, rather
-we want to demonstrate that the idea put forward in the Alms paper (to
-annotate abstract types in module signatures) also works with Affe's
-type inference.
+we want to demonstrate that Alm's use of modules is compatible with Affe's inference, as highlighted in Reviewer B's answer.
 
 We will insert a citation of the Gan, Tov, and Morrisett paper along with
 the copy-on-write array example.
