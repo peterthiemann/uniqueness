@@ -4,7 +4,7 @@ We will take their comments into account and revise our article as follows.
 * Present automatic region annotation in the body of the article and clarify its role in the type system.
 * Present the pattern matching rules, both typing and semantic.
 * Improve the explanation through new examples for the semantics and
-  the type inference (the appendix contains an example for constraint solving).
+  the type inference.
 
 
 # Reviewer A
@@ -88,7 +88,7 @@ linear, both k and k1 are instantiated to linear, and the resulting
 function type is annotated as linear. This approach follows the
 treatment of structural subtyping in HM(X).
 
-## Regions and borrowing
+## Examples, Regions and borrowing
 
 The session type interface that we present is using a functional
 style with linear types to demonstrate that this application is in
@@ -126,7 +126,7 @@ and inference, we decided not to detail the handling of matching on pairs.
 We agree that this aspect is important and we will expand on this
 topic in future revisions.
 
-> Related work
+## Related work
 
 Correct, Quill comes with a usage-counting semantics. What we meant to
 say is that their semantics isn't store based.
@@ -150,7 +150,7 @@ the copy-on-write array example.
 
 # Reviewer D
 
-> Partial inference and GADT
+## Partial inference and GADT
 
 Even if a language does not admit full type inference, we believe
 there should be a well-defined core language which does.
@@ -161,7 +161,7 @@ by requiring type annotations, similarly to Alms.
 The results we present nevertheless garantee that
 full type inference is supported in the absence of existentials.
 
-> the paper would strongly benefit from more examples that explain why the type inference algorithm works the way it does.
+## Examples
 
-One such example is available for constraint solving in the Appendix B.1, but we agree
-that it should be extended and part of the main body.
+We strongly believe programming examples are essential to demonstrate and explain
+Affe's features, as highlighted in reviewer C's answer. We do agree that semantics and inference require more examples, one of which is already available in Appendix B.1.
