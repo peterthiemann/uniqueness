@@ -1,5 +1,4 @@
-Thanks to the reviewers for their thoughtful comments. 
-Were the paper to be accepted, we would take their comments into account and revise our article in the following manner:
+We thanks the reviewers for their thoughtful comments. We will take their comments into account and revise our article in the following manner:
 - Streamline the description of examples in Section 2 to focus on Affe's novelties
 - Present automatic region annotation in the body of the article and clarify its role in the type system.
 - Present the pattern matching rules, both typing and semantic.
@@ -60,7 +59,7 @@ That's an unfortunate editing mistake.
 ## Modules
 
 Affe's usage of subsumption also interacts with type abstraction and modules
-For instance, the `File.t` type presented in Figure 1a could be implemented
+For instance, the `File.t` type presented in Section 1 could be implemented
 as a file descriptor (i.e., an integer), which is unrestricted. Subsumption
 then allow the unrestricted type to be exposed as affine.
 Such mechanism allow programmers to implement their own primitives on
@@ -131,7 +130,8 @@ comes with a heavy price in terms of complexity (e.g., dependent
 kinds, lub operator in types) and it is not suitable for type
 inference. Most of the examples in the Alms paper exploit the
 genericity of existentials to, e.g., connect resources with
-capabilities. As Affe doesn't have unrestricted existentials, the
+capabilities. In order to provide full type inference
+Affe doesn't have unrestricted existentials, and the
 corresponding examples are unlikely to work in Affe as they are stated
 in the Alms paper.
 
@@ -156,3 +156,8 @@ In particular, it is possible (and desirable) to extend Affe with existential ty
 by requiring type annotations, similarly to Alms.
 The results we present nevertheless garantee that
 full type inference is supported in the absence of existentials.
+
+> the paper would strongly benefit from more examples that explain why the type inference algorithm works the way it does.
+
+One such example is available for constraint solving in the Appendix B.1, but we agree
+that it should be extended, and part of the main body.
