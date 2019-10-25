@@ -100,7 +100,7 @@ Most relevant to \lang:
   The GHC implementation of LH performs type inference, but
   it is neither formalized nor complete.
 \item
-  LH promotes a continuation-passing style with functions such as 
+  LH promotes a continuation-passing style with functions such as
   \lstinline/withFile : path -> (file ->. file) ->. unit/
   to ensure linear use of resources. This style leads to problems with
   placing the annotation on, e.g., the IO monad.
@@ -146,7 +146,7 @@ settings, notably in the context of low-level imperative programming
 and object systems. In particular, \lang uses borrows and regions
 which were initially developed in the context of imperative and
 object-oriented
-programming~\citep{DBLP:conf/popl/BoylandR05,DBLP:conf/pldi/GrossmanMJHWC02}. 
+programming~\citep{DBLP:conf/popl/BoylandR05,DBLP:conf/pldi/GrossmanMJHWC02}.
 
 Rust~\citep{rust} is the first
 mainstream language to popularize the idea of borrowing and ownership
@@ -196,7 +196,7 @@ foundation of Haskell's type system.
 
 The subtyping discipline used in \lang is very similar
 to structural subtyping, where the only subtyping (or here, subkinding)
-is at the leafs.
+is at the leaves.
 Such discipline is known to be friendly to inference and has be used in many
 contexts, including OCaml itself, and has been combined
 with constraints~\citep{DBLP:journals/tapos/OderskySW99,DBLP:conf/sas/TrifonovS96}.
@@ -207,7 +207,7 @@ In \lang, we repurpose these ideas to check for linearity and affinity.
 notions to solve lattice-based constraints, which we partially use
 in our constraint solving algorithm. Our main contribution
 is the design of a kind language specialized for checking linearity
-and sufficient simple to make
+and sufficiently simple to make
 all simplification rules complete, which allows to keep type signatures simple.
 
 

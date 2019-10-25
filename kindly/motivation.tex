@@ -10,7 +10,7 @@ ascribed to a communication channel and describes
 a sequence of interactions. For instance, the type
 \lstinline{!int.!int.?int.end} specifies a protocol
 where the program must send two integers, receive an integer, and then
-close the channel. 
+close the channel.
 %
 In this context, channels must be used linearly, because every use of
 a channel ``consumes'' one interaction and  changes the type of the
@@ -25,7 +25,7 @@ Here are some standard type operators for session types \SType:
     $\tau ? \SType$& Receive a value of type $\tau$ then continue with protocol $\SType$.\\
     $\SType \oplus \SType'$& Internal choice between protocols $\SType$ and $\SType'$.\\
     $\SType \operatorname{\&} \SType'$
-                    & Offer a choice between protocols $\SType$ and $\SType'$. 
+                    & Offer a choice between protocols $\SType$ and $\SType'$.
   \end{tabular}
 \end{center}
 
@@ -42,7 +42,7 @@ val send : ('a ! 'S) st -> 'a -{lin}> 'S st
 val create : unit -> 'S st * (dual 'S) st
 val close : end st -> unit
 \end{lstlisting}
-% val send : ('a:'k). 'a -> ('a ! 'S) st -{'k}> 'S st 
+% val send : ('a:'k). 'a -> ('a ! 'S) st -{'k}> 'S st
 
 Line~\ref{line:session1} introduces a parameterized abstract
 type \lstinline{st} which is linear as indicated
@@ -116,9 +116,9 @@ Moreover, the \lstinline/op_client/ function can be partially applied
 to a channel. Since the closure returned by such a partial application
 captures the channel, it can only be used once.  This restriction is
 reflected by the arrow of kind \lstinline{lin}, \lstinline/-{lin}>/,
-which is the type of a single-use function. 
+which is the type of a single-use function.
 The general form of
-arrows types in \lang is \lstinline/-{k}>/, where \lstinline/kk/ is a
+arrow types in \lang is \lstinline/-{k}>/, where \lstinline/kk/ is a
 kind that restricts the number of uses of the function.  For
 convenience, we shorten \lstinline/-{un}>/ to \lstinline/->/.  \lang
 infers the
@@ -174,10 +174,10 @@ ones. This array can be processed further using \lstinline/map/ (or \lstinline/s
 affine). The \lstinline/get/ function only applies if the element type
 is unrestricted as one element is duplicated. The \lstinline/length/
 function applies anytime. Before \lstinline/free/ing the array the elements must be
-affine, again. 
+affine, again.
 
-To manage the different kinds of accessing the array we distinguish between constructors, destructors, 
-observers, and mutators. 
+To manage the different kinds of accessing the array we distinguish between constructors, destructors,
+observers, and mutators.
 Constructors and destructors like \lstinline/create/ and \lstinline/free/ manipulate the whole
 array. As with channels in \cref{sec:session-linearity},
 \lstinline/create/ yields a linear resource which is consumed by \lstinline/free/.
@@ -189,7 +189,7 @@ argument, mutator functions such a \lstinline/set/ expect
 a mutable borrow.
 
 Each borrow is tied to a region whose lifetime is properly
-contained in the lifetime of the resource. 
+contained in the lifetime of the resource.
 In a region, we can split off as many immutable borrows as we like
 from a resource, but we can take only one mutable borrow. In a
 subsidiary region, we can take further immutable borrows from any
@@ -200,7 +200,7 @@ borrows are affine (\lstinline/aff/).
 
 The code in \cref{ex:array} demonstrates a use of the API to create an
 array of Fibonacci numbers. After creation of the array, we can see
-that the presence of a borrow prevents access to the ``raw'' 
+that the presence of a borrow prevents access to the ``raw''
 resource inside the borrow's region. In \cref{ex:array:get} of the
 example, there are two immutable borrows in the same
 expression, which forms a region by itself. These borrows are split
@@ -215,7 +215,7 @@ which is possible because none of the borrows are in scope anymore.
 \begin{lstlisting}
 module Array : sig
   type ('a : 'k) t : lin
-  
+
   val create : ('a : un) => int -> 'a -> 'a t
   val free : ('a : aff) => 'a t -> unit
 
@@ -225,7 +225,7 @@ module Array : sig
     ('a : un) => &('a t) * int -> 'a
   val set :
     ('a : aff) => &!('a t) * int * 'a -> unit
-  
+
   val map : (&'a -> 'b) -> &('a t) -> 'b t
 end
 \end{lstlisting}
@@ -261,7 +261,7 @@ let mk_fib_array n =
 explicitly state the regions of the example in \cref{ex:array}.  One
 region consists of the header expression of the \lstinline/let/ in
 \cref{ex:array:region:get}. It is contained in another region that
-comprises the body of the \lstinline/for/ loop. \lang guarantees that borrows 
+comprises the body of the \lstinline/for/ loop. \lang guarantees that borrows
 never escape the smallest enclosing region. It employs a system of
 \emph{indexed kinds} like \lstinline{aff_r} and \lstinline{un_r} where
 $r$ is a positive integer that corresponds to the lexical nesting
@@ -269,12 +269,12 @@ depth of regions. For instance, the type of \lstinline{&!a} in
 \cref{ex:array:set} has kind \lstinline{aff_1} whereas the type of
 \lstinline{&a} in \cref{ex:array:region:get} has kind
 \lstinline{un_2} and the typing of its region is such that types with
-kind indexes greater than or equal to $2$ cannot escape. 
+kind indexes greater than or equal to $2$ cannot escape.
 
 In \cref{ex:array:region:get} of the example, there is no danger of \lstinline/&a/ escaping because it
 is consumed in the calls to \lstinline/get/.
 Region annotations are automatically inserted using
-syntactic cues such as borrows and binders (see 
+syntactic cues such as borrows and binders (see
 \cref{regionannot}).  Users may manually insert regions to further restrict the range of a
 borrow. In practice, region annotations are
 rarely needed with common programming idioms.
@@ -328,7 +328,7 @@ However, only changes that correspond to a choice point need to use
 the persistence mechanism, others may be implemented as
 cheap in-place mutations.
 
-\cref{sig:hybarray} contains an API \lstinline/HybArray/ 
+\cref{sig:hybarray} contains an API \lstinline/HybArray/
 that enables using mutable and immutable modifications to
 the board through affine types and borrows.
 The signature differs slightly from the \lstinline/Array/
@@ -356,7 +356,7 @@ takes the position of the element.
 \begin{lstlisting}
 module type HybArray = sig
   type ('a : un) t : lin
-  
+
   val create : int -> 'a -> 'a t
   val free : 'a t -> unit
 
@@ -380,7 +380,7 @@ module Cow : HybArray = struct
       if i = i0 then x0 else x
     in
     Array.mapi f a
-  
+
   let set_mut = Array.set
 end
 \end{lstlisting}
@@ -398,7 +398,7 @@ forbids uses of the previous version.
 
 The board is represented as a 2D-matrix (\cref{line:boardtype}), where
 the \lstinline/Matrix/ type uses the same API as \lstinline/HybArray/
-but with two indices. 
+but with two indices.
 Each cell contains an integer set that represent admissible solutions so far.
 The Sudoku solver iterates over the cells and tries each possible solution (\cref{line:try_solution}).
 When a value is picked for the current cell, we create a choice point,
@@ -406,10 +406,10 @@ change the cell with an immutable modification (\cref{line:immutset}), and propa
 the changes with the \lstinline/propagate/ function.
 The \lstinline/propagate/ function uses direct mutation through a
 mutable borrow of the matrix as it need not preserve the previous
-version of the board.  
+version of the board.
 The implementation of \lstinline/propagate/ is split into three parts
 for lines, columns, and square, which are all very similar to function
-\lstinline/propagate_lines/ (\cref{line:propline}). 
+\lstinline/propagate_lines/ (\cref{line:propline}).
 
 The typing ensures that the mutations do not compromise the state at
 the choice point, because they operate on a new state \lstinline/new_g/ created for one
@@ -468,7 +468,7 @@ convenient programming style without compromising performance.
 % We have seen that borrows are limited to a region.
 In the examples so far, regions do not appear in type signatures.
 But for certain programming idioms, we want to extend the scope of a
-region across a function boundary. As an example, 
+region across a function boundary. As an example,
 we present an interface and implementation of a pool of linear resources where the
 extended scope of the region enforces proper use of the resources.
 
@@ -483,7 +483,7 @@ The function \lstinline/Pool.use/ is the workhorse of the API, which
 borrows a resource from the pool to a callback.
 It takes a shared borrow of a pool (to enable concurrent access) and a
 callback function.
-The callback receives a mutable borrow of an arbitrary resource from the pool. 
+The callback receives a mutable borrow of an arbitrary resource from the pool.
 The typing of the callback ensures
 that this borrow is neither captured nor returned by the function.
 
@@ -491,7 +491,7 @@ This encapsulation is implemented with a universally quantified \emph{kind index
 The signature prescribes the type \lstinline/&!(aff_r1,'a_1 )/ for the
 mutable borrow of the resource with an affine kind at region nesting $r+1$. The return
 type of the callback is constrained to kind \lstinline/'k_2 <= aff_r/
-so that the callback certainly cannot return the borrowed argument. 
+so that the callback certainly cannot return the borrowed argument.
 In a specific use of \lstinline/Pool.use/, the index $r$ gets unified
 with the current nesting level of regions so that the region for the
 callback effectively gets ``inserted'' into the lexical nesting at the callsite.
@@ -499,7 +499,7 @@ callback effectively gets ``inserted'' into the lexical nesting at the callsite.
 \cref{ex:pool} shows a simple example of using the \lstinline/Pool/ module.
 
 The implementation in \cref{impl:pool} represents a bag of resources
-using a concurrent queue with atomic add and remove operations. 
+using a concurrent queue with atomic add and remove operations.
 The implementation of the \lstinline/Pool.create/ and \lstinline/Pool.consume/
 functions is straightforward.
 The function \lstinline/Pool.use/ first draws
@@ -530,7 +530,7 @@ use : ('a_1:'k_1),('a_2:'k_2),('k_2 <= aff_r) =>
 let create_user pool name =
   Pool.use &pool (fun connection ->
     Db.insert "users" [("name", name)] connection)
- 
+
 let uri = "postgresql://localhost:5432"
 let main users =
   (* Create a database connection pool. *)

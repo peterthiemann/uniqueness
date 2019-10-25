@@ -51,7 +51,7 @@ where all the binders are replace by normal ones. More formally:
 \begin{lemma}
   \label{lemma:env:flat}
   Given a type environment $\E$ and a term $e$ such
-  that $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$ 
+  that $\inferW{\Sv}{(C,\unif)}{\E}{e}{\tau}$
   then $\Eflat\Sv \subset \E$.
   \begin{proof}
     By induction over the typing derivation.
@@ -75,7 +75,7 @@ where all the binders are replace by normal ones. More formally:
 
 \begin{theorem}[Soundness of inference]
   Given a type environment $\E$ containing only value bindings,
-  $\E|_\tau$ containing only type binding and a term $e$,\\
+  $\E|_\tau$ containing only a type binding and a term $e$,\\
   if $\inferW{\Sv}{(C,\unif)}{\E;\E_\tau}{e}{\tau}$
   then $\inferS{C}{\unif(\Sv;\E_\tau)}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$
 \begin{proof}
@@ -83,11 +83,11 @@ where all the binders are replace by normal ones. More formally:
   Most of the cases follow the proofs from HM(X) closely.
   For brevity, we showcase three rules: the treatment of binders
   and weakening, where our inference algorithm differ significantly
-  from the syntax directed rule, and the $Pair$ case
+  from the syntax-directed rule, and the $Pair$ case
   which showcase the treatment of environment splitting.
-    
+
   \mcase{$\ruleIVar$}
-  
+
   We have $\Sv = \Sone{x}{\sigma}$.
   Without loss of generality, we can consider $\unif_x = \unif'|_{\fv{\E}} = \unif'|_{\fv{\sigma}}$.
   Since $\Sv\Sdel{x}$ is empty and by definition of normalize, we
@@ -98,7 +98,7 @@ where all the binders are replace by normal ones. More formally:
   By rule $Var$, we obtain
   $\inferS{C}{\unif_x(\Sv;\E_\tau)}{x}{\unif_x\unif'\tau}$, which concludes.
   \\
-  
+
   \mcase{$\ruleIAbs$}
 
   By induction, we have
@@ -108,20 +108,20 @@ where all the binders are replace by normal ones. More formally:
   $\entail{C}{C'\Cand\Cleq{\unif'\Sv}{\unif'\kvar} \Cand \Weaken_{x}(\unif'\Sv_x)}$ and
   $\unif \leq \unif'$.
   By \cref{lemma:constrsubst}, we have $\entail{C}{\Cleq{\Sv}{\unif\kvar}}$.
-  
+
   We now consider two cases:
   \begin{enumerate}[leftmargin=*,noitemsep,topsep=5pt]
   \item If $x\in\Sv_x$, then $\Weaken_{x}(\unif\Sv_x) = \Ctrue$
     and by \cref{lemma:env:flat}, $\Sv_x = \Sv;\bvar{x}{\alpha}$.
     We can deduce that
     $\inferS{C'\Cand \Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x)}{\unif\Sv;\E_\tau;\bvar{x}{\unif(\tvar)}}{e}{\tau}$.
-  \item If $x\notin\Sv_x$, then $\Sv = \Sv_x$ and 
+  \item If $x\notin\Sv_x$, then $\Sv = \Sv_x$ and
     $\Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x) = \Cleq{\unif\tvar}{\kaff_\infty}$.
     By \cref{lemma:typ:weakening},
     we have that
     $\inferS{C'\Cand \Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x)}{\unif\Sv;\E_\tau;\bvar{x}{\unif(\tvar)}}{e}{\tau}$
   \end{enumerate}
-  % By \cref{lemma:env:flat}, we know that if $x\in\Sv_x$, then 
+  % By \cref{lemma:env:flat}, we know that if $x\in\Sv_x$, then
   % By \cref{lemma:typ:weakening,}, we deduce
   % that
   % $\inferS{C'\Cand \Weaken_{x}(\unif\Sv_x)}{\unif\Sv;\bvar{x}{\unif(\tvar)}}{e}{\tau}$.
@@ -135,10 +135,10 @@ where all the binders are replace by normal ones. More formally:
 
   % \mcase{$\ruleIApp$}
 
-  % By induction, we have 
+  % By induction, we have
   % $\inferS{C_1}{\unif_1\Sv_1}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
   % and $\unif_1 \tau_1 = \tau_1$
-  % and 
+  % and
   % $\inferS{C_2}{\unif_2\Sv_2}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
   % and $\unif_2 \tau_2 = \tau_2$.
   % %
@@ -158,14 +158,14 @@ where all the binders are replace by normal ones. More formally:
   % {\unif\Sv}{\app{e_1}{e_2}}{\unif(\tvar)}$,
   % which concludes.
   % \\
-  
+
 
   % \mcase{$\ruleILet$}
 
-  % By induction, we have 
+  % By induction, we have
   % $\inferS{C_1}{\unif_1\Sv_1}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
   % and $\unif_1 \tau_1 = \tau_1$
-  % and 
+  % and
   % $\inferS{C_2}{\unif_2\Sv_2}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
   % and $\unif_2 \tau_2 = \tau_2$.
   % %
@@ -178,7 +178,7 @@ where all the binders are replace by normal ones. More formally:
   % %
 
   % \TODO{}
-  
+
   % $
   % \inferrule[Let]
   % { \inferS{C \Cand D}{\E_1}{e_1}{\tau_1} \\
@@ -189,13 +189,13 @@ where all the binders are replace by normal ones. More formally:
   % }
   % { \inferS{C}
   %   {\E}{\letin{x}{e_1}{e_2}}{\tau_2} }$
-  
+
   \mcase{$\ruleIPair$}
 
-  By induction, we have 
+  By induction, we have
   $\inferS{C_1}{\unif_1(\Sv_1;\E^1_\tau)}{e_1}{\tau_1}$, $\unif_1 C_1 = C_1$,
   and $\unif_1 \tau_1 = \tau_1$
-  and 
+  and
   $\inferS{C_2}{\unif_2(\Sv_2;\E^2_\tau)}{e_2}{\tau_2}$, $\unif_2 C_2 = C_2$
   and $\unif_2 \tau_2 = \tau_2$.
   %
@@ -229,14 +229,14 @@ where all the binders are replace by normal ones. More formally:
   % \\
 
   % \mcase{$\ruleIRegion$}
-  
+
 \end{proof}
 \end{theorem}
 
 \subsection{Completeness}
 
 We now state our algorithm is complete: for any given
-syntax directed typing derivation, our inference algorithm can find
+syntax-directed typing derivation, our inference algorithm can find
 a derivation that gives a type at least as general.
 For this, we need first to provide a few additional definitions.
 
@@ -334,10 +334,10 @@ Finally, we present the completeness theorem.
 
   % $\ruleIVar$
 
-  
+
   \mcase{$
     \inferrule[Abs]
-    { 
+    {
       \inferS{C'}
       {\E'_x;\bvar{x}{\tau'_2}}{e}{\tau'_1} \\
       \addlin{\entail{C}{\Cleq{\E'_x}{k}}}
@@ -363,12 +363,12 @@ Finally, we present the completeness theorem.
   \end{align*}
 
   Let $C_a = C\Cand \Cleq{\Sv}{\kvar} \Cand \Weaken_{\bvar{x}{\tvar}}(\Sv_x)$
-  and 
+  and
   By definition, $\unif_D\Sdel{\alpha;\kvar} \leq^{\phi_D}_{\fv{\E_x}} \unif$
   which means we have
   $\unif_D\Sdel{\alpha;\kvar} \leq^{\phi\circ\phi_D}_{\fv{\E_x}} \unif'$.
   We also have that $\Sv_x\Sdel{x}\subset \E_x$.
-  
+
   Since $\entail{C}{\Cleq{\E'_x}{k}}$, we have $\entail{C}{\unif'\Cleq{\Sv}{\kvar}}$.
   If $x\in\Sv_x$, then $\Weaken_{\bvar{x}{\tvar}}(\Sv_x) = \Ctrue$.
   Otherwise we can show by induction
@@ -380,8 +380,8 @@ Finally, we present the completeness theorem.
   exists. Let $(D,\unif_D) = \normalize{C_a}{\unif\Sdel{\alpha;\kvar}}$.
   By the property of principal normal forms,
   we have $\entail{C'}{\rho D}$ and
-  $\unif_D \leq^{\rho}_{\fv{\E_x}} \unif'$.  
-  
+  $\unif_D \leq^{\rho}_{\fv{\E_x}} \unif'$.
+
   By application of {\sc Abs$_I$}, we have
   $\inferW{\Sv_x\Sdel{x}}{(C,\unif_D\Sdel{\tvar,\kvar})}{\Eflat\E_x}
   {\lam{x}{e}}{\unif_D(\tvar)\tarr{\unif_D(\kvar)}\tau_1}$.\\
@@ -392,7 +392,7 @@ Finally, we present the completeness theorem.
 
   \mcase{$
     \inferrule[Pair]
-    { 
+    {
       \inferS{C'}{\E'_1}{e_1}{\tau'_1} \\
       \inferS{C'}{\E'_2}{e_2}{\tau'_1} \\
       \lsplit{C}{\E'}{\E'_1}{\E'_2}
@@ -440,7 +440,7 @@ Finally, we present the completeness theorem.
   $\entail{}{\unif'_i\E_i \preceq \E'_i}$ and $\Sv_i\subset\E_i$.
   By \cref{split:gen},
   we have $\entail{C}{\unif' C_s}$.
-  The rest of the proof follows HM(X). 
+  The rest of the proof follows HM(X).
 
 \end{proof}
 

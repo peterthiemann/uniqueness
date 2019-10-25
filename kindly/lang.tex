@@ -12,11 +12,11 @@ For ease of presentation, we keep the language as simple as possible.
 \item Regions are assumed to be explicit in the code. (But we present
   an algorithm to infer them in \cref{regionannot}.)
 \item Regions are identified using de Bruijn-indexing instead of region
-  variables. 
+  variables.
 \end{itemize}
 
 The rest of this section formalizes  \lang: the syntax (\cref{syntax}),
-the statics in terms of syntax directed typing (\cref{sdtyping}),
+the statics in terms of syntax-directed typing (\cref{sdtyping}),
 and a dynamics that is linearity- and resource-aware (\cref{sec:sem}).
 
 \subsection{Syntax}
@@ -44,7 +44,7 @@ A kind is either a kind variable $\kvar$ or a constant
 by a nesting level $n \in \Nat \cup \{\infty\}$.
 
 A type $\tau$ is either a type variable, a function type indexed by a
-kind, 
+kind,
 a type application $\tapp{t}{\Multi{\tau}}$ of an abstract type constructor
 $\T t$, or a borrowed type  $\borrowty{k}{\tau}$.
 
@@ -146,7 +146,7 @@ Kinds form a lattice with an ordering that implements two principles
 where affine ones are expected and affine ones are less restricted
 than linear one as reflected in \TirName{Lat-UA} and \TirName{Lat-AL}.
 Second, values usable at level $n$ may be used at any more deeply
-nested level $n'$ (where $n\le\infty$ for any $n$) as defined in the \TirName{Lat-X-Level} axioms. 
+nested level $n'$ (where $n\le\infty$ for any $n$) as defined in the \TirName{Lat-X-Level} axioms.
 
 Constraints are conjunctions of inequality constraints over this kind
 lattice. In most uses, a constraint gives an upper or lower bound for
@@ -200,7 +200,7 @@ earmarked for a borrowing use in a nested region
 marked with $x$ (see \cref{sdtyping:regions}), but
 cannot be used directly.
 A borrow binding, $\bvar{\borrow{x}}{\borrowty{k}{\schm}}$, replaces
-such a suspended binding on entry to the $x$-region. It indicates 
+such a suspended binding on entry to the $x$-region. It indicates
 that the borrow $\borrow{x}$ can be used directly. The kind $k$
 restricts the lifetime of the borrow to the region (see \cref{selectrules:borrow}).
 
@@ -225,13 +225,13 @@ Borrow bindings follow the exact same rules, but suspended bindings
 are forbidden in an environment $\E$ constrained like that.
 This intuitive explanation is sufficient to understand
 the {\sc Abs} and {\sc Var} rules shown in
-\cref{selectrules:binders}. 
+\cref{selectrules:binders}.
 
 The {\sc Var} rule looks up the type scheme of the variable $x$ in
 the environment $\E$
 and instantiates it using the substitution $\unif$. The rule also
 checks that the other bindings in $\E$ can be safely discarded by
-imposing the constraint $\Cleq{\E\Sdel{x}}{\kaff_\infty}$. 
+imposing the constraint $\Cleq{\E\Sdel{x}}{\kaff_\infty}$.
 It enforces that all remaining bindings (except $x$) are affine or
 unrestricted and can therefore be discarded.
 
@@ -269,7 +269,7 @@ Capturing a suspended binding is forbidden.
       >{$}c<{$}@{ $=$ }
       >{$}c<{$}@{ $\ltimes$ }
       >{$}c<{$}r}
-      
+
       \Cleq{\schm}{\kun_\infty}
       &\bvar{x}{\schm}&\bvar{x}{\schm}&\bvar{x}{\schm}
       &Both\\[2mm]
@@ -301,7 +301,7 @@ The {\sc Pair} typing rule in \cref{sdtyp:pair} demonstrates how \lang
 deals with duplication and dropping of values.
 The splitting $\lsplit{C}{\E}{\E_1}{\E_2}$ in the rule decomposes the
 type environment $\E$ in two parts, $\E_1$ and $\E_2$, which are used
-to typecheck the components of the pair. 
+to typecheck the components of the pair.
 The constraint $C$ characterizes a valid  splitting.
 
 \cref{sdtyp:split} shows the action of the splitting rules on single
@@ -316,9 +316,9 @@ the left while conserving access to the binding on the right.
 A suspended binding can later be turned
 into a borrow inside a region. Splitting of suspended bindings is
 asymmetric. It must follow the order of execution from left to right,
-which means that a resource can be used first as a borrow on the left 
+which means that a resource can be used first as a borrow on the left
 and then later as a full resource on the right. The {\sc Susp} rule
-works with a full resource while the {\sc SuspB} 
+works with a full resource while the {\sc SuspB}
 rule splits off an immutable suspended binding from a borrow.
 
 Splitting applies whenever an
@@ -331,7 +331,7 @@ the rule {\sc Susp} splits off a borrow from  the resource
 \lstinline/a/ to use it in the left component of the pair.
 As usual, a borrow cannot be active in the same scope as its resource.
 The \emph{region} around its use ensures that the borrow in the left component does not
-escape, which brings us to next topic.
+escape, which brings us to the next topic.
 
 
 
@@ -381,18 +381,18 @@ escape, which brings us to next topic.
 
 Borrowing is crucial to support an imperative programming style.
 To guarantee the validity of a borrow, its lifetime must be properly contained in its
-ancestors lifetime. \lang ensures proper nesting of lifetimes by using
-regions. The expression $\region{\Sone x\BORROW}{e}$ indicates a 
+ancestor's lifetime. \lang ensures proper nesting of lifetimes by using
+regions. The expression $\region{\Sone x\BORROW}{e}$ indicates a
 region at nesting level $n$ in which a $\BORROW$-borrow can be taken of $x$.
 
 The typing for a region (see the {\sc Region} rule in \cref{selectrules:region})
 replaces suspended bindings by borrow bindings
-(\cref{env:rule:borrow}), typechecks the body 
+(\cref{env:rule:borrow}), typechecks the body
 of the region, and finally ensures that the borrow does not leak outside.
 This last check is done with indices that correspond to the nesting
 level of the region. The kind $k$ of the borrow is indexed with the level $n$
 corresponding to its region, thanks to the constraint $(\BORROW_n\lk
-k)$, and the constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures that 
+k)$, and the constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures that
 the return type of the region must live at some enclosing, lower level.
 
 As an example, consider the expression $\region{\Sone x\IBORROW}{f(\borrow[\IBORROW]{c})}$
@@ -404,10 +404,10 @@ $\lregion{C}{x}{\E}{\E'}$, which defines $\E'$
 corresponding to $\E$ where the suspended binding is replaced by the
 borrow binding  $\bvar{\borrow[\IBORROW]{c}}{\borrowty[\IBORROW]{k}{\text{channel}}}$.
 To constrain the borrow to this region we impose the constraint
-$\entail{C}{(\kun_n\lk k) \wedge (\lk\kun_\infty)}$, which affirms
+$\entail{C}{(\kun_n\lk k) \wedge (k \lk\kun_\infty)}$, which affirms
 that the borrow is unrestricted, but can only be used in nesting
-levels $n$ and higher.  
-WIth that setup we typecheck the body of the region,
+levels $n$ and higher.
+With that setup we typecheck the body of the region,
 $f(\borrow[\IBORROW]{c})$.
 The constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures
 that the kind of $\tau$ does not contain anything whose kind is
@@ -420,7 +420,7 @@ As it would be cumbersome to markup regions manually, we developed an
 algorithm that starts from each borrow, creates a region around it,
 and extends it as much as possible while respecting other borrows
 and binders. The algorithm (see \cref{regionannot}) also provides the region's level
-and variable annotation. 
+and variable annotation.
 Henceforth, we consider terms with fully annotated regions.
 
 
@@ -444,15 +444,15 @@ In this section, we present the dynamics of \lang in big-step
 functional
 style~\cite{siek13:_type_safet_three_easy_lemmas,DBLP:conf/esop/OwensMKT16,
   DBLP:conf/popl/AminR17}. It is given as a function
-@eval \Store \Perm \VEnv i e@ 
+@eval \Store \Perm \VEnv i e@
 that manipulates the semantic objects defined in
-\cref{fig:syntax-internal-language}. 
+\cref{fig:syntax-internal-language}.
 To demonstrate resource handling, the semantics comes with an abstract
 notion of linear resources that can be created, destroyed, observed
 (through unrestricted borrows), and
-updated (through affine borrows). 
+updated (through affine borrows).
 
-Expressions $e$ need to be elaborted with some kind and constraint
+Expressions $e$ need to be elaborated with some kind and constraint
 annotations. Polymorphic functions give rise to elaborated
 abstractions which abstract over kind variables $\Multi\kappa$ and
 which are tagged with a kind $k$ indicating their usage restriction
@@ -477,7 +477,7 @@ A result $r$ is either an address or a constant (e.g., a number). All
 non-trivial values are boxed in the sense that they are represented by
 the address of their actual content.
 
-A value environment $\VEnv$ is a mapping from variables to results. 
+A value environment $\VEnv$ is a mapping from variables to results.
 
 A storable $W$ is a particular object that can be stored. There are five
 kinds of storable. A poly closure represents a polymorphic
@@ -509,11 +509,11 @@ step count. If successful, it returns the final store, the remaining
 permissions, and the actual result.
 
 \input{fig-code}
- 
+
 We give some excerpts of the definition of @eval@ in
-\cref{fig:big-step-interpretation} and leave the full 
+\cref{fig:big-step-interpretation} and leave the full
 definition for \cref{sec:semant-defin}. The appendix also
-contains the semantics 
+contains the semantics
 in traditional notation, which does not make the monadic nature of
 evaluation explicit.
 

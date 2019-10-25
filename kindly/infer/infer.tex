@@ -11,7 +11,7 @@ Most importantly,
 $HM(X)$ ensures principal type inference
 when $X$ respects the specified properties.
 We apply HM(X) to a concrete constraint language which we name $\CL$.
-We adapt and extend HM(X) existing rules to support kind inference,
+We adapt and extend HM(X)'s existing rules to support kind inference,
 track linearity and handle borrows and regions. Finally, we
 formulate an appropriate constraint solving algorithm for $\CL$
 which solves and simplifies constraints in a principled way.
@@ -68,7 +68,7 @@ the constraints.
 \end{itemize}
 
 The relations used for syntax-directed typing can trivially be defined
-in term of these new relations by using constraint entailment.
+in terms of these new relations by using constraint entailment.
 All relations are fully described in \cref{typ:extra:envs}.
 
 \subsubsection{Constraint normalization}
@@ -148,9 +148,9 @@ As before, the complete type inference rules are shown in \cref{appendix:infer}.
 \end{figure}
 %
 In our syntax-directed system, we ensured
-that linear variables are not discarded at the \emph{leafs}, through
+that linear variables are not discarded at the \emph{leaves}, through
 the {\sc Var} rule. In the inference algorithm, we operate in the opposite
-direction: we collect data from the leafs, and only enforce linearity
+direction: we collect data from the leaves, and only enforce linearity
 at \emph{binders}. This is reflected in the {\sc Var$_I$} and
 {\sc Abs$_I$} rules presented in \cref{rule:infer:envs}.
 Typing for variables is very similar to traditional (non-affine) ML
@@ -163,7 +163,7 @@ usage of linear variable via the $\Weaken$ property.
 We demonstrate how this is achieved for lambda expressions
 in the {\sc Abs$_I$} rule.
 First, we typecheck the body of the lambda and obtain a usage
-environment $\Sv_x$. Just like in the syntax directed,
+environment $\Sv_x$. Just like in the syntax-directed type system,
 we introduce the constraint
 $\Cleq{\Sv\Sdel{x}}{\kvar}$ which properly accounts for captures in
 the body of the lambda expression. We also introduce the constraint
@@ -171,7 +171,7 @@ $\Weaken_{\bvar{x}{\sigma}}(\Sv)$. If $x$ was used $e$, $x$ is present
 in $\Sv$ and this constraint is empty. Otherwise, if $x$ is
 \emph{not} present in $\Sv$, its type should not have a linear
 kind, which is enforced by the constraints $\Cleq{\sigma}{\kaff_\infty}$.
-The $\Weaken$ constraint is introduce at each binding point in the program
+The $\Weaken$ constraint is introduced at each binding point in the program
 such as let-bindings and pattern matching.
 
 Finally, we use normalization on complex constraints to ensure
@@ -187,7 +187,7 @@ constraints and unifiers.
   \centering
   \begin{mathpar}
     \ruleIPair
-    
+
     \ruleIRegion
   \end{mathpar}
   \caption{The {\sc Pair$_I$} and {\sc Region$_I$} rules}
@@ -199,10 +199,10 @@ of the {\sc Pair} and {\sc Region} rules in \cref{rule:infer:envrules}.
 While the rules are quite similar to the original version, the usage
 environment $\Sv$ is now an \emph{output} of the algorithm.
 As such, we use the ``inference'' version of the relations on
-environment,
+the environment,
 $\bsplit{C}{\Sv}{\bf{\Sv_1}}{\bf{\Sv_2}}$ and $\bregion{C}{\bf{x}}{\Sv}{\bf\Sv'}$,
-which return the necessary constraints.
-As appropriate for inference, these relations 
+which returns the necessary constraints.
+As appropriate for inference, these relations
 are total and non ambiguous for their input parameters ($\Sv_1, \Sv_2$ and $\Sv'$, respectively).
 We then collect all constraints and normalize them.
 
@@ -249,9 +249,9 @@ free variables and the current constraints.
 The generated constraint $C_\schm$ uses a new projection operator,
 noted $\Cproj{\tvar}{D}$, which
 allow the creation of local variables inside the constraints.
-This allow to encapsulate all the quantified variables in the global constraints.
-It also reflect the fact that there
-should exists at least one solution for $C$ for the scheme to be valid.
+This allows us to encapsulate all the quantified variables in the global constraints.
+It also reflects the fact that there
+should exist at least one solution for $C$ for the scheme to be valid.
 \citet{DBLP:journals/tapos/OderskySW99} give a detailed account
 on the projection operators in HM inference.
 
@@ -263,7 +263,7 @@ on the projection operators in HM inference.
 \newcommand\SC{\mathcal S}
 
 We define the constraint solver in terms of an arbitrary bounded
-lattice $(\mathcal L, \lk_\Lat)$, i.e., 
+lattice $(\mathcal L, \lk_\Lat)$, i.e.,
 a lattice which has a minimal and a maximal element ($l^\top$ and $l^\bot$).
 We write lattice elements as $l$ and $\glb_i l_i$ (resp. $\lub_i l_i$)
 for the greatest lower bound (resp. least upper bound) in $\mathcal L$.
@@ -297,8 +297,8 @@ details).
       C &::= \Cleq{\tau_1}{\tau_2} \\
         &\mid \Cleq{k_1}{k_2} \tag{Inequalities} \\
         &\mid C_1 \Cand C_2  \tag{Conjunction}\\
-        &\mid \Cproj{\tvar}{C} 
-        \mid \Cproj{\kvar}{C} \tag{Projection} 
+        &\mid \Cproj{\tvar}{C}
+        \mid \Cproj{\kvar}{C} \tag{Projection}
     \end{align*}
     \caption{The constraint language}
     \label{grammar:constraint}
@@ -358,12 +358,12 @@ More precisely, we apply the following steps:
   gather all existential quantifications at the front of the constraint.
   We obtain a constraint $C^k = \exists \kvar_i,\ \Cleq{k_j}{k'_j}_j$ and
   a substitution $\unif_\tau$.
-  
+
   We note $\mathcal R$ the relation $\Cleq{k_j}{k'_j}_j$,
   $\mathcal G$ the underlying directed graph and $V$ its vertices.
 
 \item Saturate the lattice equalities in $\mathcal R$.
-  
+
   More precisely, for each kind variable $\kvar \in V$,
   for each constant $l_i$ (resp. $l_j$) such that
   there is a path from $l_i$ to $\kvar$ (resp. from $\kvar$ to $l_j$) in $\mathcal G$,
@@ -380,7 +380,7 @@ More precisely, we apply the following steps:
   for any constants $l_1$ and $l_2$ such that
   there is a path from $l_1$ to $l_2$ in $\mathcal G$, then $l_1\lk_\Lat l_2$.
   If this is not the case, we return \textbf{fail}.
-  
+
 \item For each strongly connected component in $\mathcal G$, unify all its vertices and replace it by a representative.
   We note $\unif_k$ the substitution that replaces a kind variable by
   its representative.
@@ -417,11 +417,11 @@ It is also possible to add ``best-effort'' simplification
 rules which help reduce the size of inferred signatures even further
 \citep{DBLP:conf/aplas/Simonet03}.
 %
-We now show that this algorithms is well-behaved with respect to entailment
+We now show that this algorithm is well-behaved with respect to entailment
 and computes unique normal forms.
 
 \begin{property}[Principal normal form]
-  Normalization computes principal normal forms for $\CL$, i.e. 
+  Normalization computes principal normal forms for $\CL$, i.e.
   given a constraint $D\in\CL$, a substitution $\phi$ and
   $(C,\unif) = \normalize{D}{\phi}$,
   then $\phi\leq\unif$,
@@ -456,11 +456,11 @@ and completeness properties of HM(X). This is achieved by extending
 the original proofs from HM(X), which is done in \cref{appendix:infer}.
 %
 The first theorem states that our inference algorithm is sound
-with respect to the syntax directed type system.
+with respect to the syntax-directed type system.
 
 \begin{theorem}[Soundness of inference]
   Given a type environment $\E$ containing only value bindings,
-  $\E|_\tau$ containing only type binding and a term $e$,\\
+  $\E|_\tau$ containing only a type binding and a term $e$,\\
   if $\inferW{\Sv}{(C,\unif)}{\E;\E_\tau}{e}{\tau}$
   then $\inferS{C}{\unif(\Sv;\E_\tau)}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$
 \end{theorem}
@@ -471,7 +471,7 @@ are discovered on the fly and recorded in $\Sv$. The type binding, however,
 are directly taken from the syntax-directed derivation.
 
 The second theorem states that our algorithm is complete: for any given
-syntax directed typing derivation, our inference algorithm can find
+syntax-directed typing derivation, our inference algorithm can find
 a derivation that gives a type at least as general.
 For this, we need first to provide a few additional definitions.
 
@@ -539,7 +539,7 @@ toplevel programs.
     % &( C, \schm, \unif) &\leq (C',\schm',\unif')
   \end{align*}
 
-  
+
 \end{corollary}
 
 %%% Local Variables:

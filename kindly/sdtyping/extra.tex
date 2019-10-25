@@ -28,7 +28,7 @@ in term of an inductively defined relation
 $\Rannot{e}{e'}{S}$ where $n$ is the current nesting and $S$ is a set of
 variable that are not yet enclosed in a region.
 The base cases are constants, variables and borrows.
-The general idea is to start from the leafs of the syntax tree, create a
+The general idea is to start from the leaves of the syntax tree, create a
 region for each borrow, and enlarge the region as much as possible.
 This is implemented by a depth-first walk of the syntax
 tree which collects each variable that has a corresponding borrow.
@@ -141,7 +141,7 @@ does compute normal forms, and that such normal forms are unique.
   % to $D$ and that $\phi = id$.
   Let us partition $\phi$ into a part which affects type variables,
   $\phi_\tau$, and a part which affects kind variables, $\phi_k$.
-  
+
   We note $(C^k,\unif_\tau)$ the result of
   the modified Herbrand unification on $(D,\phi)$ in step (1).
   Herbrand unification computes the most general
@@ -151,7 +151,7 @@ does compute normal forms, and that such normal forms are unique.
   $\phi_\tau\leq\unif_\tau$,
   $C^k \equivC \unif_\tau D$ and
   $\unif_\tau C^k = C^k$.
-  
+
   Let $C^{k+}$ be the result after step (2), we trivially have that
   $\fv{C^{k+}} = \fv{C^k}$ and that $C^{k+} \equivC C^k$.
 
@@ -166,7 +166,7 @@ does compute normal forms, and that such normal forms are unique.
   we have $C^{A} = \unif_\tau C^{A} \equivC \unif C^{k+} \equivC \unif D$
   and $\unif C^{A} = C^{A}$.
   Furthermore, $\phi_\tau \meet \phi_k \leq \unif_\tau \meet \unif_k$.
-  
+
   Steps (5) to (9) all preserve the free variables and the equivalence
   of constraints, which concludes.
 \end{proof}
@@ -185,7 +185,7 @@ does compute normal forms, and that such normal forms are unique.
 
   We note $P(C_a)$ if for all $C = (k, k)'$
   such that $\entail{C_a}{C}$ and $\nvdash_eC$,
-  we have $C \in {\mathcal R}_a$. 
+  we have $C \in {\mathcal R}_a$.
 
   Let us note $C_1'$ and $C_2'$ the constraints after step (4). $P(C_1')$ and
   $P(C_2')$ hold. Indeed, since $C_1'$ and $C_2'$ are only composed
@@ -260,7 +260,7 @@ linear and affine types, and borrow.
 We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
 
 
-\section{Syntax directed typing}
+\section{Syntax-directed typing}
 \label{appendix:sdtyping}
 
 \subsection{Kinding}
@@ -327,7 +327,7 @@ emitting the constraint ({\sc ConstrSD} and {\sc ConstrI}).
 
 \subsection{Typing}
 
-The rules for syntax directed typing are shown in \cref{fig:syntax-directed-typing}
+The rules for syntax-directed typing are shown in \cref{fig:syntax-directed-typing}
 and follow the presentation given in \cref{sdtyping}.
 As usual in HM type systems, introduction of type-schemes
 is included in the {\sc Let} rule via generalization.
