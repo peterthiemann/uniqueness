@@ -12,7 +12,10 @@
   \inferrule[KArr]
   { }
   { \inferK{(\Ctrue,\emptyset)}{\E}{\tau_1 \tarr{k} \tau_2}{k} }
-
+  \and
+  \inferrule[KBorrow]
+  { }{ \inferK{(\Ctrue,\emptyset)}{\E}{\borrowty{k}{\tau}}{k}}
+  \and
   \inferrule[KApp]
   { \forall j,\
     \inferK{(C_j,\unif_j)}{\E}{\tau_j}{k'_j} \\
@@ -24,9 +27,6 @@
     {\unif_0\meet \Multi[j]{\unif}}
   }
   { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tapp{t}{\Multi[j]{\tau}}}{\unif k} }
-  \and
-  \inferrule[KBorrow]
-  { }{ \inferK{(\Ctrue,\emptyset)}{\E}{\borrowty{k}{\tau}}{k}}
 \end{mathpar}
 
 

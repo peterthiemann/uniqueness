@@ -1,9 +1,9 @@
-\begin{minipage}{0.6\linewidth}
+\begin{minipage}{0.65\linewidth}
   \begin{mathpar}
     \inferrule[Lat-UA]{}{\kun_n \lk_\Lat \kaff_n}
     \and
     \inferrule[Lat-AL]{}{\kaff_n \lk_\Lat \klin_n}
-    \\
+    \and
     \inferrule[Lat-U-Level]{n \lk n'}{\kun_n \lk_\Lat \kun_{n'}}
     \and 
     \inferrule[Lat-A-Level]{n \lk n'}{\kaff_n \lk_\Lat \kaff_{n'}}
@@ -11,10 +11,10 @@
     \inferrule[Lat-L-Level]{n \lk n'}{\klin_n \lk_\Lat \klin_{n'}}
   \end{mathpar}
 \end{minipage}~
-\begin{minipage}{0.4\linewidth}
+\begin{minipage}{0.2\linewidth}
   \centering
   \begin{tikzpicture}
-    [->,auto,semithick]
+    [->,auto,semithick, every node/.style={scale=0.7}]
     \node(U) {$\kun_0$} ;
     \node(A) [above left of=U] {$\kaff_0$} ;
     \node(L) [above left of=A] {$\klin_0$} ;

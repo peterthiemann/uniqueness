@@ -100,7 +100,7 @@ in $\Multi[i]\tau$.
 % $\tydecl{t}{\kschm}{K}{\tau}$, introduce both a new type constructor $\T{t}$ and
 % a data constructor $K$.
 
-\begin{figure*}[b]
+\begin{figure*}[!tb]
   \centering
   \input{grammar}
   \caption{Syntax}
@@ -161,8 +161,8 @@ a kind variable or it relates two kind variables.
 
 \subsubsection{Environments and bindings}
 \label{sdtyping:envs}
-\begin{figure}[tp]
-  \begin{minipage}{0.33\linewidth}
+\begin{figure*}[tp]
+  \begin{minipage}{0.28\linewidth}
     \begin{align*}
       \E &::=\ \Eempty \mid \E;B\tag{Environments}\\
       B &::=\ \bnone \tag{Empty} \\
@@ -175,7 +175,7 @@ a kind variable or it relates two kind variables.
     \caption{Type environments}
     \label{grammar:env}
   \end{minipage}\hfill
-  \begin{minipage}{0.65\linewidth}
+  \begin{minipage}{0.7\linewidth}
     \begin{mathpar}
       \ruleSDBorrow
       \and
@@ -187,7 +187,7 @@ a kind variable or it relates two kind variables.
     \label{selectrules:borrow}
     \label{selectrules:binders}
   \end{minipage}
-\end{figure}
+\end{figure*}
 
 \lang controls the use of variables by supporting new modes of
 binding in a type environment $\E$.
@@ -253,7 +253,7 @@ Capturing a suspended binding is forbidden.
 
 \subsubsection{Copying and Splitting}
 \label{sdtyping:split}
-\begin{figure}[tp]
+\begin{figure*}[tp]
   \centering
   \begin{minipage}{0.35\linewidth}
     \begin{mathpar}
@@ -295,7 +295,7 @@ Capturing a suspended binding is forbidden.
     \caption{Splitting rules for bindings}
     \label{sdtyp:split}
   \end{minipage}
-\end{figure}
+\end{figure*}
 
 The {\sc Pair} typing rule in \cref{sdtyp:pair} demonstrates how \lang
 deals with duplication and dropping of values.

@@ -213,12 +213,11 @@ We then collect all constraints and normalize them.
   \begin{mathpar}
     \ruleILet
 
+    \inferrule{}
     {\generalize{C}{\E}{\tau} =
       (\Cproj{\Multi{\kvar},\Multi{\tvar}}{C},
-      \forall \Multi{\kvar},\Multi{\tvar}.\qual{C}{\tau})
-
-      \text{ where }
-
+      \forall \Multi{\kvar},\Multi{\tvar}.\qual{C}{\tau})\\
+      \text{ where}\quad
       \Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}
     }
   \end{mathpar}
@@ -290,7 +289,7 @@ projection operators are omitted for brevity (see
 \citep{DBLP:journals/tapos/OderskySW99} for
 details).
 
-\begin{figure}[!bt]
+\begin{figure*}[!bt]
   \centering
   \begin{minipage}{0.32\linewidth}
     \begin{align*}
@@ -330,7 +329,7 @@ details).
     \caption{Base entailment rules -- $\entail{C}{D}$ }
     \label{rules:entail}
   \end{minipage}
-\end{figure}
+\end{figure*}
 
 We define the set of solved formed
 $\mathcal S$ as the set of constraints $\CL$ quantified by $\equivC$.
