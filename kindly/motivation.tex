@@ -89,6 +89,7 @@ let add_service ep =
 # add_service :
   (int ! int ! int ? end) st -> unit
 \end{lstlisting}
+    \vspace{-10pt}
     \caption{Addition server}
   \end{subfigure}~
   \begin{subfigure}[t]{.5\linewidth}
@@ -106,8 +107,10 @@ let op_client ep x y =
 % # ('m2:^k2), ('m1:^k1).
 % # (^k1 < ^k) & (lin < ^k) =>
 % # ('m1 ?'m2 ? 'result ! end) st -> 'm1 -{lin}> 'm2 -{^k}> 'result
+    \vspace{-10pt}
     \caption{Binary operators client}
   \end{subfigure}
+  \vspace{-10pt}
   \caption{Corresponding session type programs in \lang}
   \label{fig:sessiontype}
 \end{figure}
@@ -211,28 +214,24 @@ which is possible because none of the borrows are in scope anymore.
 
 \begin{figure}[tp]
   \centering
-  \begin{subfigure}[t]{0.47\linewidth}
+  \begin{subfigure}[t]{1\linewidth}
 \begin{lstlisting}
 module Array : sig
   type ('a : 'k) t : lin
-
   val create : ('a : un) => int -> 'a -> 'a t
   val free : ('a : aff) => 'a t -> unit
-
   val length : &('a t) -> int
-
-  val get :
-    ('a : un) => &('a t) * int -> 'a
-  val set :
-    ('a : aff) => &!('a t) * int * 'a -> unit
-
+  val get : ('a : un) => &('a t) * int -> 'a
+  val set : ('a : aff) => &!('a t) * int * 'a -> unit
   val map : (&'a -> 'b) -> &('a t) -> 'b t
 end
 \end{lstlisting}
+    \vspace{-15pt}
     \caption{Affine arrays}
     \label{sig:array}
-  \end{subfigure}\hfill
-  \begin{subfigure}[t]{0.53\linewidth}
+  \end{subfigure}
+
+  \begin{subfigure}[t]{1\linewidth}
 \begin{lstlisting}
 let mk_fib_array n =
   let a = create n 1 in
@@ -243,6 +242,7 @@ let mk_fib_array n =
   a(*@\label{ex:array:return}*)
 # mk_fib_array : int -> int Array.t
 \end{lstlisting}
+    \vspace{-10pt}
     \caption{Example of use of linear arrays}
     \label{ex:array}
 \begin{lstlisting}[firstnumber=2]
@@ -252,6 +252,7 @@ let mk_fib_array n =
     set &!a i x
   |} done;
 \end{lstlisting}
+    \vspace{-10pt}
     \caption{Excerpt of \cref{ex:array} with explicit regions}
     \label{ex:array:region}
   \end{subfigure}
@@ -352,42 +353,37 @@ takes the position of the element.
 
 \begin{figure}[tp]
   \centering
-  \begin{subfigure}{0.48\linewidth}
+  \begin{subfigure}{1\linewidth}
 \begin{lstlisting}
 module type HybArray = sig
   type ('a : un) t : lin
-
   val create : int -> 'a -> 'a t
   val free : 'a t -> unit
-
   val length : &('a t) -> int
   val get : &('a t) * int -> 'a
-
   val set : &('a t) * int * 'a -> 'a t
   val set_mut : &!('a t) * int * 'a -> unit
 end
 \end{lstlisting}
+    \vspace{-15pt}
     \caption{Signature}
     \label{sig:hybarray}
-  \end{subfigure}\hfill
-  \begin{subfigure}{0.5\linewidth}
+  \end{subfigure}
+
+  \begin{subfigure}{1\linewidth}
 \begin{lstlisting}
 module Cow : HybArray = struct
   include Array
-
   let set (a, i0, x0) =
-    let f i x =
-      if i = i0 then x0 else x
-    in
-    Array.mapi f a
-
+    Array.mapi (fun i x -> if i = i0 then x0 else x) a
   let set_mut = Array.set
 end
 \end{lstlisting}
+    \vspace{-15pt}
     \caption{Implementation using copy-on-write}
     \label{ex:cow}
   \end{subfigure}
-  \caption{Hybrid arrays -- signature and example implementation}
+  \caption{Hybrid arrays}
 \end{figure}
 
 Our implementation of a Sudoku solver (\cref{ex:sudoku}) performs
@@ -437,12 +433,8 @@ convenient programming style without compromising performance.
 
 \begin{figure}
   \centering
-  \begin{minipage}[t]{0.45\linewidth}
-    \lstinputlisting[linerange=1-13]{code/sukodu.affe}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.54\linewidth}
-    \lstinputlisting[linerange=15-31,firstnumber=last]{code/sukodu.affe}
-  \end{minipage}
+  \lstinputlisting[linerange=1-31]{code/sukodu.affe}
+    \vspace{-15pt}
   \caption{Excerpt of the Sudoku solver}
   \label{ex:sudoku}
 \end{figure}
@@ -513,7 +505,7 @@ In practice, the type checker inserts this region automatically.
 
 \begin{figure}[tp]
   \centering
-  \begin{subfigure}[t]{.58\linewidth}
+  \begin{subfigure}[t]{1\linewidth}
 \begin{lstlisting}
 type ('a:'k) pool : 'k
 
@@ -522,6 +514,7 @@ consume : ('a -> unit) -> 'a pool -> unit
 use : ('a_1:'k_1),('a_2:'k_2),('k_2 <= aff_r) =>
   &('a_1 pool) -> (&!(aff_r1,'a_1) -{lin}> 'a_2) -{'k_1}> 'a_2
 \end{lstlisting}
+    \vspace{-10pt}
     \caption{Interface}
     \label{intf:pool}
 
@@ -538,10 +531,12 @@ let main users =
   List.parallel_iter (create_user &pool) users;
   Pool.consume (fun c -> Db.close c)
 \end{lstlisting}
+    \vspace{-10pt}
     \caption{Example of use}
     \label{ex:pool}
-  \end{subfigure}~
-  \begin{subfigure}[t]{.43\linewidth}
+  \end{subfigure}
+
+  \begin{subfigure}[t]{1\linewidth}
 \begin{lstlisting}
 type ('a:'k) pool : 'k = {
   spawn : unit -> 'a ;
@@ -562,6 +557,7 @@ let use { spawn ; queue } f =
   Queue.push o &queue;
   r
 \end{lstlisting}
+    \vspace{-15pt}
     \caption{Implementation}
     \label{impl:pool}
   \end{subfigure}

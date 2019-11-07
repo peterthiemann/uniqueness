@@ -320,10 +320,10 @@ which means that a resource can be used first as a borrow on the left
 and then later as a full resource on the right. The {\sc Susp} rule
 works with a full resource while the {\sc SuspB}
 rule splits off an immutable suspended binding from a borrow.
-
+%
 Splitting applies whenever an
 expression has multiple subexpressions:  pairs, function applications,
-and let bindings. For instance, in the
+and let bindings. In the
 expression
 $\letin{a}{\text{create}\ 10\ x}
 {\introPair{\region[{}]{\Sone x\IBORROW}{\app{\text{length}}{\borrow[\IBORROW]{a}}}}{a}}$,

@@ -110,11 +110,12 @@ and other related works.
 \begin{figure}[tp]
   \begin{subfigure}[t]{0.45\linewidth}
     \lstinputlisting{code/writefiles.affe}
+    \vspace{-15pt}
     \caption{File API}
     \label{fig:writing-files-api}
   \end{subfigure}
   ~
-  \begin{subfigure}[t]{0.45\linewidth}
+  \begin{subfigure}[t]{0.5\linewidth}
 \begin{lstlisting}
 let main () =
   let h = File.fopen "foo" in
@@ -122,9 +123,11 @@ let main () =
   File.write &!h "world!";
   File.close h
 \end{lstlisting}
+    \vspace{-10pt}
     \caption{File example}
     \label{fig:writing-files-example}
   \end{subfigure}
+  \vspace{-10pt}
   \caption{Writing files}
   \label{fig:writing-fiules}
 \end{figure}
@@ -145,7 +148,7 @@ the type of \lstinline/write/: a partial application like
 resulting function must also be handled in an affine way. That is, it
 would be an error to write
 \begin{lstlisting}
-  let w = File.write &!h in w "Hello "; w "world!" (* type error *)
+let w = File.write &!h in w "Hello "; w "world!" (*error*)
 \end{lstlisting}
 as we would be using the affine closure twice. The remaining arrows in
 the API are unrestricted and we write \lstinline/->/ instead of the

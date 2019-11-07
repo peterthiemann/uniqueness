@@ -1,4 +1,4 @@
-\documentclass[acmsmall,review,anonymous,table]{acmart}
+\documentclass[sigplan,10pt,review,anonymous]{acmart}
 \settopmatter{printfolios=true,printccs=false,printacmref=false}
 
 % Encoding and lang
@@ -32,7 +32,8 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{enumitem}
-%\setlist{leftmargin=*,noitemsep,topsep=5pt}
+\setlist{leftmargin=*,noitemsep}
+\usepackage{array}
 
 \usepackage{natbib}% Good citations and bibliography
 \usepackage{mathpartir} % Syntax trees
@@ -55,7 +56,7 @@
 %\newtheorem{corollary}{Corollary}
 
 \bibliographystyle{ACM-Reference-Format}
-\citestyle{acmauthoryear}
+
 
 \author{Gabriel Radanne}
 \affiliation{
