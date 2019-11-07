@@ -51,14 +51,14 @@ the transformations.
 In the context of inference, we define new judgements which \emph{infers}
 the constraints.
 \begin{itemize}[leftmargin=*]
-\item $\bsplit{C}{\Sv}{\bf{\Sv_1}}{\bf{\Sv_2}}$.
+\item $\bsplit{C}{\Sv}{\bm{\Sv_1}}{\bm{\Sv_2}}$.
   Given two usage environments $\Sv_1$ and $\Sv_2$
   (inferred from two subexpressions, for instance),
   we return $\Sv$, the merged environment, and $C$, a set
   of constraints that must be respected.
   This relation is total and non-ambiguous given $\Sv_1$ and $\Sv_2$
   and uses the same rules as the one presented in \cref{sdtyping:split}.
-\item $\bregion{C}{\bf{x}}{\Sv}{\bf\Sv'}$.
+\item $\bregion[\bm{n}]{C}{\bm{x}}{\Sv}{\bm\Sv'}$.
   Given a usage environment $\Sv'$ and a variable name $x$, we return
   $\Sv$ where the borrow binding of $x$ in $\Sv'$, if it exists, is replaced by
   a suspended binding. We also return $C$, a set of constraints that must
@@ -73,7 +73,7 @@ All relations are fully described in \cref{typ:extra:envs}.
 
 \subsubsection{Constraint normalization}
 
-The HM(X) framework assumes the existence of a $\operatorname{normalize}$
+The HM(X) framework assumes the existence of a ``$\operatorname{normalize}$''
 function which takes a constraint $C$, a substitution $\psi$ and returns a
 simplified constraint $C'$
 and an updated substitution $\unif'$.
@@ -83,46 +83,16 @@ of the normalization function and its property in \cref{infer:solving}.
 In the meantime, we simply
 assume the existence of such a function for our constraint system.
 
-\subsection{Kind inference}
-%
-\begin{figure}[t]
-  \centering
-  \input{infer/kinds}
-  \caption{Kind inference algorithm -- $\inferK{(C,\unif)}{\E}{\tau}{k}$}
-  \label{rules:kinding}
-\end{figure}
-%
-We note $\inferK{(C,\unif)}{\bf{\E}}{\bf{\tau}}{k}$ when type $\tau$ has kind $k$
-in environment $\E$ under constraints $C$ and unifier $\unif$.
-$\E$ and $\tau$ are the input parameters of
-our inference procedure.
-We present the kind inference algorithm as a set of rules in
-\cref{rules:kinding}.
-Higher-kinds are not generally supported
-and can only appear by looking-up the kind scheme of a type constructor,
-for use in the type application rule {\sc KApp}.
-Type variables must be of a simple kind in rule {\sc KVar}.
-Kind schemes are instantiated in the {\sc KVar} rules by creating
-fresh kind variables and the associated substitution.
-{\sc KArr} and {\sc KBorrow} simply returns the kind of the primitive
-arrow and borrow types.
-The $\operatorname{normalize}$ function is used every time several constraints
-must be composed in order to simplify the constraint and return a most general
-unifier.
-
-
-
-
 \subsection{Type inference}
 
-We note $\inferW{\Sv}{(C,\unif)}{\bf{\E}}{\bf{e}}{\tau}$ when
+We note $\inferW{\Sv}{(C,\unif)}{\bm{\E}}{\bm{e}}{\tau}$ when
 $e$\ has type $\tau$ in $\E$ under the constraints $C$ and unifier $\unif$
-with a usage environment $\Sv$. $\E$ and $e$ are the input parameters of our
+with a usage environment $\Sv$. $\bm\E$ and $\bm e$ are the input parameters of our
 inference algorithm.
 Unlike in the syntax-directed version, $\E$ only regular and type bindings.
 Suspended and borrow bindings can only be present in $\Sv$.
-We revisit the syntax-directed rules presented in \cref{sdtyping} to highlight the
-novelties
+We revisit some of the syntax-directed rules presented in \cref{sdtyping}
+to highlight the novelties
 of our inference algorithm and the differences with the syntax-directed
 system.
 As before, the complete type inference rules are shown in \cref{appendix:infer}.
@@ -451,16 +421,17 @@ this extended system.
 \subsection{Soundness and Principality}
 
 We now show that our extended inference algorithm still satisfies the soundness
-and completeness properties of HM(X). This is achieved by extending
-the original proofs from HM(X), which is done in \cref{appendix:infer}.
+and completeness properties of HM(X).
+% This is achieved by extending
+% the original proofs from HM(X), which is done in \cref{appendix:infer}.
 %
 The first theorem states that our inference algorithm is sound
 with respect to the syntax-directed type system.
 
 \begin{theorem}[Soundness of inference]
   Given a type environment $\E$ containing only value bindings,
-  $\E|_\tau$ containing only a type binding and a term $e$,\\
-  if $\inferW{\Sv}{(C,\unif)}{\E;\E_\tau}{e}{\tau}$
+  $\E|_\tau$ containing only type bindings, and a term $e$:\\
+  if $\inferW{\Sv}{(C,\unif)}{\E;\E_\tau}{e}{\tau}$\\
   then $\inferS{C}{\unif(\Sv;\E_\tau)}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$
 \end{theorem}
 
@@ -500,7 +471,8 @@ where all the binders are replace by normal ones. More formally:
     \bvar{x}{\tau}\in\E
     \vee \bvar{\borrow{x}}{\borrowty{k}{\tau}}\in\E
     \vee \svar{x}{\tau}^n\in\E
-    \right\} \cup \left\{ \bvar{\tvar}{k} \mid \bvar{\tvar}{k}\in\E \right\}
+    \right\}\\
+  &\cup \left\{ \bvar{\tvar}{k} \mid \bvar{\tvar}{k}\in\E \right\}
 \end{align*}
 \end{definition}
 

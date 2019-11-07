@@ -111,8 +111,8 @@
 \newcommand\esplit[2]{#1 \operatorname{\ltimes} #2}
 \newcommand\lsplit[4]{#1 \vdash_e #2 = #3 \ltimes #4}
 \newcommand\bsplit[4]{#1 \Lleftarrow #2 = #3 \ltimes #4}
-\newcommand\lregion[4]{#1 \vdash_e #3 \rightsquigarrow_n^{#2} #4}
-\newcommand\bregion[4]{#1 \Lleftarrow #3 \rightsquigarrow_n^{#2} #4}
+\newcommand\lregion[5][n]{#2 \vdash_e #4 \rightsquigarrow_{#1}^{#3} #5}
+\newcommand\bregion[5][n]{#2 \Lleftarrow #4 \rightsquigarrow_{#1}^{#3} #5}
 \newcommand\fv[1]{\operatorname{fv}(#1)}
 \newcommand\Eflat[1]{\Downarrow\!#1}
 

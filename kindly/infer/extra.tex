@@ -2,18 +2,51 @@
 \section{Type Inference}
 \label{appendix:infer}
 
-\begin{figure*}[!btp]
-  \input{infer/typing}
-  \caption{Type inference rules -- $\inferW{\Sigma}{(C,\psi)}{\bf{\E}}{\bf{e}}{\tau}$ }
-  \label{rules:typing:full}
-\end{figure*}
-
 In this appendix, we provide the complete type inference rules
 and show that our type inference algorithm is sound and complete.
-The kinding and constraints rules are already shown in \cref{inference}.
+The constraints rules are already shown in \cref{inference}.
+Kind inference is presented in \cref{rules:kinding:full}.
 The type inference rules are shown in \cref{rules:typing:full}.
 The various theorems and their proofs are direct adaptations
 of the equivalent statements for HM(X) \citep{sulzmann1997proofs}.
+
+
+\subsection{Kind inference}
+\label{rules:kinding:full}
+%
+\begin{figure}[tb]
+  \centering
+  \input{infer/kinds}
+  \caption{Kind inference rules -- $\inferK{(C,\unif)}{{\bm\E}}{{\bm\tau}}{k}$}
+  \label{rules:kinding}
+\end{figure}
+%
+We note $\inferK{(C,\unif)}{{\bm\E}}{{\bm\tau}}{k}$ when type $\tau$ has kind $k$
+in environment $\E$ under constraints $C$ and unifier $\unif$.
+$\bm\E$ and $\bm\tau$ are the input parameters of
+our inference procedure.
+We present the kind inference algorithm as a set of rules in
+\cref{rules:kinding}.
+Higher-kinds are not generally supported
+and can only appear by looking-up the kind scheme of a type constructor,
+for use in the type application rule {\sc KApp}.
+Type variables must be of a simple kind in rule {\sc KVar}.
+Kind schemes are instantiated in the {\sc KVar} rules by creating
+fresh kind variables and the associated substitution.
+{\sc KArr} and {\sc KBorrow} simply returns the kind of the primitive
+arrow and borrow types.
+The $\operatorname{normalize}$ function is used every time several constraints
+must be composed in order to simplify the constraint and return a most general
+unifier.
+
+
+\begin{figure*}[!btp]
+  \input{infer/typing}
+  \caption{Type inference rules --
+    $\inferW{\Sigma}{(C,\psi)}{{\bm\E}}{{\bm e}}{\tau}$ }
+  \label{rules:typing:full}
+\end{figure*}
+
 
 % \begin{figure}[tp]
 %   \centering
