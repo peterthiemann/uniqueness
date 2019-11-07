@@ -13,7 +13,7 @@ region annotations for each individual variable.
   \region{\Sone x\BORROW;S}{e} &= \region{\Sone x\BORROW}{\region{S}{e}}& \region{\emptyset}{e} &= e\\
 \end{align*}
 %
-\begin{figure*}[b]
+\begin{figure*}[!tb]
   \centering
   \input{region-annot}
   \caption{Automatic region annotation --- $\RannotT{e}{e'}$}
@@ -265,7 +265,7 @@ We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
 
 \subsection{Kinding}
 %
-\begin{figure}[tb]
+\begin{figure}[bt]
   \centering
   \input{sdtyping/sd-kinds}
   \caption{Syntax-directed kinding rule --
@@ -311,7 +311,7 @@ Type schemes are constrained by first inferring the kind, and then
 emitting the constraint ({\sc ConstrSD} and {\sc ConstrI}).
 
 
-\begin{figure}[!tb]
+\begin{figure*}[!tb]
   \input{sdtyping/sd-splitting}
   \caption{Splitting --- environments $\lsplit
     C\E\E\E$; binders $\bsplit Cbbb$}
@@ -323,7 +323,7 @@ emitting the constraint ({\sc ConstrSD} and {\sc ConstrI}).
   \input{sdtyping/sd-environments}
   \caption{Rewriting constraints on environments --- $\Cleq\E k \Crewrite  C$}
   \label{fig:contraints-environments-types}
-\end{figure}
+\end{figure*}
 
 \subsection{Typing}
 

@@ -285,7 +285,7 @@ resource.
   \textbf{case $e$ of}
   \lstsemrule{sapp}
 
-  By assumption $\ruleSDApp$.
+  By assumption\\ $\ruleSDApp$.
 
   As \lstinline{sp}  is evidence for the split in the typing rule,
   we find that
@@ -615,8 +615,8 @@ resource.
   \item $\Reach\Store{\Active{\VEnv'}, \MutableBorrows{\VEnv'},
       \ImmutableBorrows{\VEnv'}} \subseteq \Perm'$ because we
     ``activate'' the borrow for $x$ by putting $\rho'$ into $\Perm'$:
-    The assumption $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv,
-      \ImmutableBorrows\VEnv} \subseteq \Perm$ covers the remaining addresses.
+    with the assumption $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv,
+      \ImmutableBorrows\VEnv} \subseteq \Perm$, we covers the remaining addresses.
   \item Incoming Resources: For $\REACH = \Reach\Store\VEnv$ we know that
     \begin{enumerate}
     \item\label{item:1} 

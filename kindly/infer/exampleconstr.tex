@@ -5,8 +5,8 @@ The application of our inference algorithm yields the following constraints:
 %
 \begin{align*}
   \E &= (\tvar_f : \kvar_f)
-  (\tvar_x : \kvar_x)\dots
-  &C &= (\tvar_f \leq \gamma \tarr{\kvar_1} \beta )
+  (\tvar_x : \kvar_x)\dots\\
+  C &= (\tvar_f \leq \gamma \tarr{\kvar_1} \beta )
   \Cand
   (\gamma \leq \tvar_x)
   \Cand
@@ -78,8 +78,6 @@ $$
 
 \begin{figure}[tbp]
   \centering
-  \begin{minipage}{0.5\linewidth}
-  \centering
   \begin{tikzpicture}[every edge/.style=[link,->,>=latex,thick]]
     \node (U) {$\kun$} ;
     \node[above left=of U] (x) {$\kvar_x$} ;
@@ -118,9 +116,7 @@ $$
   \end{tikzpicture}
     \caption{Graph representing the example constraints}
     \label{example:graph}
-\end{minipage}~
-\begin{minipage}{0.5\linewidth}
-  \centering
+    
   \begin{tikzpicture}[every edge/.style=[link,->,>=latex,thick]]
     \node (b) {$\kvar_\beta$} ;
     \node[right=of b] (3) {$\kvar_3$} ;
@@ -132,7 +128,6 @@ $$
   \end{tikzpicture}
     \caption{Final state of the graph}
     \label{example:graph:final}
-\end{minipage}
 \end{figure}
   
 
