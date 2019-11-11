@@ -21,15 +21,15 @@ We start by various preliminary definitions.
 
 Unlike the syntax-directed version of our type system, knowing which elements
 are input and output or our inference judgement is critical. In the rest
-of this section, when presenting a new judgement
-we will note in \textbf{bold} the input parameters. The rest will then be
+of this section, when presenting a new judgement,
+we write input parameters in \textbf{bold}. The rest will then be
 output parameters.
 
 \subsubsection{Usage environments}
 
 % One novelty of our inference  judgement now
 % returns a type environment, which we call ``usage environment'' and commonly
-% note $\Sv$, to summarize how variables and borrows are used inside
+% write $\Sv$, to summarize how variables and borrows are used inside
 % the expression.
 
 In order to determine if a variable is used in an affine manner, we must track
@@ -41,8 +41,8 @@ In order to infer such constraints, our inference judgement will not only
 take an environment as parameter but also return an environment which
 we call ``usage environment'' and which summarizes how variables and borrows
 are used. Usage environments follow the exact same grammar
-as normal environment. In order to distinguish them more easily,
-we note them $\Sv$.
+as normal environments. In order to distinguish them more easily,
+we denote them by $\Sv$.
 
 In \cref{sdtyping}, we used relations to split environments in two and to
 transform suspended bindings into borrows inside a region.
@@ -85,7 +85,7 @@ assume the existence of such a function for our constraint system.
 
 \subsection{Type inference}
 
-We note $\inferW{\Sv}{(C,\unif)}{\bm{\E}}{\bm{e}}{\tau}$ when
+We write $\inferW{\Sv}{(C,\unif)}{\bm{\E}}{\bm{e}}{\tau}$ when
 $e$\ has type $\tau$ in $\E$ under the constraints $C$ and unifier $\unif$
 with a usage environment $\Sv$. $\bm\E$ and $\bm e$ are the input parameters of our
 inference algorithm.
@@ -210,13 +210,13 @@ $e_2$, and should not be part of the returned usage environment.
 
 As per tradition in ML languages, generalization is performed
 on let-bindings.
-Following HM(X), we note $(C_\schm, \schm) = \generalize{C}{\E}{\tau}$
-the pair of a constraint and a scheme resulting from
+Following HM(X), we write $(C_\schm, \schm) = \generalize{C}{\E}{\tau}$
+for the pair of a constraint and a scheme resulting from
 generalization. The definition is provided in \cref{rule:infer:let}.
 The type scheme $\schm$ is created by quantifying over all the appropriate
 free variables and the current constraints.
 The generated constraint $C_\schm$ uses a new projection operator,
-noted $\Cproj{\tvar}{D}$, which
+$\Cproj{\tvar}{D}$, which
 allow the creation of local variables inside the constraints.
 This allows us to encapsulate all the quantified variables in the global constraints.
 It also reflects the fact that there
@@ -244,14 +244,14 @@ The full grammar of constraints is shown in \cref{grammar:constraint}.
 Constraints are made of kind inequalities, conjunctions and
 projections, as shown previously, along with type unification
 constraints. Since types might contain kinds (for instance, on the arrows),
-type unification is oriented and noted $\leq$.
+type unification is oriented and written as $\leq$.
 For simplicity, we consider all type constructors
 invariant in their parameters
 and define $\Ceq{\tau}{\tau'}$ as $\Cleq{\tau}{\tau'} \wedge \Cleq{\tau'}{\tau}$.
 
-As before, entailment is noted $\entail{C}{D}$,
+As before, entailment is denoted by $\entail{C}{D}$,
 where $D$ is a consequence of the constraints $C$.
-We say that $C$ and $D$ are equivalent, noted $C \equivC D$,
+We say that $C$ and $D$ are equivalent, $C \equivC D$,
 when $\entail{C}{D}$ and $\entail{D}{C}$.
 The base rules for entailment are given in \cref{rules:entail}.
 The rules for classic Herbrand unification and
@@ -307,7 +307,7 @@ We will show later that such constraints are in fact only composed of
 kind inequalities, and thus correspond to the syntactic constraints
 used in type and kind schemes.
 %
-We now define our normalization procedure, noted $\normalize{C_0}{\unif_0}$ where
+We now define our normalization procedure $\normalize{C_0}{\unif_0}$, where
 $C_0\in \CL$ is a set of constraints and $\unif_0$ is a substitution.
 It returns a constraint $C \in \mathcal S$ in
 solved form and a unifier $\unif$.
@@ -328,7 +328,7 @@ More precisely, we apply the following steps:
   We obtain a constraint $C^k = \exists \kvar_i,\ \Cleq{k_j}{k'_j}_j$ and
   a substitution $\unif_\tau$.
 
-  We note $\mathcal R$ the relation $\Cleq{k_j}{k'_j}_j$,
+  We write $\mathcal R$ for the relation $\Cleq{k_j}{k'_j}_j$,
   $\mathcal G$ the underlying directed graph and $V$ its vertices.
 
 \item Saturate the lattice equalities in $\mathcal R$.
@@ -351,7 +351,7 @@ More precisely, we apply the following steps:
   If this is not the case, we return \textbf{fail}.
 
 \item For each strongly connected component in $\mathcal G$, unify all its vertices and replace it by a representative.
-  We note $\unif_k$ the substitution that replaces a kind variable by
+  We write $\unif_k$ for the substitution that replaces a kind variable by
   its representative.
   The representative of a strongly connected component $g$ can be determined as follows:
   \begin{itemize}
@@ -463,7 +463,7 @@ For this, we need first to provide a few additional definitions.
 
 \begin{definition}[Flattened Environment]
 A flattened environment,
-noted $\Eflat\E$, is the environment
+written as $\Eflat\E$, is the environment
 where all the binders are replace by normal ones. More formally:
 \begin{align*}
   \Eflat\E

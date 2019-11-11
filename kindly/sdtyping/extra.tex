@@ -81,11 +81,11 @@ borrows should be enclosed immediately.
 % \newcommand\SC{\mathcal S}
 
 Our system is defined in \cref{infer:solving}.
-As before, we note $\CL$ our constraint system for an arbitrary
+As before, we write $\CL$ for our constraint system for an arbitrary
 total bounded lattice $(\mathcal L, \lk_\Lat)$.
-Entailment is noted $\entail{C}{D}$, where $D$ is a consequence of the
+Entailment is written $\entail{C}{D}$, where $D$ is a consequence of the
 constraints $C$.
-We say that $C$ and $D$ are equivalent, noted $C \equivC D$,
+We say that $C$ and $D$ are equivalent, written as $C \equivC D$,
 when $\entail{C}{D}$ and $\entail{D}{C}$.
 Following HM(X), we define a cylindric constraint system as
 a system which respects the following properties for any variable $x$:
@@ -109,7 +109,7 @@ $\CL$ is defined as the smallest cylindric term constraint system that
 satisfies the axiom shown in \cref{rules:entail}.
 We define  $\Ceq{\tau}{\tau'}$ as $\Cleq{\tau}{\tau'} \wedge \Cleq{\tau'}{\tau}$.
 %
-We note $\SC$ the set of solved forms
+We write $\SC$ for the set of solved forms,
 which can be used inside type and kind schemes.
 We define $\SC$ as $\CL$ quotiented by the relation $\equivC$.
 %
@@ -142,7 +142,7 @@ does compute normal forms, and that such normal forms are unique.
   Let us partition $\phi$ into a part which affects type variables,
   $\phi_\tau$, and a part which affects kind variables, $\phi_k$.
 
-  We note $(C^k,\unif_\tau)$ the result of
+  We write $(C^k,\unif_\tau)$ for the result of
   the modified Herbrand unification on $(D,\phi)$ in step (1).
   Herbrand unification computes the most general
   unifier. Our modified Herbrand unification only output additional
@@ -183,11 +183,11 @@ does compute normal forms, and that such normal forms are unique.
   Since $\unif_1 C_1 \equivC \unif_2 C_2$, equivalence between
   the two results of the normalization procedures is preserved for all steps.
 
-  We note $P(C_a)$ if for all $C = (k, k)'$
+  We write $P(C_a)$ if for all $C = (k, k)'$
   such that $\entail{C_a}{C}$ and $\nvdash_eC$,
   we have $C \in {\mathcal R}_a$.
 
-  Let us note $C_1'$ and $C_2'$ the constraints after step (4). $P(C_1')$ and
+  Let us write $C_1'$ and $C_2'$ for the constraints after step (4). $P(C_1')$ and
   $P(C_2')$ hold. Indeed, since $C_1'$ and $C_2'$ are only composed
   of existential quantifications and kind inequalities, the only rules
   that applies are transitivity and lattice inequalities.
@@ -201,7 +201,7 @@ does compute normal forms, and that such normal forms are unique.
   % In (6) we only remove
   % trivial lattice inequalities.
 
-  Let us note $C''_a$ for $a\in\{1,2\}$ the constraints after step (5).
+  Let us write $C''_a$ for $a\in\{1,2\}$ the constraints after step (5).
   Since there are no more existential variables,
   we have $C''_a=(k_i,k'_i)_i=\mathcal R''_a$.
   For any $C=(k,k')$ such that $\entail{}{C}$ and $\entail{C''_a}{C}$,
@@ -273,8 +273,8 @@ We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
   \label{rules:sd-kinding}
 \end{figure}
 
-We note $\inferSK{C}{\E}{\tau}{k}$
-when $\tau$ has kind $k$ in environment $\E$ under constraints $C$.
+We write $\inferSK{C}{\E}{\tau}{k}$
+if $\tau$ has kind $k$ in environment $\E$ under constraints $C$.
 The rules are shown in \cref{rules:sd-kinding}.
 Kinds and types follow a small calculus with variables ($\tvar$,\dots),
 functions (type constructors $\T{t}$), application ($\tapp{t}{\Multi{\tau}}$)
@@ -301,7 +301,7 @@ The remaining new rules are dedicated to iterating over the environment.
 
 \cref{fig:contraints-environments-types} defines
 the rewriting relation on environment constraints,
-noted $\Cleq\E k \Crewrite  C$ which rewrites a constraint of the form
+$\Cleq\E k \Crewrite C$, which rewrites a constraint of the form
 $\Cleq\E k$ into $C$. It proceeds by iterating over the environment
 and expending the constraints for each binding.
 Suspended bindings are rejected ({\sc ConstrSusp}).

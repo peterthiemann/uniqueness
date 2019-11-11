@@ -64,28 +64,28 @@ in $\Multi[i]\tau$.
 
 
 % Let us first define our conventions and meta-syntactic variables.
-% Expressions, types and kinds are noted respectively $e$, $\tau$, and $k$.
-% Variables, type variables and kind variables are noted
-% respectively $x$, $\tvar$ and $\kvar$. Types and kind schemes
-% are noted $\schm$ and $\kschm$.
+% Expressions, types and kinds are denoted respectively as $e$, $\tau$, and $k$.
+% Variables, type variables and kind variables are denoted
+% respectively as $x$, $\tvar$ and $\kvar$. Types and kind schemes
+% are denoted by $\schm$ and $\kschm$.
 % In the rest of the text, we will write lists with a bar and an index, for
 % instance $\Multi[i]{\tau}$.
-% Kind constants are noted in bold capital letters, such as $\kaff$ for affine.
+% Kind constants are denoted in bold capital letters, such as $\kaff$ for affine.
 
 % The syntax of \lang is presented in \cref{grammar} and follows
 % traditional ML languages with let bindings.
-% Borrows, noted $\borrow{e}$, are annotated with a specification indicating
+% Borrows $\borrow{e}$ are annotated with a specification indicating
 % if a borrow is immutable ($\IBORROW$) or mutable ($\MBORROW$).
-% We also distinguish reborrows, which are noted $\reborrow{e}$.
+% We also distinguish reborrows, which are written as $\reborrow{e}$.
 % Match are indexed with a specification which can be either $\&^b$
 % (which $b$ a borrow specification) or $id$, indicating if the match
 % should operate on borrows or not.
-% Regions, noted $\region{\Sone x\BORROW}{e}$ are annotated with their nesting ($n$)
+% Regions $\region{\Sone x\BORROW}{e}$ are annotated with their nesting ($n$)
 % and the variable whose borrow they enclose ($x$).
 % %
 % $\tapp{t}{\Multi{\tau}}$ denotes a type application where
 % $\T t$ is an abstract type constructor.
-% Arrow and borrow types are annotated with a kind, noted $\tau \tarr{k} \tau$
+% Arrow and borrow types are annotated with a kind, written as $\tau \tarr{k} \tau$
 % and $\borrowty{k}{\tau}$ respectively.
 % %
 % Kinds can be either a kind variable $\kvar$, or constants
@@ -211,7 +211,7 @@ restricts the lifetime of the borrow to the region (see \cref{selectrules:borrow
 % in a controlled way.
 % In order to check these properties, we introduce several new bindings
 % in our typing environments.
-% The grammar of type environment (noted $\E$) is shown in \cref{grammar:env}.
+% The grammar of type environment (denoted $\E$) is shown in \cref{grammar:env}.
 
 % Environments are also used to encode several linearity-related properties
 % through \emph{environment-wide constraints}.
