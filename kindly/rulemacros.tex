@@ -60,7 +60,7 @@
     \Downarrow^{#1} \Ok{ \Store_2, \Perm_2, r_2}
   }{
     \Store, \Perm, \VEnv \vdash \letin{x}{e_1}{e_2}
-    \Downarrow^{#1+1} \Ok{\Store_2, \Perm_2, r_2} 
+    \Downarrow^{#1+1} \Ok{\Store_2, \Perm_2, r_2}
   }
 }
 
@@ -206,7 +206,7 @@
 
 \newcommand\ruleSDLam{%
   \inferrule[Abs]
-  { 
+  {
     \inferS{C}
     {\E;\bvar{x}{\tau_2}}{e}{\tau_1} \\
     \addlin{\entail{C}{\Cleq{\E}{k}}}
@@ -226,11 +226,11 @@
 
 \newcommand\ruleSDApp{%
   \inferrule[App]
-  { 
+  {
     \inferS{C}{\E_1}{e_1}{\tau_2 \tarr{k} \tau_1} \\
     \inferS{C}{\E_2}{e_2}{\tau'_2} \\
     \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
-    \entail C {\Cleq{\tau_2'}{\tau_2}} 
+    \entail C {\Cleq{\tau_2'}{\tau_2}}
   }
   { \inferS{C}
     {\E}{\app{e_1}{e_2}}{\tau_1} }
@@ -253,7 +253,7 @@
   { \inferS{C}{\E}{\borrow{x}}{\borrowty{k}{\tau}} }
 }
 \newcommand\ruleSDReBorrow{
-  \inferrule[Borrow]
+  \inferrule[Reborrow]
   { \inferS{C}{\E}{x}{\borrowty{k}{\tau}} }
   { \inferS{C}{\E}{\reborrow{x}}{\borrowty{k}{\tau}} }
 }
@@ -373,7 +373,7 @@
   \inferrule[ReBorrow$_I$]
   { \inferW{\Sv}{(C',\unif')}{\E}{x}{\tau'} \\\\
     % k = \operatorname{kind}(\iota)\\
-    (C,\unif) = \normalize{C' \Cand \Cleq{\tau'}{\borrowty{\kvar}{\tau}}}{\unif'}\\   
+    (C,\unif) = \normalize{C' \Cand \Cleq{\tau'}{\borrowty{\kvar}{\tau}}}{\unif'}\\
   }
   { \inferW
     {\addlin{\bvar{\borrow{x}}{\borrowty{\kvar}{\tau}}}}
@@ -385,7 +385,7 @@
     \inferK{(C_\tau,\unif_\tau)}{\E}{\tau}{k_\tau}\\
     \addlin{ \bregion{C_r}{x}{\Sv}{\Sv'} }\\
     D = C' \Cand C_\tau \Cand \Cleq{k_\tau}{\klin_{n-1}} \Cand C_r\\
-    (C,\unif) = \normalize{D}{\unif' \mostgeneral \unif_\tau}\\    
+    (C,\unif) = \normalize{D}{\unif' \mostgeneral \unif_\tau}\\
   }  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{\Sone x \BORROW}{e}}{\tau} }
 }
 
@@ -393,4 +393,3 @@
 %%% mode: latex
 %%% TeX-master: "main"
 %%% End:
-

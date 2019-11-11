@@ -294,7 +294,7 @@ the splitting and borrowing relations on environments,
 $\lsplit C\E\E\E$ and $\lregion C{x}\E\E$.
 The complete definitions are shown on \cref{fig:sd-splitting,fig:sd-borrowing}.
 All the definitions are made in term of the inference version, which
-returns a fresh constraints. The solving version then simply
+returns fresh constraints. The solving version then simply
 uses entailment, as shown in rule {\sc ESplit-Check} and
 {\sc EBorrow-Check}.
 The remaining new rules are dedicated to iterating over the environment.
@@ -303,10 +303,10 @@ The remaining new rules are dedicated to iterating over the environment.
 the rewriting relation on environment constraints,
 $\Cleq\E k \Crewrite C$, which rewrites a constraint of the form
 $\Cleq\E k$ into $C$. It proceeds by iterating over the environment
-and expending the constraints for each binding.
+and expanding the constraints for each binding.
 Suspended bindings are rejected ({\sc ConstrSusp}).
 Borrow bindings directly use the annotated kind ({\sc ConstrBorrow}).
-Other bindings uses the underlying type scheme ({\sc ConstrBinding}).
+Other bindings use the underlying type scheme ({\sc ConstrBinding}).
 Type schemes are constrained by first inferring the kind, and then
 emitting the constraint ({\sc ConstrSD} and {\sc ConstrI}).
 
