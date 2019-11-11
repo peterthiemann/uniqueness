@@ -6,6 +6,8 @@
   |&\ \introPair{e}{e'} \mid \matchin{x,y}{e}{e'}\tag{Pairs}\\
   |&\ \region{\Sone x\BORROW}{e}\tag{Region}\\
   |&\ \borrow{x} \mid \reborrow{x}\tag{Borrows}\\
+  |&\ \create{e} \mid \observe{e}\\
+  |&\ \update{e}{e'} \mid \destroy{e}\tag{Resources}\\
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
   % |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
   \htag{Borrows}
@@ -23,6 +25,7 @@
   \htag{Types}
   \tau ::=&\ \tvar\tag{Type variables}\\
   |&\ \tau\tarr{k}\tau\tag{Function types}\\
+  |&\ \tyPair[k]{\tau}{\tau'}\tag{Pair types}\\
   |&\ \tapp{t}{\Multi\tau}\tag{Type constructors}\\
   |&\ \borrowty{k}{\tau}\tag{Borrowed Type}\\
   \htag{Kinds}
