@@ -97,7 +97,7 @@ let borrowed : address -> borrow -> address sem =
      Ok (Address (b :: bs, ell))
   | Mut ->
      match bs with
-       [] -> 
+       [] ->
         Ok (Address ([b], ell))
      | (Mut :: bs) ->
         Ok (Address (b :: bs, ell))
@@ -214,7 +214,7 @@ let (-:>) : 'a -> 'b -> 'a * 'b =
 let (.+()) : venv -> ident * result -> venv =
   fun v (i, r) -> VUpd (v, i, r)
 
-type subst 
+type subst
 let (-->) : 'a list -> 'a var list -> subst = assert false
 let (./{}) : 'a -> subst -> 'a = assert false
 
@@ -228,10 +228,11 @@ let rec eval
     (store * perm * result) sem
   = fun delta pi gamma i e ->
   if i=0 then TimeOut else
+  let i' = i - 1 in
   match e with
   (**)
   (* rule const *)
-  | Const (c) -> 
+  | Const (c) ->
     Ok (delta, pi, RCONST c)
   (**)
   (* rule var *)
@@ -247,8 +248,8 @@ let rec eval
     let* w = delta.*(ell) in
     let* (gamma', kappas', cstr', k', x', e') = getstpoly w in
     let pi' =
-      if cstr'./{ks-->kappas'} <=> [(k' <<= KUNR None)]./{ks-->kappas'}  
-      then pi 
+      if cstr'./{ks-->kappas'} <=> [(k' <<= KUNR None)]./{ks-->kappas'}
+      then pi
       else pi <-> !$ ell
     in
     let w = STCLOS (gamma', k'./{ks-->kappas'}, x', e'./{ks-->kappas'}) in
@@ -263,7 +264,6 @@ let rec eval
   (**)
   (* rule sapp *)
   | App (e_1, e_2, sp) ->
-     let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* ell_1 = getloc r_1 in
@@ -277,7 +277,6 @@ let rec eval
   (**)
   (* rule slet *)
   | Let (x, e_1, e_2, sp) ->
-     let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 gamma_2.+(x -:> r_1) i' e_2 in
@@ -285,7 +284,6 @@ let rec eval
   (**)
   (* rule spair *)
   | Pair (k, e_1, e_2, sp) ->
-     let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 gamma_2 i' e_2 in
@@ -295,7 +293,6 @@ let rec eval
   (**)
   (* rule smatch *)
   | Match (x, y, e_1, e_2, sp) ->
-     let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* ell = getloc r_1 in
@@ -309,7 +306,6 @@ let rec eval
   (**)
   (* rule matchborrow *)
   | Matchborrow (x, y, e_1, e_2, sp) ->
-     let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* (b, _, ell) = getborrowed_loc r_1 in
@@ -328,7 +324,6 @@ let rec eval
   (**)
   (* rule sregion *)
   | Region (e, n, x, b) ->
-     let i' = i - 1 in
      let* RADDR rho = gamma.!(x) in
      let* rho' = rho <.> b in
      let gamma' = gamma.+(x -:>RADDR rho') in
@@ -339,7 +334,6 @@ let rec eval
   (**)
   (* previous *)
   | Region (e_1, n, x, b) ->
-     let i' = i - 1 in
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
      let*? () = rho <|= pi in
@@ -363,7 +357,6 @@ let rec eval
      Ok (delta, pi, RADDR rho')
   (* rule screate *)
   | Create (e_1) ->
-     let i' = i - 1 in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
      let w = STRSRC (r_1) in
      let (ell', delta') = salloc delta w in
@@ -372,7 +365,6 @@ let rec eval
   (**)
   (* rule sdestroy *)
   | Destroy (e_1) ->
-     let i' = i - 1 in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
      let* ell = getloc r_1 in
      let* w = delta_1.*(ell) in
@@ -383,7 +375,6 @@ let rec eval
   (**)
   (* rule sobserve *)
   | Observe (e_1) ->
-     let i' = i - 1 in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
      let* (b, _, ell) = getborrowed_loc r_1 in
      let*? () = (b = Imm) in
@@ -393,7 +384,6 @@ let rec eval
   (**)
   (* rule supdate *)
   | Update (e_1, e_2, sp) ->
-     let i' = i - 1 in
      let (gamma_1, gamma_2) = vsplit gamma sp in
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* rho = getaddress r_1 in
@@ -407,4 +397,3 @@ let rec eval
      let pi_2' = pi_2 <-> rho in
      Ok (delta_2', pi_2', RVOID)
   (**)
-
