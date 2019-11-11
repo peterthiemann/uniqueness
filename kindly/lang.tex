@@ -126,7 +126,7 @@ We discuss judgments for typing, kinding, and constraint entailment:
 
 \subsubsection{Kinds and constraints}
 
-\affe uses of kinds and constrained types to indicate
+\affe uses kinds and constrained types to indicate
 linear and affine types.
 % Before explaining the details of our type system, we
 % give a quick presentation of the kinds and constraints.
@@ -144,7 +144,7 @@ $\kvar$ must be unrestricted, but can be local to a region.
 Kinds form a lattice with an ordering that implements two principles
 (see \cref{sdtyp:lattice}). First, unrestricted values may be used
 where affine ones are expected and affine ones are less restricted
-than linear one as reflected in \TirName{Lat-UA} and \TirName{Lat-AL}.
+than linear ones as reflected in \TirName{Lat-UA} and \TirName{Lat-AL}.
 Second, values usable at level $n$ may be used at any more deeply
 nested level $n'$ (where $n\le\infty$ for any $n$) as defined in the \TirName{Lat-X-Level} axioms.
 
