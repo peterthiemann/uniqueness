@@ -141,7 +141,7 @@ complementary and aim to combine them in the future.
 
 \subsection{Other substructural type-systems}
 
-Linear and affine discipline have also been used in non-functional
+Linear and affine disciplines have also been used in non-functional
 settings, notably in the context of low-level imperative programming
 and object systems. In particular, \lang uses borrows and regions
 which were initially developed in the context of imperative and
@@ -180,10 +180,10 @@ more expressivity at the cost of inference.
 \lang relies on constrained types
 to introduce the kind inequalities required for linear types. In
 particular, we use HM(X)~\citep{DBLP:journals/tapos/OderskySW99} which
-allow to use constrained types in an ML-like language with complete
+allows to use constrained types in an ML-like language with complete
 type inference.
 HM(X) has been shown to be compatible with subtyping,
-bounded universal and existentials~\citep{DBLP:conf/icfp/Simonet03},
+bounded quantification and existentials~\citep{DBLP:conf/icfp/Simonet03},
 GADTs~\citep{DBLP:journals/toplas/SimonetP07},
 and there exists a syntactic soundness proof~\citep{DBLP:journals/entcs/SkalkaP02}.
 These results make us confident that the system developed in \lang
@@ -197,7 +197,7 @@ foundation of Haskell's type system.
 The subtyping discipline used in \lang is very similar
 to structural subtyping, where the only subtyping (or here, subkinding)
 is at the leaves.
-Such discipline is known to be friendly to inference and has be used in many
+Such discipline is known to be friendly to inference and has been used in many
 contexts, including OCaml itself, and has been combined
 with constraints~\citep{DBLP:journals/tapos/OderskySW99,DBLP:conf/sas/TrifonovS96}.
 In particular, Flowcaml~\citep{DBLP:conf/popl/PottierS02}
