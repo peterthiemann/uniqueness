@@ -1,14 +1,10 @@
 \begin{minipage}{0.65\linewidth}
   \begin{mathpar}
-    \inferrule[Lat-UA]{}{\kun_n \lk_\Lat \kaff_n}
+    \inferrule[Lat-UA]{}{\kun \lk \kaff}
     \and
-    \inferrule[Lat-AL]{}{\kaff_n \lk_\Lat \klin_n}
+    \inferrule[Lat-AL]{}{\kaff \lk \klin}
     \and
-    \inferrule[Lat-U-Level]{n \lk n'}{\kun_n \lk_\Lat \kun_{n'}}
-    \and 
-    \inferrule[Lat-A-Level]{n \lk n'}{\kaff_n \lk_\Lat \kaff_{n'}}
-    \and 
-    \inferrule[Lat-L-Level]{n \lk n'}{\klin_n \lk_\Lat \klin_{n'}}
+    \inferrule[Lat-Level]{\mul \lk \mul' \and n \lk n'}{\mul_n \lk_\Lat \mul'_{n'}}
   \end{mathpar}
 \end{minipage}~
 \begin{minipage}{0.2\linewidth}

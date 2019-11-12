@@ -1,12 +1,7 @@
 \begin{mathpar}
-  \inferrule[KVar|KCons]
-  { \bvar{\tvar|\T{t}}{
-      \forall \kvar_i.\ \qual{D}{(\Multi[j]{k}) \karr k}}
-    \in \E \\
-    \unif = \subst{\kvar_i}{k_i}{} \\
-    \entail C {\unif D}
-  }
-  { \inferSK{C}{\E}{\tvar|\T t}{\unif((\Multi[j]{k}) \karr k)}
+  \inferrule[KVar]
+  { \bvar{\tvar}{k} \in \E }
+  { \inferSK{C}{\E}{\tvar}{k}
   }
   \and
   \inferrule[KArr]
@@ -14,12 +9,15 @@
   { \inferSK{C}{\E}{\tau_1 \tarr{k} \tau_2}{k} }
   \and
   \inferrule[KApp]
-  { \forall j,\
-    \inferSK{C}{\E}{\tau_j}{k_j} \\
-    \inferSK{C}{\E}{\T{t}}{(\Multi[j]{k'}) \karr k} \\
-    \inferSS{C}{\E}{k_j}{k'_j}
+  { \bvar{\T{\tcon}}{
+      \forall \Multi[i]\kvar.\ \qual{D}{(\Multi[j]{k'}) \karr k'}}
+    \in \E \\
+    \inferSK{C}{\E}{\Multi[j]{\tau}}{\Multi[j]{k}} \\
+    \unif = \subst{\Multi[i]\kvar}{\Multi[i]k}{} \\
+    \entail C {\unif D} \\
+    \inferSS{C}{\E}{\Multi[j]k}{\unif{\Multi[j]{k'}}}
   }
-  { \inferSK{C}{\E}{\tapp{t}{(\Multi[j]{\tau})}}{k} }
+  { \inferSK{C}{\E}{\tapp{\tcon}{\Multi[j]{\tau}}}{\unif{k'}} }
   \and
   \inferrule[KBorrow]
   { }{ \inferSK{C}{\E}{\borrowty{k}{\tau}}{k}}

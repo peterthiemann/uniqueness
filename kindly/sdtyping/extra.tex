@@ -277,7 +277,7 @@ We write $\inferSK{C}{\E}{\tau}{k}$
 if $\tau$ has kind $k$ in environment $\E$ under constraints $C$.
 The rules are shown in \cref{rules:sd-kinding}.
 Kinds and types follow a small calculus with variables ($\tvar$,\dots),
-functions (type constructors $\T{t}$), application ($\tapp{t}{\Multi{\tau}}$)
+functions (type constructors $\T{t}$), application ($\tapp{\tcon}{\Multi{\tau}}$)
 and primitives such as types for arrows ($\tau\tarr{k}\tau'$) and
 borrows ($\borrowty{k}{\tau}$).
 Kind checking can thus be done in a fairly straightforward, syntax-directed

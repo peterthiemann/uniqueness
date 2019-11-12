@@ -26,13 +26,14 @@
   \tau ::=&\ \tvar\tag{Type variables}\\
   |&\ \tau\tarr{k}\tau\tag{Function types}\\
   |&\ \tyPair[k]{\tau}{\tau'}\tag{Pair types}\\
-  |&\ \tapp{t}{\Multi\tau}\tag{Type constructors}\\
+  |&\ \tapp{\tcon}{\Multi\tau}\tag{Type constructors}\\
   |&\ \borrowty{k}{\tau}\tag{Borrowed Type}\\
   \htag{Kinds}
+  \mul ::=&\ \klin\tag{Linear}\\
+  |&\ \kaff\tag{Affine}\\
+  |&\ \kun\tag{Unrestricted}\\
   k ::=&\ \kvar\tag{Kind variables}\\
-  |&\ \klin_n\tag{Linear kind}\\
-  |&\ \kaff_n\tag{Affine kind}\\
-  |&\ \kun_n\tag{Unrestricted kind}\\
+  |&\ \mul_n \tag{Indexed kinds}\\
   n \in&\ \Nat \cup \{\infty\}\\
   \htag{Constrained type and kind schemes}
   \schm ::=&\ \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau}) \tag{Type scheme}\\

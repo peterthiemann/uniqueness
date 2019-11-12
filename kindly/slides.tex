@@ -158,14 +158,14 @@ let%lwt c = Lwt_io.write output "thing" in (*Oups*)
 type channel : A (* channel is Affine! *)
 \end{lstlisting}\pause
 \begin{lstlisting}
-let with_file s f = 
+let with_file s f =
   let c = open_channel s
   let c = f c in
   close_channel c
 val with_file : string -> (channel -> channel)
 \end{lstlisting}\pause
 \begin{lstlisting}
-let () = 
+let () =
   let r = ref None in
   with_file "thing"
     (fun c -> r := Some c ; c) (* (*@\color{red} \ding{56}  No!@*) *)
@@ -237,25 +237,25 @@ val app :
 \defverbatim{\Comp}{
 \begin{lstlisting}
 let compose f g x = f (g x)
-val compose : 
+val compose :
   ('b -{?}> 'a) -> ('c -{?}> 'b) -{?}> 'c -{?}> 'a
 \end{lstlisting}
 }
 \defverbatim{\CompA}{
 \begin{lstlisting}
 let compose f g x = f (g x)
-val compose : 
+val compose :
   ('k2 < 'k) & ('k1 < 'k) & ('k1 < 'k3) =>
-  ('b -{'k1}> 'a) -> ('c -{'k2}> 'b) -{'k3}> 
+  ('b -{'k1}> 'a) -> ('c -{'k2}> 'b) -{'k3}>
   'c -{'k}> 'a
 \end{lstlisting}
 }
 \defverbatim{\CompB}{
 \begin{lstlisting}
 let compose f g x = f (g x)
-val compose : 
+val compose :
   ('k1 < 'k) =>
-  ('b -{'k1}> 'a) -> ('c -{'k}> 'b) -{'k1}> 
+  ('b -{'k1}> 'a) -> ('c -{'k}> 'b) -{'k1}>
   'c -{'k}> 'a
 \end{lstlisting}
 }
@@ -306,7 +306,7 @@ module AffineArray : sig
 
   type +'a r : U
   val freeze : 'a w -> 'a r
-  val get : int -> 'a r -> 'a 
+  val get : int -> 'a r -> 'a
 end
 \end{lstlisting}
 \end{frame}
@@ -327,7 +327,7 @@ end
     \column{0.5\textwidth}
     \begin{align*}
       \htag{Type Expressions}
-      \tau ::=&\ \tvar\ |\ \tau\tarr{k}\tau\ |\ \tapp{t}{(\tau^*)}\\
+      \tau ::=&\ \tvar\ |\ \tau\tarr{k}\tau\ |\ \tapp{\tcon}{(\tau^*)}\\
       k ::=&\ \kvar\ |\ \ell \in {\mathcal L}
     \end{align*}
   \end{columns}
@@ -367,19 +367,19 @@ end
     \node[above right=1.2 and 1.2 of pic cs:e, anchor=south] (expr)
     {\bf Expression};
     \draw[link] (expr) to[out=-100,in=80] ([shift={(0.8ex,1.2ex)}]pic cs:e);
-    
+
     \node[above left=1.2 and 0.2 of pic cs:E] (env) {\bf Environment};
     \draw[link] (env) to[out=-80,in=100] ([shift={(0.8ex,1.9ex)}]pic cs:E);
-    
+
     \node[below right=0.6 and 0.8 of pic cs:t] (ty) {Type};
     \draw[link] (ty) to[out=170,in=-70] ([shift={(0.8ex,-0.4ex)}]pic cs:t);
-    
+
     \node[below right=1.2 and 0.8 of pic cs:psi] (psi) {Unifier};
     \draw[link] (psi) to[out=100,in=-80] ([shift={(0.8ex,-0.4ex)}]pic cs:psi);
-    
+
     \node[below left=1.2 and 0 of pic cs:C] (C) {Constraints};
     \draw[link] (C) to[out=100,in=-80] ([shift={(0.8ex,-0.4ex)}]pic cs:C);
-    
+
     \node[below left=0 and 0.9 of pic cs:Sv] (Sv) {\addlin{Usage Map}};
     \draw[link,blue] (Sv) to[out=20,in=180] ([shift={(0ex,0.6ex)}]pic cs:Sv);
   \end{tikzpicture}
@@ -401,7 +401,7 @@ end
 
 \begin{frame}
   \frametitle{Typing \hfill Tracking linearity}
-  
+
   When typechecking (e1, e2):
   \begin{itemize}[<+->]
   \item $\inferW{\Sv_1}{(C_1,\psi_1)}{\Gamma}{e_1}{\tau_1}$
@@ -434,7 +434,7 @@ end
     \and
     \inferrule{}{\entail{}{\Cleq{\ell^\bot}{k}}}
   \end{mathpar}
-  
+
 \end{frame}
 
 \begin{frame}
@@ -476,7 +476,7 @@ end
 \begin{frame}[plain]
   \centering
   \begin{gather*}
-    (\gamma : \kvar_\gamma) (\beta : \kvar_\beta).\ 
+    (\gamma : \kvar_\gamma) (\beta : \kvar_\beta).\
     (\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma\\
     \visible<7->{\kvar_\gamma = \kvar_x = \kun}
     \visible<13>{\Cand \kvar_3 \leq \kvar_1}
@@ -555,7 +555,7 @@ end
   \draw<10-13> (3) to[bend right] (1) ;
 
   \end{tikzpicture}
-  
+
 \end{frame}
 
 \begin{frame}
@@ -570,17 +570,17 @@ end
     {\Cleq{\kvar_3}{\kvar_1}}
     {(\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma}
   \end{gather*}
-  
 
-  
+
+
 \end{frame}
 
 \defverbatim{\CompAA}{
 \begin{lstlisting}
 let compose f g x = f (g x)
-val compose : 
+val compose :
   ('k1 < 'k) & ('k1 < 'k3) =>
-  ('b -{'k1}> 'a) -> ('c -{'k}> 'b) -{'k3}> 
+  ('b -{'k1}> 'a) -> ('c -{'k}> 'b) -{'k3}>
   'c -{'k}> 'a
 \end{lstlisting}
 }
@@ -644,7 +644,7 @@ val compose :
   \end{itemize}
 
   The system is still small. We must look at concrete code pattern used in \ocaml and decide how to support them.
-  
+
   Area of future work:
   \begin{itemize}
   \item Explore various interactions with modules
@@ -684,7 +684,7 @@ val compose :
   \item Borrowing
   \item Prototype cool APIs with it
   \end{enumerate}
-  
+
 \end{frame}
 
 \begin{frame}
@@ -705,7 +705,7 @@ val compose :
   Several distinct problematic:
   \begin{itemize}
   \item \alert<2>{Type abstraction} \only<2>{{\color{green}\ding{52}}
-      
+
       Can declare unrestricted types and expose them as Affine.
     }
   \item \alert<3>{Linear/affine values in modules} \only<3>{
@@ -717,7 +717,7 @@ val compose :
   \item \alert<4>{Functors}\only<4>{
 
       What happens if a functor takes a module containing affine values?
-      
+
       $\implies$ We need kind annotation on the functor arrow\dots \frownie{}
     }
   \item \alert<5->{Separate compilation}\only<5->{
@@ -729,7 +729,7 @@ val compose :
       \visible<6>{But what about \lstinline{stdout} ?}
     }
   \end{itemize}
-  
+
 \end{frame}
 
 \begin{frame}[fragile,fragile,fragile]
@@ -753,11 +753,11 @@ val add_mut : id -> key -> 'a -> 'a t -> 'a t
 
   Mutable borrows, in \texttt{lacaml}:
 \begin{lstlisting}
-val Lacaml.D.sycon : 
+val Lacaml.D.sycon :
   ... -> ?iwork:Common.int32_vec -> mat -> float
 (* iwork is an optional preallocated work buffer *)
 \end{lstlisting}
-  
+
 \end{frame}
 
 \begin{frame}[fragile]{Borrowing}
@@ -780,7 +780,7 @@ val Lacaml.D.sycon :
   \item More syntactic annotations
   \item Regions
   \end{itemize}
-  
+
 \end{frame}
 
 
@@ -788,17 +788,17 @@ val Lacaml.D.sycon :
   Which kind of linearity?
   \begin{itemize}
   \item \alert<2>{Ownership approaches}
-    
+
     \only<2>{
       Suitable to imperative languages (Rust, \dots).
     }
   \item \alert<3>{Capabilities and typestates}
-    
+
     \only<3>{
       Often use in Object-Oriented contexts (Wyvern, Plaid, Hopkins Objects Group, \dots).
     }
   \item \alert<4,6>{Substructural type systems}
-    
+
     \only<4>{
       Many variations, mostly in functional languages:
       \begin{itemize}
@@ -809,7 +809,7 @@ val Lacaml.D.sycon :
       \end{itemize}
     }
   \item \alert<5>{\dots}
-    
+
     \only<5>{Mix of everything: Mezzo}
   \end{itemize}
 \end{frame}

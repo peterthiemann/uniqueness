@@ -45,7 +45,7 @@ by a nesting level $n \in \Nat \cup \{\infty\}$.
 
 A type $\tau$ is either a type variable, a function type indexed by a
 kind,
-a type application $\tapp{t}{\Multi{\tau}}$ of an abstract type constructor
+a type application $\tapp{\tcon}{\Multi{\tau}}$ of an abstract type constructor
 $\T t$, or a borrowed type  $\borrowty{k}{\tau}$.
 
 Type schemes $\schm$ add quantification over kind
@@ -83,7 +83,7 @@ in $\Multi[i]\tau$.
 % Regions $\region{\Sone x\BORROW}{e}$ are annotated with their nesting ($n$)
 % and the variable whose borrow they enclose ($x$).
 % %
-% $\tapp{t}{\Multi{\tau}}$ denotes a type application where
+% $\tapp{\tcon}{\Multi{\tau}}$ denotes a type application where
 % $\T t$ is an abstract type constructor.
 % Arrow and borrow types are annotated with a kind, written as $\tau \tarr{k} \tau$
 % and $\borrowty{k}{\tau}$ respectively.

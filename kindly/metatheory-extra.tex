@@ -53,14 +53,14 @@
     \inferrule{
       \SE \vdash r : \IType{t}{\Multi\tau}
     }{
-      \SE \vdash {[r]} : \tapp{t}{\Multi\tau}
+      \SE \vdash {[r]} : \tapp{\tcon}{\Multi\tau}
     }
 
     \inferrule{}{
       \SE \vdash \blob : \tau
     }
   \end{mathpar}
-\item Relating  results to types $ \SE \vdash r : \tau$, 
+\item Relating  results to types $ \SE \vdash r : \tau$,
 \item Relating results to type schemes $\SE \vdash r : \schm$
   \begin{mathpar}
   \inferrule{}{ \SE \vdash c : \CType{c} }
@@ -82,7 +82,7 @@
   in $\Suspended\VEnv$. The
   suspended entries cannot be used directly, but they can be activated
   by borrowing.
-  
+
   $\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
   \ImmutableBorrows\VEnv, \Suspended\VEnv : \E$
 \end{itemize}
@@ -104,7 +104,7 @@
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
-    \IBORROW r : \schm} 
+    \IBORROW r : \schm}
   {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv[ x\mapsto \IBORROW r], \Suspended\VEnv : \E\bvar{\borrow[\IBORROW] x}{\borrowty[\IBORROW] k{ \schm}} }
 
@@ -117,7 +117,7 @@
 \paragraph{Extending environments and stores}
 \begin{mathpar}
   \inferrule{}{\SE \le \SE}
-  
+
   \inferrule{\SE \le \SE'}{\SE \le \SE' (\ell : \schm)}
 
   \inferrule{}{\Store\le\Store}
@@ -145,7 +145,7 @@ addresses, results, and environments.
 We write $\Reach\Store\VEnv \subseteq \Dom\Store$ for the function
 that computes all addresses reachable from $\Addresses\VEnv$
 assuming that $\Addresses\VEnv \subseteq \Dom\Store$. It is defined in
-two steps. First a helper function 
+two steps. First a helper function
 for addresses, results, storables, and environments.
 
 \begin{align*}
@@ -190,7 +190,7 @@ knows about the actual resources.
 \item if $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\kaff}{k}$, then $\Loc$ is affine.
 \item if $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \kaff
   k$, then $\Loc$ is affine.
-\item if $\SE (\Loc) = \tapp{t}{\Multi\tau}$, then $\Loc$ is affine.
+\item if $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$, then $\Loc$ is affine.
 % \item if $\SE (\Loc) = \borrow[\MBORROW]\tau$, then $\Loc$ is affine
 %   \dots (THAT SHOULDN'T REALLY  BE A STORE TYPE)
 % \item if $\SE (\Loc) = \borrow[\IBORROW]\tau$, then $\Loc$ is not affine
@@ -206,7 +206,7 @@ resource.
 \item if $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\klin}{k}$, then $\Loc$ is linear.
 \item if $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \klin
   k$, then $\Loc$ is linear.
-\item if $\SE (\Loc) = \tapp{t}{\Multi\tau}$, then $\Loc$ is linear.
+\item if $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$, then $\Loc$ is linear.
 \end{itemize}
 
 \begin{theorem}
@@ -221,7 +221,7 @@ resource.
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
   \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
     \begin{itemize}
-    \item 
+    \item
       For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active\VEnv}} >0$,
       if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc\REACH= 1$
     \item For all $\Loc$ such that $
@@ -238,26 +238,26 @@ resource.
   $\exists$ $\Store'$, $\Perm'$, $r'$, $\SE'$ such that
   \begin{itemize}
   \item
-    $R = \Ok{\Store', \Perm', r'}$  
+    $R = \Ok{\Store', \Perm', r'}$
   \item $\SE \le \SE'$, $\Store \le \Store'$,
-    $\vdash \Store' : \SE'$ 
+    $\vdash \Store' : \SE'$
   \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
   \item $\SE' \vdash r' : \tau$
   \item $\Reach{\Store'}{r'} \subseteq \Perm'$
   \item Outside: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store'}{\VEnv}$ it must be that 
+    \Reach{\Store'}{\VEnv}$ it must be that
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
     %% must be \Store because \Perm has no idea of \Perm'
   \item Immutables: For all $\Loc \in
     \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
-    $\Loc\in\Dom\Store$, 
+    $\Loc\in\Dom\Store$,
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
   \item Resources:
     Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
     For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
-    \MultiNumber\Loc{\REACH'}$, 
+    \MultiNumber\Loc{\REACH'}$,
     \begin{itemize}
     \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
     \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
@@ -278,8 +278,8 @@ resource.
   @eval \Store \Perm \VEnv i e@.
 
   The base case is trivial as
-  @eval \Store \Perm \VEnv 0 e = \TimeOut@. 
-  
+  @eval \Store \Perm \VEnv 0 e = \TimeOut@.
+
   Let now $i>0$ and consider the different cases for expressions.
 
   \textbf{case $e$ of}
@@ -294,13 +294,13 @@ resource.
     \SE \vdash \VEnv_1 : \E_1 && \SE \vdash \VEnv_2 : \E_2
   \end{align}
 
-  Hence, we can establish the assumptions for the recursive call 
+  Hence, we can establish the assumptions for the recursive call
   @eval delta pi gamma_1 i' e_1@.
   \begin{itemize}
   \item  $\inferS{C}{\E_1}{e_1}{\tau_2\tarr{k}\tau_1}$ by inversion of typing
   \item $\SE \vdash \VEnv_1 : \E_1$ by \eqref{eq:1}
   \item $\vdash \Store : \SE$ by assumption
-  \item $\Addresses\Perm \subseteq \Dom\Store$ by assumption 
+  \item $\Addresses\Perm \subseteq \Dom\Store$ by assumption
   \item $
     \Reach\Store{\Active{\VEnv_1}, \MutableBorrows{\VEnv_1},
       \ImmutableBorrows{\VEnv_1}}
@@ -309,7 +309,7 @@ resource.
     \subseteq \Perm$
   \item Incoming Resources: For $\REACH_1 = \Reach\Store{\VEnv_1}$.
     \begin{itemize}
-    \item 
+    \item
       For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active{\VEnv_1}}} >0$,
       if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc{\REACH_1}= 1$
     \item For all $\Loc$ such that $
@@ -336,14 +336,14 @@ resource.
   \end{gather}
   \begin{itemize}
   \item Outside: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store_1}{\VEnv_1}$ it must be that 
+    \Reach{\Store_1}{\VEnv_1}$ it must be that
     $\Store_1 (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1$ 
+    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1$
   \item Immutables: For all $\Loc \in
     \Reach{\Store_1}{\ImmutableBorrows{\VEnv_1}}$ it must be that
-    $\Loc\in\Dom\Store$, 
+    $\Loc\in\Dom\Store$,
     $\Store_1 (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1$ 
+    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1$
   \item Resources:
     Let $\REACH_1 =\Reach{\Store_1}{\Active{\VEnv_1}}$.
     For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_1} >0$,
@@ -407,7 +407,7 @@ resource.
     then its permission is never withdrawn an $\Loc\in\Perm_1'$.
   \item Incoming resources considering $\REACH_2$.
     \begin{itemize}
-    \item 
+    \item
       For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store_1}{\Active{\VEnv_2}}} >0$,
       if $\Affine{\SE_2}\Loc$ then $\MultiNumber\Loc{\REACH_2}= 1$.
     \item For all $\Loc$ such that $
@@ -416,7 +416,7 @@ resource.
     \end{itemize}
     In both cases the rationale is that this statement was true for
     the incoming environment $\VEnv$ (by assumption) and splitting did
-    not pass affine resources to $\VEnv_1$. 
+    not pass affine resources to $\VEnv_1$.
   \item $i'<i$ and  @eval delta_1 pi_1' gamma_2 i' e_2@ terminates
     with $R_2 \ne \TimeOut$.
   \end{itemize}
@@ -438,18 +438,18 @@ resource.
   \end{gather}
   \begin{itemize}
   \item Outside: For all $\Loc \in \Dom{\Store_1} \setminus
-    \Reach{\Store_2}{\VEnv_2}$ it must be that 
+    \Reach{\Store_2}{\VEnv_2}$ it must be that
     $\Store_2(\Loc) = \Store_1 (\Loc)$
-    and $\Loc\in\Perm_1' \Leftrightarrow \Loc\in\Perm_2$ 
+    and $\Loc\in\Perm_1' \Leftrightarrow \Loc\in\Perm_2$
   \item Immutables: For all $\Loc \in
     \Reach{\Store_2}{\ImmutableBorrows{\VEnv_2}}$ it must be that
-    $\Loc\in\Dom{\Store_1}$, 
+    $\Loc\in\Dom{\Store_1}$,
     $\Store_2 (\Loc) = \Store_1 (\Loc)$
-    and $\Loc\in{\Perm_1'} \Leftrightarrow \Loc\in\Perm_2$ 
+    and $\Loc\in{\Perm_1'} \Leftrightarrow \Loc\in\Perm_2$
   \item Resources:
     Let $\REACH_2' =\Reach{\Store_2}{\Active{\VEnv_2}}$.
     For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_2} >0$ and $n' =
-    \MultiNumber\Loc{\REACH_2'}$, 
+    \MultiNumber\Loc{\REACH_2'}$,
     \begin{itemize}
     \item if $\Affine{\SE_2}\Loc$ then $n=1$ and $n'\le 1$,
     \item if $\Linear{\SE_2}\Loc$ then $n=1$ and $n' = 0$,
@@ -461,8 +461,8 @@ resource.
   \item No thin air permission: For all $\Loc\in \Perm_2$, $\Loc
     \in \Perm_1' \cup  \Dom{\Store_2} \setminus \Dom{\Store_1}$.
   \end{itemize}
-  
-  Finally, we establish the assumptions for the recursive call 
+
+  Finally, we establish the assumptions for the recursive call
   @eval delta_2 pi_2 gamma'(x'-:>r_2) i' e'@.
   To this end, let $\VEnv_3 = \VEnv' (x'\mapsto r_2)$.
   \begin{itemize}
@@ -488,7 +488,7 @@ resource.
     For $r_2$ bound to $x'$, we obtain this from (\ref{eq:11}).
   \item Incoming Resources: Let $\REACH_3 = \Reach{\Store_2}{\VEnv_3}$.
     \begin{itemize}
-    \item 
+    \item
       For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store_2}{\Active{\VEnv_3}}} >0$,
       if $\Affine{\SE_2}\Loc$ then $\MultiNumber\Loc{\REACH_3}= 1$
     \item For all $\Loc$ such that $
@@ -517,18 +517,18 @@ resource.
   \end{gather}
   \begin{itemize}
   \item Outside: For all $\Loc \in \Dom{\Store_2} \setminus
-    \Reach{\Store_3}{\VEnv_3}$ it must be that 
+    \Reach{\Store_3}{\VEnv_3}$ it must be that
     $\Store_3(\Loc) = \Store_2 (\Loc)$
-    and $\Loc\in\Perm_2 \Leftrightarrow \Loc\in\Perm_3$ 
+    and $\Loc\in\Perm_2 \Leftrightarrow \Loc\in\Perm_3$
   \item Immutables: For all $\Loc \in
     \Reach{\Store_3}{\ImmutableBorrows{\VEnv_3}}$ it must be that
-    $\Loc\in\Dom{\Store_2}$, 
+    $\Loc\in\Dom{\Store_2}$,
     $\Store_3 (\Loc) = \Store_2 (\Loc)$
-    and $\Loc\in{\Perm_2} \Leftrightarrow \Loc\in\Perm_3$ 
+    and $\Loc\in{\Perm_2} \Leftrightarrow \Loc\in\Perm_3$
   \item Resources:
     Let $\REACH_3' =\Reach{\Store_3}{\Active{\VEnv_3}}$.
     For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_3} >0$ and $n' =
-    \MultiNumber\Loc{\REACH_3'}$, 
+    \MultiNumber\Loc{\REACH_3'}$,
     \begin{itemize}
     \item if $\Affine{\SE_2}\Loc$ then $n=1$ and $n'\le 1$,
     \item if $\Linear{\SE_2}\Loc$ then $n=1$ and $n' = 0$,
@@ -552,7 +552,7 @@ resource.
   \item by (\ref{eq:14}), $\SE' \vdash r' : \tau_1$
   \item by (\ref{eq:15}), $\Reach{\Store'}{r'} \subseteq \Perm'$
   \item Outside: Let $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store'}{\VEnv}$ and show that that 
+    \Reach{\Store'}{\VEnv}$ and show that that
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
 
@@ -561,7 +561,7 @@ resource.
     $\VEnv$ or newly allocated ones. Hence, the claim follows.
   \item Immutables: Let $\Loc \in
     \Reach{\Store'}{\ImmutableBorrows\VEnv}$ and show that
-    $\Loc\in\Dom\Store$, 
+    $\Loc\in\Dom\Store$,
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
 
@@ -574,7 +574,7 @@ resource.
   \item Resources:
     Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
     For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
-    \MultiNumber\Loc{\REACH'}$, 
+    \MultiNumber\Loc{\REACH'}$,
     \begin{itemize}
     \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
     \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
@@ -608,7 +608,7 @@ resource.
     $\E'$ where $C \vdash_e {(\BORROW_n\lk k\lk\BORROW_\infty)}$. This
     change moves the entry for $x$ from $\Suspended\VEnv$ to either
     $\MutableBorrows\VEnv$ or $\ImmutableBorrows\VEnv$. The same
-    happens in the semantics by mapping updating $\VEnv$ to $\VEnv'$. 
+    happens in the semantics by mapping updating $\VEnv$ to $\VEnv'$.
   \item $\vdash \Store : \SE$ by assumption.
   \item $\Addresses{\Perm'} \subseteq \Dom\Store$: we only change
     $\rho$ to $\rho'$, but their raw location is the same.
@@ -619,7 +619,7 @@ resource.
       \ImmutableBorrows\VEnv} \subseteq \Perm$, we covers the remaining addresses.
   \item Incoming Resources: For $\REACH = \Reach\Store\VEnv$ we know that
     \begin{enumerate}
-    \item\label{item:1} 
+    \item\label{item:1}
       For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active\VEnv}} >0$,
       if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc\REACH= 1$
     \item\label{item:2} For all $\Loc$ such that $
@@ -633,32 +633,32 @@ resource.
     Item~\ref{item:1} and Item~\ref{item:3} do not change. Item~\ref{item:2} is not
     affected if $\BORROW=\IBORROW$. If $\BORROW=\MBORROW$, then we
     can deduce $\MultiNumber\Loc\REACH=1$ for the
-    underlying location of $\rho'$ from Item~\ref{item:3}. 
+    underlying location of $\rho'$ from Item~\ref{item:3}.
   \item  $i'<i\in\Nat$ and @eval delta pi' gamma' i' e@ terminates
-    with $R\ne \TimeOut$. 
+    with $R\ne \TimeOut$.
   \end{itemize}
   Induction yields that
   \begin{itemize}
   \item
-    $R_1 = \Ok{\Store_1, \Perm_1, r_1}$  
+    $R_1 = \Ok{\Store_1, \Perm_1, r_1}$
   \item $\SE \le \SE_1$, $\Store \le \Store_1$,
-    $\vdash \Store_1 : \SE_1$ 
+    $\vdash \Store_1 : \SE_1$
   \item $\Addresses{\Perm_1} \subseteq \Dom{\Store_1}$
   \item $\SE_1 \vdash r_1 : \tau$
   \item $\Reach{\Store_1}{r_1} \subseteq \Perm_1$
   \item Outside: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store_1}{\VEnv'}$ it must be that 
+    \Reach{\Store_1}{\VEnv'}$ it must be that
     $\Store_1 (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm' \Leftrightarrow \Loc\in\Perm_1$.
   \item Immutables: For all $\Loc \in
     \Reach{\Store_1}{\ImmutableBorrows{\VEnv'}}$ it must be that
-    $\Loc\in\Dom\Store$, 
+    $\Loc\in\Dom\Store$,
     $\Store_1 (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm' \Leftrightarrow \Loc\in\Perm_1$.
   \item Resources:
     Let $\REACH_1 =\Reach{\Store_1}{\Active{\VEnv'}}$.
     For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_1} >0$ and $n' =
-    \MultiNumber\Loc{\REACH_1}$, 
+    \MultiNumber\Loc{\REACH_1}$,
     \begin{itemize}
     \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
     \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
@@ -687,13 +687,13 @@ resource.
     Hence, we conclude  $\Reach{\Store'}{r'} \subseteq \Perm_1- \rho'
     = \Perm_1'$.
   \item Outside: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store'}{\VEnv}$ it must be that 
+    \Reach{\Store'}{\VEnv}$ it must be that
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1'$. Immediate from
     the subevaluation as $\VEnv$ and $\VEnv'$ reach the same set of locations.
   \item Immutables: For all $\Loc \in
     \Reach{\Store'}{\ImmutableBorrows{\VEnv}}$ it must be that
-    $\Loc\in\Dom\Store$, 
+    $\Loc\in\Dom\Store$,
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1'$.
     This set can only be affected if $\rho'$ is an immutable
@@ -702,7 +702,7 @@ resource.
   \item Resources are not affected by this evaluation rule:
     Let $\REACH' =\Reach{\Store'}{\Active{\VEnv}}$.
     For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH} >0$ and $n' =
-    \MultiNumber\Loc{\REACH'}$, 
+    \MultiNumber\Loc{\REACH'}$,
     \begin{itemize}
     \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
     \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
@@ -729,7 +729,7 @@ resource.
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
   \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
     \begin{itemize}
-    \item 
+    \item
       For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active\VEnv}} >0$,
       if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc\REACH= 1$
     \item For all $\Loc$ such that $
@@ -746,7 +746,7 @@ resource.
 
   Second, $\rho$ is a borrow address ending with $\BORROW$ also
   by~\ref{item:4}.
-  
+
   By assumption~\ref{item:5}, $\rho \in \Perm$ as $\rho$ is either in
   $\MutableBorrows\VEnv$ or $\ImmutableBorrows\VEnv$.
 
@@ -760,18 +760,18 @@ resource.
   \item $\SE \vdash \rho : \borrowty{k}{\tau}$ by inversion of typing.
   \item $\Reach{\Store}{\rho} \subseteq \Perm$ by assumption~\ref{item:5}.
   \item Outside holds trivially: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store}{\VEnv}$ it must be that 
+    \Reach{\Store}{\VEnv}$ it must be that
     $\Store (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm$.
   \item Immutables holds trivially: For all $\Loc \in
     \Reach{\Store}{\ImmutableBorrows\VEnv}$ it must be that
-    $\Loc\in\Dom\Store$, 
+    $\Loc\in\Dom\Store$,
     $\Store (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm$.
   \item Resources:
     Let $\REACH =\Reach{\Store}{\Active\VEnv}$.
     For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
-    \MultiNumber\Loc{\REACH}$, 
+    \MultiNumber\Loc{\REACH}$,
     \begin{itemize}
     \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
     \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
@@ -788,7 +788,7 @@ resource.
   \item No thin air permission holds trivially: For all $\Loc\in \Perm$, $\Loc
     \in \Perm \cup  \Dom{\Store} \setminus \Dom{\Store} = \Perm$.
   \end{itemize}
-  
+
 
 \end{proof}
 
