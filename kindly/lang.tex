@@ -29,8 +29,8 @@ specifications, regions, and borrows.
 
 We start from the bottom.
 A borrow $\borrow{x}$ is always taken from a variable $x$. The
-\emph{borrow annotation} $\BORROW$ indicates whether the borrow is mutable
-($\MBORROW$) or immutable ($\IBORROW$). If $x$ is already borrowed,
+\emph{borrow annotation} $\BORROW$ indicates whether the borrow is exclusive
+($\MBORROW$) or shared ($\IBORROW$). If $x$ is already borrowed,
 then we need to use the reborrow expression $\reborrow{x}$.
 %
 A region $\region{\Sone x\BORROW}{e}$ is annotated with its nesting $n$, the variable $x$ that may be borrowed in $e$, and the kind of borrow $\BORROW$.
@@ -319,7 +319,7 @@ asymmetric. It must follow the order of execution from left to right,
 which means that a resource can be used first as a borrow on the left
 and then later as a full resource on the right. The {\sc Susp} rule
 works with a full resource while the {\sc SuspB}
-rule splits off an immutable suspended binding from a borrow.
+rule splits off an shared suspended binding from a borrow.
 %
 Splitting applies whenever an
 expression has multiple subexpressions:  pairs, function applications,

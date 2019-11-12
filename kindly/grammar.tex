@@ -11,8 +11,8 @@
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
   % |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
   \htag{Borrows}
-  \BORROW ::=& \ \IBORROW \tag{Immutable borrow} \\
-  |&\ \MBORROW \tag{Mutable borrow}\\
+  \BORROW ::=& \ \IBORROW \tag{Shared borrow} \\
+  |&\ \MBORROW \tag{Exclusive borrow}\\
   \htag{Match Specification}
   \etransfm ::=&\ \text{id} \tag{Normal match} \\
   |&\ \&^{\BORROW} \tag{Borrow match}\\

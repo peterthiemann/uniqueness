@@ -77,8 +77,8 @@
   environment $\VEnv = (\Active\VEnv, \MutableBorrows\VEnv,
   \ImmutableBorrows\VEnv, \Suspended\VEnv)$ as a quadruple
   consisting of the active entries in $\Active\VEnv$ and the
-  entries for mutable borrows in $\MutableBorrows\VEnv$ and for
-  immutable borrows in $\ImmutableBorrows\VEnv$, and suspended entries
+  entries for exclusive borrows in $\MutableBorrows\VEnv$ and for
+  shared borrows in $\ImmutableBorrows\VEnv$, and suspended entries
   in $\Suspended\VEnv$. The
   suspended entries cannot be used directly, but they can be activated
   by borrowing.
@@ -400,7 +400,7 @@ resource.
     $\Loc\in\Perm_1'$.
 
     If  $n = \MultiNumber\Loc{\MutableBorrows{\Theta_2}}>0$,
-    then $\Loc$ is affine as it is a mutable borrow and
+    then $\Loc$ is affine as it is a exclusive borrow and
     $\Loc\in\Perm_1'$ by analogous argument.
 
     If  $n = \MultiNumber\Loc{\ImmutableBorrows{\Theta_2}}>0$,
@@ -696,7 +696,7 @@ resource.
     $\Loc\in\Dom\Store$,
     $\Store' (\Loc) = \Store (\Loc)$
     and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1'$.
-    This set can only be affected if $\rho'$ is an immutable
+    This set can only be affected if $\rho'$ is an shared
     borrow. But in this case, $\rho'$ is not reachable from
     $\ImmutableBorrows\VEnv$ so that the conclusion holds.
   \item Resources are not affected by this evaluation rule:

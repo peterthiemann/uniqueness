@@ -45,8 +45,8 @@ and returns three sets: $S_l$ and $S_r$ indicates the variables
 that should be immediately enclosed by a region on the left and right
 subterms and $S$ indicates the set of the yet-to-be-enclosed variables.
 As an example, the rule \textsc{AnnotRegion-MutLeft} is applied
-when there is an immutable borrow and a mutable borrow. In that case, a
-region is created to enclose the immutable borrow, while the mutable
+when there is an shared borrow and a exclusive borrow. In that case, a
+region is created to enclose the shared borrow, while the exclusive
 borrow is left to be closed later. This is coherent with the rules
 for environment splitting and suspended bindings from \cref{sdtyping}.
 %

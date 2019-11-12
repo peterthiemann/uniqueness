@@ -78,7 +78,7 @@ ensured by programming conventions.
 
 Our work provides a solution to programmers in this situation. We
 propose an extended type system for ML-like languages that comes with
-linear and affine types, mutable and immutable borrows, but all that
+linear and affine types, exclusive and shared borrows, but all that
 integrated with full principal type inference, garbage collected data, and
 automatic placement of borrowing regions.
 
@@ -91,7 +91,7 @@ values and retain type inference, but the details are quite different.
 \begin{enumerate}
 \item LH's multiplicities are either linear or unrestricted whereas
   we also permit affine values.
-\item Our system supports mutable and immutable borrows, hence the
+\item Our system supports exclusive and shared borrows, hence the
   need for affinity.
 \item Our multiplicities are directly attached to the type of the
   value. For example, in our system the function type \lstinline/'a-{lin}>'b/
@@ -138,9 +138,9 @@ linear abstract type \lstinline/File.t/. A call like
 \lstinline/fopen "foo"/ returns a linear handle to a newly created
 file, which \emph{must} be released later on through \lstinline/close/
 as shown in \cref{fig:writing-files-example}. Failing to do so is a
-static type error.  To write to the file, we must take a (mutable)
+static type error.  To write to the file, we must take a (exclusive)
 borrow \lstinline/&!h/ of the handle and pass it to the
-\lstinline/write/ function. Mutable borrows are classified as affine:
+\lstinline/write/ function. Exclusive borrows are classified as affine:
 they must not be duplicated, but there is no requirement to use
 them. This affinity shows up in the annotation \lstinline/-{aff}>/ of the second arrow in
 the type of \lstinline/write/: a partial application like
