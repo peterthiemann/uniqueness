@@ -5,10 +5,11 @@ Paper #235 Kindly Bent to Free Us
 
 Review #235A
 ===========================================================================
+* Updated: 4 Oct 2019 1:48:51am AoE
 
 Overall merit
 -------------
-C. Weak Reject
+B. Weak Accept
 
 Reviewer expertise
 ------------------
@@ -30,6 +31,20 @@ Weaknesses
 
 Comments for author
 -------------------
+# Post-response update
+
+Thank you for the response, which somewhat addressed my concerns.  The typo on the region indices is an important one, but easy to fix.  And a revision of the paper absolutely must be clear that the input to Section 4's inference is an already-region-annotated program.
+
+I think the paper and response are a bit imprecise in describing principality of type inference.  I think my assertion in the original review that the type inference results in Section 4 are *relative* to a given region annotation is *correct*: the response states that Section 4 is assumed to apply to programs that have already had region constructs inserted with specific indices.  So this means Corollary 4.6 applies to an $e$ with a fixed (assumed-to-be-well-formed) set of regions already inserted.  This is fine, but is not the same thing as a proof that the *combination* of region insertion and inference per Section 4 is principal.
+
+Consider separate compilation.  If region insertion is added separately to two modules, it seems likely the case will arise where a higher order function f in module A receives a polymorphic type with certain kind constraints, and a function g in module B receives a type that would be compatible *except in the region indices* --- i.e., ignoring region indices passing g to f would be fine, but taking them into account it won't work, although f or g could have been given different indices that would have allowed the call to type check (I'm assuming the call doesn't appear in the source of module A or module B, but might occur in an additional client program).  Typically the point of principal type inference is to avoid this.  So counting region insertion as part of the inference process, I *don't* believe the whole process gives principal types; this is not implied by Corollary 4.6, and the reason is that the corollary is given for a fixed set of region indices, which may appear in region constraints.  I *do* believe that given a set of regions, the inference in Section 4.6 gives the principal typing with respect to those indices (this is what Corollary 4.6 actually proves).
+
+Note that this happens because the region indices given to programs are constant natural numbers, because picking concrete natural numbers for all region indices imposes unnecessary orderings between regions.  Other work has solved this sort of thing using variables rather than concrete numbers, and drawing the elements of the lattice from a *dense* total order (i.e., for any a and b, there is always some element c between them), which ensures both that nothing is fixed in an arbitrary place in the order, and that when calling universally quantified code, there is always a way to come up with a way to satisfy compatible constraints (because the order is dense, so the call side can "choose" elements of the dense order to be compatible with its local constraints, if it's logically possible).
+
+I *don't* think this is a major issue, but if the paper was to be accepted I'd push hard for requiring precision here (or clarity in case there's still something I'm missing).
+
+# Original Review
+
 I really, really *want* to accept this paper.  It's a great topic, and I love the approach.  Most of the paper is exceptionally well-written and clear, though I'm unsure how easy it would be for someone who hasn't worked with HM(X) to follow that part of the paper; I'll leave it to other reviewers to judge that.
 
 But I have significant questions about the handling of how region indices ensure borrows are appropriately scoped.  I suspect this is a matter of unclear exposition that could easily be corrected, rather than a true soundness issue, but without knowing for sure I can't yet recommend acceptance.  Good answers to my questions for the authors' response would lead me to upgrade my score, possibly significantly.
@@ -347,6 +362,7 @@ observation that goes back at least to Gan, Tov and Morrisett at LINEARITY 2014.
 
 Review #235D
 ===========================================================================
+* Updated: 19 Sep 2019 10:52:23pm AoE
 
 Overall merit
 -------------
@@ -389,6 +405,19 @@ Weaknesses
 
 Comments for author
 -------------------
+Small update after rebuttal (original review below):
+
+Thanks for your response. One small comment:
+
+> We strongly believe programming examples are essential to demonstrate and explain Affe's features, as highlighted in reviewer C's answer. We do agree that semantics and inference require more examples, one of which is already available in Appendix B.1.
+
+I of course agree that examples are generally useful.
+My comment was that in the examples you give, you should explain what they are intended to demonstrate or explain.
+Specifically, for your examples in Section 2, you should explain whether the examples are intended to demonstrate the general usefulness of affine types, or whether they are demonstrating some property that is unique to Affe.
+My understanding was the second, but I wasn't sure. 
+
+-- end of post-rebuttal update
+
 I find this paper technically very impressive.
 Affe seems very well-designed ML extension, offers a rather complete set of features (linear, affine types and borrowing, kinds expressing linearity and lifetime, polymorphism, kind polymorphism etc.).
 Additionally, the type inference is fully formalized, well-designed, and comes with soundness and completeness proofs.
