@@ -5,7 +5,7 @@
   }
   \and
   \inferrule[KArr]
-  { }
+  {}
   { \inferSK{C}{\E}{\tau_1 \tarr{k} \tau_2}{k} }
   \and
   \inferrule[KApp]
@@ -20,7 +20,7 @@
   { \inferSK{C}{\E}{\tapp{\tcon}{\Multi[j]{\tau}}}{\unif{k'}} }
   \and
   \inferrule[KBorrow]
-  { }{ \inferSK{C}{\E}{\borrowty{k}{\tau}}{k}}
+  {}{ \inferSK{C}{\E}{\borrowty{k}{\tau}}{k}}
 \end{mathpar}
 
 

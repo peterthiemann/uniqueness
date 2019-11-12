@@ -6,8 +6,9 @@
     \htag{Elaborated expressions}
     e &::= \dots \\
     &\mid \ilam{\Multi\kvar}{\Multi\tvar}Ckxe \tag{El. abstraction} \\
-    &\mid \ivar x {\Multi k} {\Multi\tau} \tag{El. application} \\
+    &\mid \ivar x {\Multi k} {\Multi\tau} \tag{Instantiation} \\
     &\mid \introPair[k]{e}{e} \tag{Tagged pairs}\\
+    &\mid \iapp{\Sp}{e}{e} \tag{El. application}\\
     \htag{Addresses}
     \Addr &::= \Multi\IBORROW\Multi\MBORROW\Loc \tag{Locations}
     % \\           &\mid \borrow{\Addr} \tag{Borrows}
