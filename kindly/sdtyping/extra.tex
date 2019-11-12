@@ -315,14 +315,14 @@ emitting the constraint ({\sc ConstrSD} and {\sc ConstrI}).
   \input{sdtyping/sd-splitting}
   \caption{Splitting ---
     environments $\lsplit C\E{\E_l}{\E_r}$;
-    inference $\bsplit C\E{\bm\E_l}{\bm\E_r}$;
-    binders $\bsplit Cb{\bm b_r}{\bm b_l}$}
+    inference $\bsplit C\E{\bm{\E_l}}{\bm{\E_r}}$;
+    binders $\bsplit Cb{\bm{b_r}}{\bm{b_l}}$}
   \label{fig:sd-splitting}
   \input{sdtyping/sd-borrowing}
   \caption{Borrowing ---
     environments $\lregion[n]{C}{x}{\E}{\E'}$;
-    inference $\bregion[\bm n]{C}{\bm x}{\E}{\bm\E'}$;
-    binders $\bregion[\bm n]{C}{\bm x}{b}{\bm b'}$}
+    inference $\bregion[\bm n]{C}{\bm x}{\E}{\bm{\E'}}$;
+    binders $\bregion[\bm n]{C}{\bm x}{b}{\bm{b'}}$}
   \label{fig:sd-borrowing}
   \input{sdtyping/sd-environments}
   \caption{Rewriting constraints on environments --- $\bm{\Cleq{\E}{k}}\Crewrite  C$}
@@ -344,7 +344,8 @@ $\Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}$.
 
 \begin{figure*}[hbtp]
   \input{sdtyping/sd-typing}
-  \caption{Syntax-directed typing rules}
+  \caption{Syntax-directed typing rules --
+    $\inferS{C}{\E}{e}{\tau}$}
   \label{fig:syntax-directed-typing}
 \end{figure*}
 

@@ -14,15 +14,22 @@
   { \inferSK{C}{\E}{\tau_1 \tarr{k} \tau_2}{k} }
   \and
   \inferrule[KApp]
-  { \forall j,\
-    \inferSK{C}{\E}{\tau_j}{k_j} \\
-    \inferSK{C}{\E}{\T{t}}{(\Multi[j]{k'}) \karr k} \\
-    \inferSS{C}{\E}{k_j}{k'_j}
+  { \inferSK{C}{\E}{\T{t}}{(\Multi[i]{k'}) \karr k} \\
+    \forall i \quad
+    \inferSK{C}{\E}{\tau_i}{k_i} \quad
+    \inferSS{C}{\E}{k_i}{k'_i}
   }
-  { \inferSK{C}{\E}{\tapp{t}{(\Multi[j]{\tau})}}{k} }
+  { \inferSK{C}{\E}{\tapp{t}{(\Multi[i]{\tau})}}{k} }
   \and
   \inferrule[KBorrow]
   { }{ \inferSK{C}{\E}{\borrowty{k}{\tau}}{k}}
+  \and
+  \inferrule[KPair]
+  { \forall i \quad
+    \inferSK{C}{\E}{\tau_i}{k_i} \quad
+    \inferSS{C}{\E}{k_i}{k}
+  }
+  { \inferSK{C}{\E}{\tyPair{\tau_1}{\tau_2}}{k} }
 \end{mathpar}
 
 
