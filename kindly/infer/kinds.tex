@@ -31,7 +31,7 @@
   \inferrule[KPair]
   { \forall i,\
     \inferK{(C_i,\unif_i)}{\E}{\tau_i}{k_i} \\
-    \kvar \text{ new} \\\\
+    \kvar \text{ fresh} \\\\
     (C,\unif) =
     \normalize
     {\Multi[i]{C} \Cand \Multi[i]{\Cleq{k_i}{\kvar}}}

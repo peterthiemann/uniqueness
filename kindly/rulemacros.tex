@@ -266,7 +266,7 @@
   \inferrule[Var$_I$]
   { \bvar{x}{\sigma}\in \E \\
     \sigma = \forall \kvar_i \forall (\tvar_j:k_j). \qual{C_x}{\tau} \\
-    \Multi[i]{\kvar'},\Multi[j]{\tvar'} \text{ new} \\\\
+    \Multi[i]{\kvar'},\Multi[j]{\tvar'} \text{ fresh} \\\\
     % \addlin{
     % \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{k_j}}{\tau}{k_\tau}
     % }\\
@@ -283,7 +283,7 @@
   \inferrule[Abs$_I$]
   { \tvar,
     %\kvar_\tvar,
-    \kvar\text{ new}\\
+    \kvar\text{ fresh}\\
     \inferW{\Sv_x}{(C',\unif')}
     {\E;\bvar{x}{\tvar}
       % ;\bvar{\tvar}{\kvar_\tvar}
@@ -298,7 +298,7 @@
 }
 \newcommand\ruleIApp{%
   \inferrule[App$_I$]
-  { \tvar,\kvar\text{ new}\\
+  { \tvar,\kvar\text{ fresh}\\
     \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
     \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\
     \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
@@ -340,7 +340,7 @@
 }
 \newcommand\ruleIMatch{%
   \inferrule[MatchPair$_I$]
-  { \tvar,\kvar,\tvar',\kvar'\text{ new}\\
+  { \tvar,\kvar,\tvar',\kvar'\text{ fresh}\\
     \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
     \E' = \E;
     \bvar{x}{\transfm{\tvar}};\bvar{\tvar}{\kvar};
@@ -361,7 +361,7 @@
 }
 \newcommand\ruleIBorrow{%
   \inferrule[Borrow$_I$]
-  { \kvar \text{ new}\\
+  { \kvar \text{ fresh}\\
     \inferW{\Sv}{(C,\unif)}{\E}{x}{\tau} \\
     % k = \operatorname{kind}(\iota)\\
   }
