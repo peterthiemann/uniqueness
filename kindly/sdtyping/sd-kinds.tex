@@ -21,6 +21,13 @@
   \and
   \inferrule[KBorrow]
   {}{ \inferSK{C}{\E}{\borrowty{k}{\tau}}{k}}
+  \and
+  \inferrule[KPair]
+  { \forall i \quad
+    \inferSK{C}{\E}{\tau_i}{k_i} \quad
+    \inferSS{C}{\E}{k_i}{k}
+  }
+  { \inferSK{C}{\E}{\tyPair{\tau_1}{\tau_2}}{k} }
 \end{mathpar}
 
 

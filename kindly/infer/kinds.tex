@@ -3,7 +3,7 @@
   { \bvar{\tvar|\T t}{
       \forall \kvar_i.\ \qual{D}{(\Multi[j]{k}) \karr k}}
     \in \E \\
-    \Multi[i]{\kvar'} \text{ new} \\\\
+    \Multi[i]{\kvar'} \text{ fresh} \\\\
     (C,\unif) =
     \normalize{D}{\subst{\kvar_i}{\kvar'_i}{}_i}
   }
@@ -27,6 +27,17 @@
     {\unif_0\meet \Multi[j]{\unif}}
   }
   { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tapp{\tcon}{\Multi[j]{\tau}}}{\unif k} }
+  \and
+  \inferrule[KPair]
+  { \forall i,\
+    \inferK{(C_i,\unif_i)}{\E}{\tau_i}{k_i} \\
+    \kvar \text{ new} \\\\
+    (C,\unif) =
+    \normalize
+    {\Multi[i]{C} \Cand \Multi[i]{\Cleq{k_i}{\kvar}}}
+    {\Multi[i]{\unif}}
+  }
+  { \inferK{(C,\unif)}{\E}{\tyPair{\tau_1}{\tau_2}}{\unif\kvar} }
 \end{mathpar}
 
 

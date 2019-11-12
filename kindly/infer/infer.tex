@@ -48,7 +48,7 @@ In \cref{sdtyping}, we used relations to split environments in two and to
 transform suspended bindings into borrows inside a region.
 These relations take as argument a constraint which validates
 the transformations.
-In the context of inference, we define new judgements which \emph{infers}
+In the context of inference, we define new judgements which \emph{infer}
 the constraints.
 \begin{itemize}[leftmargin=*]
 \item $\bsplit{C}{\Sv}{\bm{\Sv_1}}{\bm{\Sv_2}}$.
@@ -64,7 +64,7 @@ the constraints.
   a suspended binding. We also return $C$, a set of constraints that must
   be respected.
   Again, the relation is total and non-ambiguous for any given $\Sv'$ and $x$,
-  and uses the same rules as the one presented in \cref{sdtyping:regions}.
+  and uses the rules presented in \cref{sdtyping:regions}.
 \end{itemize}
 
 The relations used for syntax-directed typing can trivially be defined
@@ -137,10 +137,8 @@ environment $\Sv_x$. Just like in the syntax-directed type system,
 we introduce the constraint
 $\Cleq{\Sv\Sdel{x}}{\kvar}$ which properly accounts for captures in
 the body of the lambda expression. We also introduce the constraint
-$\Weaken_{\bvar{x}{\sigma}}(\Sv)$. If $x$ was used $e$, $x$ is present
-in $\Sv$ and this constraint is empty. Otherwise, if $x$ is
-\emph{not} present in $\Sv$, its type should not have a linear
-kind, which is enforced by the constraints $\Cleq{\sigma}{\kaff_\infty}$.
+$\Weaken_{\bvar{x}{\sigma}}(\Sv)$, which is false only if weakening
+is necessary but impossible due to linearity.
 The $\Weaken$ constraint is introduced at each binding point in the program
 such as let-bindings and pattern matching.
 
@@ -185,8 +183,8 @@ We then collect all constraints and normalize them.
 
     \inferrule{}
     {\generalize{C}{\E}{\tau} =
-      (\Cproj{\Multi{\kvar},\Multi{\tvar}}{C},
-      \forall \Multi{\kvar},\Multi{\tvar}.\qual{C}{\tau})\\
+      (\Cproj{(\Multi{\kvar},\Multi{\tvar})}{C},
+      \forall (\Multi{\kvar},\Multi{\tvar}).\qual{C}{\tau})\\
       \text{ where}\quad
       \Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}
     }
@@ -216,7 +214,7 @@ generalization. The definition is provided in \cref{rule:infer:let}.
 The type scheme $\schm$ is created by quantifying over all the appropriate
 free variables and the current constraints.
 The generated constraint $C_\schm$ uses a new projection operator,
-$\Cproj{\tvar}{D}$, which
+$\Cproj{x}{D}$ where $x$ can be either a type or a kind variable, which
 allow the creation of local variables inside the constraints.
 This allows us to encapsulate all the quantified variables in the global constraints.
 It also reflects the fact that there
@@ -302,7 +300,7 @@ details).
 \end{figure*}
 
 We define the set of solved formed
-$\mathcal S$ as the set of constraints $\CL$ quantified by $\equivC$.
+$\mathcal S$ as the quotient set of $\CL$ by $\equivC$.
 We will show later that such constraints are in fact only composed of
 kind inequalities, and thus correspond to the syntactic constraints
 used in type and kind schemes.
@@ -325,7 +323,7 @@ More precisely, we apply the following steps:
 \begin{enumerate}
 \item Solve all type equality constraints through Herband unification and
   gather all existential quantifications at the front of the constraint.
-  We obtain a constraint $C^k = \exists \kvar_i,\ \Cleq{k_j}{k'_j}_j$ and
+  We obtain a constraint $C^k = \exists \Multi\kvar,\ \Cleq{k_j}{k'_j}_j$ and
   a substitution $\unif_\tau$.
 
   We write $\mathcal R$ for the relation $\Cleq{k_j}{k'_j}_j$,
@@ -362,7 +360,7 @@ More precisely, we apply the following steps:
   \end{itemize}
   Note that this step will also detect all unsatisfiable constraints.
 \item Take the transitive closure of $\mathcal R$.
-\item Remove all the vertices corresponding to the kind variables $\kvar_i$
+\item Remove all the vertices corresponding to the kind variables $\Multi\kvar$
   that are existentially quantified in $C^k$.
 \item Take the transitive reduction of $\mathcal R$.
 \item Remove the extremums of $\mathcal L$ and the edges of $(\leq)$
@@ -453,7 +451,7 @@ For this, we need first to provide a few additional definitions.
 \end{definition}
 
 \begin{definition}[Instance relation]
-  Given a constraints $C$ and two schemes
+  Given a constraint $C$ and two schemes
   $\schm = \forall \Multi\tvar. \qual{D}{\tau}$ and
   $\schm' = \forall \Multi\tvar'. \qual{D'}{\tau'} $.
   Then $\entail{C}{\schm \preceq \schm'}$

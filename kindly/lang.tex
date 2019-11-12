@@ -11,7 +11,7 @@ For ease of presentation, we keep the language as simple as possible.
   the borrow of a borrow).
 \item Regions are assumed to be explicit in the code. (But we present
   an algorithm to infer them in \cref{regionannot}.)
-\item Regions are identified using de Bruijn-indexing instead of region
+\item Regions are identified using nesting levels instead of region
   variables.
 \end{itemize}
 
@@ -479,7 +479,7 @@ the address of their actual content.
 
 A value environment $\VEnv$ is a mapping from variables to results.
 
-A storable $W$ is a particular object that can be stored. There are five
+A storable $w$ is a particular object that can be stored. There are five
 kinds of storable. A poly closure represents a polymorphic
 function. It consists of an environment and the components of an
 elaborated abstraction. Similarly, a closure represents a monomorphic
