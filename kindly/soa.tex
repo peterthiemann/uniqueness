@@ -34,7 +34,7 @@ does not admit a most general type for function composition.
 Furthermore, since it is based on System F, it does not admit
 principal type inference.
 
-Quill~\citep{DBLP:conf/icfp/Morris16} is an Haskell-like language with affine
+Quill~\citep{DBLP:conf/icfp/Morris16} is a Haskell-like language with affine
 types through the use of qualified types.
 Quill does not expose a kind language, but
 uses typeclass-like mechanism and annotation on arrows.
@@ -57,7 +57,7 @@ affine types and ML modules, similar to \lang.
 Their system often relies on existential types to track the identity
 of objects. For instance
 \lstinline/Array.create : int -> 'a -> \E 'b. ('a, 'b) array/ where
-\lstinline/'b/ uniquely identify of the array.
+\lstinline/'b/ uniquely identify the array.
 Due to the reliance on existentials, Alms does not support complete type inference.
 Furthermore, Alms does not support borrow and often rely
 on manual passing of capabilities.
@@ -106,7 +106,7 @@ Most relevant to \lang:
   placing the annotation on, e.g., the IO monad.
   \lang follows System F\degree, Quill, and Alms, all of which support
   resource handling in direct style, where types themselves are
-  described as affine or linear. (Or course, continuation-passing
+  described as affine or linear. (Of course, continuation-passing
   style is also supported.)
   We expect that the direct approach eases modular reasoning about linearity.
   In particular, using abstraction through modules,
@@ -180,7 +180,7 @@ more expressivity at the cost of inference.
 \lang relies on constrained types
 to introduce the kind inequalities required for linear types. In
 particular, we use HM(X)~\citep{DBLP:journals/tapos/OderskySW99} which
-allows to use constrained types in an ML-like language with complete
+allows us to use constrained types in an ML-like language with complete
 type inference.
 HM(X) has been shown to be compatible with subtyping,
 bounded quantification and existentials~\citep{DBLP:conf/icfp/Simonet03},
@@ -198,7 +198,7 @@ The subtyping discipline used in \lang is very similar
 to structural subtyping, where the only subtyping (or here, subkinding)
 is at the leaves.
 Such discipline is known to be friendly to inference and has been used in many
-contexts, including OCaml itself, and has been combined
+contexts, including OCaml, and has been combined
 with constraints~\citep{DBLP:journals/tapos/OderskySW99,DBLP:conf/sas/TrifonovS96}.
 In particular, Flowcaml~\citep{DBLP:conf/popl/PottierS02}
 extends OCaml with security levels forming a lattice and supports type inference.
@@ -208,7 +208,7 @@ notions to solve lattice-based constraints, which we partially use
 in our constraint solving algorithm. Our main contribution
 is the design of a kind language specialized for checking linearity
 and sufficiently simple to make
-all simplification rules complete, which allows to keep type signatures simple.
+all simplification rules complete, which allows us to keep type signatures simple.
 
 
 %%% Local Variables:

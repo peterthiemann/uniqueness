@@ -8,14 +8,14 @@ Session typing \cite{Honda1993,DBLP:conf/esop/HondaVK98} is a type
 discipline for checking protocols statically. A session type is
 ascribed to a communication channel and describes
 a sequence of interactions. For instance, the type
-\lstinline{!int.!int.?int.end} specifies a protocol
+\lstinline{int!int!int?end} specifies a protocol
 where the program must send two integers, receive an integer, and then
 close the channel.
 %
 In this context, channels must be used linearly, because every use of
 a channel ``consumes'' one interaction and  changes the type of the
 channel. That is, after sending two integers on the channel,
-the remaining channel has type \lstinline{?int.end}.
+the remaining channel has type \lstinline{int?end}.
 
 Here are some standard type operators for session types \SType:
 \begin{center}

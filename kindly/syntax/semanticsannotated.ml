@@ -288,8 +288,8 @@ let rec eval
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 gamma_2 i' e_2 in
      let w = STPAIR (k, r_1, r_2) in
-     let (ell', delta') = salloc delta w in
-     Ok (delta_2, pi_2 <+> !$ ell', RADDR !$ ell')
+     let (ell', delta') = salloc delta_2 w in
+     Ok (delta', pi_2 <+> !$ ell', RADDR !$ ell')
   (**)
   (* rule smatch *)
   | Match (x, y, e_1, e_2, sp) ->
