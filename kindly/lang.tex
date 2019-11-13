@@ -22,6 +22,12 @@ and a dynamics that is linearity- and resource-aware (\cref{sec:sem}).
 \subsection{Syntax}
 \label{syntax}
 
+\begin{figure}[!tb]
+  \input{grammar}
+  \caption{Syntax}
+  \label{grammar}
+\end{figure}
+
 
 \Cref{grammar} defines the syntax of \lang. Expressions are as usual
 in an ML-like language.  The novel aspects are match
@@ -100,13 +106,6 @@ in $\Multi[i]\tau$.
 % $\tydecl{t}{\kschm}{K}{\tau}$, introduce both a new type constructor $\T{t}$ and
 % a data constructor $K$.
 
-\begin{figure*}[!tb]
-  \centering
-  \input{grammar}
-  \caption{Syntax}
-  \label{grammar}
-\end{figure*}
-
 \subsection{Typing}
 \label{sdtyping}
 
@@ -144,19 +143,19 @@ $\kvar$ must be unrestricted, but can be local to a region.
 Kinds form a lattice with an ordering that implements two principles
 (see \cref{sdtyp:lattice}). First, unrestricted values may be used
 where affine ones are expected and affine ones are less restricted
-than linear ones as reflected in \TirName{Lat-UA} and \TirName{Lat-AL}.
+than linear ones as reflected in \TirName{Lat-UAL}.
 Second, values usable at level $n$ may be used at any more deeply
-nested level $n'$ (where $n\le\infty$ for any $n$) as defined in the \TirName{Lat-X-Level} axioms.
+nested level $n'$ (where $n\le\infty$ for any $n$) as defined in the \TirName{Lat-Level} axioms.
 
 Constraints are conjunctions of inequality constraints over this kind
 lattice. In most uses, a constraint gives an upper or lower bound for
 a kind variable or it relates two kind variables.
 
-\begin{figure*}[tp]
+\begin{figure}[tp]
   \input{infer/lattice}
   \caption{Lattice ordering -- $k \lk_\Lat k'$}
   \label{sdtyp:lattice}
-\end{figure*}
+\end{figure}
 
 
 \subsubsection{Environments and bindings}
