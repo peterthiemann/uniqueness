@@ -257,6 +257,30 @@
   { \inferS{C}{\E}{x}{\borrowty{k}{\tau}} }
   { \inferS{C}{\E}{\reborrow{x}}{\borrowty{k}{\tau}} }
 }
+\newcommand\ruleSDCreate{
+  \inferrule[Create]
+  { \inferSK{C}{\E}{\tau}{k} \\
+    \entail C {\Cleq k {\kun_0}} }
+  { \inferS{C}{\E}{\create}{\tau \to \tapp\tres\tau } }
+}
+\newcommand\ruleSDObserve{
+  \inferrule[Observe]
+  { \inferSK{C}{\E}{\tau}{k} \\
+    \entail C {\Cleq k {\kun_0}} }
+  { \inferS{C}{\E}{\observe}{\borrowty[\IBORROW]{k'}{\tapp\tres\tau} \to \tau} }
+}
+\newcommand\ruleSDUpdate{
+  \inferrule[Update]
+  { \inferSK{C}{\E}{\tau}{k} \\
+    \entail C {\Cleq k {\kun_0}} }
+  { \inferS{C}{\E}{\update}{\borrowty[\MBORROW]{k'}{\tapp\tres\tau} \to \tau \tarr{\kaff} \tunit } }
+}
+\newcommand\ruleSDDestroy{
+  \inferrule[Destroy]
+  { \inferSK{C}{\E}{\tau}{k} \\
+    \entail C {\Cleq k {\kun_0}} }
+  { \inferS{C}{\E}{\destroy}{\tapp\tres\tau \to \tunit} }
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Inference

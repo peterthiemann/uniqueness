@@ -34,7 +34,7 @@
     {\E}{\letin{x}{e_1}{e_2}}{\tau_2} }
   \and
   \inferrule[MatchPair]
-  { 
+  {
     \inferS{C}{\E_1}{e_1}{\transfm{\tyPair{\tau_1}{\tau'_1}}} \\
     \inferS{C}
     {\E_2;
@@ -46,6 +46,14 @@
   { \inferS{C}
     {\E}{\matchin{x,x'}{e_1}{e_2}}{\tau_2} }
   \and
+  \ruleSDCreate
+  \and
+  \ruleSDObserve
+  \and
+  \ruleSDUpdate
+  \and
+  \ruleSDDestroy
+  % \and
   %
   %
   % \inferrule[Elim]
