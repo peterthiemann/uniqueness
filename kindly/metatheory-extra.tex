@@ -154,21 +154,20 @@ for addresses, results, storables, and environments.
                                       \RS\Store r \\
   \RS\Store\Addr &= \{ \Addr \}  \\
   \RS\Store c &= \{ \} \\
-  \RS\Store{\text{STPOLY}(\VEnv, \silam
-  {\Multi\kvar}{\Multi\tvar}Ckx{e})} &=
+  \RS\Store{\StPClosure \VEnv {\Multi\kvar} C k x e} &=
                                        \RS\Store\VEnv
   \\
-  \RS\Store{\text{STCLOS}(\VEnv, \slam[k]xe)} &=
+  \RS\Store{\StClosure \VEnv k x e} &=
                                                    \RS\Store\VEnv
   \\
-  \RS\Store{\text{STPAIR}\spair[k]{r_1}{r_2}} &=
+  \RS\Store{\StPair k {r_1} {r_2}} &=
                                                    \RS\Store{r_1}
                                                    \cup \RS\Store{r_2}
   \\
-  \RS\Store{\text{STRSRC}(r)} &=
+  \RS\Store{\StRes r} &=
                                    \RS\Store r
   \\
-  \RS\Store{\blob} &= \{ \}
+  \RS\Store{\StFreed} &= \{ \}
 \end{align*}
 
 This set is closed transitively by store lookup: We define the set
