@@ -27,11 +27,11 @@
     \VEnv &::= \Eempty \mid \VEnv( x \mapsto r)
             \\
     \htag{Storables}
-    w &::= \text{STPOLY}(\VEnv, \silam {\Multi\kvar}{\Multi\tvar}Ckx{e}) \tag{Poly Closures}\\
-    &\mid \text{STCLOS}(\VEnv, \slam[k]xe) \tag{Closures} \\
-    &\mid \text{STPAIR}\spair[k]rr \tag{Pairs} \\
-    &\mid \text{STRSRC}(r) \tag{Resources} \\
-    &\mid \blob \tag{Freed Resource}
+    w &::= \StPClosure \VEnv {\Multi\kvar} C k x e \tag{Poly Closures}\\
+    &\mid \StClosure \VEnv k x e \tag{Closures} \\
+    &\mid \StPair k r r \tag{Pairs} \\
+    &\mid \StRes r \tag{Resources} \\
+    &\mid \StFreed \tag{Freed Resource}
     \\
     \htag{Store}
     \Store &::= \Eempty \mid \Store( \Loc \mapsto w)

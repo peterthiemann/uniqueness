@@ -55,9 +55,6 @@
 \newcommand\LAM[1]{\Lambda #1 .}
 \newcommand\APP[2]{#1[ #2]}
 
-\newcommand\spair[3][{}]{(#1, {#2},{#3})}
-\newcommand\slam[3][{}]{#1,#2,#3}
-\newcommand\silam[5]{#1, #3, #4,#5,}
 \newcommand\ilam[5]{\lambda[#1 \mid #3 \Rightarrow #4]#5.}
 \newcommand\iapp[3]{{#2}\langle{#1}\rangle{#3}}
 %{\lambda[#1; #2 \mid #3 \Rightarrow #4]#5.}
@@ -175,8 +172,6 @@
 \newcommand\Addr\rho           %addresses
 \newcommand\Loc\ell             %locations
 
-\newcommand\blob\bullet
-
 \newcommand\Multi[2][{}]{\overline{#2_{#1}}}
 
 %% Misc
@@ -190,6 +185,17 @@
 \newcommand\Store\delta % {s}
 \newcommand\SE\Delta            % store typing
 \newcommand\Perm\pi
+
+% \newcommand\StClosure[4]{(#1, \lam[#2]{#3} #4)}
+% \newcommand\StPClosure[6]{(#1, \ilam{#2}{}{#3}{#4}{#5} #6)}
+% \newcommand\StPair[3]{\introPair[#1]{#2}{#3}}
+% \newcommand\StRes[1]{\mathtt{res}(#1)}
+% \newcommand\StFreed{\bullet}
+\newcommand\StClosure[4]{\text{STCLOS}(#1, #2, #3, #4)}
+\newcommand\StPClosure[6]{\text{STPOLY}(#1, #2, #3, #4, #5, #6)}
+\newcommand\StPair[3]{\text{STPAIR}(#1, #2, #3)}
+\newcommand\StRes[1]{\text{STRSRC}(#1)}
+\newcommand\StFreed{\bullet}
 
 \newcommand\TimeOut{\operatorname{TimeOut}}
 \newcommand\Ok[1]{\operatorname{Ok} (#1)}
