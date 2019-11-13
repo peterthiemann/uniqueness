@@ -139,7 +139,7 @@
     \Store, \Perm, \VEnv \vdash e
     \Downarrow^{#1} \Ok{ \Store', \Perm', r}\\
     \Loc\notin \Dom{\Store'} }{
-    \Store, \Perm,\VEnv \vdash \create e
+    \Store, \Perm,\VEnv \vdash \app\create e
     \Downarrow^{#1+1} \Ok{\Store'[\Loc \mapsto \rss{r}], \Perm'\Sadd\Loc, \Loc}
   }
 }
@@ -150,7 +150,7 @@
     \Downarrow^{#1} \Ok{ \Store', \Perm', \Loc} \\
     \Matches{\rss{r}}{\Store' (\Loc)}
   }{
-    \Store, \Perm, \VEnv \vdash \destroy e \Downarrow^{#1+1}
+    \Store, \Perm, \VEnv \vdash \app\destroy e \Downarrow^{#1+1}
     \Ok{\Store'[\Loc\mapsto \blob], \Perm'\Sdel\Loc, ()}
   }
 }
@@ -164,7 +164,7 @@
     \Addr \in \Perm_1 \\
     \Matches{\rss{r}}{\Store_1 (\Loc)}
   }{
-    \Store, \Perm, \VEnv \vdash \observe e
+    \Store, \Perm, \VEnv \vdash \app\observe e
     \Downarrow^{#1+1} \Ok{ \Store_1, \Perm_1, r}
   }
 }
@@ -181,7 +181,7 @@
     \Matches{\rss{r}}{\Store_2 (\Loc)} \\
     \Store_2' = \Store_2[\Loc \mapsto \rss{r_2}]
   }{
-    \Store, \Perm, \VEnv \vdash \update {e_1} {e_2}
+    \Store, \Perm, \VEnv \vdash \app{\app\update{e_1}}{e_2}
     \Downarrow^{#1+1} \Ok{\Store_2', \Perm_2 \Sdel{\Addr},  ()}
   }
 }
