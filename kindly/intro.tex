@@ -83,25 +83,25 @@ integrated with full principal type inference, garbage collected data, and
 automatic placement of borrowing regions.
 
 The most closely related contenders in this design space are Linear Haskell
-\cite{DBLP:journals/pacmpl/BernardyBNJS18}, henceforth called LH,
+\cite{DBLP:journals/pacmpl/BernardyBNJS18}, henceforth LH,
 Quill \cite{DBLP:conf/icfp/Morris16}, and ALMS \cite{DBLP:conf/popl/TovP11}.
 Compared to LH, the goals and means are
 similar as both systems permit abstraction over the number of uses of
-values and retain type inference, but the details are quite different.
+values and retain type inference, but the details are different.
 \begin{enumerate}
 \item LH's multiplicities are either linear or unrestricted whereas
-  we also permit affine values.
-\item Our system supports exclusive and shared borrows, hence the
-  need for affinity.
-\item Our multiplicities are directly attached to the type of the
-  value. For example, in our system the function type \lstinline/'a-{lin}>'b/
+  we also distinguish affine values.
+\item \lang{} supports two flavors of borrowing: affine (exclusive,
+  mutable) and unrestricted (shared, immutable) borrows.
+\item Multiplicities are directly attached to the type of the
+  value. For example, in \lang{} the function type \lstinline/'a-{lin}>'b/
   denotes the type of a \emph{single-use function} that can be called
   just once, whereas the multiplicities in LH choose
   between $\alpha\to\beta$ and $\alpha \multimap\beta$ where the
   latter is a function that promises to \emph{use its argument exactly
     once}.
-\item Similar to Quill, we make use of multiplicity contraints. We
-  rely on kind subsumption to simplify the inferred types.
+\item Similar to Quill, we make use of multiplicity contraints. Kind
+  subsumption in \lang{} helps simplify inferred types.
 \end{enumerate}
 See \cref{sec:related-work} for further in-depth discussion of these
 and other related works.
@@ -136,21 +136,21 @@ As a first, well-known example we consider a simplified API for
 writing files shown in \cref{fig:writing-files-api}.  It introduces a
 linear abstract type \lstinline/File.t/. A call like
 \lstinline/fopen "foo"/ returns a linear handle to a newly created
-file, which \emph{must} be released later on through \lstinline/close/
+file, which \emph{must} be released later on with \lstinline/close/
 as shown in \cref{fig:writing-files-example}. Failing to do so is a
-static type error.  To write to the file, we must take a (exclusive)
+static type error.  To write to the file, we must take an exclusive
 borrow \lstinline/&!h/ of the handle and pass it to the
-\lstinline/write/ function. Exclusive borrows are classified as affine:
+\lstinline/write/ function. Exclusive borrows are affine:
 they must not be duplicated, but there is no requirement to use
 them. This affinity shows up in the annotation \lstinline/-{aff}>/ of the second arrow in
 the type of \lstinline/write/: a partial application like
 \lstinline/write &!h/ captures the affine borrow and hence the
-resulting function must also be handled in an affine way. That is, it
-would be an error to write
+resulting function is also affine. It
+would be an error to use the affine closure twice as in
 \begin{lstlisting}
 let w = File.write &!h in w "Hello "; w "world!" (*error*)
 \end{lstlisting}
-as we would be using the affine closure twice. The remaining arrows in
+The remaining arrows in
 the API are unrestricted and we write \lstinline/->/ instead of the
 explicitly annotated \lstinline/-{un}>/.
 
@@ -194,7 +194,7 @@ that we would expect its annotation to be the least upper bound
 $\kappa \sqcup \kappa_1$. Thanks to subsumption of multiplicities, it
 is sufficient to assume $\kappa \le \kappa_1$ and \lstinline/g/'s
 actual multiplicity gets subsumed to $\kappa_1$. This constraint
-simplification technique is built into our type inference algorithm. Again, the printout
+simplification is part of our type inference algorithm. Again, the printout
 of the type scheme only mentions the required constraint
 $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 \kappa_1$ as well as the kinds of \lstinline/'a,'b,'c/.
