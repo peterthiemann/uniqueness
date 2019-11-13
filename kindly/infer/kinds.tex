@@ -1,14 +1,14 @@
 \begin{mathpar}
-  \inferrule[KVar|KCons]
-  { \bvar{\tvar|\T t}{
-      \forall \kvar_i.\ \qual{D}{(\Multi[j]{k}) \karr k}}
-    \in \E \\
-    \Multi[i]{\kvar'} \text{ fresh} \\\\
-    (C,\unif) =
-    \normalize{D}{\subst{\kvar_i}{\kvar'_i}{}_i}
-  }
-  { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tvar|\T t}{\unif ((\Multi[j]{k}) \karr k)} }
-  \and
+  % \inferrule[KVar|KCons]
+  % { \bvar{\tvar|\tcon}{
+  %     \forall \kvar_i.\ \qual{D}{(\Multi[j]{k}) \karr k}}
+  %   \in \E \\
+  %   \Multi[i]{\kvar'} \text{ fresh} \\\\
+  %   (C,\unif) =
+  %   \normalize{D}{\subst{\kvar_i}{\kvar'_i}{}_i}
+  % }
+  % { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tvar|\tcon}{\unif ((\Multi[j]{k}) \karr k)} }
+  % \and
   \inferrule[KArr]
   { }
   { \inferK{(\Ctrue,\emptyset)}{\E}{\tau_1 \tarr{k} \tau_2}{k} }
@@ -16,17 +16,9 @@
   \inferrule[KBorrow]
   { }{ \inferK{(\Ctrue,\emptyset)}{\E}{\borrowty{k}{\tau}}{k}}
   \and
-  \inferrule[KApp]
-  { \forall j,\
-    \inferK{(C_j,\unif_j)}{\E}{\tau_j}{k'_j} \\
-    \inferK{(C_0,\unif_0)}{\E}{\T t}{(\Multi[j]{k}) \karr k}
-    \\\\
-    (C,\unif) =
-    \normalize
-    {C_0\Cand \Multi[j]{C} \Cand \Multi[j]{\Ceq{k'_j}{k_j}}}
-    {\unif_0\meet \Multi[j]{\unif}}
-  }
-  { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tapp{\tcon}{\Multi[j]{\tau}}}{\unif k} }
+  \inferrule[KVar]
+  { \bvar{\tvar}{k} \in \E }
+  { \inferK{(\Ctrue,\emptyset)}{\E}{\tvar}{k} }
   \and
   \inferrule[KPair]
   { \forall i,\
@@ -38,6 +30,22 @@
     {\Multi[i]{\unif}}
   }
   { \inferK{(C,\unif)}{\E}{\tyPair{\tau_1}{\tau_2}}{\unif\kvar} }
+  \and
+  \inferrule[KApp]
+  { \bvar{\T{\tcon}}{
+      \forall \Multi[i]\kvar.\ \qual{C_0}{(\Multi[j]{k'}) \karr k'}}
+    \in \E \\
+    \Multi[i]{\kvar'} \text{ fresh} \\
+    \unif_0 = \subst{\Multi[i]\kvar}{\Multi[i]{\kvar'}}{} \\
+    \forall j,\
+    \inferK{(C_j,\unif_j)}{\E}{\tau_j}{k'_j} \\
+    \\\\
+    (C,\unif) =
+    \normalize
+    {C_0\Cand \Multi[j]{C} \Cand \Multi[j]{\Ceq{k'_j}{k_j}}}
+    {\unif_0\meet \Multi[j]{\unif}}
+  }
+  { \inferK{(C,\unif|_{\fv{\E}})}{\E}{\tapp{\tcon}{\Multi[j]{\tau}}}{\unif k} }
 \end{mathpar}
 
 

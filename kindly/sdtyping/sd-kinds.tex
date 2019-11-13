@@ -12,10 +12,11 @@
   { \bvar{\T{\tcon}}{
       \forall \Multi[i]\kvar.\ \qual{D}{(\Multi[j]{k'}) \karr k'}}
     \in \E \\
-    \inferSK{C}{\E}{\Multi[j]{\tau}}{\Multi[j]{k}} \\
     \unif = \subst{\Multi[i]\kvar}{\Multi[i]k}{} \\
     \entail C {\unif D} \\
-    \inferSS{C}{\E}{\Multi[j]k}{\unif{\Multi[j]{k'}}}
+    \forall j\quad
+    \inferSK{C}{\E}{\tau_j}{k_j}\quad
+    \inferSS{C}{\E}{k_j}{\unif{k'_j}}
   }
   { \inferSK{C}{\E}{\tapp{\tcon}{\Multi[j]{\tau}}}{\unif{k'}} }
   \and
