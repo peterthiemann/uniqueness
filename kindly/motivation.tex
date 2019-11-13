@@ -1,15 +1,18 @@
 \section{Linearity, Affinity, and Borrows at Work}
 \label{motivation}
 
+\lang{} is amenable to a functional resource-passing style as it is
+common in functional encodings of session types (e.g.,
+\cite{DBLP:journals/jfp/Padovani17}; see also
+\cref{sec:session-linearity} in the supplement). But it really shines 
+when manipulating mutable resources like buffers or connection pools
+using an imperative programming style. 
+%
+To support this usage pattern of linearity, we rely on
+the notion of borrowing \cite{DBLP:conf/popl/BoylandR05}.
+
 \subsection{Imperative programming}
 \label{sec:imper-progr}
-
-The functional resource-passing style demonstrated for channels in
-\cref{sec:session-linearity} becomes tedious when manipulating mutable
-resources like buffers or connection pools.
-%
-To make linearity easier to use with an imperative programming style, we rely on
-the notion of borrowing \cite{DBLP:conf/popl/BoylandR05}.
 
 As a first example, we consider an API for mutable linear arrays
 (\cref{sig:array}).
