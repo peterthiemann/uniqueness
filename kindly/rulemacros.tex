@@ -188,6 +188,13 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% syntax-directed typing
+
+\newcommand\ruleSDConst{
+  \inferrule[Const]
+  {}
+  { \inferS{C}{\E}{c}{\CType c} }
+}
+
 \newcommand\ruleSDVar{%
   \inferrule[Var]
   { \bvar{x}{
