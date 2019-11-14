@@ -104,7 +104,10 @@ let borrowed : address -> borrow -> address sem =
      | (Imm :: bs) ->
         Error ("trying to take mutable borrow of immutable borrow")
 
-let (<.>) = borrowed
+let rborrowed : borrow -> address -> address sem =
+  fun b a -> borrowed a b
+
+let (<.>) = rborrowed
 
 let checkborrowed : address -> borrow -> bool =
   fun (Address (bs, ell)) b ->
@@ -313,8 +316,8 @@ let rec eval
      let* (k', r_1', r_2') = getstpair w in
      let* rho_1 = getaddress r_1' in
      let* rho_2 = getaddress r_2' in
-     let* rho_1' = rho_1 <.> b in
-     let* rho_2' = rho_2 <.> b in
+     let* rho_1' = b<.>rho_1 in
+     let* rho_2' = b<.>rho_2 in
      let pi_1' = (((pi_1 <-> rho_1) <-> rho_2) <+> rho_1') <+> rho_2' in
      let r_1'' = RADDR rho_1' in
      let r_2'' = RADDR rho_2' in
@@ -325,7 +328,7 @@ let rec eval
   (* rule sregion *)
   | Region (e, n, x, b) ->
      let* RADDR rho = gamma.!(x) in
-     let* rho' = rho <.> b in
+     let* rho' = b<.>rho in
      let gamma' = gamma.+(x -:>RADDR rho') in
      let pi' = (pi <+> rho') in
      let* (delta_1, pi_1, r_1) = eval delta pi' gamma' i' e in
@@ -337,7 +340,7 @@ let rec eval
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
      let*? () = rho <|= pi in
-     let* rho' = rho <.> b in
+     let* rho' = b<.>rho in
      let gamma' = gamma.+(x -:>RADDR rho') in
      let pi' = (pi <-> rho) <+> rho' in
      let* (delta_1, pi_1, r_1) = eval delta pi' gamma' i' e_1 in
@@ -352,7 +355,7 @@ let rec eval
   | Borrow (b, x) ->
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
-     let* rho' = rho <.> b in
+     let* rho' = b<.>rho in
      let*? () = rho' <|= pi in
      Ok (delta, pi, RADDR rho')
   (* rule screate *)

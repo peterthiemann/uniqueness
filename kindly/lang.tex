@@ -443,26 +443,27 @@ Henceforth, we consider terms with fully annotated regions.
 
 \lstMakeShortInline[style=rule,basicstyle=\normalsize\normalfont]@
 
-In this section, we present the dynamics of \lang in big-step
+The dynamics of \lang is given in big-step
 functional
 style~\cite{siek13:_type_safet_three_easy_lemmas,DBLP:conf/esop/OwensMKT16,
-  DBLP:conf/popl/AminR17}. It is given as a function
+  DBLP:conf/popl/AminR17}.  A function
 @eval \Store \Perm \VEnv i e@
-that manipulates the semantic objects defined in
+manipulates the semantic objects defined in
 \cref{fig:syntax-internal-language}.
 To demonstrate resource handling, the semantics comes with an abstract
 notion of linear resources that can be created, destroyed, observed
 (through unrestricted borrows), and
 updated (through affine borrows).
 
-Expressions $e$ need to be elaborated with some kind and constraint
-annotations. Polymorphic functions give rise to elaborated
+The semantics is defined in terms of \emph{elaborated expressions} $e$
+with kind and constraint annotations inserted by the typechecker.
+Polymorphic functions give rise to elaborated
 abstractions which abstract over kind variables $\Multi\kappa$ and
-which are tagged with a kind $k$ indicating their usage restriction
-(linear, affine, etc). Their use
-gives rise to elaborated application where the instantiation of these
-kind variables is given. Pairs also come with a kind tag $k$
-indicating the usage restriction.
+which are tagged with a constraint $C$ and a kind $k$ indicating their
+usage restriction (linear, affine, etc). Their use
+gives rise to explicit instantiation of these kind variables. Pairs
+come with a kind tag $k$ indicating the usage restriction. Application
+is annotated with evidence $\Sp$ of the inferred splitting. 
 
 Addresses $\Addr$ are composed of a raw location $\Loc$, which is just
 a pointer into a store, and a stack of modifiers that indicates the
@@ -472,36 +473,34 @@ taken an unrestricted borrow (from a raw location or a borrowed one),
 then we can take further unrestricted borrows from it, but no more
 affine ones.
 
-A permission $\Perm$ is a set of addresses. During evaluation it
-contains the set of addresses that may be accessed. For each raw
-location, there is only ever one address inside of $\Perm$.
+A permission $\Perm$ is a set of addresses that may be accessed during
+evaluation. A well-formed permission contains at most one address for each raw
+location.
 
-A result $r$ is either an address or a constant (e.g., a number). All
-non-trivial values are boxed in the sense that they are represented by
-the address of their actual content.
+Non-trivial results are boxed in the  semantics. So, a result
+$r$ is either an address or a primitive constant (e.g., a number).
 
-A value environment $\VEnv$ is a mapping from variables to results.
+A value environment $\VEnv$  maps variables to results.
 
-A storable $w$ is a particular object that can be stored. There are five
-kinds of storable. A poly closure represents a polymorphic
+A storable $w$ describes the content of a location in the store. There are five
+kinds of storables. A \emph{poly closure} represents a polymorphic
 function. It consists of an environment and the components of an
-elaborated abstraction. Similarly, a closure represents a monomorphic
-function and it elides kind variables and the constraint. A pair
-consists of a kind and two results. A resource is just an indirection
-to another result and the $\StFreed$ fills a released location.
+elaborated abstraction. A \emph{closure} represents a monomorphic
+function in the usual way. A \emph{pair}
+consists of a kind and two results. A \emph{resource} contains
+a result and the \emph{hole} $\StFreed$ fills a released location.
 
-Finally, the store $\Store$ is a mapping from raw locations to
-storables. It comes with a function
-@salloc@ of type @store -> storable -> (loc * store)@ such that
-@salloc delta@ @w@ allocates a free location in @delta@ and fills it with
-storable $w$. It returns the location and the updated store.
+A store $\Store$ is a partial map from raw locations to
+storables. The function
+@salloc: store -> storable -> (loc * store)@ is such that
+@salloc delta@ @w@ allocates an unused location in @delta@ and fills it with
+@w@. It returns the location and the extended store.
 
 
-The evaluation function is indexed by a step count so that each
+The evaluation function is indexed by a step count @i@ so that each
 invocation is guaranteed to terminate either with an error, a timeout,
-or a meaningful result. Hence its return type is a monad
-\lstinline/'a sem/ which combines error reporting, timeout, and a
-result of type \lstinline/'a/:
+or a result. Its return type is a monad
+\lstinline/'a sem/ which combines error reporting and timeout:
 \begin{lstlisting}
 type 'a sem = Error of string | TimeOut | Ok of 'a
 val eval : store -> perm -> venv -> int -> exp -> (store * perm * result) sem
@@ -515,41 +514,40 @@ permissions, and the actual result.
 
 We give some excerpts of the definition of @eval@ in
 \cref{fig:big-step-interpretation} and leave the full
-definition for \cref{sec:semant-defin}. The appendix also
-contains the semantics
-in traditional notation, which does not make the monadic nature of
-evaluation explicit.
-
-The definition uses concrete OCaml syntax with some pretty
+definition for \cref{sec:semant-defin}.
+% The appendix also
+% contains the semantics in mathematical notation.
+The definition uses OCaml syntax with some pretty
 printing. The pervasive @let*@ operator acts as monadic bind
-for the \lstinline/sem/ monad. The function header of @eval@ checks
+for the \lstinline/sem/ monad. The operator
+\lstinline/let*? : bool -> (unit -> 'a sem) -> 'a sem/
+ converts a boolean
+argument into success or failure in the monad.
+ The function header of @eval@ checks
 whether time is up and otherwise proceeds processing the expression.
 
-The @Varinst@ case corresponds to the elaborated application. It
+The @Varinst@ case corresponds to instantiation. It
 obtains the variable's value, checks that it is a location, checks the
 permission (the @let*?@ clause), obtains the storable $w$ at that
-location, and checks that it is an STPOLY. Then it updates the
-permission: if the STPOLY closure is unrestricted, then the location
+location, and checks that it is a poly closure (STPOLY). Next, it updates the
+permission: if the poly closure is unrestricted, then the location
 remains in the permission set, otherwise it is removed. Finally, we
 allocate a new monomorphic closure, add it to the permissions, and
 return the pointer as the result along with the updated store and
 permissions.
 
-The @App@ case implements function application. Compared to the syntax
-it comes with an annotation @sp@ which contains evidence of the
-environment splitting in the application rule. This evidence takes the
-form of two sets of variables from the domain of @gamma@.
-
-To execute an application, we first apply the splitting to @gamma@ and
+The @App@ case implements (elaborated) function application.
+We first apply the splitting @sp@ to @gamma@ and
 evaluate subterm @e_1@ with its part of the environment and the
 decremented timer @i'@. The result must be a location that we are
 permitted to use. Moreover, there must be a monomorphic STCLOS stored
-at that location. The permission to further use this closure is
-withdrawn unless the closure is unrestricted. Finally, we evaluate the
+at that location. The permission to further use this closure  remains
+in force only if the closure is unrestricted. Finally, we evaluate the
 argument, then the function body, and return its result.
 
-The @Pair@ case does not present any new features, but it
-corresponds to the \TirName{Pair} typing rule.
+The @Pair@ case corresponds to the \TirName{Pair} typing rule. It
+requires no new features.
+
 
 The @Region@ case implements a region. It obtains the address for @x@,
 the suspended binding, and extends it with the intended borrow
