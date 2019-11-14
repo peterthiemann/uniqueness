@@ -3,7 +3,7 @@
 \lang is a minimal ML-like language with
 let-polymorphism, abstract types, and pairs. Its type system manages
 linearity and borrows using kinds and (kind-) constrained types.
-For ease of presentation, we keep the language as simple as possible.
+For ease of presentation, we simplify the language.
 \begin{itemize}
 \item Pattern matching is demonstrated on pairs rather than algebraic
   datatypes.
@@ -254,14 +254,18 @@ Capturing a suspended binding is forbidden.
 \label{sdtyping:split}
 \begin{figure*}[tp]
   \centering
-  \begin{minipage}{0.35\linewidth}
+  \begin{minipage}{0.49\linewidth}
     \begin{mathpar}
       \ruleSDPair
+
+      \ruleSDRegion
     \end{mathpar}
-    \caption{The {\sc Pair} rule}
+    % \caption{The {\sc Pair} rule}
+    \caption{Selected typing rules}
     \label{sdtyp:pair}
+    \label{selectrules:region}
   \end{minipage}\hfill
-  \begin{minipage}{0.6\linewidth}
+  \begin{minipage}{0.5\linewidth}
     \centering
     \begin{tabular}
       {@{}>{$}r<{$}@{ $\vdash_e$ }
@@ -337,15 +341,15 @@ escape, which brings us to the next topic.
 \subsubsection{Regions}
 \label{sdtyping:regions}
 \begin{figure}[tp]
-  \begin{minipage}{0.4\linewidth}
-    \centering
-    \begin{mathpar}
-      \ruleSDRegion
-    \end{mathpar}
-    \caption{The {\sc Region} rule}
-    \label{selectrules:region}
-  \end{minipage}\hfill
-  \begin{minipage}{0.6\linewidth}
+  % \begin{minipage}{0.4\linewidth}
+  %   \centering
+  %   \begin{mathpar}
+  %     \ruleSDRegion
+  %   \end{mathpar}
+  %   \caption{The {\sc Region} rule}
+  %   \label{selectrules:region}
+  % \end{minipage}\hfill
+  \begin{minipage}{\linewidth}
     \centering
     % \begin{tabular}
     %   {@{}>{$}r<{$}@{ $\vdash_e$ }

@@ -225,7 +225,7 @@
 \newcommand\ruleSDPair{
   \inferrule[Pair]
   { \addlin{\lsplit{C}{\E}{\E_1}{\E_2}} \\\\
-    \inferS{C}{\E_1}{e_1}{\tau_1} \\
+    \inferS{C}{\E_1}{e_1}{\tau_1} \\\\
     \inferS{C}{\E_2}{e_2}{\tau_2}
   }
   { \inferS{C}{\E}{\introPair{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }
@@ -245,9 +245,9 @@
 
 \newcommand\ruleSDRegion{%
   \inferrule[Region]
-  { \svar x {\tau_x}^n \in \E \\
+  { \svar x {\tau_x}^n \in \E \\\\
     \addlin{ \lregion{C}{x}{\E}{\E'} }\\\\
-    \inferS{C}{\E'}{e}{\tau} \\
+    \inferS{C}{\E'}{e}{\tau} \\\\
     \entail C {\Cleq{\tau}{\klin_{n-1}}} \\
   }  { \inferS{C}{\E}{\region{\Sone x \BORROW}{e}}{\tau} }
 }
