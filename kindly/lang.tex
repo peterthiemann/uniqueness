@@ -106,6 +106,101 @@ in $\Multi[i]\tau$.
 % $\tydecl{t}{\kschm}{K}{\tau}$, introduce both a new type constructor $\T{t}$ and
 % a data constructor $K$.
 
+\subsection{Automatic region annotation}
+\label{regionannot}
+
+In the examples presented in \cref{motivation}, region annotations are optional.
+In our formalization, regions must be syntactically explicit and annotated with
+a nesting index and a scoped variable.
+We now define a best-effort
+syntactic code transformation $\RannotT{p}{p'}$ which
+annotates programs automatically.
+The input $p$ is a program with optional region annotations of the form $\region[]{}{e}$.
+The output $p'$ is a program with explicit annotations
+of the form $\region{\Sone x\BORROW}{e}$.
+We give an informal presentation of our code transformation. The complete
+definition is given in \cref{appendix:regionannot}. This code transformation
+aims to find, for each borrow $\borrow{x}$, the biggest region satisfying
+the following rules:
+\begin{enumerate}
+\item The region should contain at least $\borrow{x}$.
+\item The region should never be larger than the scope of $x$.
+\item An exclusive borrow $\borrow[\kaff]{x}$ should never share a region with any other borrow of $x$.
+\item A use of $x$ can never be in the region of $\borrow{x}$.
+\end{enumerate}
+Following these rules, we start from the leafs and grow the region
+associated to each borrow until it can't grow anymore, either due to a binding
+or to conflicting uses.
+
+Let us consider the following program with binders and function applications:
+
+\[
+  \setlength{\jot}{-1pt}
+  \RannotT{
+\begin{aligned}
+  \lam{a}{}\ &
+  \letin{x}{\app{f}{\borrow[\kun]{a}}}{}\\
+  &g\ (\borrow[\kaff]{x});\\
+  &f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})\\
+\end{aligned}
+}{
+\begin{aligned}
+  \lam{a}{}\region[1]{\Sone a\MBORROW}{\ &%
+  \letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+  &\region[2]{\Sone x\MBORROW}{g\ (\borrow[\kaff]{x})};\\
+  &\region[2]{\Sone x\IBORROW}{f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})}\\
+  &\!\!\!}
+\end{aligned}
+}
+\]
+
+Since the only use of $a$ is a borrow,
+the region covers the entire lexical scope of $a$. For $x$ however, there are
+multiple conflicting borrow and we must be more careful. We place a first
+region around the exclusive borrow and its function application,
+and a second region around both shared borrows. This placement of region
+is optimal, as making any of the region bigger would cause a borrowing
+error.
+
+Naturally, these rules are best effort and it's sometimes necessary for the
+programmer to annotate regions explicitly. We take such manual annotations
+into account as an upper bound on all the contained regions.
+In the following program, a manual annotation has been inserted to ensure
+no borrow enters the reference $r$:
+
+\[
+  \setlength{\jot}{-1pt}
+  \RannotT{
+\begin{aligned}
+  \letin{&r}{\operatorname{ref}\ 0}{}\\
+  \lam{a}{}\ &
+  set\ r\ \region[]{}{g\ (\borrow[\kun]{a})};\\
+  &f\ (\borrow[\kun]{a}) 
+\end{aligned}
+}{
+\begin{aligned}
+  \letin{&r}{\operatorname{ref}\ 0}{}\\
+  \lam{a}{}\ &
+  set\ r\ \region[1]{\Sone a\IBORROW}{g\ (\borrow[\kun]{a})};\\
+  &\region[1]{\Sone a\IBORROW}{f\ (\borrow[\kun]{a})}
+\end{aligned}
+}
+\]
+
+Following the rules, we could merge the two regions around the borrows
+$\borrow[\kun]{a}$. However
+the explicit annotation indicates that the region should stay around the closure
+passed as argument of $set$. This is particularly useful to control captures
+by imperative APIs.
+
+This code transformation is purely syntactic and must be used before
+typing. It only produces well-nested annotations: if $\region[n]{b}{\dots}$
+is nested inside $\region[n']{b'}{\dots}$, then $n > n'$. Furthermore, there
+is at most one region per borrow, and exactly one region per exclusive borrow.
+In the rest of this article, we consider
+that all terms have been annotated with this code transformation and respect
+these properties.
+
 \subsection{Typing}
 \label{sdtyping}
 

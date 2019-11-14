@@ -42,47 +42,47 @@
   { \Rannot{e}{e}{\Sempty} }
 
   \inferrule
-  { \forall i,\ \Rannot{e_i}{e'_i}{B_i} \\
+  { \forall i,\ \Rannot[n+1]{e_i}{e'_i}{B_i} \\
     \getBorrows{B_1}{B_2}{S_1,S,S_2}
   }
-  { \Rannot{\app{e_1}{e_2}}{\app{\region{S_1}{e'_1}}{\region{S_2}{e'_2}}}{S} }
+  { \Rannot{\app{e_1}{e_2}}{\app{\region[n+1]{S_1}{e'_1}}{\region[n+1]{S_2}{e'_2}}}{S} }
 
   \inferrule
-  { \forall i,\ \Rannot{e_i}{e'_i}{B_i} \\
+  { \forall i,\ \Rannot[n+1]{e_i}{e'_i}{B_i} \\
     \getBorrows{B_1}{(B_2\Sdel{x})}{S_1,S,S_2} \\
     S'_2 = S_2\Sunion B_2\Sonly{x}
   }
   { \Rannot
     {\letin{x}{e_1}{e_2}}
-    {\letin{x}{\region{S_1}{e'_1}}{\region{S'_2}{e'_2}}}{S} }
+    {\letin{x}{\region[n+1]{S_1}{e'_1}}{\region[n+1]{S'_2}{e'_2}}}{S} }
 
   \inferrule[Rewrite-Lam]
-  { \Rannot{e}{e'}{B} \\
+  { \Rannot[n+1]{e}{e'}{B} \\
     B_x = B\Sonly{x}
   }
-  { \Rannot{\lam{x}{e}}{\lam{x}{\region{B_x}{e'}}}{B\Sdel{x}} }
+  { \Rannot{\lam{x}{e}}{\lam{x}{\region[n+1]{B_x}{e'}}}{B\Sdel{x}} }
   
 
   \inferrule
-  { \forall i,\ \Rannot{e_i}{e'_i}{B_i} \\
+  { \forall i,\ \Rannot[n+1]{e_i}{e'_i}{B_i} \\
     \getBorrows{B_1}{(B_2\Sdel{x,y})}{S_1,S,S_2} \\
     S'_2 = S_2\Sunion B_2\Sonly{x,y}
   }
   { \Rannot
     {\matchin{x,y}{e_1}{e_2}}
-    {\matchin{x,y}{\region{S_1}{e'_1}}{\region{S'_2}{e'_2}}}{S} }
+    {\matchin{x,y}{\region[n+1]{S_1}{e'_1}}{\region[n+1]{S'_2}{e'_2}}}{S} }
 
   \inferrule[Rewrite-Region]
-  { \Rannot{e}{e'}{B} }
-  { \Rannot{\regionS{e}}{\region{B}{e'}}{\Sempty} }
+  { \Rannot[n+1]{e}{e'}{B} }
+  { \Rannot{\regionS{e}}{\region[n+1]{B}{e'}}{\Sempty} }
 
   \inferrule[Rewrite-Pair]
-  { \forall i,\ \Rannot{e_i}{e'_i}{B_i} \\
+  { \forall i,\ \Rannot[n+1]{e_i}{e'_i}{B_i} \\
     \getBorrows{B_1}{B_2}{S_1,S,S_2}
   }
   { \Rannot
     {\introPair{e_1}{e_2}}
-    {\introPair{\region{S_1}{e'_1}}{\region{S_2}{e'_2}}}
+    {\introPair{\region[n+1]{S_1}{e'_1}}{\region[n+1]{S_2}{e'_2}}}
     {S} }
 
   \inferrule[AnnotRegion]{
