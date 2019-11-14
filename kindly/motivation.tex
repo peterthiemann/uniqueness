@@ -14,25 +14,26 @@ the notion of borrowing \cite{DBLP:conf/popl/BoylandR05}.
 \subsection{Imperative programming}
 \label{sec:imper-progr}
 
-As a first example, we consider an API for mutable linear arrays
+A first example is an API for mutable linear arrays
 (\cref{sig:array}).
 The intention of this API is to safely handle manual allocation and
 deallocation of arrays that may contain affine elements.
 One would first use \lstinline/create n v/ to create
-an (unrestricted) array of size \lstinline/n/ with some value
+an (unrestricted) array of size \lstinline/n/ initialized with value
 \lstinline/v/. This value must be unrestricted as it is duplicated to
 initialize all array elements. Using the \lstinline/map/ function we
 can transform the unrestricted elements into linear (affine)
 ones. This array can be processed further using \lstinline/map/ (or \lstinline/set/ if
-affine). The \lstinline/get/ function only applies if the element type
+affine). The \lstinline/get/ function is only applicable if the element type
 is unrestricted as one element is duplicated. The \lstinline/length/
-function applies anytime. Before \lstinline/free/ing the array the elements must be
-affine, again.
+function is always applicable. To \lstinline/free/ an array the elements must be
+affine.
 
 To manage the different kinds of accessing the array we distinguish between constructors, destructors,
 observers, and mutators.
 Constructors and destructors like \lstinline/create/ and \lstinline/free/ manipulate the whole
-array. As with channels in \cref{sec:session-linearity},
+array. %As with channels in \cref{sec:session-linearity},
+The constructor
 \lstinline/create/ yields a linear resource which is consumed by \lstinline/free/.
 During the lifetime of the array resource \lstinline/a/, we can split
 off \emph{shared borrows} \lstinline/&a/ that provide a read-only
@@ -43,24 +44,24 @@ a exclusive borrow.
 
 Each borrow is tied to a region whose lifetime is properly
 contained in the lifetime of the resource.
-In a region, we can split off as many shared borrows as we like
-from a resource, but we can take only one exclusive borrow. In a
-subsidiary region, we can take further shared borrows from any
-borrow or we can take a exclusive borrow from a exclusive borrow from a
+In a region, we can split off as many shared borrows of a resource as
+we like, but we can take only one exclusive borrow. In a 
+subsidiary region, we can take shared borrows of any
+borrow or we can take an exclusive borrow of an exclusive borrow from an
 enclosing region. Borrows are confined to their regions. Inside the region,
 shared borrows are unrestricted (\lstinline/un/) whereas exclusive
 borrows are affine (\lstinline/aff/).
 
 The code in \cref{ex:array} demonstrates a use of the API to create an
-array of Fibonacci numbers. After creation of the array, we can see
-that the presence of a borrow prevents access to the ``raw''
-resource inside the borrow's region. In \cref{ex:array:get} of the
-example, there are two shared borrows in the same
-expression, which forms a region by itself. These borrows are split
-off the exclusive borrow used in \cref{ex:array:set}, which belongs to
-the next enclosing region.
-Finally, the code returns the whole array in \cref{ex:array:return},
-which is possible because none of the borrows are in scope anymore.
+array of Fibonacci numbers as the programmer would write it. After
+creation of the array, the presence of a borrow in the for loop
+prevents access to the ``raw'' resource inside the loop's
+body. \cref{ex:array:get} of the example contains two shared borrows
+in the same expression, which forms a region by itself. These borrows
+are split off the exclusive borrow used in \cref{ex:array:set}, which
+belongs to the next enclosing region corresponding to the loop body.
+The whole array can be returned in \cref{ex:array:return} because  the
+borrows are no longer in scope. 
 
 \begin{figure}[tp]
   \centering
@@ -108,8 +109,8 @@ let mk_fib_array n =
   \end{subfigure}
 \end{figure}
 
-\cref{ex:array:region} uses braces as in \lstinline/{| ... |}/ to
-explicitly state the regions of the example in \cref{ex:array}.  One
+\cref{ex:array:region} uses braces \lstinline/{| ... |}/ to make the
+regions of the example in \cref{ex:array} explicit.  One
 region consists of the header expression of the \lstinline/let/ in
 \cref{ex:array:region:get}. It is contained in another region that
 comprises the body of the \lstinline/for/ loop. \lang guarantees that borrows
@@ -119,11 +120,11 @@ $r$ is a positive integer that corresponds to the lexical nesting
 depth of regions. For instance, the type of \lstinline{&!a} in
 \cref{ex:array:set} has kind \lstinline{aff_1} whereas the type of
 \lstinline{&a} in \cref{ex:array:region:get} has kind
-\lstinline{un_2} and the typing of its region is such that types with
+\lstinline{un_2} and the typing of the inner region is such that types with
 kind indexes greater than or equal to $2$ cannot escape.
+In the example, borrows cannot escape  because they are consumed
+immediately by \lstinline/get/ and \lstinline/set/.
 
-In \cref{ex:array:region:get} of the example, there is no danger of \lstinline/&a/ escaping because it
-is consumed in the calls to \lstinline/get/.
 Region annotations are automatically inserted using
 syntactic cues such as borrows and binders (see
 \cref{regionannot}).  Users may manually insert regions to further restrict the range of a
