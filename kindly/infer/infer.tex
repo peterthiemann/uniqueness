@@ -233,9 +233,10 @@ on the projection operators in HM inference.
 \newcommand\A{\mathcal A}
 \newcommand\SC{\mathcal S}
 
-We define the constraint solver in terms of an arbitrary bounded
+We define the constraint solver in terms of an arbitrary commutative bounded
 lattice $(\mathcal L, \lk_\Lat)$, i.e.,
-a lattice which has a minimal and a maximal element ($l^\top$ and $l^\bot$).
+a lattice which has a minimal and a maximal element ($l^\top$ and $l^\bot$)
+and where meet and joins are commutative.
 We write lattice elements as $l$ and $\glb_i l_i$ (resp. $\lub_i l_i$)
 for the greatest lower bound (resp. least upper bound) in $\mathcal L$.
 The lattice for \lang (see \cref{sdtyping}) is a bounded lattice with
