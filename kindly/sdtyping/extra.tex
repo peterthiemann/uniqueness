@@ -14,7 +14,7 @@ region annotations for each individual variable.
 \begin{figure*}[!tb]
   \centering
   \input{region-annot}
-  \caption{Automatic region annotation --- $\RannotT{e}{e'}$}
+  \caption{Automatic region annotation --- $\RannotT{\inP{e}}{e'}$}
   \label{fig:region-annotation}
 \end{figure*}
 %
@@ -71,7 +71,7 @@ borrows should be enclosed immediately.
   % \input{infer/lattice}
   % \caption{Lattice inequalities -- $k \lk_\Lat k'$}
   \input{infer/entails}
-  \caption{Base entailment rules -- $\entail{C}{D}$ }
+  \caption{Base entailment rules -- $\entail{\inP{C}}{\inP{D}}$ }
   \label{rules:entail}
 \end{figure}
 
@@ -81,7 +81,8 @@ borrows should be enclosed immediately.
 Our system is defined in \cref{infer:solving}.
 As before, we write $\CL$ for our constraint system for an arbitrary
 total bounded lattice $(\mathcal L, \lk_\Lat)$.
-Entailment is written $\entail{C}{D}$, where $D$ is a consequence of the
+Entailment is written $\entail{\inP{C}}{\inP{D}}$,
+where $D$ is a consequence of the
 constraints $C$.
 We say that $C$ and $D$ are equivalent, written as $C \equivC D$,
 when $\entail{C}{D}$ and $\entail{D}{C}$.
@@ -99,8 +100,8 @@ types $\tau$,$\tau'$, there exists an equality predicates $\Ceq{\tau}{\tau'}$
 which is symmetric, reflexive, transitive, stable under substitution and such that,
 for any predicate $P$:
 \begin{align*}
-  \entail{\Ceq{x}{y}\wedge \Cproj{x}C \wedge \Ceq{x}{y}&}{C}
-  &\subst{x}{\tau}{P} &\equivC \Cproj{x}P \wedge \Ceq{x}{\tau}
+  &\entail{\Ceq{x}{y}\wedge \Cproj{x}C \wedge \Ceq{x}{y}}{C}\\
+  &\subst{x}{\tau}{P} \equivC \Cproj{x}P \wedge \Ceq{x}{\tau}
                         \text{ where } x\notin\fv{\tau}
 \end{align*}
 $\CL$ is defined as the smallest cylindric term constraint system that

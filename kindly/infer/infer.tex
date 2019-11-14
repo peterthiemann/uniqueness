@@ -20,9 +20,9 @@ We start by various preliminary definitions.
 \subsection{Preliminaries}
 
 Unlike the syntax-directed version of our type system, knowing which elements
-are input and output or our inference judgement is critical. In the rest
+are input and output or our inference judgements is critical. In the rest
 of this section, when presenting a new judgement,
-we write input parameters in \textbf{bold}. The rest will then be
+we write input parameters in \textbf{\textcolor{DarkSlateBlue}{bold blue}}. The rest will then be
 output parameters.
 
 \subsubsection{Usage environments}
@@ -52,18 +52,21 @@ In the context of inference, we define new judgements which \emph{infer}
 the constraints.
 \begin{itemize}[leftmargin=*]
 \item $\bsplit{C}{\Sv}{\inP{\Sv_1}}{\inP{\Sv_2}}$.
-  Given two usage environments $\Sv_1$ and $\Sv_2$
+  Given two usage environments $\inP{\Sv_1}$ and $\inP{\Sv_2}$
   (inferred from two subexpressions, for instance),
   we return $\Sv$, the merged environment, and $C$, a set
   of constraints that must be respected.
   This relation is total and non-ambiguous given $\Sv_1$ and $\Sv_2$
   and uses the same rules as the one presented in \cref{sdtyping:split}.
 \item $\bregion[\inP{n}]{C}{\inP{x}}{\Sv}{\inP\Sv'}$.
-  Given a usage environment $\Sv'$ and a variable name $x$, we return
-  $\Sv$ where the borrow binding of $x$ in $\Sv'$, if it exists, is replaced by
+  Given a usage environment $\inP{\Sv'}$, a nesting level $\inP{n}$,
+  and a variable name $\inP{x}$, we return
+  $\Sv$ where the borrow binding of $x$ in $\Sv'$, if it exists,
+  is replaced by
   a suspended binding. We also return $C$, a set of constraints that must
   be respected.
-  Again, the relation is total and non-ambiguous for any given $\Sv'$ and $x$,
+  Again, the relation is total and non-ambiguous for any given $\Sv'$,
+  $n$ and $x$,
   and uses the rules presented in \cref{sdtyping:regions}.
 \end{itemize}
 
@@ -86,7 +89,7 @@ assume the existence of such a function for our constraint system.
 \subsection{Type inference}
 
 We write $\inferW{\Sv}{(C,\unif)}{\inP{\E}}{\inP{e}}{\tau}$ when
-$e$\ has type $\tau$ in $\E$ under the constraints $C$ and unifier $\unif$
+$\inP{e}$\ has type $\tau$ in $\inP{\E}$ under the constraints $C$ and unifier $\unif$
 with a usage environment $\Sv$. $\inP\E$ and $\inP{e}$ are the input parameters of our
 inference algorithm.
 Unlike in the syntax-directed version, $\E$ only regular and type bindings.
@@ -295,7 +298,7 @@ details).
       }
       { \entail{C}{\Cleq{\tau_1\tarr{k}\tau_2}{\tau'_1\tarr{k'}\tau'_2}} }
     \end{mathpar}
-    \caption{Base entailment rules -- $\entail{C}{D}$ }
+    \caption{Base entailment rules -- $\entail{\inP{C}}{\inP{D}}$ }
     \label{rules:entail}
   \end{minipage}
 \end{figure*}
