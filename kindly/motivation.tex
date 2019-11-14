@@ -261,20 +261,18 @@ for lines, columns, and square, which are all very similar to function
 The typing ensures that the mutations do not compromise the state at
 the choice point, because they operate on a new state \lstinline/new_g/ created for one
 particular branch of the choice.
-In particular,
-since the \lstinline/set/ function only requires an unrestricted shared borrow,
-\lstinline/try_solution/ can captures the borrow \lstinline/&g/
-while staying unrestricted.
-This also make \lstinline/try_solution/ itself bound to the same
-region as \lstinline/&g/. In this example, our region inference
-will place the region exactly at the \lstinline/begin//\lstinline/end/
-scope.
-This allows us to use \lstinline/try_solution/ in
-the iteration loop on \cref{line:iter}.
-Since \lstinline/&g/ is unrestricted, we could even use a parallel iteration
-instead of a sequential one.
-As \lstinline/g/ is linear we must free it before returning,
-in \cref{line:free:g}, outside of the region.
+As the \lstinline/set/ function only requires an unrestricted shared borrow,
+the closure \lstinline/try_solution/ remains unrestricted even though
+it captures the borrow \lstinline/&g/. 
+The price is that \lstinline/try_solution/ cannot escape from
+\lstinline/&g/'s region. In this example, inference places the region
+around the \lstinline/begin//\lstinline/end/ scope.
+Hence, \lstinline/try_solution/ can be used in
+the iteration in \cref{line:iter}.
+% As \lstinline/&g/ is unrestricted, we could even use a parallel iteration
+% instead of a sequential one.
+As \lstinline/g/ is linear we must free it outside of the region
+before returning (\cref{line:free:g}). 
 
 While presented for copy-on-write arrays, the API
 can easily be adapted to other persistent data structures with
