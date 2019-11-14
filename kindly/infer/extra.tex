@@ -17,13 +17,13 @@ of the equivalent statements for HM(X) \citep{sulzmann1997proofs}.
 \begin{figure}[tb]
   \centering
   \input{infer/kinds}
-  \caption{Kind inference rules -- $\inferK{(C,\unif)}{{\bm\E}}{{\bm\tau}}{k}$}
+  \caption{Kind inference rules -- $\inferK{(C,\unif)}{{\inP\E}}{{\inP\tau}}{k}$}
   \label{rules:kinding}
 \end{figure}
 %
-We write $\inferK{(C,\unif)}{{\bm\E}}{{\bm\tau}}{k}$ when type $\tau$ has kind $k$
+We write $\inferK{(C,\unif)}{{\inP\E}}{{\inP\tau}}{k}$ when type $\tau$ has kind $k$
 in environment $\E$ under constraints $C$ and unifier $\unif$.
-$\bm\E$ and $\bm\tau$ are the input parameters of
+$\inP\E$ and $\inP\tau$ are the input parameters of
 our inference procedure.
 We present the kind inference algorithm as a set of rules in
 \cref{rules:kinding}.
@@ -43,7 +43,7 @@ unifier.
 \begin{figure*}[!btp]
   \input{infer/typing}
   \caption{Type inference rules --
-    $\inferW{\Sigma}{(C,\psi)}{{\bm\E}}{{\bm e}}{\tau}$ }
+    $\inferW{\Sigma}{(C,\psi)}{{\inP\E}}{{\inP e}}{\tau}$ }
   \label{rules:typing:full}
 \end{figure*}
 

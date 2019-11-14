@@ -51,14 +51,14 @@ the transformations.
 In the context of inference, we define new judgements which \emph{infer}
 the constraints.
 \begin{itemize}[leftmargin=*]
-\item $\bsplit{C}{\Sv}{\bm{\Sv_1}}{\bm{\Sv_2}}$.
+\item $\bsplit{C}{\Sv}{\inP{\Sv_1}}{\inP{\Sv_2}}$.
   Given two usage environments $\Sv_1$ and $\Sv_2$
   (inferred from two subexpressions, for instance),
   we return $\Sv$, the merged environment, and $C$, a set
   of constraints that must be respected.
   This relation is total and non-ambiguous given $\Sv_1$ and $\Sv_2$
   and uses the same rules as the one presented in \cref{sdtyping:split}.
-\item $\bregion[\bm{n}]{C}{\bm{x}}{\Sv}{\bm\Sv'}$.
+\item $\bregion[\inP{n}]{C}{\inP{x}}{\Sv}{\inP\Sv'}$.
   Given a usage environment $\Sv'$ and a variable name $x$, we return
   $\Sv$ where the borrow binding of $x$ in $\Sv'$, if it exists, is replaced by
   a suspended binding. We also return $C$, a set of constraints that must
@@ -85,9 +85,9 @@ assume the existence of such a function for our constraint system.
 
 \subsection{Type inference}
 
-We write $\inferW{\Sv}{(C,\unif)}{\bm{\E}}{\bm{e}}{\tau}$ when
+We write $\inferW{\Sv}{(C,\unif)}{\inP{\E}}{\inP{e}}{\tau}$ when
 $e$\ has type $\tau$ in $\E$ under the constraints $C$ and unifier $\unif$
-with a usage environment $\Sv$. $\bm\E$ and $\bm e$ are the input parameters of our
+with a usage environment $\Sv$. $\inP\E$ and $\inP{e}$ are the input parameters of our
 inference algorithm.
 Unlike in the syntax-directed version, $\E$ only regular and type bindings.
 Suspended and borrow bindings can only be present in $\Sv$.
@@ -168,7 +168,8 @@ While the rules are quite similar to the original version, the usage
 environment $\Sv$ is now an \emph{output} of the algorithm.
 As such, we use the ``inference'' version of the relations on
 the environment,
-$\bsplit{C}{\Sv}{\bf{\Sv_1}}{\bf{\Sv_2}}$ and $\bregion{C}{\bf{x}}{\Sv}{\bf\Sv'}$,
+$\bsplit{C}{\Sv}{\inP{\Sv_1}}{\inP{\Sv_2}}$
+and $\bregion{C}{\inP{x}}{\Sv}{\inP\Sv'}$,
 which returns the necessary constraints.
 As appropriate for inference, these relations
 are total and non ambiguous for their input parameters ($\Sv_1, \Sv_2$ and $\Sv'$, respectively).

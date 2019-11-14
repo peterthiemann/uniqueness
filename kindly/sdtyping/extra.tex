@@ -313,17 +313,17 @@ emitting the constraint ({\sc ConstrSD} and {\sc ConstrI}).
   \input{sdtyping/sd-splitting}
   \caption{Splitting ---
     environments $\lsplit C\E{\E_l}{\E_r}$;
-    inference $\bsplit C\E{\bm{\E_l}}{\bm{\E_r}}$;
-    binders $\bsplit Cb{\bm{b_r}}{\bm{b_l}}$}
+    inference $\bsplit C\E{\inP{\E_l}}{\inP{\E_r}}$;
+    binders $\bsplit Cb{\inP{b_r}}{\inP{b_l}}$}
   \label{fig:sd-splitting}
   \input{sdtyping/sd-borrowing}
   \caption{Borrowing ---
     environments $\lregion[n]{C}{x}{\E}{\E'}$;
-    inference $\bregion[\bm n]{C}{\bm x}{\E}{\bm{\E'}}$;
-    binders $\bregion[\bm n]{C}{\bm x}{b}{\bm{b'}}$}
+    inference $\bregion[\inP n]{C}{\inP x}{\E}{\inP{\E'}}$;
+    binders $\bregion[\inP n]{C}{\inP x}{b}{\inP{b'}}$}
   \label{fig:sd-borrowing}
   \input{sdtyping/sd-environments}
-  \caption{Rewriting constraints on environments --- $\bm{\Cleq{\E}{k}}\Crewrite  C$}
+  \caption{Rewriting constraints on environments --- $\inP{\Cleq{\E}{k}}\Crewrite  C$}
   \label{fig:contraints-environments-types}
 \end{figure*}
 
