@@ -26,12 +26,12 @@ None of the following languages support borrows.
 System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
 extends System F with kinds to distinguish
 between linear and unrestricted types.
-\citet{DBLP:conf/tldi/MazurakZZ10} also provide
-(and proves soundness) of a linearity-aware semantics.
+\citet{DBLP:conf/tldi/MazurakZZ10} provide
+a linearity-aware semantics with a soundness proof.
 Unlike \lang, System F\degree{} does not allow
 quantification over kinds which limits its expressivity. For instance, it
 does not admit a most general type for function composition.
-Furthermore, since it is based on System F, it does not admit
+Being based on System F, it does not admit
 principal type inference.
 
 Quill~\citep{DBLP:conf/icfp/Morris16} is a Haskell-like language with affine
@@ -125,7 +125,7 @@ Most relevant to \lang:
 \end{itemize}
 
 Mezzo~\citep{DBLP:phd/hal/Protzenko14} is an ML-like language
-with an extremely rich capability system which is able to encode numerous
+with a rich capability system which is able to encode numerous
 properties akin to separation logic~\citep{DBLP:conf/lics/Reynolds02}.
 Mezzo explores the  boundaries of the design space of type systems for
 resources. Hence, it is more expressive than \lang, but
@@ -135,27 +135,29 @@ annotations and it is not known whether type inference for Mezzo is possible.
 \citet{DBLP:journals/corr/abs-1803-02796} presents
 an extension of OCaml for resource management in the style of C++'s RAII
 and Rust's lifetimes. This system assumes
-the existence of a linear type system and develop the associated compilation
-and runtime infrastructure. We believe our approaches are very
+the existence of a linear type system and develops the associated compilation
+and runtime infrastructure. We believe our approach is
 complementary and aim to combine them in the future.
 
 \subsection{Other substructural type-systems}
 
-Linear and affine disciplines have also been used in non-functional
-settings, notably in the context of low-level imperative programming
-and object systems. In particular, \lang uses borrows and regions
-which were initially developed in the context of imperative and
+% Linear and affine disciplines have  been used in non-functional
+% settings, notably in the context of low-level imperative programming
+% and object systems. In particular,
+\lang uses borrows and regions
+which were initially developed in the context of linear and affine
+typing for  imperative and
 object-oriented
 programming~\citep{DBLP:conf/popl/BoylandR05,DBLP:conf/pldi/GrossmanMJHWC02}.
 
 Rust~\citep{rust} is the first
 mainstream language to popularize the idea of borrowing and ownership
 for safe low-level programming.
-\lang heavily draws inspiration from Rust's borrowing system to apply
+\lang is inspired from Rust's borrowing system to apply
 it in a functional setting with type inference, a GC, and
 an ML module system.
 Rust's lifetime system is more explicit and more expressive than \lang,
-however Rust does not provide type inference
+but Rust does not provide type inference
 and only provides \emph{partial} lifetime inference.
 Recently, \citet{DBLP:journals/corr/abs-1903-00982}
 formalized Rust's ownership discipline, including non-lexical lifetimes.
@@ -165,21 +167,21 @@ could help us improve our handling of regions and of successive exclusive borrow
 Vault~\citep{DBLP:conf/pldi/DeLineF01}
 and Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}
 leverage typestate and capabilities
-to express very rich properties in objects and protocols.
+to express rich properties in objects and protocols.
 These systems are designed for either low-level or object-oriented
-programming, and do not immediately lend themselves to a more functional
-style. Furthermore, while their type-systems are much more
-powerful than \affe's, they require many annotations by the programmer
-and do not support any inference.
-It could however be interesting to expand \affe with limited
+programming and do not immediately lend themselves to a more functional
+style. While these systems are much more
+powerful than \affe's, they require programmer annotations
+and do not support inference.
+It  would be interesting to extend \lang with limited
 forms of typestate as a local, opt-in feature that would provide
 more expressivity at the cost of inference.
 
 \subsection{Type-system features}
 %
 \lang relies on constrained types
-to introduce the kind inequalities required for linear types. In
-particular, we use HM(X)~\citep{DBLP:journals/tapos/OderskySW99} which
+to introduce the kind inequalities required for linear types.
+HM(X)~\citep{DBLP:journals/tapos/OderskySW99} 
 allows us to use constrained types in an ML-like language with complete
 type inference.
 HM(X) has been shown to be compatible with subtyping,
@@ -188,13 +190,13 @@ GADTs~\citep{DBLP:journals/toplas/SimonetP07},
 and there exists a syntactic soundness proof~\citep{DBLP:journals/entcs/SkalkaP02}.
 These results make us confident that the system developed in \lang
 could be applied to larger and more complex languages such as OCaml.
+Alternatively, we could have based \lang on qualified
+types~\cite{DBLP:journals/scp/Jones94}, similarly to Quill.
+% This
+% choice would also be sustainable as qualified types is part of the
+% foundation of Haskell's type system.
 
-Alternatively, we could have based the system on qualified
-types~\cite{DBLP:journals/scp/Jones94}, similarly to Quill. This
-choice would also be sustainable as qualified types is part of the
-foundation of Haskell's type system.
-
-The subtyping discipline used in \lang is very similar
+\lang's  subtyping discipline is similar
 to structural subtyping, where the only subtyping (or here, subkinding)
 is at the leaves.
 Such discipline is known to be friendly to inference and has been used in many

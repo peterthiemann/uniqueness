@@ -2,7 +2,7 @@
 \section{Conclusions}
 \label{sec:conclusions}
 
-The \lang language is an extension of ML-like languages with sound handling of linear and affine resources. It's main novel feature is the combination of full type inference and a practically useful notion of shared and exclusive borrowing of linear and affine resources.
+\lang is an ML-like language extended with sound handling of linear and affine resources. Its main novel feature is the combination of full type inference and a practically useful notion of shared and exclusive borrowing of linear and affine resources.
 Although the inferred types are much richer internally than plain ML types, most of that complexity can be hidden from user-level programmers. On the other hand, programmers of libraries dealing with resources have sufficient expressiveness at their fingertips to express many resource management schemes.
 
 The main restriction of the current system is that the lifetime of borrows is determined by lexical scoping. Overcoming this restriction is subject of future work and will probably require extending the type system by some notion of effect, which is currently discussed in the OCaml community. 
