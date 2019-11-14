@@ -1,5 +1,12 @@
 \begin{minipage}{0.38\linewidth}
 \begin{mathpar}
+  \inferrule[ESplit-Check]{
+    \bsplit{D}{\E}{\E_1}{\E_2} \\
+    \entail{C}{D}
+  }{
+    \lsplit{C}{\E}{\E_1}{\E_2}
+  }
+  
   \inferrule[ESplit-Empty]{}{
     \bsplit{\Cempty}\Eempty\Eempty\Eempty
   }
@@ -9,13 +16,6 @@
     \bsplit{C_2}{b}{b_1}{b_2}
   }{
     \bsplit{C_1\Cand C_2}{\E;b}{\E_1;b_1}{\E_2;b_2}
-  }
-
-  \inferrule[ESplit-Check]{
-    \bsplit{D}{\E}{\E_1}{\E_2} \\
-    \entail{C}{D}
-  }{
-    \lsplit{C}{\E}{\E_1}{\E_2}
   }
 \end{mathpar}
 \end{minipage}\vrule~

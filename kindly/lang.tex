@@ -276,10 +276,18 @@ a kind variable or it relates two kind variables.
       \ruleSDLam
       \and
       \ruleSDVar
+      \and
+      \ruleSDPair
+      \and
+      \ruleSDRegion
+      \and
+      \ruleSDMatchPair
     \end{mathpar}
-    \caption{The {\sc Borrow}, {\sc Abs} and {\sc Var} rules}
+    \caption{Selected typing rules}
     \label{selectrules:borrow}
     \label{selectrules:binders}
+    \label{sdtyp:pair}
+    \label{selectrules:region}
   \end{minipage}
 \end{figure*}
 
@@ -347,20 +355,8 @@ Capturing a suspended binding is forbidden.
 
 \subsubsection{Copying and Splitting}
 \label{sdtyping:split}
-\begin{figure*}[tp]
-  \centering
-  \begin{minipage}{0.49\linewidth}
-    \begin{mathpar}
-      \ruleSDPair
-
-      \ruleSDRegion
-    \end{mathpar}
-    % \caption{The {\sc Pair} rule}
-    \caption{Selected typing rules}
-    \label{sdtyp:pair}
-    \label{selectrules:region}
-  \end{minipage}\hfill
-  \begin{minipage}{0.5\linewidth}
+\begin{figure}[tp]
+  % \begin{minipage}{0.5\linewidth}
     \centering
     \begin{tabular}
       {@{}>{$}r<{$}@{ $\vdash_e$ }
@@ -392,8 +388,8 @@ Capturing a suspended binding is forbidden.
     \end{tabular}
     \caption{Splitting rules for bindings}
     \label{sdtyp:split}
-  \end{minipage}
-\end{figure*}
+  % \end{minipage}
+\end{figure}
 
 The {\sc Pair} typing rule in \cref{sdtyp:pair} demonstrates how \lang
 deals with duplication and dropping of values.
@@ -514,12 +510,12 @@ that the kind of $\tau$ does not contain anything whose kind is
 $\kun_n$ and thus cannot be returned).
 
 
-As it would be cumbersome to markup regions manually, we developed an
-algorithm that starts from each borrow, creates a region around it,
-and extends it as much as possible while respecting other borrows
-and binders. The algorithm (see \cref{regionannot}) also provides the region's level
-and variable annotation.
-Henceforth, we consider terms with fully annotated regions.
+% As it would be cumbersome to markup regions manually, we developed an
+% algorithm that starts from each borrow, creates a region around it,
+% and extends it as much as possible while respecting other borrows
+% and binders. The algorithm (see \cref{regionannot}) also provides the region's level
+% and variable annotation.
+% Henceforth, we consider terms with fully annotated regions.
 
 
 
@@ -527,9 +523,11 @@ Henceforth, we consider terms with fully annotated regions.
 
 % \TODO{Present this if we have enough space}
 
-% \subsubsection{Pattern matching}
+\subsubsection{Pattern matching}
 
-% \TODO{Present this if we have enough space}
+
+
+\TODO{Present this if we have enough space}
 
 % \clearpage
 \subsection{Semantics}
