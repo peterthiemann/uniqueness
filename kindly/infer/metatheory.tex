@@ -41,8 +41,7 @@ We define the flattening $\Eflat\E$ of an environment $\E$, as the environment
 where all the binders are replaced by normal ones. More formally:
 \begin{align*}
   \Eflat\E
-  &= \left\{ \bvar{x}{\tau} \mid
-    \bvar{x}{\tau}\in\E
+  =& \left\{ \bvar{x}{\tau} \in\E \mid
     \vee \bvar{\borrow{x}}{\borrowty{k}{\tau}}\in\E
     \vee \svar{x}{\tau}^n\in\E
     \right\}\\
@@ -421,11 +420,13 @@ Finally, we present the completeness theorem.
     \inferW{\Sv_2}{(C_2,\unif_2)}{\Eflat\E_2&}{e}{\tau_2}
     &\unif_2 &\leq^{\phi_2}_{\fv{\E}} \unif'_2
     &\entail{C'&}{\phi C_2}
-    &\entail{&}{\phi_2 \schm_2 \preceq \schm'_2}
   \end{align*}
   \begin{align*}
-    \Sv_2&\subset\E_2
-    &\schm'_2 &= \generalize{C'}{\E'_2}{\tau'_2}
+    \entail{&}{\phi_2 \schm_2 \preceq \schm'_2}
+    &\Sv_2&\subset\E_2
+  \end{align*}
+  \begin{align*}
+    \schm'_2 &= \generalize{C'}{\E'_2}{\tau'_2}
     &\schm_2 &= \generalize{C}{\E_2}{\tau_2}
   \end{align*}
 

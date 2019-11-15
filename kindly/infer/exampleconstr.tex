@@ -1,6 +1,6 @@
 We now demonstrate the constraint solving
-algorithm presented in \cref{infer:solving}.
-Let us consider the expression $\lam{f}{\lam{x}{(\app{f}{x},x)}}$.
+algorithm presented in \cref{infer:solving}
+on the expression $\lam{f}{\lam{x}{(\app{f}{x},x)}}$.
 The application of our inference algorithm yields the following constraints:
 %
 \begin{align*}
@@ -21,20 +21,20 @@ $$\alpha_r =
 (\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma$$
 
 and the following kind constraints: 
-\begin{gather*}
-  \Cproj{\kvar_r}\Cproj{\kvar_f}\Cproj{\kvar_x}
+\[\begin{aligned}
+  \Cproj{\kvar_r}\Cproj{\kvar_f}\Cproj{\kvar_x}{}&
   (\kvar_x \leq \kun)
   \Cand
   (\kvar_\gamma \leq \kvar_x)
   \Cand
   (\kvar_x \leq \kvar_r)
-  \Cand
-  (\kvar_\beta \leq \kvar_r)
+  \Cand\\
+  &(\kvar_\beta \leq \kvar_r)
   \Cand
   (\kvar_3 \leq \kvar_f)
   \Cand
   (\kvar_f \leq \kvar_1)
-\end{gather*}
+\end{aligned}\]
 Since $\kvar_r$, $\kvar_f$ and $\kvar_x$ are not present in the type skeleton,
 they are existentially quantified.
 

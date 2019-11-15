@@ -13,13 +13,12 @@ In this context, channels must be used linearly, because every use of
 a channel ``consumes'' one interaction and  changes the type of the
 channel. That is, after sending two integers on the channel,
 the remaining channel has type \lstinline{int?end}.
-
+%
 Here are some standard type operators for session types \SType:
 \begin{center}
-  $\SType ::=$
   \begin{tabular}[t]{rl}
-    $\tau ! \SType$ & Send a value of type $\tau$ then continue with protocol $\SType$.\\
-    $\tau ? \SType$& Receive a value of type $\tau$ then continue with protocol $\SType$.\\
+    $\tau ! \SType$ & Send a value of type $\tau$ then continue with $\SType$.\\
+    $\tau ? \SType$& Receive a value of type $\tau$ then continue with $\SType$.\\
     $\SType \oplus \SType'$& Internal choice between protocols $\SType$ and $\SType'$.\\
     $\SType \operatorname{\&} \SType'$
                     & Offer a choice between protocols $\SType$ and $\SType'$.
@@ -76,20 +75,20 @@ This code is polymorphic in both argument and return types, so it could
 be used with any binary operator.
 %
 \begin{figure}[!h]
-  \begin{subfigure}[t]{.5\linewidth}
+  \begin{subfigure}[t]{\linewidth}
 \begin{lstlisting}
 let add_service ep =
   let x, ep = receive ep in
   let y, ep = receive ep in
   let ep = send ep (x + y) in
   close ep
-# add_service :
-  (int ! int ! int ? end) st -> unit
+# add_service : (int ! int ! int ? end) st -> unit
 \end{lstlisting}
-    \vspace{-10pt}
+    \vspace{-5pt}
     \caption{Addition server}
-  \end{subfigure}~
-  \begin{subfigure}[t]{.5\linewidth}
+  \end{subfigure}
+
+  \begin{subfigure}[t]{\linewidth}
 \begin{lstlisting}
 let op_client ep x y =
   let ep = send ep x in
@@ -97,14 +96,13 @@ let op_client ep x y =
   let result, ep = receive ep in
   close ep;
   result
-# op_client :
-  ('a_1 ? 'a_2 ? 'b ! end) st -> 'a_1 -{lin}> 'a_2 -{lin}> 'b
+# op_client : ('a_1 ? 'a_2 ? 'b ! end) st -> 'a_1 -{lin}> 'a_2 -{lin}> 'b
 \end{lstlisting}
 % The actual answer from the typechecker looks like this:
 % # ('m2:^k2), ('m1:^k1).
 % # (^k1 < ^k) & (lin < ^k) =>
 % # ('m1 ?'m2 ? 'result ! end) st -> 'm1 -{lin}> 'm2 -{^k}> 'result
-    \vspace{-10pt}
+    \vspace{-5pt}
     \caption{Binary operators client}
   \end{subfigure}
   \vspace{-10pt}
