@@ -9,32 +9,32 @@
   |&\ \create \mid \observe \mid \update \mid \destroy \tag{Resources}\\
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
   % |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
-  \htag{Borrows}
-  \BORROW ::=& \ \IBORROW \tag{Shared borrow} \\
-  |&\ \MBORROW \tag{Exclusive borrow}\\
-  \htag{Match Specification}
-  \etransfm ::=&\ \text{id} \tag{Normal match} \\
-  |&\ \&^{\BORROW} \tag{Borrow match}\\
-  \htag{Constraints}
-  C ::=&\ \Multi{\Cleq{k}{k'}}
+  % \htag{Borrows}
+  \BORROW ::=& \ \IBORROW % \tag{Shared borrow} \\
+  \mid \MBORROW % \tag{Exclusive borrow}\\
+  \tag{Borrow specification}\\
+  %\htag{Match Specification}
+  \etransfm ::=&\ \text{id} % \tag{Normal match} \\
+  \mid \&^{\BORROW} % \tag{Borrow match}\\
+  \tag{Match Specification}
 % \end{align*}
 % \end{subfigure}\hfill
 % \begin{subfigure}[t]{0.5\linewidth}
 % \begin{align*}
   \htag{Types}
-  \tau ::=&\ \tvar\tag{Type variables}\\
+  \tau ::=&\ \tvar% \tag{Type variables}\\
+  \mid \tyPair{\tau}{\tau'}% \tag{Pair types}\\
+  \mid \tapp{\tcon}{\Multi\tau}% \tag{Type constructors}\\
+  \tag{ML types}\\
   |&\ \tau\tarr{k}\tau\tag{Function types}\\
-  |&\ \tyPair{\tau}{\tau'}\tag{Pair types}\\
-  |&\ \tapp{\tcon}{\Multi\tau}\tag{Type constructors}\\
   |&\ \borrowty{k}{\tau}\tag{Borrowed Type}\\
   \htag{Kinds}
-  \mul ::=&\ \klin\tag{Linear}\\
-  |&\ \kaff\tag{Affine}\\
-  |&\ \kun\tag{Unrestricted}\\
-  k ::=&\ \kvar\tag{Kind variables}\\
-  |&\ \mul_n \tag{Indexed kinds}\\
+  k ::=&\ \kvar \mid \mul_n \tag{Kinds}\\
+  \mul ::=&\ \klin \mid \kaff \mid \kun\tag{Quality}\\
   n \in&\ \Nat \cup \{\infty\}\\
   \htag{Constrained type and kind schemes}
+  C ::=&\ \Multi{\Cleq{k}{k'}}
+  \tag{Constraints}\\
   \schm ::=&\ \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau}) \tag{Type scheme}\\
   \kschm ::=&\ \forall\Multi\kvar.(\qual{C}{\Multi{k} \karr k}) \tag{Kind scheme}
 \end{align*}
