@@ -288,6 +288,7 @@ a kind variable or it relates two kind variables.
     \label{selectrules:binders}
     \label{sdtyp:pair}
     \label{selectrules:region}
+    \label{selectrules:matching}
   \end{minipage}
 \end{figure*}
 
@@ -428,6 +429,31 @@ The \emph{region} around its use ensures that the borrow in the left component d
 escape, which brings us to the next topic.
 
 
+\subsubsection{Pattern matching}
+\label{sdtyping:matching}
+
+In order to deconstruct pairs in the presence of linear types, we require
+more than projection operators. Indeed, given a linear pair $x$,
+$\operatorname{fst} x$ would consume $x$ without giving access to the second
+member.
+Furthermore, we would like to be able to deconstruct a borrow of a pair
+and obtain borrows of the components.
+For these purposes, we provide the pattern matching construct
+$\matchin{x,x'}{e_1}{e_2}$. The typing rule is shown in \cref{selectrules:matching}.
+A syntactic marker $\etransfm$ indicates if it applies to
+a pair ($\etransfm = \operatorname{id}$) or a borrow ($\etransfm = \&^\BORROW$).
+If $\etransfm = \operatorname{id}$, it operators a regular destruct on pair.
+Otherwise, $e_1$ is expected to be of type
+$\borrowty{k}{\tyPair{\tau_1}{\tau'_1}}$
+while $x$ and $x'$ are of type respectively
+$\borrowty{k}{\tau_1}$ and $\borrowty{k}{\tau'_1}$.
+
+The typing of pattern matching is voluntarily simple here.
+Using a typeclass mechanism could avoid the need for explicit markers
+for borrow matches. Furthermore, a richer pattern language would allow
+finer-grained borrowing of inner components.
+We believe both extension are compatible with our system
+and are out of scope of this article.
 
 \subsubsection{Regions}
 \label{sdtyping:regions}
@@ -523,11 +549,6 @@ $\kun_n$ and thus cannot be returned).
 
 % \TODO{Present this if we have enough space}
 
-\subsubsection{Pattern matching}
-
-
-
-\TODO{Present this if we have enough space}
 
 % \clearpage
 \subsection{Semantics}
