@@ -103,22 +103,40 @@ As before, the complete type inference rules are shown in \cref{appendix:infer}.
 \subsubsection{Environments and bindings}
 \label{infer:envs}
 %
-\begin{figure}[tp]
+\begin{figure*}[tb]
   \begin{mathpar}
-    { \Weaken_{\bvar{x}{\sigma}}(\Sv) =
-      \begin{dcases}
-        \Ctrue&\text{if } x\in\Sv\\
-        \Cleq{\sigma}{\kaff_\infty}&\\
-      \end{dcases}
-    }
-    \and
     \ruleIVar
     \and
     \ruleIAbs
+    \and
+    \ruleILet
+    \hfill
+    \ruleIRegion
+    \and
+    \ruleIPair
+    \and
+    \inferrule{}
+    { \Weaken_{\bvar{x}{\sigma}}(\Sv) =
+      \text{if } (x\in\Sv) \text{ then} \Ctrue \text{else }
+      \Cleq{\sigma}{\kaff_\infty}
+      % \begin{dcases}
+      %   \Ctrue&\text{if } x\in\Sv\\
+      %   \Cleq{\sigma}{\kaff_\infty}&\\
+      % \end{dcases}
+      \\\\\\
+      \generalize{C}{\E}{\tau} =
+      (\Cproj{(\Multi{\kvar},\Multi{\tvar})}{C},
+      \forall (\Multi{\kvar},\Multi{\tvar}).\qual{C}{\tau})\\
+      \text{ where}\\\\
+      \Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}
+    }
   \end{mathpar}
-  \caption{The {\sc Abs$_I$} and {\sc Var$_I$} rules}
+  \vspace{-15pt}
+  \caption{Selected inference rules}
   \label{rule:infer:envs}
-\end{figure}
+  \label{rule:infer:envrules}
+  \label{rule:infer:let}
+\end{figure*}
 %
 In our syntax-directed system, we ensured
 that linear variables are not discarded at the \emph{leaves}, through
@@ -154,17 +172,7 @@ constraints and unifiers.
 \subsubsection{Splitting and Regions}
 \label{infer:split}
 \label{infer:regions}
-\begin{figure}[tb]
-  \centering
-  \begin{mathpar}
-    \ruleIPair
 
-    \ruleIRegion
-  \end{mathpar}
-  \caption{The {\sc Pair$_I$} and {\sc Region$_I$} rules}
-  \label{rule:infer:envrules}
-\end{figure}
-%
 We now present the inference version
 of the {\sc Pair} and {\sc Region} rules in \cref{rule:infer:envrules}.
 While the rules are quite similar to the original version, the usage
@@ -179,24 +187,7 @@ are total and non ambiguous for their input parameters ($\Sv_1, \Sv_2$ and $\Sv'
 We then collect all constraints and normalize them.
 
 \subsubsection{Generalization and constraints}
-%
-\begin{figure}[tbp]
-  \centering
-  \begin{mathpar}
-    \ruleILet
 
-    \inferrule{}
-    {\generalize{C}{\E}{\tau} =
-      (\Cproj{(\Multi{\kvar},\Multi{\tvar})}{C},
-      \forall (\Multi{\kvar},\Multi{\tvar}).\qual{C}{\tau})\\
-      \text{ where}\quad
-      \Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}
-    }
-  \end{mathpar}
-  \caption{The {\sc Let$_I$} rule}
-  \label{rule:infer:let}
-\end{figure}
-%
 So far, constraints have only been composed of a list of kind inequalities.
 The internal language of constraints used for inference is in fact
 richer.
@@ -470,8 +461,7 @@ written as $\Eflat\E$, is the environment
 where all the binders are replaced by normal ones. More formally:
 \begin{align*}
   \Eflat\E
-  &= \left\{ \bvar{x}{\tau} \mid
-    \bvar{x}{\tau}\in\E
+  =& \left\{\bvar{x}{\tau}\in\E \mid
     \vee \bvar{\borrow{x}}{\borrowty{k}{\tau}}\in\E
     \vee \svar{x}{\tau}^n\in\E
     \right\}\\

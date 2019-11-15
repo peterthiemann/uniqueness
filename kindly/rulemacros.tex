@@ -376,10 +376,10 @@
 \newcommand\ruleILet{%
   \inferrule[Let$_I$]
   { \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
-    (C_\schm,\sigma) = \generalize{C_1}{\unif_1\E}{\tau_1} \\
+    (C_\schm,\sigma) = \generalize{C_1}{\unif_1\E}{\tau_1} \\\\
     \inferW{\Sv_2}{(C_2,\unif_2)}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2} \\
-    \unif' = \unif_1 \mostgeneral \unif_2 \\
-    \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{(\Sv_2 \Sdel{x})}}\\
+    \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2 \Sdel{x}}}\\
+    \unif' = \unif_1 \mostgeneral \unif_2 \\\\
     D =
     C_\schm \Cand C_2 \Cand
     \addlin{C_s \Cand \Weaken_{\bvar{x}{\sigma}}(\Sv_2)}  \\
@@ -392,10 +392,10 @@
   \inferrule[Pair$_I$]
   { \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
     \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\
+    \unif' = \unif_1 \mostgeneral \unif_2 \\\\
     \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
     D =
     C_1 \Cand C_2 \Cand \addlin{C_s} \\
-    \unif' = \unif_1 \mostgeneral \unif_2 \\
     (C,\unif) = \normalize{D}{\unif'}\\
   }
   { \inferW{\Sv}{(C,\unif)}{\E}{\introPair{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }
@@ -444,9 +444,9 @@
 \newcommand\ruleIRegion{%
   \inferrule[Region$_I$]
   { \inferW{\addlin{\Sv'}}{(C',\unif')}{\E}{e}{\tau} \\
-    \inferK{(C_\tau,\unif_\tau)}{\E}{\tau}{k_\tau}\\
+    \inferK{(C_\tau,\unif_\tau)}{\E}{\tau}{k_\tau}\\\\
     \addlin{ \bregion{C_r}{x}{\Sv}{\Sv'} }\\
-    D = C' \Cand C_\tau \Cand \Cleq{k_\tau}{\klin_{n-1}} \Cand C_r\\
+    D = C' \Cand C_\tau \Cand \Cleq{k_\tau}{\klin_{n-1}} \Cand C_r\\\\
     (C,\unif) = \normalize{D}{\unif' \mostgeneral \unif_\tau}\\
   }  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{\Sone x \BORROW}{e}}{\tau} }
 }
