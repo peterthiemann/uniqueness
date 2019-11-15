@@ -6,15 +6,23 @@ common in functional encodings of session types (e.g.,
 \cite{DBLP:journals/jfp/Padovani17}; see also
 \cref{sec:session-linearity} in the supplement). But it really shines 
 when manipulating mutable resources like buffers or connection pools
-using an imperative programming style. 
+using a mixed functional and imperative programming style.
 %
 To support this usage pattern of linearity, we rely on
-the notion of borrowing \cite{DBLP:conf/popl/BoylandR05}.
+the notion of borrowing \cite{DBLP:conf/popl/BoylandR05} which
+we demonstrate through a series of examples:
+\begin{itemize}
+\item An API for linear arrays to demonstrate simple borrowing and imperative programming.
+\item
+  A backtracking Sudoku solver to demonstrate
+  \lang's ability to build safe hybrid functional/imperative data-structures.
+\item A pool of linear objects to demonstrate advanced usage of regions.
+\end{itemize}
 
-\subsection{Imperative programming}
+\subsection{Imperative programming with linear arrays}
 \label{sec:imper-progr}
 
-A first example is an API for mutable linear arrays
+We now showcase an API for mutable linear arrays
 (\cref{sig:array}).
 The intention of this API is to safely handle manual allocation and
 deallocation of arrays that may contain affine elements.
@@ -78,7 +86,7 @@ module Array : sig
 end
 \end{lstlisting}
     \vspace{-15pt}
-    \caption{Affine arrays}
+    \caption{Signature}
     \label{sig:array}
   \end{subfigure}
 
@@ -94,7 +102,7 @@ let mk_fib_array n =
 # mk_fib_array : int -> int Array.t
 \end{lstlisting}
     \vspace{-10pt}
-    \caption{Example of use of linear arrays}
+    \caption{Example of use}
     \label{ex:array}
 \begin{lstlisting}[firstnumber=2]
   let a = create n 1 in
@@ -107,6 +115,9 @@ let mk_fib_array n =
     \caption{Excerpt of \cref{ex:array} with explicit regions}
     \label{ex:array:region}
   \end{subfigure}
+  \vspace{-5pt}
+  \caption{Linear arrays}
+  \label{ex:array}
 \end{figure}
 
 \cref{ex:array:region} uses braces \lstinline/{| ... |}/ to make the
@@ -155,7 +166,7 @@ rarely needed with common programming idioms.
 
 
 
-\subsection{Hybrid programming style}
+\subsection{Solving sudokus with hybrid data-structures}
 
 Recently introduced persistent data structures
 permit transient mutations where
@@ -189,7 +200,7 @@ the structure itself remains linear so as to be implemented in terms of \lstinli
 The in-place mutation function \lstinline/set_mut/ with type
 \lstinline/&!('a t) * int * 'a -> unit/ works on a exclusive borrow  whereas the persistent
 \lstinline/set/ operation has type \lstinline/&('a t) * int * 'a -> 'a t/. It
-takes an shared borrow because it only reads from the
+takes a shared borrow because it only reads from the
 argument array, but returns a fresh,  modified structure.
 The code in \cref{ex:cow} contains a very simple implementation of
 \lstinline/HybArray/ that represents hybrid arrays
@@ -364,7 +375,7 @@ use : ('a_1:'k_1),('a_2:'k_2),('k_2 <= aff_r) =>
   &('a_1 pool) -> (&!(aff_r1,'a_1) -{lin}> 'a_2) -{'k_1}> 'a_2
 \end{lstlisting}
     \vspace{-10pt}
-    \caption{Interface}
+    \caption{Signature}
     \label{intf:pool}
 
 \begin{lstlisting}

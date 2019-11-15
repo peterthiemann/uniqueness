@@ -129,7 +129,7 @@ the following rules:
 \item A use of $x$ can never be in the region of $\borrow{x}$.
 \end{enumerate}
 Following these rules, we start from the leafs and grow the region
-associated to each borrow until it can't grow anymore, either due to a binding
+associated to each borrow until it can't grow anymore either due to a binding
 or to conflicting uses.
 
 Let us consider the following program with binders and function applications:
@@ -161,10 +161,12 @@ region around the exclusive borrow and its function application,
 and a second region around both shared borrows. This placement of region
 is optimal, as making any of the region bigger would cause a borrowing
 error.
+Notes that indices of regions are well nested, as the inner region have
+higher indices that the outer ones.
 
-Naturally, these rules are best effort and it's sometimes necessary for the
-programmer to annotate regions explicitly. We take such manual annotations
-into account as an upper bound on all the contained regions.
+Naturally, these rules are best effort and programmers must sometime
+annotate regions explicitly. We take such manual annotations
+into account as an upper bound on the regions of all contained borrows.
 In the following program, a manual annotation has been inserted to ensure
 no borrow enters the reference $r$:
 
@@ -434,15 +436,17 @@ escape, which brings us to the next topic.
 
 In order to deconstruct pairs in the presence of linear types, we require
 more than projection operators. Indeed, given a linear pair $x$,
-$\operatorname{fst} x$ would consume $x$ without giving access to the second
+$\app{\operatorname{fst}}{x}$ would consume $x$ without giving access to the second
 member.
 Furthermore, we would like to be able to deconstruct a borrow of a pair
 and obtain borrows of the components.
-For these purposes, we provide the pattern matching construct
-$\matchin{x,x'}{e_1}{e_2}$. The typing rule is shown in \cref{selectrules:matching}.
+For these purposes, we provide the construct
+$(\matchin{x,x'}{e_1}{e_2})$ whose
+typing rule is shown in \cref{selectrules:matching}.
 A syntactic marker $\etransfm$ indicates if it applies to
 a pair ($\etransfm = \operatorname{id}$) or a borrow ($\etransfm = \&^\BORROW$).
-If $\etransfm = \operatorname{id}$, it operators a regular destruct on pair.
+If $\etransfm = \operatorname{id}$, the typing simplifies to
+a regular destruct on pairs.
 Otherwise, $e_1$ is expected to be of type
 $\borrowty{k}{\tyPair{\tau_1}{\tau'_1}}$
 while $x$ and $x'$ are of type respectively
