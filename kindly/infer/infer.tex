@@ -257,11 +257,10 @@ details).
   \centering
   \begin{minipage}{0.32\linewidth}
     \begin{align*}
-      C &::= \Cleq{\tau_1}{\tau_2} \\
-        &\mid \Cleq{k_1}{k_2} \tag{Inequalities} \\
-        &\mid C_1 \Cand C_2  \tag{Conjunction}\\
+      C &::=  C_1 \Cand C_2  \tag{Conjunction}\\
+        &\mid \Cleq{\tau_1}{\tau_2} \mid \Cleq{k_1}{k_2} \tag{Inequalities} \\
         &\mid \Cproj{\tvar}{C}
-        \mid \Cproj{\kvar}{C} \tag{Projection}
+        \mid \Cproj{\kvar}{C} \tag{Projections}
     \end{align*}
     \caption{The constraint language}
     \label{grammar:constraint}
