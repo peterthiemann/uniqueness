@@ -12,7 +12,8 @@ with the type environment $\SE \vdash \VEnv:\E$ that we define
 formally in~\cref{sec:metatheory:proofs} along with selected cases of the proofs. The
 non-standard part is the handling of permissions. With
 $\Rawloc\Perm$ we extract the underlying raw locations from the
-permissions and with $\Reach\Store\VEnv$ we transitively trace the
+permissions as in  $\Rawloc{\Multi\IBORROW\Multi\MBORROW\Loc} = \Loc$
+and with $\Reach\Store\VEnv$ we transitively trace the 
 addresses reachable from $\VEnv$ in store $\Store$. We write
 $\SE\le\SE'$ and $\Store \le \Store'$ for extending the domain of the
 store type and of the store, respectively.
@@ -67,8 +68,10 @@ shown in \cref{sec:sem}.
 For the refined statement, we distinguish several parts of the value
 environment $\VEnv$ that correspond to the different kinds of bindings in the
 type environment: $\Active\VEnv$ for active entries of direct
-references to resources, closures, etc; $\MutableBorrows\VEnv$ for 
-affine borrows; $\ImmutableBorrows\VEnv$ for unrestricted borrows;
+references to linear resources, closures, etc; $\MutableBorrows\VEnv$ for 
+affine borrows or resources;
+$\ImmutableBorrows\VEnv$ for unrestricted values including
+unrestricted borrows;
 and $\Suspended\VEnv$ for suspended entries. The judgment
 $\SE \vdash \VEnv:\E$ is defined in terms of this structure.
 We treat
@@ -83,32 +86,46 @@ With these concepts, we can refine the assumption of
 \item $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv} \subseteq \Perm$
   % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
-\item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
-  \begin{itemize}
-  \item 
-    For all $\Addr$ such that $\MultiNumber\Addr{\Reach{\Store}{\Active\VEnv}} >0$,
-    if $\Affine{\SE}\Addr$ then $\MultiNumber\Addr\REACH= 1$
-  \item For all $\Addr$ such that $
-    \MultiNumber\Addr{\Reach{\Store}{\MutableBorrows\VEnv}} >0$, it
-    must be that $\MultiNumber\Addr\REACH=1$.
-  \item For all $\Addr$ such that $
-    \MultiNumber\Addr{\Reach{\Store}{\Suspended\VEnv}} >0$, it
-    must be that $\MultiNumber\Addr\REACH=1$.
-  \end{itemize}
+  \item Incoming Resources: 
+    \begin{itemize}
+    \item $\forall \Loc\in \Rawloc{\Reach\Store\VEnv}$,  $\Store (\Loc) \ne
+      \StFreed$.
+      % suspended bindings must not point to freed resources
+    \item $\forall \Loc \in \REACH
+      =\Rawloc{\Reach\Store{\Active\VEnv,\MutableBorrows\VEnv}}$, 
+      % if $\Affine\SE\Loc$ then
+      $\MultiNumber\Loc\REACH= 1$.
+    \item $\forall \Loc \in \REACH
+      =\Rawloc{\Reach\Store{\Suspended\VEnv}}$, 
+      if $\Affine\SE\Loc$ then
+      $\MultiNumber\Loc\REACH= 1$.
+    \end{itemize}
+% \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
+%   \begin{itemize}
+%   \item 
+%     For all $\Addr$ such that $\MultiNumber\Addr{\Reach{\Store}{\Active\VEnv}} >0$,
+%     if $\Affine{\SE}\Addr$ then $\MultiNumber\Addr\REACH= 1$
+%   \item For all $\Addr$ such that $
+%     \MultiNumber\Addr{\Reach{\Store}{\MutableBorrows\VEnv}} >0$, it
+%     must be that $\MultiNumber\Addr\REACH=1$.
+%   \item For all $\Addr$ such that $
+%     \MultiNumber\Addr{\Reach{\Store}{\Suspended\VEnv}} >0$, it
+%     must be that $\MultiNumber\Addr\REACH=1$.
+%   \end{itemize}
 \end{itemize}
-Thus, we do not require permission for suspended bindings in the
-environment. Moreover, affine (or linear)  resources, affine
-borrows, and suspended bindings must be reached exactly once by
-incoming references. I.e., there is no restriction on unrestricted
-borrows and other resources. The function $\Affine{\SE}\Addr$ checks
-affinity of a resource by inspecting the store type (see
-\cref{sec:metatheory:proofs}). 
+First, we do not require permission for suspended bindings in the
+environment. Second, all incoming resources are active. Third, affine
+(or linear) resources, affine borrows, and suspended affine bindings
+must be reached exactly once by incoming references. There is no
+restriction on unrestricted values, unrestricted borrows or their
+suspensions.  The predicate $\Affine{\SE}\Addr$ checks affinity of a
+resource by inspecting the store type $\SE$ (see
+\cref{sec:metatheory:proofs}).
 
 This refined assumption enables the following additional conclusions,
 again stated in the context of \cref{theorem:type-soundness}. Function
 $\Linear{\SE}\Addr$ is defined analogously to  $\Affine{\SE}\Addr$.  As
-in the semantics, the location of an address is defined by $\text{getloc}
-(\Multi\IBORROW\Multi\MBORROW\Loc) = \Loc$. 
+in the semantics, 
 \begin{itemize}
 \item Outside:
   For all $\Loc \in \Dom{\Store} \setminus \text{getloc} (\Reach{\Store'}{\VEnv})$ it must be that 

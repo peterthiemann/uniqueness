@@ -201,22 +201,26 @@
 \newcommand\TimeOut{\operatorname{TimeOut}}
 \newcommand\Ok[1]{\operatorname{Ok} (#1)}
 \newcommand\Nat{\mathbb{N}}
-\newcommand\Rawloc[1]{\operatorname{rawloc} (#1)}
+\newcommand\Rawloc[1]{\operatorname{getloc} (#1)}
 \newcommand\Reach[2]{\operatorname{reach}_{#1} (#2)}
 \newcommand\RS[2]{\operatorname{reach}_0 (#2)}
 %\newcommand\Writeable[2]{\operatorname{writeable}_{#1} (#2)}
-\newcommand\Writeable[2]{\operatorname{affine}_{#1} (#2)}
-\newcommand\Linear[2]{\operatorname{linear}_{#1} (#2)}
-\newcommand\Affine[2]{\operatorname{affine}_{#1} (#2)}
+\newcommand\Writeable[2]{\operatorname{aff}_{#1} (#2)}
+\newcommand\Linear[2]{\operatorname{lin}_{#1} (#2)}
+\newcommand\Affine[2]{\operatorname{aff}_{#1} (#2)}
 \newcommand\Crewrite{\leadsto}
 
 \newcommand\REACH\Theta
 
-\newcommand\MultiNumber[2]{\#(#1,#2)}
+\newcommand\MultiNumber[2]{#2(#1)}%{\#(#1,#2)}
 
-\newcommand\Active[1]{{#1}_{\bullet}}
-\newcommand\MutableBorrows[1]{{#1}_{\circledast}}
-\newcommand\ImmutableBorrows[1]{{#1}_{\circ}}
+\newcommand\LinPart[1]{{#1}^\klin}
+\newcommand\AffPart[1]{{#1}^\kaff}
+\newcommand\UnrPart[1]{{#1}^\kun}
+
+\newcommand\Active[1]{\LinPart{#1}} %{{#1}_{\bullet}}
+\newcommand\MutableBorrows[1]{\AffPart{#1}} %{{#1}_{\circledast}}
+\newcommand\ImmutableBorrows[1]{\UnrPart{#1}} % {{#1}_{\circ}}
 \newcommand\Suspended[1]{{#1}_{\#}}
 
 \newcommand\Matches[2]{#1 \gets #2}        %pattern matching
