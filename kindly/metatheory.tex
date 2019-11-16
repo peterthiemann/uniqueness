@@ -11,7 +11,7 @@ $\vdash \Store : \SE$ and agreement of the results in the value environment
 with the type environment $\SE \vdash \VEnv:\E$ that we define
 formally in~\cref{sec:metatheory:proofs} along with selected cases of the proofs. The
 non-standard part is the handling of permissions. With
-$\Addresses\Perm$ we extract the underlying raw locations from the
+$\Rawloc\Perm$ we extract the underlying raw locations from the
 permissions and with $\Reach\Store\VEnv$ we transitively trace the
 addresses reachable from $\VEnv$ in store $\Store$. We write
 $\SE\le\SE'$ and $\Store \le \Store'$ for extending the domain of the
@@ -27,7 +27,7 @@ store type and of the store, respectively.
   % \item
     $\vdash \Store : \SE$,
   % \item
-    $\Addresses\Perm \subseteq \Dom\Store$,
+    $\Rawloc\Perm \subseteq \Dom\Store$,
   % \item
     $\Reach\Store{\VEnv} \subseteq \Perm$,
   % \item
@@ -47,7 +47,7 @@ store type and of the store, respectively.
   % \item
     $\SE' \vdash r' : \tau$,
   % \item
-    $\Addresses{\Perm'} \subseteq \Dom{\Store'}$,
+    $\Rawloc{\Perm'} \subseteq \Dom{\Store'}$,
   % \item
     $\Reach{\Store'}{r'} \subseteq \Perm'$.
   % \end{itemize}
@@ -81,7 +81,7 @@ With these concepts, we can refine the assumption of
 \cref{theorem:type-soundness} by two items:
 \begin{itemize}
 \item $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv} \subseteq \Perm$
-  % \item  $\VEnv'$ with $\Addresses{\VEnv'}
+  % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
 \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
   \begin{itemize}

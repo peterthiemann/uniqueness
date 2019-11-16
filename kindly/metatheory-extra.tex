@@ -134,20 +134,20 @@
   \VEnv : \E$.
 \end{lemma}
 
-We write $\Addresses{\VEnv}$ for the function that extracts a multiset
-of raw locations from the range of the variable environment. It needs to be defined for
-results and environments.
+We write $\Rawloc\cdot$ for the function that extracts a multiset of
+\emph{raw locations} from a result or from the range of the variable
+environment. 
 
 \begin{align*}
-  \Addresses{\Multi\IBORROW\Multi\MBORROW\Loc} &= \{ \Loc \} \\
-  \Addresses{c} &= \{ \} \\
-  \Addresses\Eempty &= \{\} \\
-  \Addresses{\VEnv( x \mapsto r)} &= \Addresses\VEnv \cup \Addresses r
+  \Rawloc{\Multi\IBORROW\Multi\MBORROW\Loc} &= \{\Loc\} \\
+  \Rawloc{c} &= \{ \} \\
+  \Rawloc\Eempty &= \{\} \\
+  \Rawloc{\VEnv( x \mapsto r)} &= \Rawloc\VEnv \cup \Rawloc r
 \end{align*}
 
-We write $\Reach\Store\VEnv$ for the multiset of all addresses
-reachable from $\Addresses\VEnv$ 
-assuming that $\Addresses\VEnv \subseteq \Dom\Store$\footnote{In
+We write $\Reach\Store\VEnv$ for the multiset of all \emph{addresses}
+reachable from $\Rawloc\VEnv$ 
+assuming that $\Rawloc\VEnv \subseteq \Dom\Store$\footnote{In
   mixed comparisons between a multiset and a set, we tacitly convert
   a multiset $M$ to its supporting set $\{ x \mid \MultiNumber x M \ne 0\}$.}.
 The function $\Reach\Store\cdot$ is defined in
@@ -179,7 +179,7 @@ for results, storables, and environments.
 This multiset is closed transitively by store lookup. We define 
 $\Reach\Store\VEnv$ as the smallest multiset $\REACH$ that fulfills
 the following inequations. We assume a nonstandard
-model such that an element $\Loc$ may occur infinitely often as in
+model of multisets such that an element $\Loc$ may occur infinitely often as in
 $\MultiNumber\Loc\REACH = \infty$. 
 \begin{align*}
   \REACH &\supseteq \RS\Store\VEnv \\
@@ -228,21 +228,21 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \item $\inferS{C}{\E}{e}{\tau}$
   \item $\SE \vdash \VEnv : \E$
   \item $\vdash \Store : \SE$
-  \item $\Addresses\Perm \subseteq \Dom\Store$
+  \item $\Rawloc\Perm \subseteq \Dom\Store$
   \item $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv,
       \ImmutableBorrows\VEnv} \subseteq \Perm$
-  \item $\Addresses{\Active\VEnv}$,
-    $\Addresses{\MutableBorrows\VEnv}$,
-    $\Addresses{\ImmutableBorrows\VEnv}$, and
-    $\Addresses{\Suspended\VEnv}$ are all disjoint
-  % \item  $\VEnv'$ with $\Addresses{\VEnv'}
+  \item $\Rawloc{\Active\VEnv}$,
+    $\Rawloc{\MutableBorrows\VEnv}$,
+    $\Rawloc{\ImmutableBorrows\VEnv}$, and
+    $\Rawloc{\Suspended\VEnv}$ are all disjoint
+  % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
   \item Incoming Resources: 
     \begin{itemize}
-    \item $\forall \Loc\in \Reach\Store\VEnv$,  $\Store (\Loc) \ne
+    \item $\forall \Loc\in \Rawloc{\Reach\Store\VEnv}$,  $\Store (\Loc) \ne
       \StFreed$.
       % suspended bindings must not point to freed resources
-    \item $\forall \Loc \in \REACH =\Reach\Store{\Active\VEnv,\MutableBorrows\VEnv}$,
+    \item $\forall \Loc \in \REACH =\Rawloc{\Reach\Store{\Active\VEnv,\MutableBorrows\VEnv}}$,
       if $\Affine\SE\Loc$ then  $\MultiNumber\Loc\REACH= 1$.
     \end{itemize}
   \item  $i\in\Nat$ and $\Store, \Perm, \VEnv \vdash {e}
@@ -256,25 +256,32 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \item $\SE \le \SE'$, $\Store \le \Store'$,
     $\vdash \Store' : \SE'$
   \item $\SE' \vdash r' : \tau$
-  \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
+  \item $\Rawloc{\Perm'} \subseteq \Dom{\Store'}$
   \item $\Reach{\Store'}{r'} \subseteq \Perm'$
-  \item Frame: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store'}{\VEnv}$ it must be that
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Addresses\Perm \cap \Addresses{\Perm'}$.
+  \item Frame: \\
+    For all $\Loc \in \Dom{\Store} \setminus
+    \Rawloc{\Reach{\Store'}{\VEnv}}$ it must be that
+    \begin{itemize}
+    \item $\Store' (\Loc) = \Store (\Loc)$ and
+    \item  for any $\Addr$ based on $\Loc$,
+      $\Addr \in \Perm \Leftrightarrow \Addr\in\Perm'$.
+    \end{itemize}
     %% must be \Store because \Perm has no idea of \Perm'
-  \item Immutable borrows: For all $\Loc \in
-    \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
+  \item Immutable borrows: \\
+    For all $\Addr \in
+    \Reach{\Store'}{\ImmutableBorrows\VEnv}$ with
+    $\Rawloc\Addr = \{\Loc\}$, it must be that
     $\Loc\in\Dom\Store$,
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Addresses\Perm \cap \Addresses{\Perm'}$.
-  \item Mutable borrows: For all $\Loc \in
-    \Reach{\Store'}{\MutableBorrows\VEnv}$, if
+    $\Store' (\Loc) = \Store (\Loc) \ne \StFreed$
+    and $\Addr\in\Perm'$.
+  \item Mutable borrows:\\
+    For all $\Addr \in  \Reach{\Store'}{\MutableBorrows\VEnv}$
+    with $\Rawloc\Addr = \{\Loc\}$, if
     $\Loc\in\Dom\Store$, then 
     $\Store' (\Loc) \ne \StFreed$
-    and $\Loc\in \Addresses{\Perm'}$ implies $\Loc\in
-    \Addresses\Perm$.
-    \\\textbf{PJT: anything else that can be said?}
+    and $\Addr\in{\Perm'}$ implies $\Addr\in
+    \Rawloc\Perm$.
+    \\\textbf{PJT: this is a really weak statement! anything else that can be said?}
   \item Resources:
     Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
     For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
@@ -288,8 +295,8 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
     {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Loc$ then
     $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm'$.
   \item No thin air permission: \\
-    For all $\Loc\in \Addresses{\Perm'}$, $\Loc
-    \in \Addresses\Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
+    For all $\Loc\in \Rawloc{\Perm'}$, $\Loc
+    \in \Rawloc\Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
   \end{itemize}
 \end{theorem}
 
@@ -300,9 +307,9 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \item $\inferS{C}{\E}{e}{\tau}$
   \item $\SE \vdash \VEnv : \E$
   \item $\vdash \Store : \SE$
-  \item $\Addresses\Perm \subseteq \Dom\Store$
+  \item $\Rawloc\Perm \subseteq \Dom\Store$
   \item $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv} \subseteq \Perm$
-  % \item  $\VEnv'$ with $\Addresses{\VEnv'}
+  % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
   \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
     \begin{itemize}
@@ -326,7 +333,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
     $R = \Ok{\Store', \Perm', r'}$
   \item $\SE \le \SE'$, $\Store \le \Store'$,
     $\vdash \Store' : \SE'$
-  \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
+  \item $\Rawloc{\Perm'} \subseteq \Dom{\Store'}$
   \item $\SE' \vdash r' : \tau$
   \item $\Reach{\Store'}{r'} \subseteq \Perm'$
   \item Outside: For all $\Loc \in \Dom{\Store} \setminus
@@ -385,7 +392,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \item  $\inferS{C}{\E_1}{e_1}{\tau_2\tarr{k}\tau_1}$ by inversion of typing
   \item $\SE \vdash \VEnv_1 : \E_1$ by \eqref{eq:1}
   \item $\vdash \Store : \SE$ by assumption
-  \item $\Addresses\Perm \subseteq \Dom\Store$ by assumption
+  \item $\Rawloc\Perm \subseteq \Dom\Store$ by assumption
   \item $
     \Reach\Store{\Active{\VEnv_1}, \MutableBorrows{\VEnv_1},
       \ImmutableBorrows{\VEnv_1}}
@@ -413,7 +420,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
     \Store \le \Store_1 \qquad
     \vdash \Store_1 :    \SE_1
     \\
-    \Addresses{\Perm_1} \subseteq \Dom{\Store_1}
+    \Rawloc{\Perm_1} \subseteq \Dom{\Store_1}
     \\\label{eq:3}
     \SE_1 \vdash r_1 : \tau_2\tarr{k}\tau_1
     \\\label{eq:10}
@@ -467,7 +474,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \item $\SE_1 \vdash \VEnv_2 : \E_2$ by \eqref{eq:1} and Weakening
     (Lemma~\ref{lemma:store-weakening}).
   \item $\vdash \Store_1 : \SE_1$ by IH on $e_1$
-  \item $\Addresses{\Perm_1'} \subseteq \Dom{\Store_1}$ by assumption
+  \item $\Rawloc{\Perm_1'} \subseteq \Dom{\Store_1}$ by assumption
     and no-thin-air permission for $e_1$
   \item Show that for $\Active{\Theta_2} =
     \Reach{\Store_1}{\Active{\VEnv_2}}$, $\MutableBorrows{\Theta_2} =
@@ -515,7 +522,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
     \Store_1 \le \Store_2 \qquad
     \vdash \Store_2 :  \SE_2
     \\\label{eq:9}
-    \Addresses{\Perm_2} \subseteq \Dom{\Store_2}
+    \Rawloc{\Perm_2} \subseteq \Dom{\Store_2}
     \\\label{eq:8}
     \SE_2 \vdash r_2 : \tau_2
     \\\label{eq:11}
@@ -563,7 +570,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
     \eqref{eq:8}.
   \item  $\vdash \Store_2 : \SE_2$\\
     holds by \eqref{eq:7}.
-  \item  $\Addresses{\Perm_2} \subseteq \Dom{\Store_2}$\\
+  \item  $\Rawloc{\Perm_2} \subseteq \Dom{\Store_2}$\\
     by \eqref{eq:9}.
   \item $\Reach{\Store_2}{\Active{\VEnv_3}, \MutableBorrows{\VEnv_3}, \ImmutableBorrows{\VEnv_3}} \subseteq \Perm_2$\\
     This fact follows from (\ref{eq:10}) becase $\VEnv'$ is contained
@@ -594,7 +601,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
     \Store_2 \le \Store_3 \qquad
     \vdash \Store_3 :  \SE_3
     \\\label{eq:13}
-    \Addresses{\Perm_3} \subseteq \Dom{\Store_3}
+    \Rawloc{\Perm_3} \subseteq \Dom{\Store_3}
     \\\label{eq:14}
     \SE_3 \vdash r_3 : \tau_1
     \\\label{eq:15}
@@ -633,7 +640,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \item $R' = \Ok{\Store', \Perm', r'}$
   \item by transitivity, $\Store \le \Store'$ and $\SE \le \SE'$
   \item by (\ref{eq:12}), $\vdash \Store' : \SE'$
-  \item by (\ref{eq:13}), $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
+  \item by (\ref{eq:13}), $\Rawloc{\Perm'} \subseteq \Dom{\Store'}$
   \item by (\ref{eq:14}), $\SE' \vdash r' : \tau_1$
   \item by (\ref{eq:15}), $\Reach{\Store'}{r'} \subseteq \Perm'$
   \item Outside: Let $\Loc \in \Dom{\Store} \setminus
@@ -695,7 +702,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
     $\MutableBorrows\VEnv$ or $\ImmutableBorrows\VEnv$. The same
     happens in the semantics by mapping updating $\VEnv$ to $\VEnv'$.
   \item $\vdash \Store : \SE$ by assumption.
-  \item $\Addresses{\Perm'} \subseteq \Dom\Store$: we only change
+  \item $\Rawloc{\Perm'} \subseteq \Dom\Store$: we only change
     $\rho$ to $\rho'$, but their raw location is the same.
   \item $\Reach\Store{\Active{\VEnv'}, \MutableBorrows{\VEnv'},
       \ImmutableBorrows{\VEnv'}} \subseteq \Perm'$ because we
@@ -728,7 +735,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
     $R_1 = \Ok{\Store_1, \Perm_1, r_1}$
   \item $\SE \le \SE_1$, $\Store \le \Store_1$,
     $\vdash \Store_1 : \SE_1$
-  \item $\Addresses{\Perm_1} \subseteq \Dom{\Store_1}$
+  \item $\Rawloc{\Perm_1} \subseteq \Dom{\Store_1}$
   \item $\SE_1 \vdash r_1 : \tau$
   \item $\Reach{\Store_1}{r_1} \subseteq \Perm_1$
   \item Outside: For all $\Loc \in \Dom{\Store} \setminus
@@ -761,7 +768,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \item $R' = \Ok{\Store', \Perm_1', r'}$
   \item  $\SE \le \SE'$, $\Store \le \Store'$,
     $\vdash \Store' : \SE'$  by the subevaluation.
-  \item $\Addresses{\Perm_1'} = \Addresses{\Perm_1-\rho'} \subseteq \Dom{\Store'}$
+  \item $\Rawloc{\Perm_1'} = \Rawloc{\Perm_1-\rho'} \subseteq \Dom{\Store'}$
   \item $\SE' \vdash r' : \tau$
     %%% ok the next bit is fishy, but morally correct
   \item The constraint $\entail C {\Cleq{\tau}{\klin_{n-1}}}$
@@ -808,9 +815,9 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \item $\ruleSDBorrow$.
   \item\label{item:4} $\SE \vdash \VEnv : \E$
   \item\label{item:7} $\vdash \Store : \SE$
-  \item\label{item:6} $\Addresses\Perm \subseteq \Dom\Store$
+  \item\label{item:6} $\Rawloc\Perm \subseteq \Dom\Store$
   \item\label{item:5} $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv} \subseteq \Perm$
-  % \item  $\VEnv'$ with $\Addresses{\VEnv'}
+  % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
   \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
     \begin{itemize}
@@ -840,7 +847,7 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \item $R=\Ok{\Store, \Perm, \rho}$.
   \item $\SE \le \SE$, $\Store \le \Store$ trivially
   \item $\vdash \Store : \SE$ by assumption~\ref{item:7}.
-  \item $\Addresses{\Perm} \subseteq \Dom{\Store}$ by
+  \item $\Rawloc{\Perm} \subseteq \Dom{\Store}$ by
     assumption~\ref{item:6}.
   \item $\SE \vdash \rho : \borrowty{k}{\tau}$ by inversion of typing.
   \item $\Reach{\Store}{\rho} \subseteq \Perm$ by assumption~\ref{item:5}.

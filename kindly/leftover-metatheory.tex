@@ -50,7 +50,7 @@
   \item $\vdash \Store : \SE$
   \item $\Reach\Store{\VEnv_1} \subseteq \Reach\Store{\VEnv} \subseteq
     \Perm \subseteq \Dom\Store$ 
-  \item $\Addresses{\VEnv_1'} \subseteq \Dom\Store$ and
+  \item $\Rawloc{\VEnv_1'} \subseteq \Dom\Store$ and
     $\Dom{\VEnv_1} \cap \Dom{\VEnv_1'}=\emptyset$
   \item $\Store, \Perm, \VEnv_1 + \VEnv_1' \vdash {e_1}
     \Downarrow^i R_1$
@@ -98,7 +98,7 @@
     \item If $\Loc' \in \Reach{\Store_1}{\VEnv_1}$, then splitting
       enforces that $\neg\Writeable{\SE_1}{\Loc'}$, hence $\Loc' \in \Perm_1'$.
     \end{itemize}
-  \item $\Addresses{\VEnv_2'} \subseteq \Dom{\Store} \subseteq \Dom{\Store_1}$ and
+  \item $\Rawloc{\VEnv_2'} \subseteq \Dom{\Store} \subseteq \Dom{\Store_1}$ and
     $\Dom{\VEnv_2} \cap \Dom{\VEnv_2'}=\emptyset$ by construction
   \item $\Store_1, \Perm_1', \VEnv_2 + \VEnv_2' \vdash {e_2}
     \Downarrow^i R_2$
@@ -206,7 +206,7 @@
   \item $\vdash \Store : \SE$
   \item $\Reach\Store{\VEnv, \MutableBorrows\VEnv} \subseteq \Perm \subseteq \Dom\Store$\\
     (we have permission for suspended bindings)
-  \item  $\VEnv'$ with $\Addresses{\VEnv'}
+  \item  $\VEnv'$ with $\Rawloc{\VEnv'}
     \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
     \\
     (that would be the enclosing frame)
