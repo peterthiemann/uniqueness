@@ -75,47 +75,107 @@
   }{  \SE \vdash
     \Multi\IBORROW\Multi\MBORROW\Loc : \borrow{\tau}}
   \end{mathpar}
-\item Relating environments to contexts. Here we consider an
-  environment $\VEnv = (\Active\VEnv, \MutableBorrows\VEnv,
-  \ImmutableBorrows\VEnv, \Suspended\VEnv)$ as a quadruple
-  consisting of the active entries in $\Active\VEnv$ and the
-  entries for exclusive borrows in $\MutableBorrows\VEnv$ and for
-  shared borrows in $\ImmutableBorrows\VEnv$, and suspended entries
-  in $\Suspended\VEnv$. The
-  suspended entries cannot be used directly, but they can be activated
-  by borrowing.
+\item 
+We write $\Affine\SE\Loc$ to express that $\Loc$ points to a resource
+that requires at least affine treatment. Borrow types do not appear in
+store types as the store only knows about the actual resources.
 
-  $\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
-  \ImmutableBorrows\VEnv, \Suspended\VEnv : \E$
+Define  $\Affine\SE\Loc$ if one of the following cases holds:
+\begin{itemize}
+\item $\SE (\Loc) =
+  \forall\Multi\kvar\forall\Multi{\bvar{\tvar}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$
+  and $C \wedge (k \lk \kun_\infty)$ is contradictory;
+\item $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\kaff}{k}$;
+\item $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \kaff
+  k$;
+\item $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$.
+% \item if $\SE (\Loc) = \borrow[\MBORROW]\tau$, then $\Loc$ is affine
+%   \dots (THAT SHOULDN'T REALLY  BE A STORE TYPE)
+% \item if $\SE (\Loc) = \borrow[\IBORROW]\tau$, then $\Loc$ is not affine
+%   \dots (THAT SHOULDN'T REALLY  BE A STORE TYPE)
 \end{itemize}
+\item 
+We write $\Linear\SE\Loc$ to express that $\Loc$ points to a linear
+resource.
+
+Define  $\Linear\SE\Loc$ if one of the following cases holds:
+\begin{itemize}
+\item $\SE (\Loc) =
+  \forall\Multi\kvar\forall\Multi{\bvar{\tvar}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$
+  and $C \wedge (k \lk \kaff_\infty)$ is contradictory; 
+\item $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\klin}{k}$;
+\item $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \klin
+  k$;
+\item $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$.
+\end{itemize}
+\item 
+It remains to characterize unrestricted resources. 
+Define $\Unrestricted\SE\Loc$ if neither $\Affine\SE\Loc$ nor
+$\Linear\SE\Loc$ holds.
+\item 
+Relating environments to contexts $\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+\ImmutableBorrows\VEnv, \Suspended\VEnv : \E$. 
+
+Here we consider an
+environment $\VEnv = (\Active\VEnv, \MutableBorrows\VEnv,
+\ImmutableBorrows\VEnv, \Suspended\VEnv)$ as a quadruple
+consisting of the active entries in $\Active\VEnv$ and the
+entries for exclusive borrows in $\MutableBorrows\VEnv$ and for
+shared borrows in $\ImmutableBorrows\VEnv$, and suspended entries
+in $\Suspended\VEnv$. The
+suspended entries cannot be used directly, but they can be activated
+by borrowing.
+\end{itemize}
+
+
 \begin{mathpar}
   \inferrule{}{\SE \vdash \Sempty, \Sempty, \Sempty, \Sempty : \Eempty}
+  \\
+  \inferrule{
+    \SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E
+    \\ \SE \vdash r : \schm
+    \\ \Linear\SE r}
+  {\SE \vdash \Active\VEnv[ x\mapsto r], \MutableBorrows\VEnv ,
+    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E;\bvar x\schm }
 
   \inferrule{
     \SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E
-    \\ \SE \vdash r : \schm}
-  {\SE \vdash \Active\VEnv[ x\mapsto r], \MutableBorrows\VEnv ,
-    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E\bvar x\schm }
+    \\ \SE \vdash r : \schm
+    \\ \Affine\SE r}
+  {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv[ x\mapsto r] ,
+    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E;\bvar x\schm }
+
+  \inferrule{
+    \SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E
+    \\ \SE \vdash r : \schm
+    \\ \Unrestricted\SE r}
+  {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv[ x\mapsto r], \Suspended\VEnv : \E;\bvar
+    x\schm } 
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\
     \SE \vdash r : \schm}
   { \SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
-    \ImmutableBorrows\VEnv, \Suspended\VEnv[ x\mapsto r] : \E\svar x\schm^n }
+    \ImmutableBorrows\VEnv, \Suspended\VEnv[ x\mapsto r] :
+    \E;\svar x\schm^n }
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
     \IBORROW\Addr : \schm}
   {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
-    \ImmutableBorrows\VEnv[ x\mapsto \IBORROW\Addr], \Suspended\VEnv : \E\bvar{\borrow[\IBORROW] x}{\borrowty[\IBORROW] k{ \schm}} }
+    \ImmutableBorrows\VEnv[ x\mapsto \IBORROW\Addr], \Suspended\VEnv :
+    \E;\bvar{\borrow[\IBORROW] x}{\borrowty[\IBORROW] k{ \schm}} }
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
     \MBORROW\Addr : \schm}
   {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv[ x\mapsto \MBORROW\Addr],
     \ImmutableBorrows\VEnv, \Suspended\VEnv
-    : \E\bvar{\borrow[\MBORROW] x}{\borrowty[\MBORROW] k{ \schm}} }
+    : \E;\bvar{\borrow[\MBORROW] x}{\borrowty[\MBORROW] k{ \schm}} }
 \end{mathpar}
 \paragraph{Extending environments and stores}
 \begin{mathpar}
@@ -188,38 +248,6 @@ $\MultiNumber\Loc\REACH = \infty$.
                                      \in \REACH \wedge w = \Store (\Loc)
 \end{align*}
 
-We write $\Affine\SE\Loc$ to express that $\Loc$ points to a resource
-that requires at least affine treatment. Borrow types do not appear in
-store types as the store only knows about the actual resources.
-
-Define  $\Affine\SE\Loc$ if one of the following cases holds:
-\begin{itemize}
-\item $\SE (\Loc) =
-  \forall\Multi\kvar\forall\Multi{\bvar{\tvar}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$
-  and $C \wedge (k \lk \kun_\infty)$ is contradictory;
-\item $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\kaff}{k}$;
-\item $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \kaff
-  k$;
-\item $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$.
-% \item if $\SE (\Loc) = \borrow[\MBORROW]\tau$, then $\Loc$ is affine
-%   \dots (THAT SHOULDN'T REALLY  BE A STORE TYPE)
-% \item if $\SE (\Loc) = \borrow[\IBORROW]\tau$, then $\Loc$ is not affine
-%   \dots (THAT SHOULDN'T REALLY  BE A STORE TYPE)
-\end{itemize}
-
-We write $\Linear\SE\Loc$ to express that $\Loc$ points to a linear
-resource.
-
-Define  $\Linear\SE\Loc$ if one of the following cases holds:
-\begin{itemize}
-\item $\SE (\Loc) =
-  \forall\Multi\kvar\forall\Multi{\bvar{\tvar}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$
-  and $C \wedge (k \lk \kaff_\infty)$ is contradictory; 
-\item $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\klin}{k}$;
-\item $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \klin
-  k$;
-\item $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$.
-\end{itemize}
 
 \clearpage{}
 \newcommand\resultOk[2]{
@@ -240,12 +268,12 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \Rawloc{\Reach{\Store#2}{\VEnv#1}}$ it must be that
   \begin{itemize}
   \item $\Store#2 (\Loc) = \Store#1 (\Loc)$ and
-  \item  for any $\Addr$ based on $\Loc$,
+  \item  for any $\Addr$ with $\Rawloc\Addr = \{\Loc\}$,
     $\Addr \in \Perm#1 \Leftrightarrow \Addr\in\Perm#2$.
   \end{itemize}
 }
 \newcommand\resultImmutables[2]{
-  Immutable borrows: \\
+  Unrestricted values, resources, and borrows: \\
   For all $\Addr \in
   \Reach{\Store#2}{\ImmutableBorrows{\VEnv#1}}$ with
   $\Rawloc\Addr = \{\Loc\}$, it must be that
@@ -254,10 +282,10 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   and $\Addr\in\Perm#2$.
 }
 \newcommand\resultMutables[2]{
-  Mutable borrows:\\
+  Affine borrows and resources:\\
   For all $\Addr \in  \Reach{\Store#2}{\MutableBorrows{\VEnv#1}}$
   with $\Rawloc\Addr = \{\Loc\}$, if
-  $\Loc\in\Dom{\Store#1}$, then 
+  $\Loc\in\Dom{\Store#1}$ and $\Addr\ne\Loc$, then 
   $\Store#2 (\Loc) \ne \StFreed$
   and $\Addr\in{\Perm#2}$ implies $\Addr\in
   \Perm#1$.
@@ -281,14 +309,16 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \\
   For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH#1} >0$ and $n' =
   \MultiNumber\Loc{\REACH#2}$,
-  \begin{itemize}
-  \item if $\Linear{\SE#1}\Loc$
-    then $n=n'=1$, $\Loc\notin\Perm#2$, and if $\Store#1(\Loc)$ is a
-    resource, then $\Store#2 (\Loc) = \StFreed$;
-  \item if $\Affine{\SE#1}\Loc$ then $n=1$ and $n'\le 1$;
-  \item if $\neg\Writeable{\SE#1}\Loc$ then
-    $\Store#2 (\ell) = \Store#1 (\ell)$ and $\Loc\in \Perm#2$.
-  \end{itemize}
+  it must be that  $n=n'=1$, $\Loc\notin\Perm#2$, and if
+  $\Store#1(\Loc)$ is a resource, then $\Store#2 (\Loc) = \StFreed$.
+  % \begin{itemize}
+  % \item if $\Linear{\SE#1}\Loc$
+  %   then $n=n'=1$, $\Loc\notin\Perm#2$, and if $\Store#1(\Loc)$ is a
+  %   resource, then $\Store#2 (\Loc) = \StFreed$;
+  % \item if $\Affine{\SE#1}\Loc$ then $n=1$ and $n'\le 1$;
+  % \item if $\Unrestricted{\SE#1}\Loc$ then
+  %   $\Store#2 (\ell) = \Store#1 (\ell)$ and $\Loc\in \Perm#2$.
+  % \end{itemize}
 }
 \newcommand\resultThinAir[2]{
   No thin air permission: \\
@@ -317,8 +347,14 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
     \item $\forall \Loc\in \Rawloc{\Reach\Store\VEnv}$,  $\Store (\Loc) \ne
       \StFreed$.
       % suspended bindings must not point to freed resources
-    \item $\forall \Loc \in \REACH =\Rawloc{\Reach\Store{\Active\VEnv,\MutableBorrows\VEnv}}$,
-      if $\Affine\SE\Loc$ then  $\MultiNumber\Loc\REACH= 1$.
+    \item $\forall \Loc \in \REACH
+      =\Rawloc{\Reach\Store{\Active\VEnv,\MutableBorrows\VEnv}}$,
+      % if $\Affine\SE\Loc$ then
+      $\MultiNumber\Loc\REACH= 1$.
+    \item $\forall \Loc \in \REACH
+      =\Rawloc{\Reach\Store{\Suspended\VEnv}}$, 
+      if $\Affine\SE\Loc$ then
+      $\MultiNumber\Loc\REACH= 1$.
     \end{itemize}
   \item  $i\in\Nat$ and $\Store, \Perm, \VEnv \vdash {e}
     \Downarrow^i R'$ and $R'\ne \TimeOut$.
@@ -342,6 +378,32 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \item \resultThinAir{}{'}
   \end{enumerate}
 \end{theorem}
+
+Some explanations are in order for the resource-related assumptions
+and statements.
+
+Incoming resources are always active (i.e., not freed).
+Linear and affine resources as well as suspended affine borrows have
+exactly one pointer in the environment.
+
+The Frame condition states that only store locations reachable from
+the current environment can change and that all permissions outside
+the reachable locations remain the same.
+
+Unrestricted values, resources, and borrows do not change their
+underlying resource and do not spend their permission.
+
+Affine borrows and resources may or may not spend their
+permission. Borrows are not freed, but resources may be freed.
+
+Incoming suspended borrows have no permission attached to them and
+their permission has been retracted on exit of their region. 
+
+A linear resource is always freed. 
+
+Outgoing permissions are either inherited from the caller or they
+refer to newly created values.
+
 
 \newpage
 \lstMakeShortInline[style=rule]@
@@ -413,8 +475,8 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
   \begin{enumerate}[({A2-}1)]
   \item From inversion: $\inferS{C}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2}$
   \item From~\eqref{eq:17} we have $\SE \vdash \VEnv_2 : \E_2$.
-    %% PJT: weakening lemma needed
-    By weakening using~\ref{item:8}, we have
+    By store weakening (Lemma~\ref{lemma:store-weakening}) and
+    using~\ref{item:8}, we have 
     $\SE_1 \vdash \VEnv_2 : \E_2$.
     With~\ref{item:9}, we obtain
     $\SE_1 \vdash \VEnv_2 (x \mapsto r_1 ) : \E_2;\bvar x {\tau_1}$
