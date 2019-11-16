@@ -16,27 +16,29 @@
 \item Store typing $ \vdash \Store : \SE$,
   \begin{mathpar}
     \inferrule{
-      (\forall \Loc \in \Dom\Store)~
+      (\forall \Loc \in \Dom\Store)~~
       \SE \vdash \Store (\Loc) : \SE (\Loc)
     }{ \vdash \Store : \SE }
   \end{mathpar}
-\item Relating storables to type schemes $\SE \vdash W : \schm$
+\item Relating storables to type schemes $\SE \vdash w : \schm$
   \begin{mathpar}
   \inferrule{
     (\exists \E)~ \SE \vdash \VEnv : \E
     \\
     \inferS{C}{\E, (x:\tau_2)}{e}{\tau_1}
+    \\
+    \Multi\tvar = \fv{\tau_1,\tau_2} \setminus \fv{\E}
   }{
     \SE \vdash (\VEnv, \ilam {\Multi\kvar}{\Multi\tvar}Ckx{e})
-    : \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})
+    : \forall\Multi\kvar\forall\Multi{\bvar{\tvar}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})
   }
   \end{mathpar}
-\item Relating storables to types $ \SE \vdash W : \tau$
+\item Relating storables to types $ \SE \vdash w : \tau$
   \begin{mathpar}
     \inferrule{
       (\exists \E, C)~ \SE \vdash \VEnv : \E
       \\
-      \inferS{C}{\E\bvar x{\tau_2})}{e}{\tau_1}
+      \inferS{C}{\E\bvar x{\tau_2}}{e}{\tau_1}
       \\
       \addlin{\entail{C}{\Cleq{\E}{k}}}
     }{
@@ -51,7 +53,7 @@
     }
 
     \inferrule{
-      \SE \vdash r : \IType{t}{\Multi\tau}
+      \SE \vdash r : \IType{\tcon}{\Multi\tau}
     }{
       \SE \vdash {[r]} : \tapp{\tcon}{\Multi\tau}
     }
@@ -60,7 +62,7 @@
       \SE \vdash \StFreed : \tau
     }
   \end{mathpar}
-\item Relating  results to types $ \SE \vdash r : \tau$,
+%\item Relating  results to types $ \SE \vdash r : \tau$,
 \item Relating results to type schemes $\SE \vdash r : \schm$
   \begin{mathpar}
   \inferrule{}{ \SE \vdash c : \CType{c} }
@@ -104,26 +106,27 @@
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
-    \IBORROW r : \schm}
+    \IBORROW\Addr : \schm}
   {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
-    \ImmutableBorrows\VEnv[ x\mapsto \IBORROW r], \Suspended\VEnv : \E\bvar{\borrow[\IBORROW] x}{\borrowty[\IBORROW] k{ \schm}} }
+    \ImmutableBorrows\VEnv[ x\mapsto \IBORROW\Addr], \Suspended\VEnv : \E\bvar{\borrow[\IBORROW] x}{\borrowty[\IBORROW] k{ \schm}} }
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
-    \MBORROW r : \schm}
-  {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv[ x\mapsto \MBORROW r],
-    \ImmutableBorrows\VEnv : \E\bvar{\borrow[\MBORROW] x}{\borrowty[\MBORROW] k{ \schm}} }
+    \MBORROW\Addr : \schm}
+  {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv[ x\mapsto \MBORROW\Addr],
+    \ImmutableBorrows\VEnv, \Suspended\VEnv
+    : \E\bvar{\borrow[\MBORROW] x}{\borrowty[\MBORROW] k{ \schm}} }
 \end{mathpar}
 \paragraph{Extending environments and stores}
 \begin{mathpar}
   \inferrule{}{\SE \le \SE}
 
-  \inferrule{\SE \le \SE'}{\SE \le \SE' (\ell : \schm)}
-
+  \inferrule{\SE \le \SE' \\ \ell \notin \Dom\Store}{\SE \le \SE' (\ell : \schm)}
+\\
   \inferrule{}{\Store\le\Store}
 
   \inferrule{\Store \le \Store' \\ \ell \notin \Dom\Store
-  }{\Store \le \Store'[ \ell \mapsto W] }
+  }{\Store \le \Store'[ \ell \mapsto w] }
 \end{mathpar}
 
 \begin{lemma}[Store Weakening]\label{lemma:store-weakening}
@@ -131,9 +134,9 @@
   \VEnv : \E$.
 \end{lemma}
 
-We write $\Addresses{\VEnv}$ for the function that extracts raw locations
-from the range of the variable environment. It needs to be defined for
-addresses, results, and environments.
+We write $\Addresses{\VEnv}$ for the function that extracts a multiset
+of raw locations from the range of the variable environment. It needs to be defined for
+results and environments.
 
 \begin{align*}
   \Addresses{\Multi\IBORROW\Multi\MBORROW\Loc} &= \{ \Loc \} \\
@@ -142,11 +145,14 @@ addresses, results, and environments.
   \Addresses{\VEnv( x \mapsto r)} &= \Addresses\VEnv \cup \Addresses r
 \end{align*}
 
-We write $\Reach\Store\VEnv \subseteq \Dom\Store$ for the function
-that computes all addresses reachable from $\Addresses\VEnv$
-assuming that $\Addresses\VEnv \subseteq \Dom\Store$. It is defined in
+We write $\Reach\Store\VEnv$ for the multiset of all addresses
+reachable from $\Addresses\VEnv$ 
+assuming that $\Addresses\VEnv \subseteq \Dom\Store$\footnote{In
+  mixed comparisons between a multiset and a set, we tacitly convert
+  a multiset $M$ to its supporting set $\{ x \mid \MultiNumber x M \ne 0\}$.}.
+The function $\Reach\Store\cdot$ is defined in
 two steps. First a helper function
-for addresses, results, storables, and environments.
+for results, storables, and environments.
 
 \begin{align*}
   \RS\Store\Eempty &= \Eempty \\
@@ -170,8 +176,11 @@ for addresses, results, storables, and environments.
   \RS\Store{\StFreed} &= \{ \}
 \end{align*}
 
-This set is closed transitively by store lookup: We define the set
-$\Reach\Store\VEnv = \REACH$ as follow.
+This multiset is closed transitively by store lookup. We define 
+$\Reach\Store\VEnv$ as the smallest multiset $\REACH$ that fulfills
+the following inequations. We assume a nonstandard
+model such that an element $\Loc$ may occur infinitely often as in
+$\MultiNumber\Loc\REACH = \infty$. 
 \begin{align*}
   \REACH &\supseteq \RS\Store\VEnv \\
   \REACH &\supseteq \RS\Store w & \text{if }
@@ -179,17 +188,19 @@ $\Reach\Store\VEnv = \REACH$ as follow.
                                      \in \REACH \wedge w = \Store (\Loc)
 \end{align*}
 
-We write $\Affine\SE\Loc$ to express that $\Loc$ points to an affine
-resource. Borrow types do not appear in store types as the store only
-knows about the actual resources.
+We write $\Affine\SE\Loc$ to express that $\Loc$ points to a resource
+that requires at least affine treatment. Borrow types do not appear in
+store types as the store only knows about the actual resources.
+
+Define  $\Affine\SE\Loc$ if one of the following cases holds:
 \begin{itemize}
-\item if $\SE (\Loc) =
-  \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$,
-  then $\Loc$ is affine if $C \wedge (k \lk \kun_\infty)$ is contradictory.
-\item if $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\kaff}{k}$, then $\Loc$ is affine.
-\item if $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \kaff
-  k$, then $\Loc$ is affine.
-\item if $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$, then $\Loc$ is affine.
+\item $\SE (\Loc) =
+  \forall\Multi\kvar\forall\Multi{\bvar{\tvar}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$
+  and $C \wedge (k \lk \kun_\infty)$ is contradictory;
+\item $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\kaff}{k}$;
+\item $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \kaff
+  k$;
+\item $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$.
 % \item if $\SE (\Loc) = \borrow[\MBORROW]\tau$, then $\Loc$ is affine
 %   \dots (THAT SHOULDN'T REALLY  BE A STORE TYPE)
 % \item if $\SE (\Loc) = \borrow[\IBORROW]\tau$, then $\Loc$ is not affine
@@ -198,17 +209,92 @@ knows about the actual resources.
 
 We write $\Linear\SE\Loc$ to express that $\Loc$ points to a linear
 resource.
+
+Define  $\Linear\SE\Loc$ if one of the following cases holds:
 \begin{itemize}
-\item if $\SE (\Loc) =
-  \forall\Multi\kvar\forall\Multi{\bvar{\alpha}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$,
-  then $\Loc$ is linear if $C \wedge (k \lk \kaff_\infty)$ is contradictory.
-\item if $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\klin}{k}$, then $\Loc$ is linear.
-\item if $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \klin
-  k$, then $\Loc$ is linear.
-\item if $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$, then $\Loc$ is linear.
+\item $\SE (\Loc) =
+  \forall\Multi\kvar\forall\Multi{\bvar{\tvar}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$
+  and $C \wedge (k \lk \kaff_\infty)$ is contradictory; 
+\item $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\klin}{k}$;
+\item $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \klin
+  k$;
+\item $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$.
 \end{itemize}
 
+\clearpage{}
 \begin{theorem}
+  Suppose that
+  \begin{itemize}
+  \item $\inferS{C}{\E}{e}{\tau}$
+  \item $\SE \vdash \VEnv : \E$
+  \item $\vdash \Store : \SE$
+  \item $\Addresses\Perm \subseteq \Dom\Store$
+  \item $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv,
+      \ImmutableBorrows\VEnv} \subseteq \Perm$
+  \item $\Addresses{\Active\VEnv}$,
+    $\Addresses{\MutableBorrows\VEnv}$,
+    $\Addresses{\ImmutableBorrows\VEnv}$, and
+    $\Addresses{\Suspended\VEnv}$ are all disjoint
+  % \item  $\VEnv'$ with $\Addresses{\VEnv'}
+  %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
+  \item Incoming Resources: 
+    \begin{itemize}
+    \item $\forall \Loc\in \Reach\Store\VEnv$,  $\Store (\Loc) \ne
+      \StFreed$.
+      % suspended bindings must not point to freed resources
+    \item $\forall \Loc \in \REACH =\Reach\Store{\Active\VEnv,\MutableBorrows\VEnv}$,
+      if $\Affine\SE\Loc$ then  $\MultiNumber\Loc\REACH= 1$.
+    \end{itemize}
+  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv \vdash {e}
+    \Downarrow^i R$ and $R\ne \TimeOut$.
+  \end{itemize}
+  Then,
+  $\exists$ $\Store'$, $\Perm'$, $r'$, $\SE'$ such that
+  \begin{itemize}
+  \item
+    $R = \Ok{\Store', \Perm', r'}$
+  \item $\SE \le \SE'$, $\Store \le \Store'$,
+    $\vdash \Store' : \SE'$
+  \item $\SE' \vdash r' : \tau$
+  \item $\Addresses{\Perm'} \subseteq \Dom{\Store'}$
+  \item $\Reach{\Store'}{r'} \subseteq \Perm'$
+  \item Frame: For all $\Loc \in \Dom{\Store} \setminus
+    \Reach{\Store'}{\VEnv}$ it must be that
+    $\Store' (\Loc) = \Store (\Loc)$
+    and $\Loc\in\Addresses\Perm \cap \Addresses{\Perm'}$.
+    %% must be \Store because \Perm has no idea of \Perm'
+  \item Immutable borrows: For all $\Loc \in
+    \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
+    $\Loc\in\Dom\Store$,
+    $\Store' (\Loc) = \Store (\Loc)$
+    and $\Loc\in\Addresses\Perm \cap \Addresses{\Perm'}$.
+  \item Mutable borrows: For all $\Loc \in
+    \Reach{\Store'}{\MutableBorrows\VEnv}$, if
+    $\Loc\in\Dom\Store$, then 
+    $\Store' (\Loc) \ne \StFreed$
+    and $\Loc\in \Addresses{\Perm'}$ implies $\Loc\in
+    \Addresses\Perm$.
+    \\\textbf{PJT: anything else that can be said?}
+  \item Resources:
+    Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
+    For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
+    \MultiNumber\Loc{\REACH'}$,
+    \begin{itemize}
+    \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
+    \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
+    \item if $n'=0$, then $\Loc\notin\Perm'$.
+    \end{itemize}
+  \item ReadOnly: For all $\Loc \in \Reach
+    {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Loc$ then
+    $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm'$.
+  \item No thin air permission: \\
+    For all $\Loc\in \Addresses{\Perm'}$, $\Loc
+    \in \Addresses\Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
+  \end{itemize}
+\end{theorem}
+
+
+\begin{theorem}[OLD]
   Suppose that
   \begin{itemize}
   \item $\inferS{C}{\E}{e}{\tau}$

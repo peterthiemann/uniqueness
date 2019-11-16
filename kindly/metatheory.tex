@@ -3,10 +3,10 @@
 
 \lstMakeShortInline[style=rule]@
 
-We are interested in several connections between the type system and
-the operational semantics. The type soundness result states
+There are several connections between the type system and
+the operational semantics. Type soundness states
 that the semantics returns values of the form predicted by the type
-system. It makes use of several standard notions like store typing
+system. It relies on several standard notions like store typing
 $\vdash \Store : \SE$ and agreement of the results in the value environment
 with the type environment $\SE \vdash \VEnv:\E$ that we define
 formally in~\cref{sec:metatheory:proofs} along with selected cases of the proofs. The
@@ -59,21 +59,22 @@ theorem is by functional induction on the evaluation judgment, which
 is indexed by the strictly decreasing counter $i$.
 
 Further bookkeeping is needed to demonstrate the substructural
-properties. The permission set is the first set. It contains the set
+properties. The permission set contains the set
 of addresses that can be used during evaluation. It is managed by the
 region expression as well as by creation and use of resources as
 shown in \cref{sec:sem}.
 
 For the refined statement, we distinguish several parts of the value
 environment $\VEnv$ that correspond to the different kinds of bindings in the
-type environment: $\Active\VEnv$ for the active entries of direct
-references to resources, closures, etc; $\MutableBorrows\VEnv$ for the
-affine borrows; $\ImmutableBorrows\VEnv$ for the unrestricted borrows;
-and $\Suspended\VEnv$ for suspended entries. Indeed, the judgment
-$\SE \vdash \VEnv:\E$ is already defined in terms of this structure.
-Moreover, to properly discuss linearity and affinity, we treat
-$\Reach\Store\VEnv$ as a multiset. For a multiset
-$M$, we use the notation $\MultiNumber x M$ for the number of times $x$ occurs in $M$.
+type environment: $\Active\VEnv$ for active entries of direct
+references to resources, closures, etc; $\MutableBorrows\VEnv$ for 
+affine borrows; $\ImmutableBorrows\VEnv$ for unrestricted borrows;
+and $\Suspended\VEnv$ for suspended entries. The judgment
+$\SE \vdash \VEnv:\E$ is defined in terms of this structure.
+We treat
+$\Reach\Store\VEnv$ as a multiset to properly discuss linearity and
+affinity. We use the notation $\MultiNumber x M$ for the number of
+times $x$ occurs in multiset $M$.
 
 
 With these concepts, we can refine the assumption of

@@ -372,6 +372,7 @@ let rec eval
      let* ell = getloc r_1 in
      let* w = delta_1.*(ell) in
      let* r = getstrsrc w in
+     let*? () = ell <|= pi_1 in
      let* delta_1' = delta_1.*(ell) <- STRELEASED in
      let pi_1' = pi_1 <-> !$ ell in
      Ok (delta_1', pi_1', RVOID)
@@ -379,6 +380,8 @@ let rec eval
   (* rule sobserve *)
   | Observe (e_1) ->
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
+     let* rho = getaddress r_1 in
+     let*? () = rho <|= pi_1 in
      let* (b, _, ell) = getborrowed_loc r_1 in
      let*? () = (b = Imm) in
      let* w = delta_1.*(ell) in
