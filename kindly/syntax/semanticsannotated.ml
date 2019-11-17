@@ -286,16 +286,16 @@ let rec eval
      let* (delta_3, pi_3, r_3) = eval delta_2 pi_2 gamma'.+(x'-:> r_2) i' e' in
      Ok (delta_3, pi_3, r_3)
   (**)
-  (* rule sapp-anf *)
+  (* rule sappanf *)
   | VApp (x_1, x_2) ->
      let* r_1 = gamma.!(x_1) in
      let* ell_1 = getloc r_1 in
      let*? () = !$ ell_1 <|= pi in
-     let* w = delta_1.*(ell_1) in
+     let* w = delta.*(ell_1) in
      let* (gamma', k', x', e') = getstclos w in
-     let pi_1' = (if k' <= KUNR None then pi_1 else pi_1 <-> !$ ell_1) in
+     let pi' = (if k' <= KUNR None then pi else pi <-> !$ ell_1) in
      let* r_2 = gamma.!(x_2) in
-     let* (delta_3, pi_3, r_3) = eval delta_2 pi_2 gamma'.+(x'-:> r_2) i' e' in
+     let* (delta_3, pi_3, r_3) = eval delta pi' gamma'.+(x'-:> r_2) i' e' in
      Ok (delta_3, pi_3, r_3)
   (**)
   (* rule slet *)
@@ -372,6 +372,7 @@ let rec eval
      let*? () = rho <?> b && rho <|= pi in
      Ok (delta, pi, RADDR rho)
   (**)
+  (* previous *)
   | Borrow (b, x) ->
      let* rx = gamma.!(x) in
      let* rho = getaddress rx in
@@ -389,10 +390,11 @@ let rec eval
   (* rule sdestroy *)
   | Destroy (e_1) ->
      let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
+     let* rho = getaddress r_1 in
      let* ell = getloc r_1 in
      let* w = delta_1.*(ell) in
      let* r = getstrsrc w in
-     let*? () = ell <|= pi_1 in
+     let*? () = rho <|= pi_1 in
      let* delta_1' = delta_1.*(ell) <- STRELEASED in
      let pi_1' = pi_1 <-> !$ ell in
      Ok (delta_1', pi_1', RVOID)
