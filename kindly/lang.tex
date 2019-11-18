@@ -9,8 +9,8 @@ For ease of presentation, we simplify the language.
   datatypes.
 \item There are separate operators for borrowing and reborrowing (taking
   the borrow of a borrow).
-\item Regions are assumed to be explicit in the code. (But we present
-  an algorithm to infer them in \cref{regionannot}.)
+\item Regions are explicit in the code and must be annotated using the
+  algorithms presented in \cref{regionannot}.
 \item Regions are identified using nesting levels instead of region
   variables.
 \end{itemize}
@@ -33,7 +33,6 @@ and a dynamics that is linearity- and resource-aware (\cref{sec:sem}).
 in an ML-like language.  The novel aspects are match
 specifications, regions, and borrows.
 
-We start from the bottom.
 A borrow $\borrow{x}$ is always taken from a variable $x$. The
 \emph{borrow annotation} $\BORROW$ indicates whether the borrow is exclusive
 ($\MBORROW$) or shared ($\IBORROW$). If $x$ is already borrowed,

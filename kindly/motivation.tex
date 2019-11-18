@@ -24,9 +24,8 @@ we demonstrate through a series of examples:
 \subsection{Imperative programming with linear arrays}
 \label{sec:imper-progr}
 
-We now showcase an API for mutable linear arrays
-(\cref{sig:array}).
-The intention of this API is to safely handle manual allocation and
+The API for mutable linear arrays (shown in \cref{sig:array})
+aims to safely handle manual allocation and
 deallocation of arrays that may contain affine elements.
 One would first use @create n v@ to create
 an (unrestricted) array of size @n@ initialized with value
@@ -349,8 +348,8 @@ so that the callback certainly cannot return the borrowed argument.
 In a specific use of @Pool.use@, the index $r$ gets unified
 with the current nesting level of regions so that the region for the
 callback effectively gets ``inserted'' into the lexical nesting at the callsite.
-
-\cref{ex:pool} shows a simple example of using the @Pool@ module.
+%
+\cref{ex:pool} shows a simple example using the @Pool@ module.
 
 The implementation in \cref{impl:pool} represents a bag of resources
 using a concurrent queue with atomic add and remove operations.
