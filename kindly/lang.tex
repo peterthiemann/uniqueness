@@ -254,34 +254,21 @@ a kind variable or it relates two kind variables.
   \label{sdtyp:lattice}
 \end{figure}
 
-
-\subsubsection{Environments and bindings}
-\label{sdtyping:envs}
 \begin{figure*}[tp]
   \begin{minipage}{0.28\linewidth}
-    \begin{align*}
-      \E &::=\ \Eempty \mid \E;B\tag{Environments}\\
-      B &::=\ \bnone \tag{Empty} \\
-         &\mid \bvar{x}{\schm}\tag{Variables}\\
-         &\mid \bvar{\borrow{x}}{\borrowty{k}{\tau}}\tag{Borrows}\\
-         &\mid \svar{x}{\schm}^n \tag{Suspended}\\
-         &\mid \bvar{\tvar}{\kschm}\tag{Types}
-         % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
-    \end{align*}
-    \caption{Type environments}
-    \label{grammar:env}
   \end{minipage}\hfill
-  \begin{minipage}{0.7\linewidth}
+  
+  % \begin{minipage}{0.7\linewidth}
     \begin{mathpar}
       \ruleSDBorrow
       \and
       \ruleSDLam
       \and
+      \ruleSDRegion
+      \and
       \ruleSDVar
       \and
       \ruleSDPair
-      \and
-      \ruleSDRegion
       \and
       \ruleSDMatchPair
     \end{mathpar}
@@ -291,8 +278,69 @@ a kind variable or it relates two kind variables.
     \label{sdtyp:pair}
     \label{selectrules:region}
     \label{selectrules:matching}
-  \end{minipage}
+  % \end{minipage}
 \end{figure*}
+
+\subsubsection{Environments and bindings}
+\label{sdtyping:envs}
+
+\begin{figure}[tp]
+  \begin{align*}
+    \E &::=\ \Eempty \mid \E;B\tag{Environments}\\
+    B &::=\ \bnone % \tag{Empty} \\
+    \mid \bvar{\tvar}{\kschm} % \tag{Types}
+    \mid \bvar{x}{\schm}% \tag{Variables}
+    \mid \bvar{\borrow{x}}{\borrowty{k}{\tau}}% \tag{Borrows}\\
+    \mid \svar{x}{\schm}^n % \tag{Suspended}
+    % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
+  \end{align*}
+  \vspace{-10pt}
+  \caption{Type environments}
+  \vspace{10pt}
+  \label{grammar:env}
+  % \begin{minipage}{0.5\linewidth}
+    \centering
+    \begin{tabular}
+      {@{}>{$}r<{$}@{ $\vdash_e$ }
+      >{$}c<{$}@{ $=$ }
+      >{$}c<{$}@{ $\ltimes$ }
+      >{$}c<{$}r}
+
+      \Cleq{\schm}{\kun_\infty}
+      &\bvar{x}{\schm}&\bvar{x}{\schm}&\bvar{x}{\schm}
+      &Both\\
+
+      {\Cempty}&
+      {\bvar{\borrow[\IBORROW]{x}}{\schm}}&
+      {\bvar{\borrow[\IBORROW]{x}}{\schm}}&{\bvar{\borrow[\IBORROW]{x}}{\schm}}
+      &Borrow
+      % \\
+      
+      % {\Cempty}&
+      % \svar[\IBORROW]{x}{\schm}^n&\svar[\IBORROW]{x}{\schm}^n&\svar[\IBORROW]{x}{\schm}^n
+      % &BothS
+      \\[2mm]
+
+      {\Cempty}&{B_x}&{B_x}&{\bnone}
+      &Left\\
+      {\Cempty}&{B_x}&{\bnone}&{B_x}
+      &Right\\[2mm]
+
+      {\Cempty}&{\bvar x \schm}&{\svar x \schm^n}&{\bvar x \schm}
+      &Susp\\
+
+      {\Cempty}&
+      {\bvar{\borrow x} \schm}&{\svar[\IBORROW] x \schm^n}&{\bvar{\borrow x} \schm}
+      &SuspB\\
+
+      {\Cempty}&
+      {\svar{x} \schm}&{\svar[\IBORROW] x \schm^n}&{\svar{x} \schm}
+      &SuspS\\
+    \end{tabular}
+    \caption{Splitting rules for bindings -- $\lsplit{C}{B}{B_l}{B_r}$}
+    \label{sdtyp:split}
+  % \end{minipage}
+\end{figure}
 
 \lang controls the use of variables by supporting new modes of
 binding in a type environment $\E$.
@@ -358,50 +406,6 @@ Capturing a suspended binding is forbidden.
 
 \subsubsection{Copying and Splitting}
 \label{sdtyping:split}
-\begin{figure}[tp]
-  % \begin{minipage}{0.5\linewidth}
-    \centering
-    \begin{tabular}
-      {@{}>{$}r<{$}@{ $\vdash_e$ }
-      >{$}c<{$}@{ $=$ }
-      >{$}c<{$}@{ $\ltimes$ }
-      >{$}c<{$}r}
-
-      \Cleq{\schm}{\kun_\infty}
-      &\bvar{x}{\schm}&\bvar{x}{\schm}&\bvar{x}{\schm}
-      &Both\\
-
-      {\Cempty}&
-      {\bvar{\borrow[\IBORROW]{x}}{\schm}}&
-      {\bvar{\borrow[\IBORROW]{x}}{\schm}}&{\bvar{\borrow[\IBORROW]{x}}{\schm}}
-      &Borrow
-      % \\
-      
-      % {\Cempty}&
-      % \svar[\IBORROW]{x}{\schm}^n&\svar[\IBORROW]{x}{\schm}^n&\svar[\IBORROW]{x}{\schm}^n
-      % &BothS
-      \\[2mm]
-
-      {\Cempty}&{B_x}&{B_x}&{\bnone}
-      &Left\\
-      {\Cempty}&{B_x}&{\bnone}&{B_x}
-      &Right\\[2mm]
-
-      {\Cempty}&{\bvar x \schm}&{\svar x \schm^n}&{\bvar x \schm}
-      &Susp\\
-
-      {\Cempty}&
-      {\bvar{\borrow x} \schm}&{\svar[\IBORROW] x \schm^n}&{\bvar{\borrow x} \schm}
-      &SuspB\\
-
-      {\Cempty}&
-      {\svar{x} \schm}&{\svar[\IBORROW] x \schm^n}&{\svar{x} \schm}
-      &SuspS\\
-    \end{tabular}
-    \caption{Splitting rules for bindings -- $\lsplit{C}{B}{B_l}{B_r}$}
-    \label{sdtyp:split}
-  % \end{minipage}
-\end{figure}
 
 The {\sc Pair} typing rule in \cref{sdtyp:pair} demonstrates how \lang
 deals with duplication and dropping of values.
