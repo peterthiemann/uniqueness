@@ -350,9 +350,9 @@ let rec eval
      let* RADDR rho = gamma.!(x) in
      let* rho' = b<.>rho in
      let gamma' = gamma.+(x -:>RADDR rho') in
-     let pi' = (pi <+> rho') in
+     let pi' = (pi <+> rho') <-> rho in
      let* (delta_1, pi_1, r_1) = eval delta pi' gamma' i' e in
-     let pi_1' = (pi_1 <-> rho') in
+     let pi_1' = (pi_1 <-> rho') <+> rho in
      Ok (delta_1, pi_1', r_1)
   (**)
   (* previous *)

@@ -299,33 +299,31 @@ $\MultiNumber\Loc\REACH = \infty$.
   For all $\Addr \in  \Reach{\Store#3}{\MutableBorrows{\VEnv#2}}$
   with $\Rawloc\Addr = \{\Loc\}$, if
   $\Loc\in\Dom{\Store#1}$ and $\Addr\ne\Loc$, then 
-  $\Store#3 (\Loc) \ne \StFreed$
-  and $\Addr\in{\Perm#3}$ implies $\Addr\in
-  \Perm#1$.
+  $\Store#3 (\Loc) \ne \StFreed$.
 }
 \newcommand\resultSuspended[3]{
   % input, inputenv, output
   Suspended borrows: \\
   For all $\Addr \in \Reach{\Store#3}{\Suspended{\VEnv#2}}$ with
-  $\Rawloc\Addr = \{\Loc\}$ it must be that $\Addr \notin \Perm#3$.
-  \begin{itemize}
-  \item If $\Addr = \IBORROW\Addr'$, then $\Loc\in\Dom{\Store#1}$ and
-    $\Store#3 (\Loc) = \Store#1 (\Loc) \ne \StFreed$.
-  \item If $\Addr = \MBORROW\Addr'$ and
-    $\Loc\in\Dom{\Store#1}$, then 
-    $\Store#3 (\Loc) \ne \StFreed$.
-  \end{itemize}
+  $\Rawloc\Addr = \{\Loc\}$ it must be that $\Addr \in \Perm#3$
+  and  $\Store#3 (\Loc) \ne \StFreed$.
+  % \begin{itemize}
+  % \item If $\Addr = \IBORROW\Addr'$, then $\Loc\in\Dom{\Store#1}$ and
+  %   $\Store#3 (\Loc) = \Store#1 (\Loc) \ne \StFreed$.
+  % \item If $\Addr = \MBORROW\Addr'$ and
+  %   $\Loc\in\Dom{\Store#1}$, then 
+  %   $\Store#3 (\Loc) \ne \StFreed$.
+  % \end{itemize}
 }
 \newcommand\resultResources[3]{
   % input, inputenv, output
-  Resources:
-  Let $\REACH#1 = \Reach{\Store#1}{\Active{\VEnv#2}}$.
-  Let $\REACH#3 =\Reach{\Store#3}{\Active{\VEnv#2}}$.
+  Resources: Let $\REACH#1 = \Reach{\Store#1}{\Active{\VEnv#2}}$.  Let
+  $\REACH#3 =\Reach{\Store#3}{\Active{\VEnv#2}}$.
   \\
-  For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH#1} >0$ and $n' =
-  \MultiNumber\Loc{\REACH#3}$,
-  it must be that  $n=n'=1$, $\Loc\notin\Perm#3$, and if
-  $\Store#1(\Loc)$ is a resource, then $\Store#3 (\Loc) = \StFreed$.
+  For all $\Loc\in \REACH#1$ it must be that
+  $\MultiNumber\Loc{\REACH#1}=\MultiNumber\Loc{\REACH#3}=1$,
+  $\Loc\notin\Perm#3$, and if $\Store#1(\Loc)$ is a resource, then
+  $\Store#3 (\Loc) = \StFreed$.
   % \begin{itemize}
   % \item if $\Linear{\SE#1}\Loc$
   %   then $n=n'=1$, $\Loc\notin\Perm#2$, and if $\Store#1(\Loc)$ is a
@@ -349,12 +347,9 @@ $\MultiNumber\Loc\REACH = \infty$.
     $\Store#1 (\Loc) \ne \StFreed$.
     % suspended bindings must not point to freed resources
   \item $\forall \Loc \in \REACH
-    =\Rawloc{\Reach{\Store#1}{\Active{\VEnv#2},\MutableBorrows{\VEnv#2}}}$,
+    =\Rawloc{\Reach{\Store#1}{\Active{\VEnv#2},\MutableBorrows{\VEnv#2},
+      \Suspended{\VEnv#2}}}$,
     % if $\Affine\SE\Loc$ then
-    $\MultiNumber\Loc\REACH= 1$.
-  \item $\forall \Loc \in \REACH
-    =\Rawloc{\Reach{\Store#1}{\Suspended{\VEnv#2}}}$, 
-    if $\Affine{\SE#1}\Loc$ then
     $\MultiNumber\Loc\REACH= 1$.
   \end{enumerate}
 }
@@ -392,8 +387,8 @@ $\MultiNumber\Loc\REACH = \infty$.
     %% must be \Store because \Perm has no idea of \Perm'
   \item \resultImmutables{}{}{'}
   \item \resultMutables{}{}{'}
-    \\\textbf{PJT: this is a really weak statement! anything else that
-      can be said?}
+    % \\\textbf{PJT: this is a really weak statement! anything else that
+    %   can be said?}
   \item \resultSuspended{}{}{'}
   \item \resultResources{}{}{'}
   \item \resultThinAir{}{'}
