@@ -285,7 +285,7 @@ a kind variable or it relates two kind variables.
       \and
       \ruleSDMatchPair
     \end{mathpar}
-    \caption{Selected typing rules}
+    \caption{Selected typing rules -- $\inferS{C}{\E}{e}{\tau}$}
     \label{selectrules:borrow}
     \label{selectrules:binders}
     \label{sdtyp:pair}
@@ -369,16 +369,22 @@ Capturing a suspended binding is forbidden.
 
       \Cleq{\schm}{\kun_\infty}
       &\bvar{x}{\schm}&\bvar{x}{\schm}&\bvar{x}{\schm}
-      &Both\\[2mm]
+      &Both\\
 
       {\Cempty}&
       {\bvar{\borrow[\IBORROW]{x}}{\schm}}&
       {\bvar{\borrow[\IBORROW]{x}}{\schm}}&{\bvar{\borrow[\IBORROW]{x}}{\schm}}
-      &Borrow\\[2mm]
+      &Borrow
+      % \\
+      
+      % {\Cempty}&
+      % \svar[\IBORROW]{x}{\schm}^n&\svar[\IBORROW]{x}{\schm}^n&\svar[\IBORROW]{x}{\schm}^n
+      % &BothS
+      \\[2mm]
 
-      {\Cempty}&{\bvar{x}{\schm}}&{\bvar{x}{\schm}}&{\bnone}
+      {\Cempty}&{b_x}&{b_x}&{\bnone}
       &Left\\
-      {\Cempty}&{\bvar{x}{\schm}}&{\bnone}&{\bvar{x}{\schm}}
+      {\Cempty}&{b_x}&{\bnone}&{b_x}
       &Right\\[2mm]
 
       {\Cempty}&{\bvar x \schm}&{\svar x \schm^n}&{\bvar x \schm}
@@ -388,8 +394,11 @@ Capturing a suspended binding is forbidden.
       {\bvar{\borrow x} \schm}&{\svar[\IBORROW] x \schm^n}&{\bvar{\borrow x} \schm}
       &SuspB\\
 
+      {\Cempty}&
+      {\svar{x} \schm}&{\svar[\IBORROW] x \schm^n}&{\svar{x} \schm}
+      &SuspS\\
     \end{tabular}
-    \caption{Splitting rules for bindings}
+    \caption{Splitting rules for bindings -- $\lsplit{C}{B}{B_l}{B_r}$}
     \label{sdtyp:split}
   % \end{minipage}
 \end{figure}
@@ -408,15 +417,16 @@ Similarly, unrestricted borrows can be duplicated according to rule
 {\sc Borrow}.
 The {\sc Left} and {\sc Right} rules are always applicable and move a binding
 either to the left or right environment.
-The rules {\sc Susp} and {\sc SuspB} split off suspended bindings to
+The rules {\sc Susp}, {\sc SuspB} and {\sc SuspS}
+split off suspended bindings to
 the left while conserving access to the binding on the right.
 A suspended binding can later be turned
 into a borrow inside a region. Splitting of suspended bindings is
 asymmetric. It must follow the order of execution from left to right,
 which means that a resource can be used first as a borrow on the left
 and then later as a full resource on the right. The {\sc Susp} rule
-works with a full resource while the {\sc SuspB}
-rule splits off an shared suspended binding from a borrow.
+works with a full resource, the {\sc SuspB}
+with a borrow and {\sc SuspS} with a suspended binding.
 %
 Splitting applies whenever an
 expression has multiple subexpressions:  pairs, function applications,
