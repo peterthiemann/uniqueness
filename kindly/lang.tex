@@ -439,7 +439,7 @@ expression
 $\letin{a}{\text{create}\ 10\ x}
 {\introPair{\region[{}]{\Sone x\IBORROW}{\app{\text{length}}{\borrow[\IBORROW]{a}}}}{a}}$,
 the rule {\sc Susp} splits off a borrow from  the resource
-\lstinline/a/ to use it in the left component of the pair.
+@a@ to use it in the left component of the pair.
 As usual, a borrow cannot be active in the same scope as its resource.
 The \emph{region} around its use ensures that the borrow in the left component does not
 escape, which brings us to the next topic.
@@ -632,7 +632,7 @@ storables. The function
 The evaluation function is indexed by a step count @i@ so that each
 invocation is guaranteed to terminate either with an error, a timeout,
 or a result. Its return type is a monad
-\lstinline/'a sem/ which combines error reporting and timeout:
+@'a sem@ which combines error reporting and timeout:
 \begin{lstlisting}
 type 'a sem = Error of string | TimeOut | Ok of 'a
 val eval : store -> perm -> venv -> int -> exp -> (store * perm * result) sem
@@ -651,8 +651,8 @@ definition for \cref{sec:semant-defin}.
 % contains the semantics in mathematical notation.
 The definition uses OCaml syntax with some pretty
 printing. The pervasive @let*@ operator acts as monadic bind
-for the \lstinline/sem/ monad. The operator
-\lstinline/let*? : bool -> (unit -> 'a sem) -> 'a sem/
+for the @sem@ monad. The operator
+@let*? : bool -> (unit -> 'a sem) -> 'a sem@
  converts a boolean
 argument into success or failure in the monad.
  The function header of @eval@ checks
