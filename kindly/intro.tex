@@ -8,7 +8,7 @@ For examples, a file handle appears as the result of opening a
 file. If it was opened for reading, then read operations will succeed,
 but write operations will fail. Once the handle is closed, it cannot
 be used for reading or writing, anymore.
-
+%
 Dynamic allocation of memory is analogous. An API call returns a
 pointer to a memory area, which can then be read and written to until
 the memory is released by another API call.
@@ -220,11 +220,9 @@ $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 \item Full account of the metatheory for type inference and type soundness.
 \item Constraint simplification techniques.
 \item Automatic inference of regions for borrows.
-\item An implementation of the type inference algorithm including all
-  constraint simplification and extended with pattern matching. A
-  web implementation of the typechecker is available, its URL is given in the
-  non-anonymous supplementary material, and we plan to submit it for
-  artifact evaluation.
+\item A prototype implementation of the type inference algorithm, including all
+  constraint simplification and extended with pattern matching,
+  available at \url{https://affe.netlify.com/}.
 \end{itemize}
 
 %%% Local Variables:
