@@ -1,7 +1,7 @@
 \section{Linearity, Affinity, and Borrows at Work}
 \label{motivation}
 
-\lang{} is amenable to a functional resource-passing style as it is
+\lang{} is amenable to a functional resource-passing style
 common in functional encodings of session types (e.g.,
 \cite{DBLP:journals/jfp/Padovani17}; see also
 \cref{sec:session-linearity} in the supplement). But it really shines 
@@ -16,7 +16,7 @@ we demonstrate through a series of examples:
 \item
   A backtracking Sudoku solver to demonstrate
   \lang's ability to build safe hybrid functional/imperative data-structures.
-\item A pool of linear objects to demonstrate advanced usage of regions.
+\item A pool of linear objects to demonstrate advanced use of regions.
 \end{itemize}
 
 \subsection{Imperative programming with linear arrays}
@@ -368,7 +368,6 @@ In practice, the type checker inserts this region automatically.
   \begin{subfigure}[t]{1\linewidth}
 \begin{lstlisting}
 type ('a:'k) pool : 'k
-
 create : (unit -> 'a) -> 'a pool
 consume : ('a -> unit) -> 'a pool -> unit
 use : ('a_1:'k_1),('a_2:'k_2),('k_2 <= aff_r) =>
@@ -398,16 +397,9 @@ let main users =
 
   \begin{subfigure}[t]{1\linewidth}
 \begin{lstlisting}
-type ('a:'k) pool : 'k = {
-  spawn : unit -> 'a ;
-  queue : 'a CQueue.t;
-}
-
-let create spawn =
-  { spawn ; queue = CQueue.create () }
-let consume f c =
-  CQueue.iter f c.queue
-
+type ('a:'k) pool : 'k = {spawn: unit -> 'a; queue: 'a CQueue.t}
+let create spawn = { spawn ; queue = CQueue.create () }
+let consume f c = CQueue.iter f c.queue
 let use { spawn ; queue } f =
   let o = match CQueue.pop &queue with
     | Some x -> x
