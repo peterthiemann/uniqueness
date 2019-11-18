@@ -42,6 +42,9 @@ A region $\region{\Sone x\BORROW}{e}$ is annotated with its nesting $n$, the var
 %
 A match is indexed with a \emph{match specification} $\etransfm$ that indicates
 whether the match should work on borrows ($\etransfm=\&^b$) or not ($\etransfm=id$).
+%
+We consider four primitive operations to manipulate resources:
+$\create$, $\observe$, $\update$ and $\destroy$.
 
 Many types are indexed with kinds, ranged over by $k$.
 A kind is either a kind variable $\kvar$ or a constant
@@ -566,6 +569,41 @@ $\kun_n$ and thus cannot be returned).
 
 % \TODO{Present this if we have enough space}
 
+\subsubsection{Resource management}
+
+Our system would be incomplete without a way to actually manipulate resources.
+We consider the simple case of an abstract resource
+type $\tapp{\tres}{\tau}$ whose content of type $\tau$ must be $\kun_0$ and
+equipped with four operations:
+\begin{itemize}
+\item 
+$\create$:
+$\forall{\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\ 
+\qual{\Cleq \kvar {\kun_0}}
+{\tvar \tarr{} \tapp\tres\tvar}$\\
+Creates a new resource.
+
+\item
+$\observe$:
+$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\ 
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+{\borrowty[\IBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar}$\\
+Reads of a shared borrow of a resource.
+
+\item
+$\update$:
+$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\ 
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+\borrowty[\MBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar \tarr{\kaff} \tunit$\\
+Writes in an exclusive borrow of a resource.
+
+\item
+$\destroy$:
+$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\ 
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+\tapp\tres\tvar \tarr{} \tunit$\\
+Disposes of a resource.
+\end{itemize}
 
 % \clearpage
 \subsection{Semantics}
