@@ -25,7 +25,7 @@ of this section, when presenting a new judgement,
 we write input parameters in \textbf{\textcolor{DarkSlateBlue}{bold blue}}. The rest will then be
 output parameters.
 
-\subsubsection{Usage environments}
+\paragraph{Usage environments}
 
 % One novelty of our inference  judgement now
 % returns a type environment, which we call ``usage environment'' and commonly
@@ -74,7 +74,7 @@ The relations used for syntax-directed typing can trivially be defined
 in terms of these new relations by using constraint entailment.
 All relations are fully described in \cref{typ:extra:envs}.
 
-\subsubsection{Constraint normalization}
+\paragraph{Constraint normalization}
 
 The HM(X) framework assumes the existence of a ``$\operatorname{normalize}$''
 function which takes a constraint $C$, a substitution $\psi$ and returns a
@@ -109,8 +109,8 @@ As before, the complete type inference rules are shown in \cref{appendix:infer}.
     \and
     \ruleIAbs
     \and
-    \ruleILet
-    \hfill
+    % \ruleILet
+    % \hfill
     \ruleIRegion
     \and
     \ruleIPair
@@ -123,16 +123,16 @@ As before, the complete type inference rules are shown in \cref{appendix:infer}.
       %   \Ctrue&\text{if } x\in\Sv\\
       %   \Cleq{\sigma}{\kaff_\infty}&\\
       % \end{dcases}
-      \\\\\\
-      \generalize{C}{\E}{\tau} =
-      (\Cproj{(\Multi{\kvar},\Multi{\tvar})}{C},
-      \forall (\Multi{\kvar},\Multi{\tvar}).\qual{C}{\tau})\\
-      \text{ where}\\\\
-      \Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}
+      % \\\\\\
+      % \generalize{C}{\E}{\tau} =
+      % (\Cproj{(\Multi{\kvar},\Multi{\tvar})}{C},
+      % \forall (\Multi{\kvar},\Multi{\tvar}).\qual{C}{\tau})\\
+      % \text{ where}\\\\
+      % \Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}
     }
   \end{mathpar}
   \vspace{-15pt}
-  \caption{Selected inference rules}
+  \caption{Selected inference rules -- $\inferW{\Sv}{(C,\unif)}{\inP{\E}}{\inP{e}}{\tau}$}
   \label{rule:infer:envs}
   \label{rule:infer:envrules}
   \label{rule:infer:let}
@@ -173,8 +173,8 @@ constraints and unifiers.
 \label{infer:split}
 \label{infer:regions}
 
-We now present the inference version
-of the {\sc Pair} and {\sc Region} rules in \cref{rule:infer:envrules}.
+The inference version
+of the {\sc Pair} and {\sc Region} rules is shown in \cref{rule:infer:envrules}.
 While the rules are quite similar to the original version, the usage
 environment $\Sv$ is now an \emph{output} of the algorithm.
 As such, we use the ``inference'' version of the relations on
@@ -186,36 +186,6 @@ As appropriate for inference, these relations
 are total and non ambiguous for their input parameters ($\Sv_1, \Sv_2$ and $\Sv'$, respectively).
 We then collect all constraints and normalize them.
 
-\subsubsection{Generalization and constraints}
-
-So far, constraints have only been composed of a list of kind inequalities.
-The internal language of constraints used for inference is in fact
-richer.
-To illustrate this, we show the inference rule for let-bindings
-in \cref{rule:infer:let}.
-This rule combines several ingredients previously seen:
-since let expressions are binders, we use $\Weaken$ on the bound
-identifier $x$. Since let-expressions contain
-two subexpressions, we use the environment splitting relation,
-$\bsplit{C_s}{\Sv}{\Sv_1}{(\Sv_2 \Sdel{x})}$. We remove the $x$ from
-the right environment, since it is not available outside of the expression
-$e_2$, and should not be part of the returned usage environment.
-
-As per tradition in ML languages, generalization is performed
-on let-bindings.
-Following HM(X), we write $(C_\schm, \schm) = \generalize{C}{\E}{\tau}$
-for the pair of a constraint and a scheme resulting from
-generalization. The definition is provided in \cref{rule:infer:let}.
-The type scheme $\schm$ is created by quantifying over all the appropriate
-free variables and the current constraints.
-The generated constraint $C_\schm$ uses a new projection operator,
-$\Cproj{x}{D}$ where $x$ can be either a type or a kind variable, which
-allow the creation of local variables inside the constraints.
-This allows us to encapsulate all the quantified variables in the global constraints.
-It also reflects the fact that there
-should exist at least one solution for $C$ for the scheme to be valid.
-\citet{DBLP:journals/tapos/OderskySW99} give a detailed account
-on the projection operators in HM inference.
 
 
 \subsection{Constraint solving}

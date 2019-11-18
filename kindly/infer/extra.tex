@@ -5,7 +5,9 @@
 In this appendix, we provide the complete type inference rules
 and show that our type inference algorithm is sound and complete.
 The constraints rules are already shown in \cref{inference}.
-Kind inference is presented in \cref{rules:kinding:full}.
+Kind inference is presented in \cref{rules:kinding:full}
+and the detailed treatment of let-bindings in
+\cref{infer:let}.
 The type inference rules are shown in \cref{rules:typing:full}.
 The various theorems and their proofs are direct adaptations
 of the equivalent statements for HM(X) \citep{sulzmann1997proofs}.
@@ -38,6 +40,39 @@ arrow and borrow types.
 The $\operatorname{normalize}$ function is used every time several constraints
 must be composed in order to simplify the constraint and return a most general
 unifier.
+
+
+\subsection{Generalization and constraints}
+\label{infer:let}
+
+% So far, constraints have only been composed of a list of kind inequalities.
+% The internal language of constraints used for inference is in fact
+% richer.
+% To illustrate this, we show the inference rule for let-bindings
+% in \cref{rule:infer:let}.
+The {\sc Let} rule combines several ingredients previously seen:
+since let expressions are binders, we use $\Weaken$ on the bound
+identifier $x$. Since let-expressions contain
+two subexpressions, we use the environment splitting relation,
+$\bsplit{C_s}{\Sv}{\Sv_1}{(\Sv_2 \Sdel{x})}$. We remove the $x$ from
+the right environment, since it is not available outside of the expression
+$e_2$, and should not be part of the returned usage environment.
+
+As per tradition in ML languages, generalization is performed
+on let-bindings.
+Following HM(X), we write $(C_\schm, \schm) = \generalize{C}{\E}{\tau}$
+for the pair of a constraint and a scheme resulting from
+generalization. The definition is provided in \cref{rule:infer:let}.
+The type scheme $\schm$ is created by quantifying over all the appropriate
+free variables and the current constraints.
+The generated constraint $C_\schm$ uses a new projection operator,
+$\Cproj{x}{D}$ where $x$ can be either a type or a kind variable, which
+allow the creation of local variables inside the constraints.
+This allows us to encapsulate all the quantified variables in the global constraints.
+It also reflects the fact that there
+should exist at least one solution for $C$ for the scheme to be valid.
+\citet{DBLP:journals/tapos/OderskySW99} give a detailed account
+on the projection operators in HM inference.
 
 
 \begin{figure*}[!btp]
