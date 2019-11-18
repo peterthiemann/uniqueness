@@ -447,6 +447,18 @@ Finally, we present the completeness theorem.
 \end{proof}
 
 
+\begin{corollary}[Principality]
+  Let $\inferS{\Ctrue}{\E}{e}{\schm}$ a closed typing judgement.\\
+  Then $\inferW{\Sv}{(C,\unif)}{\Eflat\E}{e}{\tau}$
+  such that:
+  \begin{align*}
+    (\Ctrue,\schm_o) &= \generalize{C}{\unif\E}{\tau}
+    &\entail{&}{\schm_o \preceq \schm}
+    % &( C, \schm, \unif) &\leq (C',\schm',\unif')
+  \end{align*}
+
+
+\end{corollary}
 
 %%% Local Variables:
 %%% mode: latex

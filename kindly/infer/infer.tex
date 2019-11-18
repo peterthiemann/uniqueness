@@ -365,7 +365,8 @@ More precisely, we apply the following steps:
 \end{enumerate}
 
 An example of this algorithm in action is shown in \cref{solving:example}.
-Our algorithm is complete, computes principal normal forms,
+Our algorithm is complete, computes principal normal forms
+(cf \cref{appendix:constraints}),
 and already simplifies constraints significantly
 (thanks to steps 6, 7 and 8).
 It can be extended with further simplification phases.
@@ -378,42 +379,43 @@ here, including the variance-based one, are complete.
 It is also possible to add ``best-effort'' simplification
 rules which help reduce the size of inferred signatures even further
 \citep{DBLP:conf/aplas/Simonet03}.
-%
-We now show that this algorithm is well-behaved with respect to entailment
-and computes unique normal forms.
 
-\begin{property}[Principal normal form]
-  Normalization computes principal normal forms for $\CL$, i.e.
-  given a constraint $D\in\CL$, a substitution $\phi$ and
-  $(C,\unif) = \normalize{D}{\phi}$,
-  then $\phi\leq\unif$,
-  $C \equivC \unif D$ and
-  $\unif C = C$.
-\end{property}
+% 
+% We now show that this algorithm is well-behaved with respect to entailment
+% and computes unique normal forms.
 
-\begin{property}[Principal constraints]
-  $\CL$ has the principal constraint property, i.e.
-  for every $D\in\CL$, and a substitution $\unif$,
-  either $D$ does not have a normal form, or it has
-  a principal normal form.
-\end{property}
+% \begin{property}[Principal normal form]
+%   Normalization computes principal normal forms for $\CL$, i.e.
+%   given a constraint $D\in\CL$, a substitution $\phi$ and
+%   $(C,\unif) = \normalize{D}{\phi}$,
+%   then $\phi\leq\unif$,
+%   $C \equivC \unif D$ and
+%   $\unif C = C$.
+% \end{property}
 
-\begin{property}[Regular constraint system]
-  $\CL$ is regular, ie, for $x, x'$ two types or kinds,
-  $\entail{}{\Ceq{x}{x'}}$ implies
-  $\fv{x} = \fv{x'}$
-\end{property}
+% \begin{property}[Principal constraints]
+%   $\CL$ has the principal constraint property, i.e.
+%   for every $D\in\CL$, and a substitution $\unif$,
+%   either $D$ does not have a normal form, or it has
+%   a principal normal form.
+% \end{property}
 
-The proofs are given in \cref{appendix:constraints}. These three properties
-are sufficient to state that $HM(\CL)$ provides principal type inference.
-However, we use an extension of HM(X) with kind inference
-and affine types and borrows.
-We now show that HM(X)'s completeness and soundness theorems are still valid on
-this extended system.
+% \begin{property}[Regular constraint system]
+%   $\CL$ is regular, ie, for $x, x'$ two types or kinds,
+%   $\entail{}{\Ceq{x}{x'}}$ implies
+%   $\fv{x} = \fv{x'}$
+% \end{property}
+
+% The proofs are given in \cref{appendix:constraints}. These three properties
+% are sufficient to state that $HM(\CL)$ provides principal type inference.
+% However, we use an extension of HM(X) with kind inference
+% and affine types and borrows.
+% We now show that HM(X)'s completeness and soundness theorems are still valid on
+% this extended system.
 
 \subsection{Soundness and Principality}
 
-We now show that our extended inference algorithm still satisfies the soundness
+We now state that our extended inference algorithm still satisfies the soundness
 and completeness properties of HM(X).
 % This is achieved by extending
 % the original proofs from HM(X), which is done in \cref{appendix:infer}.
@@ -438,12 +440,12 @@ syntax-directed typing derivation, our inference algorithm can find
 a derivation that gives a type at least as general.
 For this, we need first to provide a few additional definitions.
 
-\begin{definition}[More general unifier]
-  Given a set of variable $U$ and $\unif$, $\unif'$ and $\phi$
-  substitutions. \\
-  Then
-  $\unif \leq^{\phi}_{U} \unif'$ iff $(\phi \circ \unif)|_{U} = \unif'|_U$.
-\end{definition}
+% \begin{definition}[More general unifier]
+%   Given a set of variable $U$ and $\unif$, $\unif'$ and $\phi$
+%   substitutions. \\
+%   Then
+%   $\unif \leq^{\phi}_{U} \unif'$ iff $(\phi \circ \unif)|_{U} = \unif'|_U$.
+% \end{definition}
 
 \begin{definition}[Instance relation]
   Given a constraint $C$ and two schemes
@@ -469,30 +471,30 @@ where all the binders are replaced by normal ones. More formally:
 \end{definition}
 
 
-We can then state the completeness theorem.
+We can then state principality.
 
-\begin{theorem}[Completeness]
-  Given $\inferS{C'}{\E'}{e}{\tau'}$ and
-  $\entail{}{\unif'\E \preceq \E'}$.
-  Then $$\inferW{\Sv}{(C,\unif)}{\Eflat\E}{e}{\tau}$$
-  for some environment $\Sv$,
-  substitution $\unif$, constraint $C$ and type $\tau$ such
-  that
-  \begin{align*}
-    \unif &\leq^{\phi}_{\fv{\E}} \unif'
-    &\entail{C'&}{\phi C}
-    &\entail{&}{\phi \schm \preceq \schm'}
-    &\Sv&\subset\E
-    % &( C, \schm, \unif) &\leq (C',\schm',\unif')
-  \end{align*}
-  where $\schm' = \generalize{C'}{\E'}{\tau'}$
-  and $\schm = \generalize{C}{\E}{\tau}$
-\end{theorem}
+% \begin{theorem}[Completeness]
+%   Given $\inferS{C'}{\E'}{e}{\tau'}$ and
+%   $\entail{}{\unif'\E \preceq \E'}$.
+%   Then $$\inferW{\Sv}{(C,\unif)}{\Eflat\E}{e}{\tau}$$
+%   for some environment $\Sv$,
+%   substitution $\unif$, constraint $C$ and type $\tau$ such
+%   that
+%   \begin{align*}
+%     \unif &\leq^{\phi}_{\fv{\E}} \unif'
+%     &\entail{C'&}{\phi C}
+%     &\entail{&}{\phi \schm \preceq \schm'}
+%     &\Sv&\subset\E
+%     % &( C, \schm, \unif) &\leq (C',\schm',\unif')
+%   \end{align*}
+%   where $\schm' = \generalize{C'}{\E'}{\tau'}$
+%   and $\schm = \generalize{C}{\E}{\tau}$
+% \end{theorem}
 
-Finally, principality is a direct application of completeness to
-toplevel programs.
+% Finally, principality is a direct application of completeness to
+% toplevel programs.
 
-\begin{corollary}[Principality]
+\begin{theorem}[Principality]
   Let $\inferS{\Ctrue}{\E}{e}{\schm}$ a closed typing judgement.\\
   Then $\inferW{\Sv}{(C,\unif)}{\Eflat\E}{e}{\tau}$
   such that:
@@ -503,7 +505,7 @@ toplevel programs.
   \end{align*}
 
 
-\end{corollary}
+\end{theorem}
 
 %%% Local Variables:
 %%% mode: latex

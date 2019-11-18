@@ -127,7 +127,7 @@ We first prove that constraint solving
 does compute normal forms, and that such normal forms are unique.
 
 
-\begin{lemma}[Normal form]
+\begin{lemma}[Principal normal form]
   \label{lemma:normalform}
   Given a constraint $D\in\CL$, a substitution $\phi$ and
   $(C,\unif) = \normalize{D}{\phi}$,
@@ -234,7 +234,7 @@ We can now prove all the necessary high level properties.
   Thus, we can not deduce neither kind nor type equalities from $C$.
 \end{proof}
 
-\begin{property}
+\begin{property}[Regular constraint system]
   $\CL$ is regular, ie, for $x, x'$ two types or kinds,
   $\entail{}{\Ceq{x}{x'}}$ implies
   $\fv{x} = \fv{x'}$
@@ -247,7 +247,7 @@ We can now prove all the necessary high level properties.
 Finally, we can conclude with all the properties we need for
 HM(X):
 
-\begin{theorem}
+\begin{theorem}[Principal constraints]
   $\CL$ has the principal constraint property,\\
   $\operatorname{normalize}$ computes principal normal forms for $\CL$
   and $\CL$ is regular.
