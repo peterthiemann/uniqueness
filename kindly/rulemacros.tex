@@ -332,6 +332,157 @@
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% syntax-directed internal typing
+
+\newcommand\ruleSDIVar{%
+  \inferrule[Var]
+  { \bvar{x}{\tau} \in \E
+  }
+  { \inferS{C}{\E}{x}{\tau}
+  }
+}
+
+\newcommand\ruleSDIVarInst{%
+  \inferrule[VarInst]
+  { \bvar{x}{
+      \forall \Multi[i]{\kvar} \forall (\Multi[j]{\tvar_j:k}).\ \qual{C_x}{\tau}
+    }
+    \in \E \\\\
+    \unif = [\Multi[i]{\kvar_i\mapsto k},\Multi[j]{\tvar_j \mapsto \tau}] \\\\
+    \entail C {\unif(C_x) \Cand \addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}}
+    % \addlin{
+    %   \inferSK{C}{\E}{\unif \tau}{k_\tau}
+    % }
+  }
+  { \inferS{C}{\E}{\ivar{x}{\Multi[i]k}{\Multi[j]\tau}}{\unif\tau}
+  }
+}
+
+\newcommand\ruleSDILam{%
+  \inferrule[Abs] {
+    \inferS{C} {\E;\bvar{x}{\tau_2}}{e}{\tau_1} \\
+    \addlin{\entail{C}{\Cleq{\E}{k}}}
+  } {
+    \inferS
+      {C}
+      {\E}
+      {\lam[k]xe}
+      {\tau_2\tarr{k}\tau_1}
+  }
+}
+
+\newcommand\ruleSDIPair{
+  \inferrule[Pair]
+  { \addlin{\lsplit{C}{\E}{\E_1}{\E_2}} \\\\
+    \Sp = \MkSp{\E}{\E_1}{\E_2} \\\\
+    \inferS{C}{\E_1}{e_1}{\tau_1} \\\\
+    \inferS{C}{\E_2}{e_2}{\tau_2}
+  }
+  { \inferS{C}{\E}{\ipair\Sp{k}{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }
+}
+
+\newcommand\ruleSDIApp{%
+  \inferrule[App]
+  {
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\\\
+    \Sp = \MkSp{\E}{\E_1}{\E_2} \\\\
+    \inferS{C}{\E_1}{e_1}{\tau_2 \tarr{k} \tau_1} \\\\
+    \inferS{C}{\E_2}{e_2}{\tau'_2} \\\\
+    \entail C {\Cleq{\tau_2'}{\tau_2}}
+  }
+  { \inferS{C}
+    {\E}{\iapp\Sp{e_1}{e_2}}{\tau_1} }
+}
+
+\newcommand\ruleSDICreate{
+  \inferrule[Create]
+  { \inferSK{C}{\E}{\tau}{k} \\
+    \entail C {\Cleq k {\kun_0}} }
+  { \inferS{C}{\E}{\create}{\tau \tarr{} \tapp\tres\tau } }
+}
+\newcommand\ruleSDIObserve{
+  \inferrule[Observe]
+  { \inferSK{C}{\E}{\tau}{k} \\
+    \entail C {\Cleq k {\kun_0}} \\
+    \kvar \text{ fresh}
+  }
+  { \inferS{C}{\E}{\observe}{\borrowty[\IBORROW]{\kvar}{\tapp\tres\tau} \tarr{} \tau} }
+}
+\newcommand\ruleSDIUpdate{
+  \inferrule[Update]
+  { \inferSK{C}{\E}{\tau}{k} \\
+    \entail C {\Cleq k {\kun_0}} \\
+    \kvar \text{ fresh}
+  }
+  { \inferS{C}{\E}{\update}{\borrowty[\MBORROW]{\kvar}{\tapp\tres\tau} \tarr{} \tau \tarr{\kaff} \tunit } }
+}
+\newcommand\ruleSDIDestroy{
+  \inferrule[Destroy]
+  { \inferSK{C}{\E}{\tau}{k} \\
+    \entail C {\Cleq k {\kun_0}} }
+  { \inferS{C}{\E}{\destroy}{\tapp\tres\tau \tarr{} \tunit} }
+}
+
+\newcommand\ruleSDILet{
+  \inferrule[Let] {
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
+    \Sp = \MkSp{\E}{\E_1}{\E_2} \\
+    \inferS{C}{\E_1}{e_1}{\tau_1} \\
+    \inferS{C}{\E;\bvar{x}{\tau_1}}{e_2}{\tau_2} \\
+  } {
+    \inferS{C}{\E}{\ilet\Sp{x}{e_1}{e_2}}{\tau_2}
+  }
+}
+
+\newcommand\ruleSDIPLet{
+  \inferrule[PLet] {
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}} \\
+    \Sp = \MkSp{\E}{\E_1}{\E_2} \\
+    \schm_1 =
+      \forall \Multi[i]\kvar
+              \bvar{\Multi[j]\tvar}{\Multi[j]k}.\
+      \qual{D}{\tau_2\tarr{k}\tau_1} \\
+    \inferS
+      {C \Cand D}
+      {\E_1; \bvar{\Multi[j]\tvar}{\Multi[j]k}; \bvar{x}{\tau_2}}
+      {e_1}
+      {\tau_1} \\
+    \addlin{\entail{C \Cand D}{\Cleq{\E_1}{k}}} \\
+    \entail{C}{\Cproj{(\Multi[i]{\kvar},\Multi[j]{\tvar})}{D}}\\
+    \inferS{C}{\E;\bvar{f}{\schm_1}}{e_2}{\tau_2} \\
+  } {
+    \inferS
+      {C}
+      {\E}
+      {\iletfun\Sp{f}{\schm_1}{k}{x}{e_1}{e_2}}
+      {\tau_2}
+  }
+}
+
+\newcommand\ruleSDIMatchPair{
+  \inferrule[MatchPair] {
+    \addlin{\lsplit{C}{\E}{\E_1}{\E_2}} \\
+    \Sp = \MkSp{\E}{\E_1}{\E_2} \\
+    \inferS
+      {C}
+      {\E_1}
+      {e_1}
+      {\transfm{\tyPair{\tau_1}{\tau'_1}}} \\
+    \inferS
+      {C}
+      {\E_2; \bvar{x}{\transfm{\tau_1}}; \bvar{x'}{\transfm{\tau'_1}}}
+      {e_2}
+      {\tau_2} \\
+  } {
+    \inferS
+      {C}
+      {\E}
+      {\imatchin\Sp\etransfm{x,x'}{e_1}{e_2}}
+      {\tau_2}
+  }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Inference
 
 
