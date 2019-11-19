@@ -4,36 +4,58 @@
 % \begin{minipage}[t]{0.49\linewidth}
   \begin{align*}
     \htag{Elaborated expressions}
-    e &::= \dots \\
-    &\mid \ilam{\Multi\kvar}{\Multi\tvar}Ckxe \tag{El. abstraction} \\
-    &\mid \ivar x {\Multi k} {\Multi\tau} \tag{Instantiation} \\
-    &\mid \introPair[k]{e}{e} \tag{Tagged pairs}\\
-    &\mid \iapp{\Sp}{e}{e} \tag{El. application}\\
+    v ::=~& x \mid \ivar x {\Multi k} {\Multi\tau} \mid \lam[k]{x}{e} \mid \introPair[k]{v}{v'}\\
+    e ::=~& x \mid \ivar x {\Multi k} {\Multi\tau} \mid \lam[k]{x}{e} \mid \introPair[k]{e}{e'}\\
+    \mid~& \matchin{x,y}{e}{e'} \tag{Tagged pairs}\\
+    \mid~& \letin{x}{e}{e'}\\
+    \mid~& \letin{\bvar x \schm}{v}{e'}\\
+    \mid~& \iapp{\Sp}{e}{e'} \tag{El. application}\\
+    \mid~& \region{\Sone x\BORROW}{e}\tag{Region}\\
+    \mid~& \borrow{x} \mid \reborrow{x}\tag{Borrows}\\
+    \mid~& \create \mid \observe \mid \update \mid \destroy \tag{Resources}\\
+    % e &::= \dots \\
+    % &\mid \ilam{\Multi\kvar}{\Multi{\tvar : k}}Ckx{\tau}e \tag{El. poly abstraction} \\
+    % &\mid \imlam kx{\tau}e \tag{El. mono abstraction} \\
+    % &\mid \ivar x {\Multi k} {\Multi\tau} \tag{Instantiation} \\
+    % &\mid \introPair[k]{e}{e} \tag{Tagged pairs}\\
+    % &\mid \iapp{\Sp}{e}{e} \tag{El. application}\\
+    \htag{Elaborated A-normal expressions}
+    % TODO: what about constructors applied to values?
+    X ::=~& x \mid \ivar x {\Multi k} {\Multi\tau}\\
+    v ::=~& c \mid X \mid \lam[k]{x}{e} \mid \introPair[k]{X}{X'}\\
+    E ::=~& c \mid X \mid \lam[k]{x}{e} \mid \introPair[k]{x}{x'}\\
+    \mid~& \borrow{x} \mid \reborrow{x}\tag{Borrows}\\
+    \mid~& \create \mid \observe \mid \update \mid \destroy \tag{Resources}\\
+    \mid~& \app{x}{x'} \tag{El. application}\\
+    e ::=~& \letin{x}{E}{e'}\\
+    \mid~& \letin{\bvar x \schm}{v}{e'}\\
+    \mid~& \matchin{x,y}{z}{e} \tag{Tagged pairs}\\
+    \mid~& \region{\Sone x\BORROW}{e}\tag{Region}\\
     \htag{Environment}
-    \Addr &::= \Multi\IBORROW\Multi\MBORROW\Loc \tag{Locations}
+    \Addr ::=~& \Multi\IBORROW\Multi\MBORROW\Loc \tag{Locations}
     % \\           &\mid \borrow{\Addr} \tag{Borrows}
     \\
-    \Perm & ::= \{\} \mid \Perm + \Addr \tag{Permissions}
+    \Perm ::=~& \{\} \mid \Perm + \Addr \tag{Permissions}
     \\
-    r &::= \Addr \mid c \tag{Results}\\
-    \VEnv &::= \Eempty \mid \VEnv( x \mapsto r) \tag{Enviroments} \\
+    r ::=~& \Addr \mid c \tag{Results}\\
+    \VEnv ::=~& \Eempty \mid \VEnv( x \mapsto r) \tag{Enviroments} \\
 %   \end{align*}
 % \end{minipage}
 % \hfill
 % \begin{minipage}[t]{0.49\linewidth}
 %   \begin{align*}
     \htag{Storables}
-    w &::= \StPClosure \VEnv {\Multi\kvar} C k x e \tag{Poly Closures}\\
-    &\mid \StClosure \VEnv k x e \tag{Closures} \\
-    &\mid \StPair k r r \tag{Pairs} \\
-    &\mid \StRes r \tag{Resources} \\
-    &\mid \StFreed \tag{Freed Resource}
+    w ::=~& \StPClosure \VEnv {\Multi\kvar} C k x e \tag{Poly Closures}\\
+    \mid~& \StClosure \VEnv k x e \tag{Closures} \\
+    \mid~& \StPair k r r \tag{Pairs} \\
+    \mid~& \StRes r \tag{Resources} \\
+    \mid~& \StFreed \tag{Freed Resource}
     \\
     \htag{Store}
-    \Store &::= \Eempty \mid \Store( \Loc \mapsto w)
+    \Store ::=~& \Eempty \mid \Store( \Loc \mapsto w)
     \\
     \htag{Splittings}
-    \Sp &::= \Multi{\SpBoth \mid \SpBorrow \mid \SpLeft \mid \SpRight \mid \SpSusp \mid \SpSuspB}
+    \Sp ::=~& \Multi{\SpBoth \mid \SpBorrow \mid \SpLeft \mid \SpRight \mid \SpSusp \mid \SpSuspB}
   \end{align*}
 % \end{minipage}
 \caption{Syntax of internal language}
