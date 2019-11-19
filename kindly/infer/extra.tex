@@ -1,4 +1,3 @@
-
 \section{Type Inference}
 \label{appendix:infer}
 
@@ -15,14 +14,14 @@ of the equivalent statements for HM(X) \citep{sulzmann1997proofs}.
 
 \subsection{Kind inference}
 \label{rules:kinding:full}
-%
-\begin{figure}[tb]
+
+\begin{figure}[tbh]
   \centering
   \input{infer/kinds}
   \caption{Kind inference rules -- $\inferK{(C,\unif)}{{\inP\E}}{{\inP\tau}}{k}$}
   \label{rules:kinding}
 \end{figure}
-%
+
 We write $\inferK{(C,\unif)}{{\inP\E}}{{\inP\tau}}{k}$ when type $\tau$ has kind $k$
 in environment $\E$ under constraints $C$ and unifier $\unif$.
 $\inP\E$ and $\inP\tau$ are the input parameters of

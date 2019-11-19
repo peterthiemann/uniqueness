@@ -4,9 +4,12 @@
   { \inferSK{C}{\E}{\tvar}{k}
   }
   \and
-  \inferrule[KArr]
-  {}
-  { \inferSK{C}{\E}{\tau_1 \tarr{k} \tau_2}{k} }
+  \inferrule[KPair]
+  { \forall i \quad
+    \inferSK{C}{\E}{\tau_i}{k_i} \quad
+    \inferSS{C}{\E}{k_i}{k}
+  }
+  { \inferSK{C}{\E}{\tyPair{\tau_1}{\tau_2}}{k} }
   \and
   \inferrule[KApp]
   { \bvar{\T{\tcon}}{
@@ -23,12 +26,9 @@
   \inferrule[KBorrow]
   {}{ \inferSK{C}{\E}{\borrowty{k}{\tau}}{k}}
   \and
-  \inferrule[KPair]
-  { \forall i \quad
-    \inferSK{C}{\E}{\tau_i}{k_i} \quad
-    \inferSS{C}{\E}{k_i}{k}
-  }
-  { \inferSK{C}{\E}{\tyPair{\tau_1}{\tau_2}}{k} }
+  \inferrule[KArr]
+  {}
+  { \inferSK{C}{\E}{\tau_1 \tarr{k} \tau_2}{k} }
 \end{mathpar}
 
 

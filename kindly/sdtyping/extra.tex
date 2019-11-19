@@ -412,8 +412,6 @@ We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
 \section{Syntax-directed typing}
 \label{appendix:sdtyping}
 
-\subsection{Kinding}
-%
 \begin{figure}[bt]
   \centering
   \input{sdtyping/sd-kinds}
@@ -421,6 +419,36 @@ We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
     $\inferSK{C}{\E}{\tau}{k}$}
   \label{rules:sd-kinding}
 \end{figure}
+
+\begin{figure}[!tbp]
+  \input{sdtyping/sd-splitting}
+  \caption{Splitting ---
+    environments $\lsplit C\E{\E_l}{\E_r}$;
+    inference $\bsplit C\E{\inP{\E_l}}{\inP{\E_r}}$;
+    binders $\bsplit Cb{\inP{b_r}}{\inP{b_l}}$}
+  \label{fig:sd-splitting}
+\end{figure}
+\begin{figure*}[!tbp]
+  \input{sdtyping/sd-borrowing}
+  \caption{Borrowing ---
+    environments $\lregion[n]{C}{x}{\E}{\E'}$;
+    inference $\bregion[\inP n]{C}{\inP x}{\E}{\inP{\E'}}$;
+    binders $\bregion[\inP n]{C}{\inP x}{b}{\inP{b'}}$}
+  \label{fig:sd-borrowing}
+\end{figure*}
+\begin{figure*}[!tbp]
+  \input{sdtyping/sd-environments}
+  \caption{Rewriting constraints on environments --- $\inP{\Cleq{\E}{k}}\Crewrite  C$}
+  \label{fig:contraints-environments-types}
+\end{figure*}
+\begin{figure*}[!tbp]
+  \input{sdtyping/sd-typing}
+  \caption{Syntax-directed typing rules --
+    $\inferS{C}{\E}{e}{\tau}$}
+  \label{fig:syntax-directed-typing}
+\end{figure*}
+
+\subsection{Kinding}
 
 We write $\inferSK{C}{\E}{\tau}{k}$
 if $\tau$ has kind $k$ in environment $\E$ under constraints $C$.
@@ -460,24 +488,6 @@ Type schemes are constrained by first inferring the kind, and then
 emitting the constraint ({\sc ConstrSD} and {\sc ConstrI}).
 
 
-\begin{figure*}[!tb]
-  \input{sdtyping/sd-splitting}
-  \caption{Splitting ---
-    environments $\lsplit C\E{\E_l}{\E_r}$;
-    inference $\bsplit C\E{\inP{\E_l}}{\inP{\E_r}}$;
-    binders $\bsplit Cb{\inP{b_r}}{\inP{b_l}}$}
-  \label{fig:sd-splitting}
-  \input{sdtyping/sd-borrowing}
-  \caption{Borrowing ---
-    environments $\lregion[n]{C}{x}{\E}{\E'}$;
-    inference $\bregion[\inP n]{C}{\inP x}{\E}{\inP{\E'}}$;
-    binders $\bregion[\inP n]{C}{\inP x}{b}{\inP{b'}}$}
-  \label{fig:sd-borrowing}
-  \input{sdtyping/sd-environments}
-  \caption{Rewriting constraints on environments --- $\inP{\Cleq{\E}{k}}\Crewrite  C$}
-  \label{fig:contraints-environments-types}
-\end{figure*}
-
 \subsection{Typing}
 
 The rules for syntax-directed typing are shown in \cref{fig:syntax-directed-typing}
@@ -490,12 +500,6 @@ We define $\generalize{C}{\E}{\tau} =
 where
 $\Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}$.
 
-\begin{figure*}[hbtp]
-  \input{sdtyping/sd-typing}
-  \caption{Syntax-directed typing rules --
-    $\inferS{C}{\E}{e}{\tau}$}
-  \label{fig:syntax-directed-typing}
-\end{figure*}
 
 %%% Local Variables:
 %%% mode: latex

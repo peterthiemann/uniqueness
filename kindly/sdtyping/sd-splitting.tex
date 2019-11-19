@@ -1,4 +1,4 @@
-\begin{minipage}{0.38\linewidth}
+% \begin{minipage}{0.38\linewidth}
 \begin{mathpar}
   \inferrule[ESplit-Check]{
     \bsplit{D}{\E}{\E_1}{\E_2} \\
@@ -18,37 +18,12 @@
     \bsplit{C_1\Cand C_2}{\E;b}{\E_1;b_1}{\E_2;b_2}
   }
 \end{mathpar}
-\end{minipage}\vrule~
-\begin{minipage}{0.6\linewidth}
-    \begin{tabular}
-      {@{}>{$}r<{$}@{ $\Lleftarrow$ }
-      >{$}c<{$}@{ $=$ }
-      >{$}c<{$}@{ $\ltimes$ }
-      >{$}c<{$}r}
-      
-      \Cleq{\schm}{\kun_\infty}
-      &\bvar{x}{\schm}&\bvar{x}{\schm}&\bvar{x}{\schm}
-      &Both\\[2mm]
-
-      {\Cempty}&
-      {\bvar{\borrow[\IBORROW]{x}}{\schm}}&
-      {\bvar{\borrow[\IBORROW]{x}}{\schm}}&{\bvar{\borrow[\IBORROW]{x}}{\schm}}
-      &Borrow\\[2mm]
-
-      {\Cempty}&{\bvar{x}{\schm}}&{\bvar{x}{\schm}}&{\bnone}
-      &Left\\
-      {\Cempty}&{\bvar{x}{\schm}}&{\bnone}&{\bvar{x}{\schm}}
-      &Right\\[2mm]
-
-      {\Cempty}&{\bvar x \schm}&{\svar x \schm^n}&{\bvar x \schm}
-      &Susp\\
-
-      {\Cempty}&
-      {\bvar{\borrow x} \schm}&{\svar[\IBORROW] x \schm^n}&{\bvar{\borrow x} \schm}
-      &SuspB\\
-
-    \end{tabular}
-\end{minipage}
+% \end{minipage}
+\hrule
+\vspace{5pt}
+% \begin{minipage}{0.6\linewidth}
+    \input{sdtyping/split-binder}
+% \end{minipage}
 
 % \begin{mathpar}
 %   \inferrule[BSplit-Both]{}{
