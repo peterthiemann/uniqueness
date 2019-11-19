@@ -293,9 +293,9 @@ let rec eval
      let*? () = !$ ell_1 <|= pi in
      let* w = delta.*(ell_1) in
      let* (gamma', k', x', e') = getstclos w in
-     let pi' = (if k' <= KUNR None then pi else pi <-> !$ ell_1) in
+     let pi = (if k' <= KUNR None then pi else pi <-> !$ ell_1) in
      let* r_2 = gamma.!(x_2) in
-     let* (delta_3, pi_3, r_3) = eval delta pi' gamma'.+(x'-:> r_2) i' e' in
+     let* (delta_3, pi_3, r_3) = eval delta pi gamma'.+(x'-:> r_2) i' e' in
      Ok (delta_3, pi_3, r_3)
   (**)
   (* rule slet *)

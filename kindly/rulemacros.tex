@@ -243,6 +243,17 @@
     {\E}{\app{e_1}{e_2}}{\tau_1} }
 }
 
+\newcommand\ruleSDVApp{%
+  \inferrule[VApp]
+  {
+    {\E_1} (x_1) = {\tau_2 \tarr{k} \tau'_1} \\
+    {\E_2} (x_2) = {\tau'_2}\\
+    \entail C {\Cleq{\tau_2'}{\tau_2}}
+  }
+  { \inferS{C}
+    {\E}{\app{x_1}{x_2}}{\tau'_1} }
+}
+
 \newcommand\ruleSDRegion{%
   \inferrule[Region]
   { \svar x {\tau_x}^n \in \E \\

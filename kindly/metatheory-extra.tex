@@ -257,7 +257,10 @@ $\MultiNumber\Loc\REACH = \infty$.
                                      \in \REACH \wedge w = \Store (\Loc)
 \end{align*}
 
-
+\begin{definition}[Wellformed permission]
+  A permission $\Perm$ is \emph{wellformed} if it contains at most one
+  address for each raw location.
+\end{definition}
 \clearpage{}
 \newcommand\resultOk[2]{
   $R#2 = \Ok{\Store#2, \Perm#2, r#2}$
@@ -266,6 +269,7 @@ $\MultiNumber\Loc\REACH = \infty$.
   $\SE#1 \le \SE#2$, $\Store#1 \le \Store#2$, $\vdash \Store#2 : \SE#2$
 }
 \newcommand\resultPermDom[2]{
+  $\Perm#2$ is wellformed and 
   $\Rawloc{\Perm#2} \subseteq \Dom{\Store#2} \setminus {\Store#2}^{-1}
   (\StFreed)$ 
 }
@@ -340,6 +344,10 @@ $\MultiNumber\Loc\REACH = \infty$.
   % For all $\Addr\in {\Perm#2}$, $\Addr
   % \in \Perm#1 \cup ( \Dom{\Store#2} \setminus \Dom{\Store#1})$.
 }
+\newcommand\assumeWellformed[1]{
+  $\Perm#1$ is wellformed and $\Rawloc{\Perm#1} \subseteq
+  \Dom{\Store#1} \setminus {\Store#1}^{-1} (\StFreed)$
+}
 \newcommand\assumeIncoming[2]{
   Incoming Resources: 
   \begin{enumerate}
@@ -353,16 +361,14 @@ $\MultiNumber\Loc\REACH = \infty$.
     $\MultiNumber\Loc\REACH= 1$.
   \end{enumerate}
 }
+\lstMakeShortInline[style=rule]@
 \begin{theorem}
   Suppose that
   \begin{enumerate}[({A}1)]
   \item $\inferS{C}{\E}{e}{\tau}$
   \item $\SE \vdash \VEnv : \E$
   \item $\vdash \Store : \SE$
-  \item $\Perm$ contains at most one permission for
-    each raw location
-  \item\label{item:11}
-    $\Rawloc\Perm \subseteq \Dom\Store \setminus \Store^{-1} (\StFreed)$
+  \item\label{item:11} \assumeWellformed{}
   \item\label{item:12} $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv,
       \ImmutableBorrows\VEnv} \subseteq \Perm$
   \item $\Rawloc{\Active\VEnv}$,
@@ -373,8 +379,10 @@ $\MultiNumber\Loc\REACH = \infty$.
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
   \item\label{item:15} \assumeIncoming{}{}
   \end{enumerate}
-  For all $i\in\Nat$, if $\Store, \Perm, \VEnv \vdash {e}
-  \Downarrow^i R'$ and $R'\ne \TimeOut$, 
+  For all $i\in\Nat$, if
+  @R' = eval \Store \Perm \VEnv i e@
+  %$\Store, \Perm, \VEnv \vdash {e}  \Downarrow^i R'$
+  and $R'\ne \TimeOut$, 
   then
   $\exists$ $\Store'$, $\Perm'$, $r'$, $\SE'$ such that
   \begin{enumerate}[({R}1)]
@@ -422,7 +430,6 @@ refer to newly created values.
 
 
 \newpage
-\lstMakeShortInline[style=rule]@
 \begin{proof}
     By induction on the evaluation of
   @eval \Store \Perm \VEnv i e@.
@@ -454,9 +461,8 @@ refer to newly created values.
     \MutableBorrows{\VEnv_2}$, 
   \item $\ImmutableBorrows\VEnv =
     \ImmutableBorrows{\VEnv_1} = \ImmutableBorrows{\VEnv_2}$,
-  \item $\Suspended\VEnv = \Suspended{\VEnv_1} \cup
+  \item $\Suspended\VEnv = \Suspended{\VEnv_1} \uplus
     \Suspended{\VEnv_2}$
-    % \textbf{PJT needs to be sharpened}
   \end{itemize}
   We establish the assumptions for the call
   @eval \Store \Perm \VEnv_1  i' e_1@.
@@ -500,15 +506,10 @@ refer to newly created values.
     %% PJT: generalization lemma needed 
     because $\schm$ generalizes $\tau_1$.
   \item Immediate from~\ref{item:8}.
-  \item Well-formedness of $\Perm_1$ follows from~\ref{item:10}.
-  \item $\Rawloc{\Perm_1} \subseteq \Dom{\Store_1}$ because
-    (by~\ref{item:10} and~\ref{item:11} and additivity) 
-    $\Rawloc{\Perm_1} \subseteq \Rawloc{\Perm \cup \Dom{\Store_1}
-      \setminus \Dom\Store} \subseteq \Dom\Store \cup \Dom{\Store_1}
-    \setminus \Dom\Store = \Dom{\Store_1}$. 
+  \item Immediate from~\ref{item:14}. 
   \item $\Reach{\Store_1}{\Active{\VEnv_2'}, \MutableBorrows{\VEnv_2'},
       \ImmutableBorrows{\VEnv_2'}} \subseteq \Perm_1$ \\
-    We start from~\ref{item:12}, which gives immediately
+    From~\ref{item:12}, we have
      $\Reach{\Store_1}{\Active{\VEnv_2}, \MutableBorrows{\VEnv_2},
       \ImmutableBorrows{\VEnv_2}} \subseteq \Perm_1$. The extra
     binding $(x \mapsto r_1)$ goes into one of the compartments
@@ -584,8 +585,32 @@ refer to newly created values.
     \\ Immediate from~\ref{item:31}.
   \end{enumerate}
   
+  \newpage{}
   \textbf{case $e$ of}
   \lstsemrule{sappanf}
+
+  We need to invert rule \TirName{App}:
+  \begin{mathpar}
+    \ruleSDVApp
+  \end{mathpar}
+
+  We need to establish the assumptions for the recursive call
+  @eval \Store \Perm \VEnv'(x'-:>r_2) i' e'@.
+  We write $\VEnv_2' = \VEnv' (x'\mapsto r_2)$.
+  \begin{enumerate}[({A1-}1)]
+  \item $\inferS{C}{\E}{e'}{\tau'}$
+  \item $\SE \vdash \VEnv' (x' \mapsto r_2) : \E; \bvar{x'}{\tau}$
+  \item $\vdash \Store : \SE$
+  \item \assumeWellformed{}
+  \item $\Reach\Store{\Active{\VEnv_2'}, \MutableBorrows{\VEnv_2'},
+      \ImmutableBorrows{\VEnv_2'}} \subseteq \Perm$
+  \item $\Rawloc{\Active{\VEnv_2'}}$,
+    $\Rawloc{\MutableBorrows{\VEnv_2'}}$,
+    $\Rawloc{\ImmutableBorrows{\VEnv_2'}}$, and
+    $\Rawloc{\Suspended{\VEnv_2'}}$ are all disjoint
+  \item \assumeIncoming{}{_2'}
+  \end{enumerate}
+
 \end{proof}
 
 \clearpage{}
