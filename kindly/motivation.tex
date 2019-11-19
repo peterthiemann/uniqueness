@@ -76,7 +76,7 @@ borrows are no longer in scope.
   \centering
   \begin{subfigure}[t]{1\linewidth}
 \begin{lstlisting}
-module Array : sig
+module type ARRAY = sig
   type ('a : 'k) t : lin
   val create : ('a : un) => int -> 'a -> 'a t
   val free : ('a : aff) => 'a t -> unit
@@ -85,6 +85,8 @@ module Array : sig
   val set : ('a : aff) => &!('a t) * int * 'a -> unit
   val map : (&'a -> 'b) -> &('a t) -> 'b t
 end
+
+module Array : ARRAY
 \end{lstlisting}
     \vspace{-15pt}
     \caption{Signature}
@@ -216,25 +218,14 @@ takes the position of the element.
 
 \begin{figure}[tp]
   \centering
-  \begin{subfigure}{1\linewidth}
+  % \begin{subfigure}{1\linewidth}
 \begin{lstlisting}
 module type HybArray = sig
-  type ('a : un) t : lin
-  val create : int -> 'a -> 'a t
-  val free : 'a t -> unit
-  val length : &('a t) -> int
-  val get : &('a t) * int -> 'a
+  include ARRAY
   val set : &('a t) * int * 'a -> 'a t
   val set_mut : &!('a t) * int * 'a -> unit
 end
-\end{lstlisting}
-    \vspace{-15pt}
-    \caption{Signature}
-    \label{sig:hybarray}
-  \end{subfigure}
 
-  \begin{subfigure}{1\linewidth}
-\begin{lstlisting}
 module Cow : HybArray = struct
   include Array
   let set (a, i0, x0) =
@@ -243,10 +234,16 @@ module Cow : HybArray = struct
 end
 \end{lstlisting}
     \vspace{-15pt}
-    \caption{Implementation using copy-on-write}
-    \label{ex:cow}
-  \end{subfigure}
+  %   \caption{Implementation using copy-on-write}
+  % \end{subfigure}
   \caption{Hybrid arrays}
+    \label{sig:hybarray}
+    \label{ex:cow}
+  
+  \lstinputlisting[linerange=1-31]{code/sukodu.affe}
+    \vspace{-15pt}
+  \caption{Excerpt of the Sudoku solver}
+  \label{ex:sudoku}
 \end{figure}
 
 Our implementation of a Sudoku solver (\cref{ex:sudoku}) performs
@@ -292,14 +289,6 @@ transient mutability such as Relaxed-Radix Balance Vectors (RRB) \cite{DBLP:jour
 or persistent HAMTs \cite{bagwell2001ideal,clojurehamt} to provide  a
 convenient programming style without compromising performance.
 
-\begin{figure}
-  \centering
-  \lstinputlisting[linerange=1-31]{code/sukodu.affe}
-    \vspace{-15pt}
-  \caption{Excerpt of the Sudoku solver}
-  \label{ex:sudoku}
-\end{figure}
-
 % \subsection{Type abstraction and linearity violations}
 
 % While linearity allows to verify many properties, it also prevents
@@ -315,109 +304,73 @@ convenient programming style without compromising performance.
 
 % \TODO{Show example with arrays}
 
-\subsection{Local data-structures with regions}
-\label{tuto:pool}
+\subsection{Iterators and regions}
+\label{tuto:vector}
+
 
 % We have seen that borrows are limited to a region.
 In the examples so far, regions do not appear in type signatures.
 But for certain programming idioms, we want to extend the scope of a
-region across a function boundary. As an example,
-we present an interface and implementation of a pool of linear resources where the
-extended scope of the region enforces proper use of the resources.
+region across a function boundary.
+For instance, how should we fold on an array of linear objects?
+A naive fold function would only work on unrestricted content:
+\begin{lstlisting}
+val fold : ('a : un) => ('a -> 'b -> 'b) -> 'a array -> 'b -> 'b
+\end{lstlisting}
 
-\cref{intf:pool} contains the interface of the @Pool@ module.
-A pool is parameterized by its content. The kind of the pool
-depends on the content: linear content implies
-a linear pool while unrestricted content yields an unrestricted pool.
-The functions @Pool.create@ and @Pool.consume@
-build/destroy a pool given creators/destructors for the elements
-of the pool.
-The function @Pool.use@ is the workhorse of the API, which
-borrows a resource from the pool to a callback.
-It takes a shared borrow of a pool (to enable concurrent access) and a
-callback function.
-The callback receives a exclusive borrow of an arbitrary resource from the pool.
+However, if we want to work on linear and affine resources,
+we must make sure those resources are not leaked in the result.
+content. We obtain the following signature:
+
+\begin{lstlisting}
+val fold :
+  ('b:'k),('k <= aff_r) =>
+  (&(aff_r1,'a) -> 'b -{aff_r1}> 'b) -> &('a array) -> 'b -{lin}> 'b
+\end{lstlisting}
+
+The folded function receives a shared borrow of the element in the array.
 The typing of the callback ensures
 that this borrow is neither captured nor returned by the function.
-
-This encapsulation is implemented with a universally quantified \emph{kind index variable} $r$.
-The signature prescribes the type @&!(aff_r1,'a_1)@ for the
-exclusive borrow of the resource with an affine kind at region nesting $r+1$. The return
-type of the callback is constrained to kind @'k_2 <= aff_r@
-so that the callback certainly cannot return the borrowed argument.
-In a specific use of @Pool.use@, the index $r$ gets unified
-with the current nesting level of regions so that the region for the
-callback effectively gets ``inserted'' into the lexical nesting at the callsite.
 %
-\cref{ex:pool} shows a simple example using the @Pool@ module.
+This encapsulation is implemented with a universally quantified \emph{kind index variable} $r$.
+The signature prescribes the type @&!(aff_r1,'a)@ for the
+exclusive borrow of the resource with an affine kind at region nesting $r+1$. The return
+type of the callback is constrained to kind @'k <= aff_r@
+so that the callback certainly cannot return the borrowed argument.
+%
+The input of the fold is a shared borrow of the array,
+which ensures that we have the right to share borrows of the inner content and
+make multiple concurrent folds.
 
-The implementation in \cref{impl:pool} represents a bag of resources
-using a concurrent queue with atomic add and remove operations.
-The implementation of the @Pool.create@ and @Pool.consume@
-functions is straightforward.
-The function @Pool.use@ first draws
-an element from the pool (or creates a fresh element),
-passes it down to the callback function @f@, and returns
-it to the pool afterwards.
-For clarity,
-we explicitly delimit the region in \cref{line:pool:region} to ensure that
-the return value of @f &!o@ does not capture @&!o@.
-In practice, the type checker inserts this region automatically.
-
-\begin{figure}[tp]
-  \centering
-  \begin{subfigure}[t]{1\linewidth}
-\begin{lstlisting}
-type ('a:'k) pool : 'k
-create : (unit -> 'a) -> 'a pool
-consume : ('a -> unit) -> 'a pool -> unit
-use : ('a_1:'k_1),('a_2:'k_2),('k_2 <= aff_r) =>
-  &('a_1 pool) -> (&!(aff_r1,'a_1) -{lin}> 'a_2) -{'k_1}> 'a_2
-\end{lstlisting}
-    \vspace{-10pt}
-    \caption{Signature}
-    \label{intf:pool}
+We can then easily use this function to fold over an array of files. Here
+we compute the sum of their lengths:
 
 \begin{lstlisting}
-(* Using the pool in queries. *)
-let create_user pool name =
-  Pool.use &pool (fun connection ->
-    Db.insert "users" [("name", name)] connection)
-
-let uri = "postgresql://localhost:5432"
-let main users =
-  (* Create a database connection pool. *)
-  let pool = Pool.create (fun _ -> Db.connect uri) in
-  List.parallel_iter (create_user &pool) users;
-  Pool.consume (fun c -> Db.close c)
+let all_lengths = fold (fun f s -> read f + s) &all_files 0 
 \end{lstlisting}
-    \vspace{-10pt}
-    \caption{Example of use}
-    \label{ex:pool}
-  \end{subfigure}
 
-  \begin{subfigure}[t]{1\linewidth}
+Naturally, this is not sufficient if we want to mutate the array during iteration.
+For this purpose, we need to take an exclusive borrow of the structure to iterate
+on:
+
 \begin{lstlisting}
-type ('a:'k) pool : 'k = {spawn: unit -> 'a; queue: 'a CQueue.t}
-let create spawn = { spawn ; queue = CQueue.create () }
-let consume f c = CQueue.iter f c.queue
-let use { spawn ; queue } f =
-  let o = match CQueue.pop &queue with
-    | Some x -> x
-    | None () -> spawn ()
-  in
-  let r = {| f &!o |} in(*@\label{line:pool:region}*)
-  Queue.push o &queue;
-  r
+val iter_mut : &!('a array) -> (&!(aff_r1,'a) -{un_r1}> unit) -{lin}> unit
 \end{lstlisting}
-    \vspace{-15pt}
-    \caption{Implementation}
-    \label{impl:pool}
-  \end{subfigure}
 
-  \caption{The \texttt{Pool} module}
-  \label{fig:pool}
-\end{figure}
+Here, the callback of the @iter@ function must be of kind @un_r1@: Indeed, this
+callback should be @un@, as it will be called multiple time, but it should also
+be prevented from capturing objects of the region $r+1$ to prevent the borrow
+from escaping.
+
+While the distinction between mutable and immutable iteration function
+might seem unfortunate, it is typical of
+programming with borrows and is also present in the Rust standard library, for
+instance. It allows the programmer to explicitly state how various iterations
+are allowed to compose and be optimized.
+\lang's region variables ensures that the content iterated on can never
+be leaked outside of the iteration function.
+This pattern is essential in many use-cases of linearity such
+as pools of linear objects (see \cref{tuto:pool}). 
 
 \lstDeleteShortInline@
 

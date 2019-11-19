@@ -1,0 +1,104 @@
+\subsection{Pool of linear resources}
+\label{tuto:pool}
+
+We present an interface and implementation of a pool of linear resources where the
+extended scope of the region enforces proper use of the resources.
+
+\cref{intf:pool} contains the interface of the @Pool@ module.
+A pool is parameterized by its content. The kind of the pool
+depends on the content: linear content implies
+a linear pool while unrestricted content yields an unrestricted pool.
+The functions @Pool.create@ and @Pool.consume@
+build/destroy a pool given creators/destructors for the elements
+of the pool.
+The function @Pool.use@ is the workhorse of the API, which
+borrows a resource from the pool to a callback.
+It takes a shared borrow of a pool (to enable concurrent access) and a
+callback function.
+The callback receives a exclusive borrow of an arbitrary resource from the pool.
+The typing of the callback ensures
+that this borrow is neither captured nor returned by the function.
+
+This encapsulation is implemented with a universally quantified \emph{kind index variable} $r$.
+The signature prescribes the type @&!(aff_r1,'a_1)@ for the
+exclusive borrow of the resource with an affine kind at region nesting $r+1$. The return
+type of the callback is constrained to kind @'k_2 <= aff_r@
+so that the callback certainly cannot return the borrowed argument.
+In a specific use of @Pool.use@, the index $r$ gets unified
+with the current nesting level of regions so that the region for the
+callback effectively gets ``inserted'' into the lexical nesting at the callsite.
+%
+\cref{ex:pool} shows a simple example using the @Pool@ module.
+
+The implementation in \cref{impl:pool} represents a bag of resources
+using a concurrent queue with atomic add and remove operations.
+The implementation of the @Pool.create@ and @Pool.consume@
+functions is straightforward.
+The function @Pool.use@ first draws
+an element from the pool (or creates a fresh element),
+passes it down to the callback function @f@, and returns
+it to the pool afterwards.
+For clarity,
+we explicitly delimit the region in \cref{line:pool:region} to ensure that
+the return value of @f &!o@ does not capture @&!o@.
+In practice, the type checker inserts this region automatically.
+
+\begin{figure}[tp]
+  \centering
+  \begin{subfigure}[t]{1\linewidth}
+\begin{lstlisting}
+type ('a:'k) pool : 'k
+create : (unit -> 'a) -> 'a pool
+consume : ('a -> unit) -> 'a pool -> unit
+use : ('a_1:'k_1),('a_2:'k_2),('k_2 <= aff_r) =>
+  &('a_1 pool) -> (&!(aff_r1,'a_1) -{lin}> 'a_2) -{'k_1}> 'a_2
+\end{lstlisting}
+    \vspace{-10pt}
+    \caption{Signature}
+    \label{intf:pool}
+
+\begin{lstlisting}
+(* Using the pool in queries. *)
+let create_user pool name =
+  Pool.use &pool (fun connection ->
+    Db.insert "users" [("name", name)] connection)
+
+let uri = "postgresql://localhost:5432"
+let main users =
+  (* Create a database connection pool. *)
+  let pool = Pool.create (fun _ -> Db.connect uri) in
+  List.parallel_iter (create_user &pool) users;
+  Pool.consume (fun c -> Db.close c)
+\end{lstlisting}
+    \vspace{-10pt}
+    \caption{Example of use}
+    \label{ex:pool}
+  \end{subfigure}
+
+  \begin{subfigure}[t]{1\linewidth}
+\begin{lstlisting}
+type ('a:'k) pool : 'k = {spawn: unit -> 'a; queue: 'a CQueue.t}
+let create spawn = { spawn ; queue = CQueue.create () }
+let consume f c = CQueue.iter f c.queue
+let use { spawn ; queue } f =
+  let o = match CQueue.pop &queue with
+    | Some x -> x
+    | None () -> spawn ()
+  in
+  let r = {| f &!o |} in(*@\label{line:pool:region}*)
+  Queue.push o &queue;
+  r
+\end{lstlisting}
+    \vspace{-15pt}
+    \caption{Implementation}
+    \label{impl:pool}
+  \end{subfigure}
+
+  \caption{The \texttt{Pool} module}
+  \label{fig:pool}
+\end{figure}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
