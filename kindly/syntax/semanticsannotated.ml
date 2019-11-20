@@ -309,7 +309,7 @@ let rec eval
   (* rule sletfun *)
   | LetFun (f, sigma, k, x, e, e', sp) ->
     let (gamma_1, gamma_2) = vsplit gamma sp in
-    let SCHM(kappas, tybinds, cstr, ty) = sigma in
+    let SCHM(kappas, _, cstr, ty) = sigma in
     let w = STPOLY (gamma_1, kappas, cstr, k, x, e') in
     let (ell', delta') = salloc delta w in
     let pi' = pi <+> !$ ell' in
