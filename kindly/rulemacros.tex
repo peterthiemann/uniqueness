@@ -336,7 +336,8 @@
 
 \newcommand\ruleSDIVar{%
   \inferrule[Var]
-  { \bvar{x}{\tau} \in \E
+  { \bvar{x}{\tau} \in \E \\
+    \entail C {\addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}}
   }
   { \inferS{C}{\E}{x}{\tau}
   }
@@ -479,6 +480,46 @@
       {\E}
       {\imatchin\Sp\etransfm{x,x'}{e_1}{e_2}}
       {\tau_2}
+  }
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% syntax-directed internal typing in A-normal form
+
+\newcommand\ruleSDAIPair{
+  \inferrule[Pair] {
+    \bvar{x_1}{\tau_1} \in \Gamma \\\\
+    \bvar{x_2}{\tau_2} \in \Gamma \\\\
+    \entail C {\addlin{\Cleq{\E\Sdel{x_1,x_2}}{\kaff_\infty}}}
+  }
+  { \inferS{C}{\E}{\aipair{k}{x_1}{x_2}}{\tyPair{\tau_1}{\tau_2}} }
+}
+
+\newcommand\ruleSDAIApp{%
+  \inferrule[App] {
+    \bvar{x_1}{\tau_2 \tarr{k} \tau_1} \in \Gamma \\\\
+    \bvar{x_2}{\tau_2'} \in \Gamma \\\\
+    \entail C {\Cleq{\tau_2'}{\tau_2}} \\\\
+    \entail C {\addlin{\Cleq{\E\Sdel{x_1,x_2}}{\kaff_\infty}}}
+  } {
+    \inferS{C}{\E}{\aiapp{x_1}{x_2}}{\tau_1}
+  }
+}
+
+\newcommand\ruleSDAIMatchPair{
+  \inferrule[MatchPair] {
+    \bvar x {\transfm{\tyPair{\tau_1}{\tau_2}}} \in \Gamma \\\\
+    \inferS
+      {C}
+      {\E\Sdel{x}; \bvar{x_1}{\transfm{\tau_1}}; \bvar{x_2}{\transfm{\tau_2}}}
+      {e}
+      {\tau} \\
+  } {
+    \inferS
+      {C}
+      {\E}
+      {\aimatchin\etransfm{x_1,x_2}{x}{e}}
+      {\tau}
   }
 }
 
