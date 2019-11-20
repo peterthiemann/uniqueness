@@ -39,9 +39,10 @@ type schm = SCHM of kappas * (alpha * kind) list * constr * ty
 type exp = Const of int
          | Var of ident
          | Varinst of ident * kind list
-         | Polylam of kappas * constr * kind * ident * exp
+         | Lam of kind * ident * exp
          | App of exp * exp * splitting
          | Let of ident * exp * exp * splitting
+         | LetFun of ident * schm * kind * ident * exp * exp * splitting
          | Pair of kind * exp * exp * splitting
          | Match of ident * ident * exp * exp * splitting
          | Matchborrow of ident * ident * exp * exp * splitting
@@ -267,11 +268,11 @@ let rec eval
     let (ell', delta') = salloc delta w in
     Ok (delta', pi' <+> !$ ell', RADDR !$ ell')
   (**)
-  (* rule polylam *)
-  | Polylam (kappas, cstr, k, x', e') ->
-     let w = STPOLY (gamma, kappas, cstr, k, x', e') in
-     let (ell', delta') = salloc delta w in
-     Ok (delta', pi <+> !$ ell', RADDR !$ ell')
+  (* rule lam *)
+  | Lam (k, x', e') ->
+      let w = STCLOS (gamma, k, x', e') in
+      let (ell', delta') = salloc delta w in
+      Ok (delta', pi <+> !$ ell', RADDR !$ ell')
   (**)
   (* rule sapp *)
   | App (e_1, e_2, sp) ->
@@ -304,6 +305,16 @@ let rec eval
      let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
      let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 gamma_2.+(x -:> r_1) i' e_2 in
      Ok (delta_2, pi_2, r_2)
+  (**)
+  (* rule sletfun *)
+  | LetFun (f, sigma, k, x, e, e', sp) ->
+    let (gamma_1, gamma_2) = vsplit gamma sp in
+    let SCHM(kappas, tybinds, cstr, ty) = sigma in
+    let w = STPOLY (gamma_1, kappas, cstr, k, x, e') in
+    let (ell', delta') = salloc delta w in
+    let pi' = pi <+> !$ ell' in
+    let* (delta_1, pi_1, r_1) = eval delta' pi' gamma_2.+(f -:> RADDR !$ ell') i' e' in
+    Ok (delta_1, pi_1, r_1)
   (**)
   (* rule spair *)
   | Pair (k, e_1, e_2, sp) ->
