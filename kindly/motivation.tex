@@ -325,7 +325,7 @@ content. We obtain the following signature:
 \begin{lstlisting}
 val fold :
   ('b:'k),('k <= aff_r) =>
-  (&(aff_r1,'a) -> 'b -{aff_r1}> 'b) -> &('a array) -> 'b -{lin}> 'b
+  (&(aff_r1,'a) -> 'b -{aff_r}> 'b) -> &('a array) -> 'b -{lin}> 'b
 \end{lstlisting}
 
 The folded function receives a shared borrow of the element in the array.
@@ -354,10 +354,10 @@ For this purpose, we need to take an exclusive borrow of the structure to iterat
 on:
 
 \begin{lstlisting}
-val iter_mut : &!('a array) -> (&!(aff_r1,'a) -{un_r1}> unit) -{lin}> unit
+val iter_mut : &!('a array) -> (&!(aff_r1,'a) -{un_r}> unit) -{lin}> unit
 \end{lstlisting}
 
-Here, the callback of the @iter@ function must be of kind @un_r1@: Indeed, this
+Here, the callback of the @iter@ function must be of kind @un_r@: Indeed, this
 callback should be @un@, as it will be called multiple time, but it should also
 be prevented from capturing objects of the region $r+1$ to prevent the borrow
 from escaping.
