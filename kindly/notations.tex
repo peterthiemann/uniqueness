@@ -13,13 +13,14 @@
 \newcommand\K[1]{\mathrm{#1}}
 \newcommand\loc{\ell}
 \newcommand\Sp{{sp}}
-\newcommand\SpBoth  {\ensuremath{\mathtt{Both}}}
-\newcommand\SpBorrow{\ensuremath{\mathtt{Borrow}}}
-\newcommand\SpLeft  {\ensuremath{\mathtt{Left}}}
-\newcommand\SpRight {\ensuremath{\mathtt{Right}}}
-\newcommand\SpSusp  {\ensuremath{\mathtt{Susp}}}
-\newcommand\SpSuspB {\ensuremath{\mathtt{SuspB}}}
-\newcommand\MkSp[3]{\mathrm{mksp}({#1},{#2},{#3})}
+% \newcommand\SpBoth  {\ensuremath{\mathtt{Both}}}
+% \newcommand\SpBorrow{\ensuremath{\mathtt{Borrow}}}
+% \newcommand\SpLeft  {\ensuremath{\mathtt{Left}}}
+% \newcommand\SpRight {\ensuremath{\mathtt{Right}}}
+% \newcommand\SpSusp  {\ensuremath{\mathtt{Susp}}}
+% \newcommand\SpSuspB {\ensuremath{\mathtt{SuspB}}}
+\newcommand\Split[2]{({#1}, {#2})}
+\newcommand\MkSp[2]{\Split{\Dom{#1}}{\Dom{#2}}}
 
 % Lattice
 \newcommand\lub\bigvee

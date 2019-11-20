@@ -43,7 +43,8 @@
     \Store ::=~& \Eempty \mid \Store( \Loc \mapsto w)
     \\
     \htag{Splittings}
-    \Sp ::=~& \Multi{\SpBoth \mid \SpBorrow \mid \SpLeft \mid \SpRight \mid \SpSusp \mid \SpSuspB}
+    % \Sp ::=~& \Multi{\SpBoth \mid \SpBorrow \mid \SpLeft \mid \SpRight \mid \SpSusp \mid \SpSuspB}
+    \Sp ::=~& \Split{\Multi x}{\Multi x}
   \end{align*}
 % \end{minipage}
 \caption{Syntax of internal language}

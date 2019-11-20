@@ -335,11 +335,11 @@
 %% syntax-directed internal typing
 
 \newcommand\ruleSDIVar{%
-  \inferrule[Var]
-  { \bvar{x}{\tau} \in \E \\
+  \inferrule[Var] {
+    \bvar{x}{\tau} \in \E \\\\
     \entail C {\addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}}
-  }
-  { \inferS{C}{\E}{x}{\tau}
+  } {
+    \inferS{C}{\E}{x}{\tau}
   }
 }
 
@@ -375,7 +375,7 @@
 \newcommand\ruleSDIPair{
   \inferrule[Pair]
   { \addlin{\lsplit{C}{\E}{\E_1}{\E_2}} \\\\
-    \Sp = \MkSp{\E}{\E_1}{\E_2} \\\\
+    \Sp = \MkSp{\E_1}{\E_2} \\\\
     \inferS{C}{\E_1}{e_1}{\tau_1} \\\\
     \inferS{C}{\E_2}{e_2}{\tau_2}
   }
@@ -386,7 +386,7 @@
   \inferrule[App]
   {
     \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\\\
-    \Sp = \MkSp{\E}{\E_1}{\E_2} \\\\
+    \Sp = \MkSp{\E_1}{\E_2} \\\\
     \inferS{C}{\E_1}{e_1}{\tau_2 \tarr{k} \tau_1} \\\\
     \inferS{C}{\E_2}{e_2}{\tau'_2} \\\\
     \entail C {\Cleq{\tau_2'}{\tau_2}}
@@ -427,7 +427,7 @@
 \newcommand\ruleSDILet{
   \inferrule[Let] {
     \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
-    \Sp = \MkSp{\E}{\E_1}{\E_2} \\
+    \Sp = \MkSp{\E_1}{\E_2} \\
     \inferS{C}{\E_1}{e_1}{\tau_1} \\
     \inferS{C}{\E;\bvar{x}{\tau_1}}{e_2}{\tau_2} \\
   } {
@@ -438,7 +438,7 @@
 \newcommand\ruleSDIPLet{
   \inferrule[PLet] {
     \addlin{\lsplit{C}{\E}{\E_1}{\E_2}} \\
-    \Sp = \MkSp{\E}{\E_1}{\E_2} \\
+    \Sp = \MkSp{\E_1}{\E_2} \\
     \schm_1 =
       \forall \Multi[i]\kvar
               \bvar{\Multi[j]\tvar}{\Multi[j]k}.\
@@ -463,7 +463,7 @@
 \newcommand\ruleSDIMatchPair{
   \inferrule[MatchPair] {
     \addlin{\lsplit{C}{\E}{\E_1}{\E_2}} \\
-    \Sp = \MkSp{\E}{\E_1}{\E_2} \\
+    \Sp = \MkSp{\E_1}{\E_2} \\
     \inferS
       {C}
       {\E_1}
