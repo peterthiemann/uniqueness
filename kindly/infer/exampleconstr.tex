@@ -101,14 +101,14 @@ is shown in \cref{example:graph}.
 The algorithm then proceeds as follow:
 \begin{itemize}[noitemsep]
 \item From the constraints above, we deduce the graph shown
-  with plain arrows on the left
+  with plain arrows on the left of \cref{example:graph}.
 \item We add all the dashed arrows by saturating
   lattice inequalities. For clarity, we only show $\kun$.
 \item We identify the connected component circled in
   {\color{green} green}.
-  We deduce $\kvar_\gamma = \kvar_x = \kun$
+  We deduce $\kvar_\gamma = \kvar_x = \kun$.
 \item We take the transitive closure, which adds the
-  arrow in {\color{blue} blue} from $\kvar_1$ to $\kvar_3$.
+  arrow in {\color{blue} blue} from $\kvar_3$ to $\kvar_1$.
 \item We remove the remaining nodes not present in the type skeleton (colored in {\color{red} red}): $\kvar_r$ and $\kvar_f$.
 \item We clean up the graph (transitive reduction, remove unneeded constants, \dots),
   and obtain the graph shown on the right.
