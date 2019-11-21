@@ -8,8 +8,7 @@
     \mid~& \ipair\Sp{k}{e}{e'} \mid \imatchin\Sp\etransfm{x,y}{e}{e'} \tag{Tagged pairs}\\
     \mid~& \ilet\Sp{x}{e}{e'} \tag{Mono let}\\
     \mid~& \iletfun\Sp{x}\schm{k}{y}{e}{e'} \tag{Poly let}\\
-    \mid~& \region{\Sone x\BORROW}{e}\tag{Region}\\
-    \mid~& \borrow{x} \mid \reborrow{x}\tag{Borrows}\\
+    \mid~& \region{\Sone x\BORROW}{e} \mid \borrow{x} \mid \reborrow{x} \tag{Region \& Borrows}\\
     \mid~& \create \mid \observe \mid \update \mid \destroy \tag{Resources}\\
     % \htag{Elaborated A-normal expressions}
     % e ::=~& \ldots \mid \aiapp{x}{x'} \mid \aipair{k}{x}{x'} \mid \aimatchin\etransfm{x,y}{z}{e} \\
