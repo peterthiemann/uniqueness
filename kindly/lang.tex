@@ -405,7 +405,7 @@ expression
 $\letin{a}{\text{create}\ 10\ x}
 {\introPair{\region[{}]{\Sone x\IBORROW}{\app{\text{length}}{\borrow[\IBORROW]{a}}}}{a}}$,
 the rule {\sc Susp} splits off a borrow from  the resource
-@a@ to use it in the left component of the pair.
+$a$ to use it in the left component of the pair.
 As usual, a borrow cannot be active in the same scope as its resource.
 The \emph{region} around its use ensures that the borrow in the left component does not
 escape, which brings us to the next topic.
