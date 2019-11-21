@@ -1,22 +1,23 @@
-\begin{figure}
-  \begin{minipage}[t]{0.52\linewidth}
+\begin{figure*}
+  \begin{minipage}[t]{0.36\linewidth}
     \lstinputlisting[style=rule,linerange=eval\ header-(**)]
     {syntax/semanticsannotated.ml}
+  \lstsemrule{sapp}
+  \end{minipage}%
+  \begin{minipage}[t]{0.36\linewidth}
   \lstsemrule{varinst}
   \medskip
-  \lstsemrule{spair}
-  \end{minipage}
-  \begin{minipage}[t]{0.47\linewidth}
-  \lstsemrule{sapp}
-  % \lstsemrule{spair}
+  \lstsemrule{sborrow}
+  \end{minipage}%
+  \begin{minipage}[t]{0.29\linewidth}
   \medskip
   \lstsemrule{sregion}
   \medskip
-  \lstsemrule{sborrow}
+  \lstsemrule{spair}
   \end{minipage}
   \caption{Big-step interpretation}
   \label{fig:big-step-interpretation}
-\end{figure}
+\end{figure*}
 
 
 %%% Local Variables:
