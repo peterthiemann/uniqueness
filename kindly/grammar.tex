@@ -4,8 +4,7 @@
   e ::=&\ c \mid x \mid \app{e}{e'} \mid \lam{x}{e} \mid \letin{x}{e}{e'}\\
   % |&\ \fix{e}\tag{Fixpoint}\\
   |&\ \introPair{e}{e'} \mid \matchin{x,y}{e}{e'}\tag{Pairs}\\
-  |&\ \region{\Sone x\BORROW}{e}\tag{Region}\\
-  |&\ \borrow{x} \mid \reborrow{x}\tag{Borrows}\\
+  |&\ \region{\Sone x\BORROW}{e} \mid \borrow{x} \mid \reborrow{x} \tag{Region \& Borrows}\\
   |&\ \create \mid \observe \mid \update \mid \destroy \tag{Resources}\\
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
   % |&\ \elimK{K}{e}\tag{Data Constructor elimination}\\
@@ -29,9 +28,8 @@
   |&\ \tau\tarr{k}\tau'\tag{Function types}\\
   |&\ \borrowty{k}{\tau}\tag{Borrowed Type}\\
   \htag{Kinds}
-  k ::=&\ \kvar \mid \mul_n \tag{Kinds}\\
+  k ::=&\ \kvar \mid \mul_n \hspace{12mm} \forall n \in \Nat \cup \{\infty\} \tag{Kinds}\\
   \mul ::=&\ \klin \mid \kaff \mid \kun\tag{Quality}\\
-  n \in&\ \Nat \cup \{\infty\}\\
   \htag{Constrained type and kind schemes}
   C ::=&\ \Multi{\Cleq{k}{k'}}
   \tag{Constraints}\\
