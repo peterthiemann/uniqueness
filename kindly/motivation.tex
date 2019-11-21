@@ -137,8 +137,8 @@ are split off the exclusive borrow used in \cref{ex:array:set}, which
 belongs to the next enclosing region corresponding to the loop body.
 The whole array can be returned in \cref{ex:array:return} because  the
 borrows are no longer in scope. 
-
-More precisely, the code below is an annotated excerpt with explicit regions
+%
+More precisely, here is is an annotated excerpt with explicit regions
 marked in braces @{| ... |}@:
 
 \begin{lstlisting}[firstnumber=3]
@@ -173,7 +173,7 @@ immediately by @get@ and @set_mut@.
 \end{figure}
 
 On top of the mutation function @set_mut@, our array implementation
-also provides @set@ of type @&('a t) * int * 'a -> 'a t@. It
+also provides @set: &('a t) * int * 'a -> 'a t@. It
 takes a shared borrow because it only reads from the
 argument array, but returns a fresh, modified structure.
 %

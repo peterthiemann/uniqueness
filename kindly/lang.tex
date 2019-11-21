@@ -134,7 +134,7 @@ the following rules:
 Following these rules, we start from the leafs and grow the region
 associated to each borrow until it can't grow anymore either due to a binding
 or to conflicting uses.
-
+%
 Let us consider the following program with binders and function applications:
 %
 \[
@@ -223,7 +223,7 @@ We discuss judgments for typing, kinding, and constraint entailment:
 \item[$\entail{D}{C}$ --] Constraint $D$ entails constraint $C$.
 \end{description}
 
-\subsubsection{Kinds and constraints}
+\paragraph{Kinds and constraints}
 
 \affe uses kinds and constrained types to indicate
 linear and affine types.
@@ -240,16 +240,16 @@ $\infty$ refers to an empty region that is infinitely nested.
 For instance, the constraint $\Cleq{\kvar}{\kun_\infty}$ indicates that
 $\kvar$ must be unrestricted, but can be local to a region.
 
-Kinds form a lattice with an ordering that implements two principles
-(see \cref{sdtyp:lattice}). First, unrestricted values may be used
+Kinds form a lattice with an ordering implementing two principles
+(see \cref{sdtyp:lattice}). Unrestricted values may be used
 where affine ones are expected and affine ones are less restricted
 than linear ones as reflected in \TirName{Lat-UAL}.
-Second, values usable at level $n$ may be used at any more deeply
+Values usable at level $n$ may be used at any more deeply
 nested level $n'$ (where $n\le\infty$ for any $n$) as defined in the \TirName{Lat-Level} axioms.
 
 Constraints are conjunctions of inequality constraints over this kind
-lattice. In most uses, a constraint gives an upper or lower bound for
-a kind variable or it relates two kind variables.
+lattice. In most uses, constraints give upper or lower bounds for
+kind variables or relate two kind variables.
 
 \begin{figure}[tp]
   \input{infer/lattice}
@@ -258,6 +258,34 @@ a kind variable or it relates two kind variables.
   \label{sdtyp:lattice}
   \vspace{-10pt}
 \end{figure}
+
+\paragraph{Environments and bindings}
+\label{sdtyping:envs}
+
+\begin{figure}[tp]
+  \begin{align*}
+    \E &::=\ \Eempty \mid \E;B\tag{Environments}\\
+    B &::=\ \bnone % \tag{Empty} \\
+    \mid \bvar{\tvar}{\kschm} % \tag{Types}
+    \mid \bvar{x}{\schm}% \tag{Variables}
+    \mid \bvar{\borrow{x}}{\borrowty{k}{\tau}}% \tag{Borrows}\\
+    \mid \svar{x}{\schm}^n % \tag{Suspended}
+    % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
+  \end{align*}
+  \vspace{-10pt}
+  \caption{Type environments}
+  \label{grammar:env}
+  \vspace{5pt}
+  % \begin{minipage}{0.5\linewidth}
+  \centering
+    \input{sdtyping/split-binder}
+    \vspace{-5pt}
+    \caption{Splitting rules for bindings -- $\lsplit{C}{B}{B_l}{B_r}$}
+    \label{sdtyp:split}
+  \vspace{-10pt}
+  % \end{minipage}
+\end{figure}
+
 
 \begin{figure*}[tp]
   % \begin{minipage}{0.7\linewidth}
@@ -285,33 +313,6 @@ a kind variable or it relates two kind variables.
   % \end{minipage}
 \end{figure*}
 
-\subsubsection{Environments and bindings}
-\label{sdtyping:envs}
-
-\begin{figure}[tp]
-  \begin{align*}
-    \E &::=\ \Eempty \mid \E;B\tag{Environments}\\
-    B &::=\ \bnone % \tag{Empty} \\
-    \mid \bvar{\tvar}{\kschm} % \tag{Types}
-    \mid \bvar{x}{\schm}% \tag{Variables}
-    \mid \bvar{\borrow{x}}{\borrowty{k}{\tau}}% \tag{Borrows}\\
-    \mid \svar{x}{\schm}^n % \tag{Suspended}
-    % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
-  \end{align*}
-  \vspace{-10pt}
-  \caption{Type environments}
-  \label{grammar:env}
-  \vspace{5pt}
-  % \begin{minipage}{0.5\linewidth}
-  \centering
-    \input{sdtyping/split-binder}
-    \vspace{-5pt}
-    \caption{Splitting rules for bindings -- $\lsplit{C}{B}{B_l}{B_r}$}
-    \label{sdtyp:split}
-  \vspace{-10pt}
-  % \end{minipage}
-\end{figure}
-
 \lang controls the use of variables by supporting new modes of
 binding in a type environment $\E$.
 Its definition is given in  \cref{grammar:env}.
@@ -324,7 +325,7 @@ marked with $x$ (see \cref{sdtyping:regions}), but
 cannot be used directly.
 A borrow binding, $\bvar{\borrow{x}}{\borrowty{k}{\schm}}$, replaces
 such a suspended binding on entry to the $x$-region. It indicates
-that the borrow $\borrow{x}$ can be used directly. The kind $k$
+that the borrow $\borrow{x}$ can be used directly. Kind $k$
 restricts the lifetime of the borrow to the region (see \cref{selectrules:borrow}).
 
 % , either
@@ -374,7 +375,7 @@ Capturing a suspended binding is forbidden.
 
 
 
-\subsubsection{Copying and Splitting}
+\paragraph{Copying and Splitting}
 \label{sdtyping:split}
 
 The {\sc Pair} typing rule in \cref{sdtyp:pair} demonstrates how \lang
@@ -415,7 +416,7 @@ The \emph{region} around its use ensures that the borrow in the left component d
 escape, which brings us to the next topic.
 
 
-\subsubsection{Pattern matching}
+\paragraph{Pattern matching}
 \label{sdtyping:matching}
 
 In order to deconstruct pairs in the presence of linear types, we require
@@ -443,7 +444,7 @@ finer-grained borrowing of inner components.
 We believe both extension are compatible with our system
 and are out of scope of this article.
 
-\subsubsection{Regions}
+\paragraph{Regions}
 \label{sdtyping:regions}
 
 \begin{figure}[tp]
@@ -536,11 +537,11 @@ $\kun_n$ and thus cannot be returned).
 
 
 
-% \subsubsection{Kind checking}
+% \paragraph{Kind checking}
 
 % \TODO{Present this if we have enough space}
 
-\subsubsection{Resource management}
+\paragraph{Resource management}
 
 Our system would be incomplete without a way to actually manipulate resources.
 We consider the simple case of an abstract resource
