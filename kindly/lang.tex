@@ -112,7 +112,7 @@ in $\Multi[i]\tau$.
 \subsection{Automatic region annotation}
 \label{regionannot}
 
-In the examples presented in \cref{motivation}, region annotations are optional.
+In \cref{motivation}, region annotations are optional.
 In our formalization, regions must be syntactically explicit and annotated with
 a nesting index and a scoped variable.
 We now define a best-effort
@@ -121,8 +121,8 @@ annotates programs automatically.
 The input $p$ is a program with optional region annotations of the form $\region[]{}{e}$.
 The output $p'$ is a program with explicit annotations
 of the form $\region{\Sone x\BORROW}{e}$.
-We give an informal presentation of our code transformation. The complete
-definition is given in \cref{appendix:regionannot}. This code transformation
+We give an informal presentation of our code transformation and defer
+the complete definition to \cref{appendix:regionannot}. This code transformation
 aims to find, for each borrow $\borrow{x}$, the biggest region satisfying
 the following rules:
 \begin{enumerate}
@@ -131,11 +131,10 @@ the following rules:
 \item An exclusive borrow $\borrow[\kaff]{x}$ should never share a region with any other borrow of $x$.
 \item A use of $x$ can never be in the region of $\borrow{x}$.
 \end{enumerate}
-Following these rules, we start from the leafs and grow the region
+We then start from the leafs and grow the region
 associated to each borrow until it can't grow anymore either due to a binding
-or to conflicting uses.
-%
-Let us consider the following program with binders and function applications:
+or to conflicting uses. We demonstrate
+on the following program:
 %
 \[
   \setlength{\jot}{-1pt}
@@ -157,19 +156,19 @@ Let us consider the following program with binders and function applications:
 }
 \]
 %
-Since the only use of $a$ is a borrow,
-the region covers the entire lexical scope of $a$. For $x$ however, there are
-multiple conflicting borrow and we must be more careful. We place a first
+$a$ only has one borrow, its region covers its whole lexical scope.
+$x$ has multiple conflicting borrow and requires more consideration.
+We place a first
 region around the exclusive borrow and its function application,
 and a second region around both shared borrows. This placement of region
-is optimal, as making any of the region bigger would cause a borrowing
+is optimal: making any region bigger would cause a borrowing
 error.
 Notes that indices of regions are well nested, as the inner region have
 higher indices that the outer ones.
 
-Naturally, these rules are best effort and programmers must sometime
-annotate regions explicitly. We take such manual annotations
-into account as an upper bound on the regions of all contained borrows.
+Programmers might also want to annotate regions explicitly.
+Such annotations are considered as
+upper bound on the contained regions.
 In the following program, a manual annotation has been inserted to ensure
 no borrow enters the reference $r$:
 %
@@ -192,10 +191,10 @@ no borrow enters the reference $r$:
 }
 \]
 %
-Following the rules, we could merge the two regions around the borrows
+The rules allow merging the two regions around the borrows
 $\borrow[\kun]{a}$. However
 the explicit annotation indicates that the region should stay around the closure
-passed as argument of $set$. This is particularly useful to control captures
+passed as argument of $set$. This is useful to control captures
 by imperative APIs.
 
 This code transformation is purely syntactic and must be used before
@@ -231,7 +230,7 @@ linear and affine types.
 % give a quick presentation of the kinds and constraints.
 A kind $k$ is either a kind variable, $\kvar$, or a constant.
 Each constant is composed of a ``quality'' and a ``level''.
-The quality describes the use pattern of the type. It can be
+The quality describes the use pattern of the type:
 unrestricted $\kun$, affine $\kaff$, or linear $\klin$. The level  $n \in \Nat \cup \{\infty\}$
 describes the nested regions in which the value can be used.
 Level $0$ refers to the top-level scope outside any region; we often elide it
@@ -239,14 +238,14 @@ and write $\kaff$ for $\kaff_0$. Level
 $\infty$ refers to an empty region that is infinitely nested.
 For instance, the constraint $\Cleq{\kvar}{\kun_\infty}$ indicates that
 $\kvar$ must be unrestricted, but can be local to a region.
-
-Kinds form a lattice with an ordering implementing two principles
-(see \cref{sdtyp:lattice}). Unrestricted values may be used
+%
+Kinds form a lattice described in \cref{sdtyp:lattice}.
+Unrestricted values may be used
 where affine ones are expected and affine ones are less restricted
 than linear ones as reflected in \TirName{Lat-UAL}.
 Values usable at level $n$ may be used at any more deeply
-nested level $n'$ (where $n\le\infty$ for any $n$) as defined in the \TirName{Lat-Level} axioms.
-
+nested level $n'$ as defined in the \TirName{Lat-Level} axioms.
+%
 Constraints are conjunctions of inequality constraints over this kind
 lattice. In most uses, constraints give upper or lower bounds for
 kind variables or relate two kind variables.
@@ -314,14 +313,14 @@ kind variables or relate two kind variables.
 \end{figure*}
 
 \lang controls the use of variables by supporting new modes of
-binding in a type environment $\E$.
-Its definition is given in  \cref{grammar:env}.
-In addition to standard bindings of type variables to kind schemes,
-$\bvar{\tvar}{\kschm}$,  and value bindings, $\bvar{x}{\schm}$, there
-are suspended bindings and borrow bindings.
+binding in type environments $\E$, as defined in \cref{grammar:env}.
+Environments contain standard bindings of type variables to kind schemes,
+$\bvar{\tvar}{\kschm}$, value bindings $\bvar{x}{\schm}$, but also
+suspended and borrow bindings.
 A suspended binding, $\svar{x}{\schm}^n$, indicates that $x$ is
 earmarked for a borrowing use in a nested region
-marked with $x$ (see \cref{sdtyping:regions}), but
+marked with $x$ % (see \cref{sdtyping:regions}),
+but
 cannot be used directly.
 A borrow binding, $\bvar{\borrow{x}}{\borrowty{k}{\schm}}$, replaces
 such a suspended binding on entry to the $x$-region. It indicates
@@ -419,15 +418,11 @@ escape, which brings us to the next topic.
 \paragraph{Pattern matching}
 \label{sdtyping:matching}
 
-In order to deconstruct pairs in the presence of linear types, we require
-more than projection operators. Indeed, given a linear pair $x$,
-$\app{\operatorname{fst}}{x}$ would consume $x$ without giving access to the second
-member.
-Furthermore, we would like to be able to deconstruct a borrow of a pair
-and obtain borrows of the components.
-For these purposes, we provide the construct
+Elimination of pairs is done using a matching construct 
 $(\matchin{x,x'}{e_1}{e_2})$ whose
 typing rule is shown in \cref{selectrules:matching}.
+This construction can eliminate both normal pairs, but also borrows
+of pairs.
 A syntactic marker $\etransfm$ indicates if it applies to
 a pair ($\etransfm = \operatorname{id}$) or a borrow ($\etransfm = \&^\BORROW$).
 If $\etransfm = \operatorname{id}$, the typing simplifies to
@@ -437,12 +432,12 @@ $\borrowty{k}{\tyPair{\tau_1}{\tau'_1}}$
 while $x$ and $x'$ are of type respectively
 $\borrowty{k}{\tau_1}$ and $\borrowty{k}{\tau'_1}$.
 
-The typing of pattern matching is voluntarily simple here.
-Using a typeclass mechanism could avoid the need for explicit markers
-for borrow matches. Furthermore, a richer pattern language would allow
-finer-grained borrowing of inner components.
-We believe both extension are compatible with our system
-and are out of scope of this article.
+Matching is voluntarily simple here and
+could be improved using a richer pattern language
+to access inner components and a typeclass mechanisms
+to avoid the need for explicit markers for borrow matches.
+Both extensions are compatible with our system and have been partially
+implemented in our prototype type-checker.
 
 \paragraph{Regions}
 \label{sdtyping:regions}
@@ -543,8 +538,7 @@ $\kun_n$ and thus cannot be returned).
 
 \paragraph{Resource management}
 
-Our system would be incomplete without a way to actually manipulate resources.
-We consider the simple case of an abstract resource
+As a model of resource, we consider a simple abstract
 type $\tapp{\tres}{\tau}$ whose content of type $\tau$ must be $\kun_0$ and
 equipped with four operations:
 \begin{itemize}
