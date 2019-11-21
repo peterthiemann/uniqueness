@@ -26,6 +26,7 @@ and a dynamics that is linearity- and resource-aware (\cref{sec:sem}).
   \input{grammar}
   \caption{Syntax}
   \label{grammar}
+  \vspace{-10pt}
 \end{figure}
 
 
@@ -252,14 +253,13 @@ a kind variable or it relates two kind variables.
 
 \begin{figure}[tp]
   \input{infer/lattice}
+  \vspace{-5pt}
   \caption{Lattice ordering -- $k \lk_\Lat k'$}
   \label{sdtyp:lattice}
+  \vspace{-10pt}
 \end{figure}
 
 \begin{figure*}[tp]
-  \begin{minipage}{0.28\linewidth}
-  \end{minipage}\hfill
-
   % \begin{minipage}{0.7\linewidth}
     \begin{mathpar}
       \ruleSDBorrow
@@ -274,12 +274,14 @@ a kind variable or it relates two kind variables.
       \and
       \ruleSDMatchPair
     \end{mathpar}
+    \vspace{-10pt}
     \caption{Selected typing rules -- $\inferS{C}{\E}{e}{\tau}$}
     \label{selectrules:borrow}
     \label{selectrules:binders}
     \label{sdtyp:pair}
     \label{selectrules:region}
     \label{selectrules:matching}
+    \vspace{-5pt}
   % \end{minipage}
 \end{figure*}
 
@@ -298,13 +300,15 @@ a kind variable or it relates two kind variables.
   \end{align*}
   \vspace{-10pt}
   \caption{Type environments}
-  \vspace{10pt}
   \label{grammar:env}
+  \vspace{5pt}
   % \begin{minipage}{0.5\linewidth}
   \centering
     \input{sdtyping/split-binder}
+    \vspace{-5pt}
     \caption{Splitting rules for bindings -- $\lsplit{C}{B}{B_l}{B_r}$}
     \label{sdtyp:split}
+  \vspace{-10pt}
   % \end{minipage}
 \end{figure}
 
@@ -441,6 +445,7 @@ and are out of scope of this article.
 
 \subsubsection{Regions}
 \label{sdtyping:regions}
+
 \begin{figure}[tp]
   % \begin{minipage}{0.4\linewidth}
   %   \centering
@@ -450,7 +455,7 @@ and are out of scope of this article.
   %   \caption{The {\sc Region} rule}
   %   \label{selectrules:region}
   % \end{minipage}\hfill
-  \begin{minipage}{\linewidth}
+  % \begin{minipage}{\linewidth}
     \centering
     % \begin{tabular}
     %   {@{}>{$}r<{$}@{ $\vdash_e$ }
@@ -478,9 +483,11 @@ and are out of scope of this article.
         {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau}}}
       }
     \end{mathpar}
+    \vspace{-10pt}
     \caption{Borrowing rules for bindings -- $\lregion{C}{x}{\E}{\E'}$}
     \label{env:rule:borrow}
-  \end{minipage}
+  \vspace{-10pt}
+  % \end{minipage}
 \end{figure}
 
 Borrowing is crucial to support an imperative programming style.
