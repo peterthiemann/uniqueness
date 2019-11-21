@@ -12,19 +12,73 @@ using a mixed functional and imperative programming style.
 %
 To support this usage pattern of linearity, we rely on
 the notion of borrowing \cite{DBLP:conf/popl/BoylandR05} which
-we demonstrate through a series of examples:
-\begin{itemize}
-\item An API for linear arrays to demonstrate simple borrowing and imperative programming.
-\item
-  A backtracking Sudoku solver to demonstrate
-  \lang's ability to build safe hybrid functional/imperative data-structures.
-\item A pool of linear objects to demonstrate advanced use of regions.
-\end{itemize}
+we demonstrate through a series of examples.
 
-\subsection{Imperative programming with linear arrays}
-\label{sec:imper-progr}
+As running theme of our examples, we use an API for persistent arrays.
+Recently introduced persistent data structures
+permit transient mutations where
+non-linear uses lead to degraded performance
+\cite{DBLP:conf/ml/ConchonF07} or to
+dynamic and static checks \cite{DBLP:journals/pacmpl/Puente17}.
+In particular, persistent Hash-Array-Mapped-Tries (HAMT) have been used with similar
+APIs in several non-pure functional languages (OCaml, Clojure, \dots).
+Affine types help formalize the performance contract between the programmer
+and the library, while borrows avoid the need to thread state explicitly,
+as usually required by an API for immutable data types.
 
-The API for mutable linear arrays (shown in \cref{sig:array})
+\cref{sig:hybarray} contains an API @PersistArray@
+that enables using mutable and immutable modifications to
+the board through affine types and borrows.
+%
+We first present how to use it imperatively, as if it was a simple
+mutable linear array. We then see how to exploit its persistent
+properties to write a backtracking sudoku solver. Finally, we consider
+iterators on such linear structures.
+
+% \begin{itemize}
+% \item An API for linear arrays to demonstrate simple borrowing and imperative programming.
+% \item
+%   A backtracking Sudoku solver to demonstrate
+%   \lang's ability to build safe hybrid functional/imperative data-structures.
+% \item A pool of linear objects to demonstrate advanced use of regions.
+% \end{itemize}
+
+\begin{figure}[tp]
+  \centering
+  % \begin{subfigure}{1\linewidth}
+\begin{lstlisting}
+module PersistArray : sig
+  type ('a : 'k) t : lin
+  val create : ('a : un) => int -> 'a -> 'a t
+  val free : ('a : aff) => 'a t -> unit
+  val length : &('a t) -> int
+  val get : ('a : un) => &('a t) * int -> 'a
+  val set_mut : ('a : aff) => &!('a t) * int * 'a -> unit
+  val set : ('a : un) => &('a t) * int * 'a -> 'a t
+  val map : (&'a -> 'b) -> &('a t) -> 'b t
+end
+\end{lstlisting}
+% \begin{lstlisting}
+% (* A copy-on-write implementation *)
+% module Cow : PersistArray = struct
+%   type 'a t = 'a array
+%   ...
+%   let set (a, i0, x0) =
+%     mapi (fun i x -> if i = i0 then x0 else x) a
+% end
+% \end{lstlisting}
+  \vspace{-15pt}
+  % \caption{Implementation using copy-on-write}
+  % \end{subfigure}
+  \caption{Hybrid arrays}
+  \label{sig:array}
+  \label{sig:hybarray}
+  \label{ex:cow}
+\end{figure}
+
+\subsection{Imperative programming}
+
+Our API for linear arrays
 aims to safely handle manual allocation and
 deallocation of arrays that may contain affine elements.
 One would first use @create n v@ to create
@@ -32,8 +86,8 @@ an (unrestricted) array of size @n@ initialized with value
 @v@. This value must be unrestricted as it is duplicated to
 initialize all array elements. Using the @map@ function we
 can transform the unrestricted elements into linear (affine)
-ones. This array can be processed further using @map@ (or @set@ if
-affine). The @get@ function is only applicable if the element type
+ones. This array can be processed further using @map@ (or @set_mut@ if
+affine). The @get@ and @set@ function are only applicable if the element type
 is unrestricted as one element is duplicated. The @length@
 function is always applicable. To @free@ an array the elements must be
 affine.
@@ -47,8 +101,8 @@ The constructor
 During the lifetime of the array resource @a@, we can split
 off \emph{shared borrows} @&a@ that provide a read-only
 view or \emph{exclusive borrows} @&!a@ for read-write views.
-Observer functions such as @length@ and @get@ expect an shared borrow
-argument, mutator functions such a @set@ expect
+Observer functions such as @length@, @get@ and @set@ expect a shared borrow
+argument, mutator functions such a @set_mut@ expect
 a exclusive borrow.
 
 Each borrow is tied to a region whose lifetime is properly
@@ -61,8 +115,21 @@ enclosing region. Borrows are confined to their regions. Inside the region,
 shared borrows are unrestricted (@un@) whereas exclusive
 borrows are affine (@aff@).
 
-The code in \cref{ex:array} demonstrates a use of the API to create an
-array of Fibonacci numbers as the programmer would write it. After
+We can use these arrays in a purely mutable fashion
+to create an
+array of Fibonacci numbers using code very similar to an usual imperative style:
+\begin{lstlisting}
+let mk_fib_array n =
+  let a = create n 1 in
+  for i = 2 to n - 1 do
+    let x = get (&a, i-1) + get (&a, i-2) in(*@\label{ex:array:get}*)
+    set_mut (&!a, i, x)(*@\label{ex:array:set}*)
+  done;
+  a(*@\label{ex:array:return}*)
+# mk_fib_array : int -> int Array.t
+\end{lstlisting}
+
+After
 creation of the array, the presence of a borrow in the for loop
 prevents access to the ``raw'' resource inside the loop's
 body. \cref{ex:array:get} of the example contains two shared borrows
@@ -70,61 +137,19 @@ in the same expression, which forms a region by itself. These borrows
 are split off the exclusive borrow used in \cref{ex:array:set}, which
 belongs to the next enclosing region corresponding to the loop body.
 The whole array can be returned in \cref{ex:array:return} because  the
-borrows are no longer in scope.
+borrows are no longer in scope. 
 
-\begin{figure}[tp]
-  \centering
-  \begin{subfigure}[t]{1\linewidth}
-\begin{lstlisting}
-module type ARRAY = sig
-  type ('a : 'k) t : lin
-  val create : ('a : un) => int -> 'a -> 'a t
-  val free : ('a : aff) => 'a t -> unit
-  val length : &('a t) -> int
-  val get : ('a : un) => &('a t) * int -> 'a
-  val set : ('a : aff) => &!('a t) * int * 'a -> unit
-  val map : (&'a -> 'b) -> &('a t) -> 'b t
-end
+More precisely, the code below is an annotated excerpt with explicit regions
+marked in braces @{| ... |}@:
 
-module Array : ARRAY
-\end{lstlisting}
-    \vspace{-15pt}
-    \caption{Signature}
-    \label{sig:array}
-  \end{subfigure}
-
-  \begin{subfigure}[t]{1\linewidth}
-\begin{lstlisting}
-let mk_fib_array n =
-  let a = create n 1 in
-  for i = 2 to n - 1 do
-    let x = get (&a, i-1) + get (&a, i-2) in(*@\label{ex:array:get}*)
-    set (&!a, i, x)(*@\label{ex:array:set}*)
-  done;
-  a(*@\label{ex:array:return}*)
-# mk_fib_array : int -> int Array.t
-\end{lstlisting}
-    \vspace{-10pt}
-    \caption{Example of use}
-    \label{ex:array}
-\begin{lstlisting}[firstnumber=2]
-  let a = create n 1 in
+\begin{lstlisting}[firstnumber=3]
   for i = 2 to n - 1 do {|
     let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
     set &!a i x
   |} done;
 \end{lstlisting}
-    \vspace{-10pt}
-    \caption{Excerpt of \cref{ex:array} with explicit regions}
-    \label{ex:array:region}
-  \end{subfigure}
-  \vspace{-5pt}
-  \caption{Linear arrays}
-  \label{ex:array}
-\end{figure}
 
-\cref{ex:array:region} uses braces @{| ... |}@ to make the
-regions of the example in \cref{ex:array} explicit.  One
+One
 region consists of the header expression of the @let@ in
 \cref{ex:array:region:get}. It is contained in another region that
 comprises the body of the @for@ loop. \lang guarantees that borrows
@@ -137,55 +162,28 @@ depth of regions. For instance, the type of @&!a@ in
 @un_2@ and the typing of the inner region is such that types with
 kind indexes greater than or equal to $2$ cannot escape.
 In the example, borrows cannot escape  because they are consumed
-immediately by @get@ and @set@.
-
-Region annotations are automatically inserted using
-syntactic cues such as borrows and binders (see
-\cref{regionannot}).  Users may manually insert regions to further restrict the range of a
-borrow. In practice, region annotations are
-rarely needed with common programming idioms.
-% All regions for the examples in this section have been inferred.
-
-
-% \begin{figure}
-%   \centering
-%   % \begin{subfigure}{0.6\linewidth}
-% \begin{lstlisting}
-% let mk_fib_array n =
-%   let a = create n 1 in
-%   for i = 2 to n - 1 do {|
-%     let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
-%     set &!a i x
-%   |}
-%   done;
-%   a(*@\label{ex:array:return}*)
-% # mk_fib_array : int -> int Array.t
-% \end{lstlisting}
-%     \caption{Example from \cref{ex:array} with explicit regions}
-%     \label{ex:array:region}
-%   % \end{subfigure}
-% \end{figure}
-
-
-
+immediately by @get@ and @set_mut@.
 
 \subsection{Solving sudokus with hybrid data-structures}
 
-Recently introduced persistent data structures
-permit transient mutations where
-non-linear uses lead to degraded performance
-\cite{DBLP:conf/ml/ConchonF07} or to
-dynamic and static checks \cite{DBLP:journals/pacmpl/Puente17}.
-In particular, persistent Hash-Array-Mapped-Tries (HAMT) have been used with similar
-APIs in several non-pure functional languages (OCaml, Clojure, \dots).
-Affine types help formalize the performance contract between the programmer
-and the library, while borrows avoid the need to thread state explicitly,
-as usually required by an API for immutable data types.
-%
+\begin{figure}[tp]
+  \lstinputlisting[linerange=1-31]{code/sukodu.affe}
+  \vspace{-15pt}
+  \caption{Excerpt of the Sudoku solver}
+  \label{ex:sudoku}
+\end{figure}
 
-In this section, we present
-a safe API for persistent arrays that support both immutable and mutable features,
-and use it to implement a backtracking Sudoku solver.
+On top of the mutation function @set_mut@, our array implementation
+also provides @set@ of type @&('a t) * int * 'a -> 'a t@. It
+takes a shared borrow because it only reads from the
+argument array, but returns a fresh, modified structure.
+%
+This API could be implemented in a wide variety of ways, such as
+copy-on-write (which copies the whole array on each @set_mut@)
+or something more sophisticated\cite{DBLP:conf/ml/ConchonF07}.
+
+We can use our persistent arrays
+to implement a backtracking Sudoku solver.
 % show how \lang allows us to define
 The Sudoku solver maintains an array to represent the state of
 the game and uses backtracking when there are several choices to proceed.
@@ -193,58 +191,6 @@ The use of backtracking suggests a persistent data structure for the array.
 However, only changes that correspond to a choice point need to use
 the persistence mechanism, others may be implemented as
 cheap in-place mutations.
-
-\cref{sig:hybarray} contains an API @HybArray@
-that enables using mutable and immutable modifications to
-the board through affine types and borrows.
-The signature differs slightly from the @Array@
-signature. For simplicity, the array elements are unrestricted, but
-the structure itself remains linear so as to be implemented in terms of @Array@.
-The in-place mutation function @set_mut@ with type
-@&!('a t) * int * 'a -> unit@ works on a exclusive borrow  whereas the persistent
-@set@ operation has type @&('a t) * int * 'a -> 'a t@. It
-takes a shared borrow because it only reads from the
-argument array, but returns a fresh,  modified structure.
-The code in \cref{ex:cow} contains a very simple implementation of
-@HybArray@ that represents hybrid arrays
-as regular arrays and uses copy-on-write for persistent
-modifications. The function
-@mapi: (int -> &'a -> 'b) -> &('a t) -> 'b t@
-is a simple variation on @Array.map@ where the mapping function
-takes the position of the element.
-% A more elaborate implementation could use persistent arrays
-% \cite{DBLP:conf/ml/ConchonF07}.
-
-
-\begin{figure}[tp]
-  \centering
-  % \begin{subfigure}{1\linewidth}
-\begin{lstlisting}
-module type HybArray = sig
-  include ARRAY
-  val set : &('a t) * int * 'a -> 'a t
-  val set_mut : &!('a t) * int * 'a -> unit
-end
-
-module Cow : HybArray = struct
-  include Array
-  let set (a, i0, x0) =
-    Array.mapi (fun i x -> if i = i0 then x0 else x) a
-  let set_mut = Array.set
-end
-\end{lstlisting}
-    \vspace{-15pt}
-  %   \caption{Implementation using copy-on-write}
-  % \end{subfigure}
-  \caption{Hybrid arrays}
-    \label{sig:hybarray}
-    \label{ex:cow}
-
-  \lstinputlisting[linerange=1-31]{code/sukodu.affe}
-    \vspace{-15pt}
-  \caption{Excerpt of the Sudoku solver}
-  \label{ex:sudoku}
-\end{figure}
 
 Our implementation of a Sudoku solver (\cref{ex:sudoku}) performs
 modifications that correspond to choice points using @set@,
@@ -283,7 +229,7 @@ the iteration in \cref{line:iter}.
 As @g@ is linear we must free it outside of the region
 before returning (\cref{line:free:g}).
 
-While presented for copy-on-write arrays, the API
+While presented for persistent arrays, this API
 can easily be adapted to other persistent data structures with
 transient mutability such as Relaxed-Radix Balance Vectors (RRB) \cite{DBLP:journals/pacmpl/Puente17}
 or persistent HAMTs \cite{bagwell2001ideal,clojurehamt} to provide  a
@@ -319,7 +265,7 @@ val fold : ('a : un) => ('a -> 'b -> 'b) -> 'a array -> 'b -> 'b
 
 However, if we want to work on linear and affine resources,
 we must make sure those resources are not leaked in the result.
-content. We obtain the following signature:
+We obtain the following signature:
 \begin{lstlisting}
 val fold :
   ('b:'k),('k <= aff_r) =>
@@ -346,17 +292,15 @@ we compute the sum of their sizes:
 let total_size = fold (fun f s -> File.size f + s) &all_files 0
 \end{lstlisting}
 
-Naturally, this is not sufficient if we want to mutate the array during iteration.
+Naturally, this is not sufficient if we want to mutate the array during iteration,
+as is often the case with @iter@ functions.
 For this purpose, we need to take an exclusive borrow of the structure to iterate
 on:
 \begin{lstlisting}
-val iter_mut : &!('a array) -> (&!(aff_r1,'a) -{un}> unit) -{aff}> unit
+val iter : &!('a array) -> (&!(aff_r1,'a) -{un}> unit) -{aff}> unit
 \end{lstlisting}
 
-Since the callback will be called multiple times, it is explicitly
-annotated with @un@.
-
-While the distinction between mutable and immutable iteration function
+While the distinction between mutable and immutable iteration functions
 might seem unfortunate, it is typical of
 programming with borrows and is also present in the Rust standard library.
 It allows the programmer to explicitly state how various iterations
@@ -364,7 +308,7 @@ are allowed to compose and be optimized.
 \lang's region variables ensures that the content iterated on can never
 be leaked outside of the iteration function.
 This pattern is essential in many use-cases of linearity such
-as pools of linear objects (see \cref{tuto:pool}).
+as pools of linear objects (see example in \cref{tuto:pool}).
 
 \lstDeleteShortInline@
 
