@@ -6,7 +6,7 @@
 \lang{} is amenable to a functional resource-passing style
 common in functional encodings of session types (e.g.,
 \cite{DBLP:journals/jfp/Padovani17}; see also
-\cref{sec:session-linearity} in the supplement). But it really shines 
+\cref{sec:session-linearity} in the supplement). But it really shines
 when manipulating mutable resources like buffers or connection pools
 using a mixed functional and imperative programming style.
 %
@@ -54,7 +54,7 @@ a exclusive borrow.
 Each borrow is tied to a region whose lifetime is properly
 contained in the lifetime of the resource.
 In a region, we can split off as many shared borrows of a resource as
-we like, but we can take only one exclusive borrow. In a 
+we like, but we can take only one exclusive borrow. In a
 subsidiary region, we can take shared borrows of any
 borrow or we can take an exclusive borrow of an exclusive borrow from an
 enclosing region. Borrows are confined to their regions. Inside the region,
@@ -70,7 +70,7 @@ in the same expression, which forms a region by itself. These borrows
 are split off the exclusive borrow used in \cref{ex:array:set}, which
 belongs to the next enclosing region corresponding to the loop body.
 The whole array can be returned in \cref{ex:array:return} because  the
-borrows are no longer in scope. 
+borrows are no longer in scope.
 
 \begin{figure}[tp]
   \centering
@@ -239,7 +239,7 @@ end
   \caption{Hybrid arrays}
     \label{sig:hybarray}
     \label{ex:cow}
-  
+
   \lstinputlisting[linerange=1-31]{code/sukodu.affe}
     \vspace{-15pt}
   \caption{Excerpt of the Sudoku solver}
@@ -272,7 +272,7 @@ the choice point, because they operate on a new state @new_g@ created for one
 particular branch of the choice.
 As the @set@ function only requires an unrestricted shared borrow,
 the closure @try_solution@ remains unrestricted even though
-it captures the borrow @&g@. 
+it captures the borrow @&g@.
 The price is that @try_solution@ cannot escape from
 @&g@'s region. In this example, inference places the region
 around the @begin@/@end@ scope.
@@ -281,7 +281,7 @@ the iteration in \cref{line:iter}.
 % As @&g@ is unrestricted, we could even use a parallel iteration
 % instead of a sequential one.
 As @g@ is linear we must free it outside of the region
-before returning (\cref{line:free:g}). 
+before returning (\cref{line:free:g}).
 
 While presented for copy-on-write arrays, the API
 can easily be adapted to other persistent data structures with
@@ -307,7 +307,6 @@ convenient programming style without compromising performance.
 \subsection{Iterators and regions}
 \label{tuto:vector}
 
-
 % We have seen that borrows are limited to a region.
 In the examples so far, regions do not appear in type signatures.
 But for certain programming idioms, we want to extend the scope of a
@@ -321,7 +320,6 @@ val fold : ('a : un) => ('a -> 'b -> 'b) -> 'a array -> 'b -> 'b
 However, if we want to work on linear and affine resources,
 we must make sure those resources are not leaked in the result.
 content. We obtain the following signature:
-
 \begin{lstlisting}
 val fold :
   ('b:'k),('k <= aff_r) =>
@@ -344,15 +342,13 @@ make multiple concurrent folds.
 
 We can then easily use this function to fold over an array of files. Here
 we compute the sum of their sizes:
-
 \begin{lstlisting}
-let total_size = fold (fun f s -> File.size f + s) &all_files 0 
+let total_size = fold (fun f s -> File.size f + s) &all_files 0
 \end{lstlisting}
 
 Naturally, this is not sufficient if we want to mutate the array during iteration.
 For this purpose, we need to take an exclusive borrow of the structure to iterate
 on:
-
 \begin{lstlisting}
 val iter_mut : &!('a array) -> (&!(aff_r1,'a) -{un}> unit) -{aff}> unit
 \end{lstlisting}
@@ -368,7 +364,7 @@ are allowed to compose and be optimized.
 \lang's region variables ensures that the content iterated on can never
 be leaked outside of the iteration function.
 This pattern is essential in many use-cases of linearity such
-as pools of linear objects (see \cref{tuto:pool}). 
+as pools of linear objects (see \cref{tuto:pool}).
 
 \lstDeleteShortInline@
 
