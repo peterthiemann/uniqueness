@@ -68,7 +68,7 @@ collected data. They would prefer a setting where automatic memory
 management with garbage collection was the default, but where they
 could seemlessly switch to safe, manual resource management if that
 was required.
-
+%
 As a concrete example, consider a functional programmer who wants to
 safely interact with a C library. Invoking the C functions is easy via
 the existing foreign function interface, but managing the underlying
@@ -211,13 +211,13 @@ $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 \label{sec:contributions}
 
 \begin{itemize}
-\item A type system that encodes linearity and affinity with
-  borrowing. The type system is polymorphic with respect to types as
-  well as kinds that express constraints on the number of uses of a value.
+\item A type system encoding linearity with
+  borrowing. The type system is polymorphic for types and
+  for kinds that express constraints on the number of uses of a value.
 \item An extension of the HM(X) framework
   \cite{DBLP:journals/tapos/OderskySW99} with kinds, regions, and
   multiplicity constraints that supports full, principal type inference.
-\item Full account of the metatheory for type inference and type soundness.
+\item Proof of soundness for the semantics and the inference.
 \item Constraint simplification techniques.
 \item Automatic inference of regions for borrows.
 \item A prototype implementation of the type inference algorithm, including all

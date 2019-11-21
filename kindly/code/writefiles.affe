@@ -1,7 +1,6 @@
 module File : sig
   type t: lin
   val fopen: path -> t
-  val size: &t -> int
   val write: &!t -> string -{aff}> unit
   val close: t -> unit
 end

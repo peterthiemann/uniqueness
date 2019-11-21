@@ -24,14 +24,13 @@ In particular, persistent Hash-Array-Mapped-Tries (HAMT) have been used with sim
 APIs in several non-pure functional languages (OCaml, Clojure, \dots).
 Affine types help formalize the performance contract between the programmer
 and the library, while borrows avoid the need to thread state explicitly,
-as usually required by an API for immutable data types.
+as often required by APIs for immutable datatypes.
 
-\cref{sig:hybarray} contains an API @PersistArray@
-that enables using mutable and immutable modifications to
-the board through affine types and borrows.
+\cref{sig:hybarray} contains a simple API for Persistent arrays
+with mutable and immutable modifications through affine types and borrows.
 %
-We first present how to use it imperatively, as if it was a simple
-mutable linear array. We then see how to exploit its persistent
+We first present how to use it imperatively as for
+mutable linear arrays. We then see how to exploit its persistent
 properties to write a backtracking sudoku solver. Finally, we consider
 iterators on such linear structures.
 
@@ -70,7 +69,7 @@ end
   \vspace{-15pt}
   % \caption{Implementation using copy-on-write}
   % \end{subfigure}
-  \caption{Hybrid arrays}
+  \caption{Persistent arrays}
   \label{sig:array}
   \label{sig:hybarray}
   \label{ex:cow}
@@ -78,7 +77,7 @@ end
 
 \subsection{Imperative programming}
 
-Our API for linear arrays
+Our API
 aims to safely handle manual allocation and
 deallocation of arrays that may contain affine elements.
 One would first use @create n v@ to create
@@ -115,9 +114,9 @@ enclosing region. Borrows are confined to their regions. Inside the region,
 shared borrows are unrestricted (@un@) whereas exclusive
 borrows are affine (@aff@).
 
-We can use these arrays in a purely mutable fashion
+We can use the API in a mutable fashion
 to create an
-array of Fibonacci numbers using code very similar to an usual imperative style:
+array of Fibonacci numbers though an imperative coding style:
 \begin{lstlisting}
 let mk_fib_array n =
   let a = create n 1 in
@@ -149,10 +148,9 @@ marked in braces @{| ... |}@:
   |} done;
 \end{lstlisting}
 
-One
-region consists of the header expression of the @let@ in
-\cref{ex:array:region:get}. It is contained in another region that
-comprises the body of the @for@ loop. \lang guarantees that borrows
+A region consists of the header expression of the @let@ in
+\cref{ex:array:region:get}. It is contained in another region
+spanning the body of the @for@ loop. \lang guarantees that borrows
 never escape the smallest enclosing region. It employs a system of
 \emph{indexed kinds} like @aff_r@ and @un_r@ where
 $r$ is a positive integer that corresponds to the lexical nesting
@@ -185,7 +183,7 @@ or something more sophisticated\cite{DBLP:conf/ml/ConchonF07}.
 We can use our persistent arrays
 to implement a backtracking Sudoku solver.
 % show how \lang allows us to define
-The Sudoku solver maintains an array to represent the state of
+The solver maintains an array to represent the state of
 the game and uses backtracking when there are several choices to proceed.
 The use of backtracking suggests a persistent data structure for the array.
 However, only changes that correspond to a choice point need to use
@@ -199,7 +197,7 @@ of the array, while other modifications use @set_mut@, which
 forbids uses of the previous version.
 
 The board is represented as a 2D-matrix (\cref{line:boardtype}), where
-the @Matrix@ type uses the same API as @HybArray@
+the @Matrix@ type uses the same API as @PersistArray@
 but with two indices.
 Each cell contains an integer set that represent admissible solutions so far.
 The Sudoku solver iterates over the cells and tries each possible solution (\cref{line:try_solution}).
