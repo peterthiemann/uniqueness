@@ -135,7 +135,7 @@ associated to each borrow until it can't grow anymore either due to a binding
 or to conflicting uses.
 
 Let us consider the following program with binders and function applications:
-
+%
 \[
   \setlength{\jot}{-1pt}
   \RannotT{
@@ -155,7 +155,7 @@ Let us consider the following program with binders and function applications:
 \end{aligned}
 }
 \]
-
+%
 Since the only use of $a$ is a borrow,
 the region covers the entire lexical scope of $a$. For $x$ however, there are
 multiple conflicting borrow and we must be more careful. We place a first
@@ -171,7 +171,7 @@ annotate regions explicitly. We take such manual annotations
 into account as an upper bound on the regions of all contained borrows.
 In the following program, a manual annotation has been inserted to ensure
 no borrow enters the reference $r$:
-
+%
 \[
   \setlength{\jot}{-1pt}
   \RannotT{
@@ -179,7 +179,7 @@ no borrow enters the reference $r$:
   \letin{&r}{\operatorname{ref}\ 0}{}\\
   \lam{a}{}\ &
   set\ r\ \region[]{}{g\ (\borrow[\kun]{a})};\\
-  &f\ (\borrow[\kun]{a}) 
+  &f\ (\borrow[\kun]{a})
 \end{aligned}
 }{
 \begin{aligned}
@@ -190,7 +190,7 @@ no borrow enters the reference $r$:
 \end{aligned}
 }
 \]
-
+%
 Following the rules, we could merge the two regions around the borrows
 $\borrow[\kun]{a}$. However
 the explicit annotation indicates that the region should stay around the closure
@@ -259,7 +259,7 @@ a kind variable or it relates two kind variables.
 \begin{figure*}[tp]
   \begin{minipage}{0.28\linewidth}
   \end{minipage}\hfill
-  
+
   % \begin{minipage}{0.7\linewidth}
     \begin{mathpar}
       \ruleSDBorrow
@@ -540,30 +540,30 @@ We consider the simple case of an abstract resource
 type $\tapp{\tres}{\tau}$ whose content of type $\tau$ must be $\kun_0$ and
 equipped with four operations:
 \begin{itemize}
-\item 
+\item
 $\create$:
-$\forall{\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\ 
+$\forall{\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
 \qual{\Cleq \kvar {\kun_0}}
 {\tvar \tarr{} \tapp\tres\tvar}$\\
 Creates a new resource.
 
 \item
 $\observe$:
-$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\ 
+$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
 \qual{\Cleq {\kvar_\tvar} {\kun_0}}
 {\borrowty[\IBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar}$\\
 Reads of a shared borrow of a resource.
 
 \item
 $\update$:
-$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\ 
+$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
 \qual{\Cleq {\kvar_\tvar} {\kun_0}}
 \borrowty[\MBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar \tarr{\kaff} \tunit$\\
 Writes in an exclusive borrow of a resource.
 
 \item
 $\destroy$:
-$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\ 
+$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
 \qual{\Cleq {\kvar_\tvar} {\kun_0}}
 \tapp\tres\tvar \tarr{} \tunit$\\
 Disposes of a resource.
@@ -596,7 +596,7 @@ which are tagged with a constraint $C$ and a kind $k$ indicating their
 usage restriction (linear, affine, etc). Their use
 gives rise to explicit instantiation of these kind variables. Pairs
 come with a kind tag $k$ indicating the usage restriction. Application
-is annotated with evidence $\Sp$ of the inferred splitting. 
+is annotated with evidence $\Sp$ of the inferred splitting.
 
 Addresses $\Addr$ are composed of a raw location $\Loc$, which is just
 a pointer into a store, and a stack of modifiers that indicates the
