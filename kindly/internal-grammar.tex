@@ -12,13 +12,7 @@
     \mid~& \borrow{x} \mid \reborrow{x}\tag{Borrows}\\
     \mid~& \create \mid \observe \mid \update \mid \destroy \tag{Resources}\\
     \htag{Elaborated A-normal expressions}
-    e ::=~& x \mid \ivar x {\Multi k} {\Multi\tau} \mid \lam[k]{x}{e} \mid \aiapp{x}{x'} \\
-    \mid~& \aipair{k}{x}{x'} \mid \aimatchin\etransfm{x,y}{z}{e} \tag{Tagged pairs}\\
-    \mid~& \ilet\Sp{x}{e}{e'} \tag{Mono let}\\
-    \mid~& \iletfun\Sp{x}\schm{k}{y}{e}{e'} \tag{Poly let}\\
-    \mid~& \region{\Sone x\BORROW}{e}\tag{Region}\\
-    \mid~& \borrow{x} \mid \reborrow{x}\tag{Borrows}\\
-    \mid~& \create \mid \observe \mid \update \mid \destroy \tag{Resources}\\
+    e ::=~& \ldots \mid \aiapp{x}{x'} \mid \aipair{k}{x}{x'} \mid \aimatchin\etransfm{x,y}{z}{e} \\
     \htag{Environment}
     \Addr ::=~& \Multi\IBORROW\Multi\MBORROW\Loc \tag{Locations}
     % \\           &\mid \borrow{\Addr} \tag{Borrows}
