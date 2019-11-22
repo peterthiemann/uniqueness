@@ -228,7 +228,8 @@
 \newcommand\Active[1]{\LinPart{#1}} %{{#1}_{\bullet}}
 \newcommand\MutableBorrows[1]{\AffPart{#1}} %{{#1}_{\circledast}}
 \newcommand\ImmutableBorrows[1]{\UnrPart{#1}} % {{#1}_{\circ}}
-\newcommand\Suspended[1]{{#1}_{\#}}
+\newcommand\Suspended[2][{}]{{#2}^{#1}_{\#}}
+\newcommand\Disjoint[1]{\operatorname{dis} (#1)}
 
 \newcommand\Matches[2]{#1 \gets #2}        %pattern matching
 
