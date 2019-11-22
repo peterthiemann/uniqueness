@@ -116,7 +116,9 @@
   \item\label{item:15} \assumeIncoming{}{}
   \end{enumerate}
   For all $i\in\Nat$, if
-  @R' = eval $\Store$ $\Perm$ $\VEnv$ i e@
+  % Sorry for the ugly fix... I can't get lstinline to behave like
+  % \lstMakeShortInline, but copy pasting would also be bad.
+  \ \lstinline[style=rule]{R' = eval} $\Store$ $\Perm$ $\VEnv$ \lstinline[style=rule]{i e}
   %$\Store, \Perm, \VEnv \vdash {e}  \Downarrow^i R'$
   and $R'\ne \TimeOut$,
   then
