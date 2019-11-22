@@ -99,11 +99,10 @@ in the same expression, which forms a region by itself. These borrows
 are split off the exclusive borrow used in \cref{ex:array:set}, which
 belongs to the next enclosing region corresponding to the loop body.
 The whole array can be returned in \cref{ex:array:return} because  the
-borrows are no longer in scope. 
+borrows are no longer in scope.
 %
 More precisely, here is is an annotated excerpt with explicit regions
 marked in braces @{| ... |}@:
-
 \begin{lstlisting}[firstnumber=3]
   for i = 2 to n - 1 do {|
     let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
