@@ -6,7 +6,7 @@ linearity and borrows using kinds and (kind-) constrained types.
 For ease of presentation, we simplify the language.
 \begin{itemize}
 \item Pattern matching is demonstrated on pairs rather than algebraic
-  datatypes.
+  datatypes, and is covered in \cref{appendix:pairs}.
 \item There are separate operators for borrowing and reborrowing (taking
   the borrow of a borrow).
 \item Regions are explicit in the code and must be annotated using the
@@ -42,14 +42,14 @@ then we need to use the reborrow expression $\reborrow{x}$.
 %
 A region $\region{\Sone x\BORROW}{e}$ is annotated with its nesting $n$, the variable $x$ that may be borrowed in $e$, and the kind of borrow $\BORROW$.
 %
-A match is indexed with a \emph{match specification} $\etransfm$ that indicates
-whether the match should work on borrows ($\etransfm=\&^b$) or not ($\etransfm=id$).
+% A match is indexed with a \emph{match specification} $\etransfm$ that indicates
+% whether the match should work on borrows ($\etransfm=\&^b$) or not ($\etransfm=id$).
 %
 We consider four primitive operations to manipulate resources:
 $\create$, $\observe$, $\update$ and $\destroy$.
 
-Many types are indexed with kinds, ranged over by $k$.
-A kind is either a kind variable $\kvar$ or a constant
+Many types are indexed with kinds.
+A kind $k$ is either a kind variable $\kvar$ or a constant
 (linear $\klin$, affine $\kaff$, or unrestricted $\kun$) indexed
 by a nesting level $n \in \Nat \cup \{\infty\}$.
 
@@ -229,10 +229,9 @@ We discuss judgments for typing, kinding, and constraint entailment:
 linear and affine types.
 % Before explaining the details of our type system, we
 % give a quick presentation of the kinds and constraints.
-A kind $k$ is either a kind variable, $\kvar$, or a constant.
-Each constant is composed of a ``quality'' and a ``level''.
-The quality describes the use pattern of the type:
-unrestricted $\kun$, affine $\kaff$, or linear $\klin$. The level  $n \in \Nat \cup \{\infty\}$
+A kind $k$ is either a kind variable, $\kvar$, or a constant $\mul_n$.
+The quality $\mul$ describes the use pattern of the type:
+unrestricted $\kun$, affine $\kaff$, or linear $\klin$. The level $n \in \Nat \cup \{\infty\}$
 describes the nested regions in which the value can be used.
 Level $0$ refers to the top-level scope outside any region; we often elide it
 and write $\kaff$ for $\kaff_0$. Level
@@ -315,7 +314,7 @@ kind variables or relate two kind variables.
     \end{mathpar}
     \vspace{-10pt}
     \caption{Selected typing rules ($\inferS{C}{\E}{e}{\tau}$)
-      and borrowing rules ($\lregion{C}{x}{\E}{\E'}$)} 
+      and borrowing rules ($\lregion{C}{x}{\E}{\E'}$)}
     \label{selectrules:borrow}
     \label{selectrules:binders}
     \label{sdtyp:app}
@@ -395,10 +394,10 @@ deals with duplication and dropping of values.
 The splitting $\lsplit{C}{\E}{\E_1}{\E_2}$ in the rule decomposes the
 type environment $\E$ in two parts, $\E_1$ and $\E_2$, which are used
 to typecheck the components of the pair.
-The constraint $C$ characterizes a valid  splitting.
+% The constraint $C$ characterizes a valid  splitting.
 
 \cref{sdtyp:split} shows the action of splitting rules on single
-bindings. If $x$'s type is unrestricted, 
+bindings. If $x$'s type is unrestricted,
 rule {\sc Both} indicates that we can duplicate it.
 Similarly, unrestricted borrows can be duplicated with rule
 {\sc Borrow}.
@@ -432,7 +431,7 @@ escape, which brings us to the next topic.
 % \paragraph{Pattern matching}
 % \label{sdtyping:matching}
 
-% Elimination of pairs is done using a matching construct 
+% Elimination of pairs is done using a matching construct
 % $(\matchin{x,x'}{e_1}{e_2})$ whose
 % typing rule is shown in \cref{selectrules:matching}.
 % This construction can eliminate both normal pairs, but also borrows
@@ -519,13 +518,18 @@ To constrain the borrow to this region we impose the constraint
 $\entail{C}{(\kun_n\lk k) \wedge (k \lk\kun_\infty)}$, which affirms
 that the borrow is unrestricted, but can only be used in nesting
 levels $n$ and higher.
-With that setup we typecheck the body of the region,
-$f(\borrow[\IBORROW]{c})$.
-The constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures
-that the kind of $\tau$ does not contain anything whose kind is
-``above level $n$'' and thus confines the borrow to the region
-(for instance, $\borrowty[\IBORROW]{\kun_n}{\text{c}}$ has kind
-$\kun_n$ and thus cannot be returned).
+%
+% With that setup we typecheck the body of the region,
+% $f(\borrow[\IBORROW]{c})$.
+% The constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures
+% that the kind of $\tau$ does not contain anything whose kind is
+% ``above level $n$'' and thus confines the borrow to the region
+% (for instance, $\borrowty[\IBORROW]{\kun_n}{\text{c}}$ has kind
+% $\kun_n$ and thus cannot be returned).
+%
+The \TirName{Region} rule also imposes the constraint
+$\Cleq{\tau}{\klin_{n-1}}$, which prevents the borrow, having kind $k$ of level
+$\geq n$, from escaping the region's body of type $\tau$.
 
 
 % As it would be cumbersome to markup regions manually, we developed an
@@ -581,7 +585,7 @@ Destroys a resource.
 \label{sec:sem}
 \input{internal-grammar}
 
-\lstMakeShortInline[style=rule,basicstyle=\normalsize\normalfont]@
+\lstMakeShortInline[keepspaces,style=rule,basicstyle=\normalsize\normalfont]@
 
 The dynamics of \lang is given in big-step
 functional
@@ -600,12 +604,12 @@ with kind, constraint, and splitting annotations inserted by the typechecker.
 A splitting $\Sp$ is evidence of the splitting relation for type environments
 used in the typing rules.
 
-Let-Polymorphism is demonstrated for functions giving rise to elaborated
+Let-polymorphism is demonstrated for functions giving rise to elaborated
 $\eletfun$ expressions annotated with a type scheme $\schm$ and a kind $k$ indicating their
 usage restriction (linear, affine, etc) relative to the variables and
-constraints from $\schm$. Their use
-gives rise to explicit instantiation of the kind and type variables. Pairs
-come with a kind tag $k$ indicating the usage restriction.
+constraints of $\schm$. Their use
+gives rise to explicit instantiation of the kind and type variables.
+% Pairs come with a kind tag $k$ indicating the usage restriction.
 
 Addresses $\Addr$ are composed of a raw location $\Loc$, which is just
 a pointer into a store, and a stack of modifiers that indicates the
