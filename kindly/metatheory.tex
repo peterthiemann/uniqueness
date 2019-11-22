@@ -4,71 +4,32 @@
 \lstMakeShortInline[style=rule]@
 
 There are several connections between the type system and
-the operational semantics. Type soundness states
-that the semantics returns values of the form predicted by the type
-system. It relies on several standard notions like store typing
+the operational semantics, which we state as a single type soundness
+theorem.
+%
+The theorem relies on several standard notions like store typing
 $\vdash \Store : \SE$ and agreement of the results in the value environment
 with the type environment $\SE \vdash \VEnv:\E$ that we define
-formally in~\cref{sec:metatheory:proofs} along with selected cases of the proofs. The
-non-standard part is the handling of permissions. With
+formally in~\cref{sec:metatheory:proofs} along with selected cases of the
+proofs.
+%
+The non-standard part is the handling of permissions. With
 $\Rawloc\Perm$ we extract the underlying raw locations from the
-permissions as in  $\Rawloc{\Multi\IBORROW\Multi\MBORROW\Loc} = \Loc$
-and with $\Reach\Store\VEnv$ we transitively trace the 
+permissions as in $\Rawloc{\Multi\IBORROW\hspace{0.5mm}\Multi\MBORROW\hspace{0.5mm}\Loc} = \Loc$
+and with $\Reach\Store\VEnv$ we transitively trace the
 addresses reachable from $\VEnv$ in store $\Store$. We write
 $\SE\le\SE'$ and $\Store \le \Store'$ for extending the domain of the
 store type and of the store, respectively.
-
-\begin{theorem}[Type Soundness]\label{theorem:type-soundness}
-  Suppose that
-  % \begin{itemize}
-  % \item
-    $\inferS{C}{\E}{e}{\tau}$,
-  % \item
-    $\SE \vdash \VEnv : \E$,
-  % \item
-    $\vdash \Store : \SE$,
-  % \item
-    $\Rawloc\Perm \subseteq \Dom\Store$,
-  % \item
-    $\Reach\Store{\VEnv} \subseteq \Perm$,
-  % \item
-    $i\in\Nat$ and
-    $R = $@eval delta pi gamma i e@
-    with $R\ne \TimeOut$.
-  % \end{itemize}
-
-  Then,
-  $\exists$ $\Store'$, $\Perm'$, $r'$, $\SE'$ such that
-  % \begin{itemize}
-  % \item
-    $R = \Ok{\Store', \Perm', r'}$,
-  % \item
-    $\SE \le \SE'$, $\Store \le \Store'$,
-    $\vdash \Store' : \SE'$,
-  % \item
-    $\SE' \vdash r' : \tau$,
-  % \item
-    $\Rawloc{\Perm'} \subseteq \Dom{\Store'}$,
-  % \item
-    $\Reach{\Store'}{r'} \subseteq \Perm'$.
-  % \end{itemize}
-\end{theorem}
-
-% As customary with the functional style of semantics,
-The proof of the
-theorem is by functional induction on the evaluation judgment, which
-is indexed by the strictly decreasing counter $i$.
-
-Further bookkeeping is needed to demonstrate the substructural
-properties. The permission set contains the set
+%
+The permission set contains the set
 of addresses that can be used during evaluation. It is managed by the
 region expression as well as by creation and use of resources as
 shown in \cref{sec:sem}.
-
-For the refined statement, we distinguish several parts of the value
+%
+We distinguish several parts of the value
 environment $\VEnv$ that correspond to the different kinds of bindings in the
 type environment: $\Active\VEnv$ for active entries of direct
-references to linear resources, closures, etc; $\MutableBorrows\VEnv$ for 
+references to linear resources, closures, etc; $\MutableBorrows\VEnv$ for
 affine borrows or resources;
 $\ImmutableBorrows\VEnv$ for unrestricted values including
 unrestricted borrows;
@@ -79,90 +40,48 @@ $\Reach\Store\VEnv$ as a multiset to properly discuss linearity and
 affinity. We use the notation $\MultiNumber x M$ for the number of
 times $x$ occurs in multiset $M$.
 
+\begin{theorem}[Type Soundness]\label{theorem:type-soundness}
+  \SoundnessThmBody
+\end{theorem}
 
-With these concepts, we can refine the assumption of
-\cref{theorem:type-soundness} by two items:
-\begin{itemize}
-\item $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv} \subseteq \Perm$
-  % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
-  %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
-  \item Incoming Resources: 
-    \begin{itemize}
-    \item $\forall \Loc\in \Rawloc{\Reach\Store\VEnv}$,  $\Store (\Loc) \ne
-      \StFreed$.
-      % suspended bindings must not point to freed resources
-    \item $\forall \Loc \in \REACH
-      =\Rawloc{\Reach\Store{\Active\VEnv,\MutableBorrows\VEnv}}$, 
-      % if $\Affine\SE\Loc$ then
-      $\MultiNumber\Loc\REACH= 1$.
-    \item $\forall \Loc \in \REACH
-      =\Rawloc{\Reach\Store{\Suspended\VEnv}}$, 
-      if $\Affine\SE\Loc$ then
-      $\MultiNumber\Loc\REACH= 1$.
-    \end{itemize}
-% \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
-%   \begin{itemize}
-%   \item 
-%     For all $\Addr$ such that $\MultiNumber\Addr{\Reach{\Store}{\Active\VEnv}} >0$,
-%     if $\Affine{\SE}\Addr$ then $\MultiNumber\Addr\REACH= 1$
-%   \item For all $\Addr$ such that $
-%     \MultiNumber\Addr{\Reach{\Store}{\MutableBorrows\VEnv}} >0$, it
-%     must be that $\MultiNumber\Addr\REACH=1$.
-%   \item For all $\Addr$ such that $
-%     \MultiNumber\Addr{\Reach{\Store}{\Suspended\VEnv}} >0$, it
-%     must be that $\MultiNumber\Addr\REACH=1$.
-%   \end{itemize}
-\end{itemize}
-First, we do not require permission for suspended bindings in the
-environment. Second, all incoming resources are active. Third, affine
-(or linear) resources, affine borrows, and suspended affine bindings
-must be reached exactly once by incoming references. There is no
-restriction on unrestricted values, unrestricted borrows or their
-suspensions.  The predicate $\Affine{\SE}\Addr$ checks affinity of a
-resource by inspecting the store type $\SE$ (see
-\cref{sec:metatheory:proofs}).
+% As customary with the functional style of semantics,
+The proof of the
+theorem is by functional induction on the evaluation judgment, which
+is indexed by the strictly decreasing counter $i$.
 
-This refined assumption enables the following additional conclusions,
-again stated in the context of \cref{theorem:type-soundness}. Function
-$\Linear{\SE}\Addr$ is defined analogously to  $\Affine{\SE}\Addr$.  As
-in the semantics, 
-\begin{itemize}
-\item Outside:
-  For all $\Loc \in \Dom{\Store} \setminus \text{getloc} (\Reach{\Store'}{\VEnv})$ it must be that 
-  $\Store' (\Loc) = \Store (\Loc)$
-  and for all $\Addr$ with $\text{getloc }\Addr=\Loc$ it must be that
-  $\Addr\in\Perm \Leftrightarrow \Addr\in\Perm'$. 
-\item Immutables: For all $\Addr \in
-  \Reach{\Store'}{\ImmutableBorrows\VEnv}$ 
-  and $\Loc = \text{getloc }\Addr$
-  it must be 
-  $\Loc\in\Dom\Store$, 
-  $\Store' (\Loc) = \Store (\Loc)$
-  and $\Addr\in\Perm \Leftrightarrow \Addr\in\Perm'$.
-\item Resources:
-  Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
-  For all $\Addr$ such that $n= \MultiNumber\Addr\REACH >0$ and $n' =
-  \MultiNumber\Addr{\REACH'}$, 
-  \begin{itemize}
-  \item if $\Affine{\SE}\Addr$ then $n=1$ and $n'\le 1$,
-  \item if $\Linear{\SE}\Addr$ then $n=1$ and $n' = 0$,
-  \item if $n'=0$, then $\Addr\notin\Perm'$.
-  \end{itemize}
-\item ReadOnly: For all $\Addr \in \Reach
-  {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Addr$
-  and $\Loc = \text{getloc }\Addr$
-  then
-  $\Store' (\ell) = \Store (\ell)$ and $\Addr\in \Perm'$.
-\item No thin air permission: For all $\Addr\in \Perm'$, $\Addr
-  \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
-\end{itemize}
-The additional conclusions state frame conditions for unreachable
-locations (Outside) and for read-only reachable locations
-(Immutables). The (Resources) clause affirms that linearity and
-affinity are respected. (ReadOnly) affirms that unrestricted values
-are never overwritten. Finally, no permissions are conceived out of
-thin air: either they have been passed in from the context or they
-belong to locations created during evaluation of the expression.
+The assumptions A1-A3 and results R1-R3 state the standard soundness properties
+for lambda calculi with references.
+
+The rest of the statement accounts for the substructural properties and
+borrowing in the presence of explicit resource management.
+%
+% The rest of the statement accounts for the properties and interactions of
+% borrowing with explicit resource management via substructural types.
+%
+% Some explanations are in order for the resource-related assumptions
+% and statements.
+%
+Incoming resources are always active (i.e., not freed).
+Linear and affine resources as well as suspended affine borrows have
+exactly one pointer in the environment.
+%
+The Frame condition states that only store locations reachable from
+the current environment can change and that all permissions outside
+the reachable locations remain the same.
+%
+Unrestricted values, resources, and borrows do not change their
+underlying resource and do not spend their permission.
+%
+Affine borrows and resources may or may not spend their
+permission. Borrows are not freed, but resources may be freed.
+%
+Incoming suspended borrows have no permission attached to them and
+their permission has been retracted on exit of their region.
+%
+A linear resource is always freed.
+%
+Outgoing permissions are either inherited from the caller or they
+refer to newly created values.
 
 \lstDeleteShortInline@
 
