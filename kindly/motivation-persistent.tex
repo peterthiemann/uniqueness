@@ -23,7 +23,7 @@ However, only changes that correspond to a choice point need to use
 the persistence mechanism, others may be implemented as
 cheap in-place mutations.
 
-\cref{sig:hybarray} contains an API @HybArray@
+\cref{sig:hybarray} contains an API @HYBARRAY@
 that enables using mutable and immutable modifications to
 the board through affine types and borrows.
 The signature differs slightly from the @Array@
@@ -35,7 +35,7 @@ The in-place mutation function @set_mut@ with type
 takes a shared borrow because it only reads from the
 argument array, but returns a fresh,  modified structure.
 The code in \cref{ex:cow} contains a very simple implementation of
-@HybArray@ that represents hybrid arrays
+@HYBARRAY@ that represents hybrid arrays
 as regular arrays and uses copy-on-write for persistent
 modifications. The function
 @mapi: (int -> &'a -> 'b) -> &('a t) -> 'b t@
@@ -49,13 +49,13 @@ takes the position of the element.
   \centering
   % \begin{subfigure}{1\linewidth}
 \begin{lstlisting}
-module type HybArray = sig
+module type HYBARRAY = sig
   include ARRAY
   val set : &('a t) * int * 'a -> 'a t
   val set_mut : &!('a t) * int * 'a -> unit
 end
 
-module Cow : HybArray = struct
+module Cow : HYBARRAY = struct
   include Array
   let set (a, i0, x0) =
     Array.mapi (fun i x -> if i = i0 then x0 else x) a

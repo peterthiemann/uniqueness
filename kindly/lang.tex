@@ -132,7 +132,7 @@ the following rules:
 \item An exclusive borrow $\borrow[\kaff]{x}$ should never share a region with any other borrow of $x$.
 \item A use of $x$ can never be in the region of $\borrow{x}$.
 \end{enumerate}
-We then start from the leafs and grow the region
+We then start from the leaves and grow the region
 associated to each borrow until it can't grow anymore either due to a binding
 or to conflicting uses. We demonstrate
 on the following program:
@@ -158,14 +158,14 @@ on the following program:
 \]
 %
 $a$ only has one borrow, its region covers its whole lexical scope.
-$x$ has multiple conflicting borrow and requires more consideration.
+$x$ has multiple conflicting borrows and requires more consideration.
 We place a first
 region around the exclusive borrow and its function application,
 and a second region around both shared borrows. This placement of region
 is optimal: making any region bigger would cause a borrowing
 error.
-Notes that indices of regions are well nested, as the inner region have
-higher indices that the outer ones.
+Note that indices of regions are well nested, as the inner region have
+higher indices than the outer ones.
 
 Programmers might also want to annotate regions explicitly.
 Such annotations are considered as

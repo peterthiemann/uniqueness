@@ -65,7 +65,7 @@ off \emph{shared borrows} @&a@ that provide a read-only
 view or \emph{exclusive borrows} @&!a@ for read-write views.
 Observer functions such as @length@ and @get@ expect an shared borrow
 argument, mutator functions such a @set@ expect
-a exclusive borrow.
+an exclusive borrow.
 
 Each borrow is tied to a region whose lifetime is properly
 contained in the lifetime of the resource.
