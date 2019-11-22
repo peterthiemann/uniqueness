@@ -1,0 +1,139 @@
+\subsection{Solving sudokus with hybrid data-structures}
+
+Recently introduced persistent data structures
+permit transient mutations where
+non-linear uses lead to degraded performance
+\cite{DBLP:conf/ml/ConchonF07} or to
+dynamic and static checks \cite{DBLP:journals/pacmpl/Puente17}.
+In particular, persistent Hash-Array-Mapped-Tries (HAMT) have been used with similar
+APIs in several non-pure functional languages (OCaml, Clojure, \dots).
+Affine types help formalize the performance contract between the programmer
+and the library, while borrows avoid the need to thread state explicitly,
+as usually required by an API for immutable data types.
+%
+
+In this section, we present
+a safe API for persistent arrays that support both immutable and mutable features,
+and use it to implement a backtracking Sudoku solver.
+% show how \lang allows us to define
+The solver maintains an array to represent the state of
+the game and uses backtracking when there are several choices to proceed.
+The use of backtracking suggests a persistent data structure for the array.
+However, only changes that correspond to a choice point need to use
+the persistence mechanism, others may be implemented as
+cheap in-place mutations.
+
+\cref{sig:hybarray} contains an API @HybArray@
+that enables using mutable and immutable modifications to
+the board through affine types and borrows.
+The signature differs slightly from the @Array@
+signature. For simplicity, the array elements are unrestricted, but
+the structure itself remains linear so as to be implemented in terms of @Array@.
+The in-place mutation function @set_mut@ with type
+@&!('a t) * int * 'a -> unit@ works on a exclusive borrow  whereas the persistent
+@set@ operation has type @&('a t) * int * 'a -> 'a t@. It
+takes a shared borrow because it only reads from the
+argument array, but returns a fresh,  modified structure.
+The code in \cref{ex:cow} contains a very simple implementation of
+@HybArray@ that represents hybrid arrays
+as regular arrays and uses copy-on-write for persistent
+modifications. The function
+@mapi: (int -> &'a -> 'b) -> &('a t) -> 'b t@
+is a simple variation on @Array.map@ where the mapping function
+takes the position of the element.
+% A more elaborate implementation could use persistent arrays
+% \cite{DBLP:conf/ml/ConchonF07}.
+
+
+\begin{figure}[tp]
+  \centering
+  % \begin{subfigure}{1\linewidth}
+\begin{lstlisting}
+module type HybArray = sig
+  include ARRAY
+  val set : &('a t) * int * 'a -> 'a t
+  val set_mut : &!('a t) * int * 'a -> unit
+end
+
+module Cow : HybArray = struct
+  include Array
+  let set (a, i0, x0) =
+    Array.mapi (fun i x -> if i = i0 then x0 else x) a
+  let set_mut = Array.set
+end
+\end{lstlisting}
+    \vspace{-15pt}
+  %   \caption{Implementation using copy-on-write}
+  % \end{subfigure}
+  \caption{Hybrid arrays}
+    \label{sig:hybarray}
+    \label{ex:cow}
+
+  \lstinputlisting[linerange=1-31]{code/sukodu.affe}
+    \vspace{-15pt}
+  \caption{Excerpt of the Sudoku solver}
+  \label{ex:sudoku}
+\end{figure}
+
+Our implementation of a Sudoku solver (\cref{ex:sudoku}) performs
+modifications that correspond to choice points using @set@,
+which makes it trivial to come back to the previous version
+of the array, while other modifications use @set_mut@, which
+forbids uses of the previous version.
+
+The board is represented as a 2D-matrix (\cref{line:boardtype}), where
+the @Matrix@ type uses the same API as @PersistArray@
+but with two indices.
+Each cell contains an integer set that represent admissible solutions so far.
+The Sudoku solver iterates over the cells and tries each possible solution (\cref{line:try_solution}).
+When a value is picked for the current cell, we create a choice point,
+change the cell with an immutable modification (\cref{line:immutset}), and propagate
+the changes with the @propagate@ function.
+The @propagate@ function uses direct mutation through a
+exclusive borrow of the matrix as it need not preserve the previous
+version of the board.
+The implementation of @propagate@ is split into three parts
+for lines, columns, and square, which are all very similar to function
+@propagate_lines@ (\cref{line:propline}).
+
+The typing ensures that the mutations do not compromise the state at
+the choice point, because they operate on a new state @new_g@ created for one
+particular branch of the choice.
+As the @set@ function only requires an unrestricted shared borrow,
+the closure @try_solution@ remains unrestricted even though
+it captures the borrow @&g@.
+The price is that @try_solution@ cannot escape from
+@&g@'s region. In this example, inference places the region
+around the @begin@/@end@ scope.
+Hence, @try_solution@ can be used in
+the iteration in \cref{line:iter}.
+% As @&g@ is unrestricted, we could even use a parallel iteration
+% instead of a sequential one.
+As @g@ is linear we must free it outside of the region
+before returning (\cref{line:free:g}).
+
+While presented for copy-on-write arrays, the API
+can easily be adapted to other persistent data structures with
+transient mutability such as Relaxed-Radix Balance Vectors (RRB) \cite{DBLP:journals/pacmpl/Puente17}
+or persistent HAMTs \cite{bagwell2001ideal,clojurehamt} to provide  a
+convenient programming style without compromising performance.
+
+% \subsection{Type abstraction and linearity violations}
+
+% While linearity allows to verify many properties, it also prevents
+% the implementation of functions that are nevertheless safe. Rust addresses this
+% issue through the @unsafe@ construct, which allows to locally
+% ignore linearity constraints. This is essential to build basic
+% functions such as splitting strings.
+% %
+% \lang allows to partially emulate this behavior using type abstraction
+% as provided by ML modules.
+% In particular, data types can be internally defined as unrestricted but exposed
+% as affine.
+
+% \TODO{Show example with arrays}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
