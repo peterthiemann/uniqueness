@@ -75,7 +75,7 @@
   }{  \SE \vdash
     \Multi\IBORROW\Multi\MBORROW\Loc : \borrow{\tau}}
   \end{mathpar}
-\item 
+\item
 We write $\Affine\SE\Loc$ to express that $\Loc$ points to a resource
 that requires at least affine treatment. Borrow types do not appear in
 store types as the store only knows about the actual resources.
@@ -94,7 +94,7 @@ Define  $\Affine\SE\Loc$ if one of the following cases holds:
 % \item if $\SE (\Loc) = \borrow[\IBORROW]\tau$, then $\Loc$ is not affine
 %   \dots (THAT SHOULDN'T REALLY  BE A STORE TYPE)
 \end{itemize}
-\item 
+\item
 We write $\Linear\SE\Loc$ to express that $\Loc$ points to a linear
 resource.
 
@@ -102,19 +102,19 @@ Define  $\Linear\SE\Loc$ if one of the following cases holds:
 \begin{itemize}
 \item $\SE (\Loc) =
   \forall\Multi\kvar\forall\Multi{\bvar{\tvar}{k}}.(\qual{C}{\tau_2\tarr{k}\tau_1})$
-  and $C \wedge (k \lk \kaff_\infty)$ is contradictory; 
+  and $C \wedge (k \lk \kaff_\infty)$ is contradictory;
 \item $\SE (\Loc) = \tau_2\tarr{k}{\tau_1}$ and $\Cleq{\klin}{k}$;
 \item $\SE (\Loc) = \tyPair[k]{\tau_1}{\tau_2}$ and $\Cleq \klin
   k$;
 \item $\SE (\Loc) = \tapp{\tcon}{\Multi\tau}$.
 \end{itemize}
-\item 
-It remains to characterize unrestricted resources. 
+\item
+It remains to characterize unrestricted resources.
 Define $\Unrestricted\SE\Loc$ if neither $\Affine\SE\Loc$ nor
 $\Linear\SE\Loc$ holds.
-\item 
+\item
 Relating environments to contexts $\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
-\ImmutableBorrows\VEnv, \Suspended\VEnv : \E$. 
+\ImmutableBorrows\VEnv, \Suspended\VEnv : \E$.
 
 Here we consider an
 environment $\VEnv = (\Active\VEnv, \MutableBorrows\VEnv,
@@ -154,7 +154,7 @@ by borrowing.
     \\ \Unrestricted\SE r}
   {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv[ x\mapsto r], \Suspended\VEnv : \E;\bvar
-    x\schm } 
+    x\schm }
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\
@@ -205,7 +205,7 @@ by borrowing.
 
 We write $\Rawloc\cdot$ for the function that extracts a multiset of
 \emph{raw locations} from a result or from the range of the variable
-environment. 
+environment.
 
 \begin{align*}
   \Rawloc{\Multi\IBORROW\Multi\MBORROW\Loc} &= \{\Loc\} \\
@@ -215,7 +215,7 @@ environment.
 \end{align*}
 
 We write $\Reach\Store\VEnv$ for the multiset of all \emph{addresses}
-reachable from $\Rawloc\VEnv$ 
+reachable from $\Rawloc\VEnv$
 assuming that $\Rawloc\VEnv \subseteq \Dom\Store$\footnote{In
   mixed comparisons between a multiset and a set, we tacitly convert
   a multiset $M$ to its supporting set $\{ x \mid \MultiNumber x M \ne 0\}$.}.
@@ -245,11 +245,11 @@ for results, storables, and environments.
   \RS\Store{\StFreed} &= \{ \}
 \end{align*}
 
-This multiset is closed transitively by store lookup. We define 
+This multiset is closed transitively by store lookup. We define
 $\Reach\Store\VEnv$ as the smallest multiset $\REACH$ that fulfills
 the following inequations. We assume a nonstandard
 model of multisets such that an element $\Loc$ may occur infinitely often as in
-$\MultiNumber\Loc\REACH = \infty$. 
+$\MultiNumber\Loc\REACH = \infty$.
 \begin{align*}
   \REACH &\supseteq \RS\Store\VEnv \\
   \REACH &\supseteq \RS\Store w & \text{if }
@@ -262,145 +262,11 @@ $\MultiNumber\Loc\REACH = \infty$.
   address for each raw location.
 \end{definition}
 \clearpage{}
-\newcommand\resultOk[2]{
-  $R#2 = \Ok{\Store#2, \Perm#2, r#2}$
-}
-\newcommand\resultEnv[2]{
-  $\SE#1 \le \SE#2$, $\Store#1 \le \Store#2$, $\vdash \Store#2 : \SE#2$
-}
-\newcommand\resultPermDom[2]{
-  $\Perm#2$ is wellformed and 
-  $\Rawloc{\Perm#2} \subseteq \Dom{\Store#2} \setminus {\Store#2}^{-1}
-  (\StFreed)$ 
-}
-\newcommand\resultReachPerm[2]{
-  $\Reach{\Store#2}{r#2} \subseteq \Perm#2$
-}
-\newcommand\resultFrame[3]{
-  % input, inputenv, output
-  Frame: \\
-  For all $\Loc \in \Dom{\Store#1} \setminus
-  \Rawloc{\Reach{\Store#3}{\VEnv#2}}$ it must be that
-  \begin{itemize}
-  \item $\Store#3 (\Loc) = \Store#1 (\Loc)$ and
-  \item  for any $\Addr$ with $\Rawloc\Addr = \{\Loc\}$,
-    $\Addr \in \Perm#1 \Leftrightarrow \Addr\in\Perm#3$.
-  \end{itemize}
-}
-\newcommand\resultImmutables[3]{
-  % input, inputenv, output
-  Unrestricted values, resources, and borrows: \\
-  For all $\Addr \in
-  \Reach{\Store#3}{\ImmutableBorrows{\VEnv#2}}$ with
-  $\Rawloc\Addr = \{\Loc\}$, it must be that
-  $\Loc\in\Dom{\Store#1}$,
-  $\Store#3 (\Loc) = \Store#1 (\Loc) \ne \StFreed$
-  and $\Addr\in\Perm#3$.
-}
-\newcommand\resultMutables[3]{
-  % input, inputenv, output
-  Affine borrows and resources:\\
-  For all $\Addr \in  \Reach{\Store#3}{\MutableBorrows{\VEnv#2}}$
-  with $\Rawloc\Addr = \{\Loc\}$, if
-  $\Loc\in\Dom{\Store#1}$ and $\Addr\ne\Loc$, then 
-  $\Store#3 (\Loc) \ne \StFreed$.
-}
-\newcommand\resultSuspended[3]{
-  % input, inputenv, output
-  Suspended borrows: \\
-  For all $\Addr \in \Reach{\Store#3}{\Suspended{\VEnv#2}}$ with
-  $\Rawloc\Addr = \{\Loc\}$ it must be that $\Addr \in \Perm#3$
-  and  $\Store#3 (\Loc) \ne \StFreed$.
-  % \begin{itemize}
-  % \item If $\Addr = \IBORROW\Addr'$, then $\Loc\in\Dom{\Store#1}$ and
-  %   $\Store#3 (\Loc) = \Store#1 (\Loc) \ne \StFreed$.
-  % \item If $\Addr = \MBORROW\Addr'$ and
-  %   $\Loc\in\Dom{\Store#1}$, then 
-  %   $\Store#3 (\Loc) \ne \StFreed$.
-  % \end{itemize}
-}
-\newcommand\resultResources[3]{
-  % input, inputenv, output
-  Resources: Let $\REACH#1 = \Reach{\Store#1}{\Active{\VEnv#2}}$.  Let
-  $\REACH#3 =\Reach{\Store#3}{\Active{\VEnv#2}}$.
-  \\
-  For all $\Loc\in \REACH#1$ it must be that
-  $\MultiNumber\Loc{\REACH#1}=\MultiNumber\Loc{\REACH#3}=1$,
-  $\Loc\notin\Perm#3$, and if $\Store#1(\Loc)$ is a resource, then
-  $\Store#3 (\Loc) = \StFreed$.
-  % \begin{itemize}
-  % \item if $\Linear{\SE#1}\Loc$
-  %   then $n=n'=1$, $\Loc\notin\Perm#2$, and if $\Store#1(\Loc)$ is a
-  %   resource, then $\Store#2 (\Loc) = \StFreed$;
-  % \item if $\Affine{\SE#1}\Loc$ then $n=1$ and $n'\le 1$;
-  % \item if $\Unrestricted{\SE#1}\Loc$ then
-  %   $\Store#2 (\ell) = \Store#1 (\ell)$ and $\Loc\in \Perm#2$.
-  % \end{itemize}
-}
-\newcommand\resultThinAir[2]{
-  No thin air permission: \\
-  $\Perm#2 \subseteq
-  \Perm#1 \cup ( \Dom{\Store#2} \setminus \Dom{\Store#1})$.
-  % For all $\Addr\in {\Perm#2}$, $\Addr
-  % \in \Perm#1 \cup ( \Dom{\Store#2} \setminus \Dom{\Store#1})$.
-}
-\newcommand\assumeWellformed[1]{
-  $\Perm#1$ is wellformed and $\Rawloc{\Perm#1} \subseteq
-  \Dom{\Store#1} \setminus {\Store#1}^{-1} (\StFreed)$
-}
-\newcommand\assumeIncoming[2]{
-  Incoming Resources: 
-  \begin{enumerate}
-  \item $\forall \Loc\in \Rawloc{\Reach{\Store#1}{\VEnv#2}}$,
-    $\Store#1 (\Loc) \ne \StFreed$.
-    % suspended bindings must not point to freed resources
-  \item $\forall \Loc \in \REACH
-    =\Rawloc{\Reach{\Store#1}{\Active{\VEnv#2},\MutableBorrows{\VEnv#2},
-      \Suspended{\VEnv#2}}}$,
-    % if $\Affine\SE\Loc$ then
-    $\MultiNumber\Loc\REACH= 1$.
-  \end{enumerate}
-}
 \lstMakeShortInline[style=rule]@
+
 \begin{theorem}
-  Suppose that
-  \begin{enumerate}[({A}1)]
-  \item $\inferS{C}{\E}{e}{\tau}$
-  \item $\SE \vdash \VEnv : \E$
-  \item $\vdash \Store : \SE$
-  \item\label{item:11} \assumeWellformed{}
-  \item\label{item:12} $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv,
-      \ImmutableBorrows\VEnv} \subseteq \Perm$
-  \item $\Rawloc{\Active\VEnv}$,
-    $\Rawloc{\MutableBorrows\VEnv}$,
-    $\Rawloc{\ImmutableBorrows\VEnv}$, and
-    $\Rawloc{\Suspended\VEnv}$ are all disjoint
-  % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
-  %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
-  \item\label{item:15} \assumeIncoming{}{}
-  \end{enumerate}
-  For all $i\in\Nat$, if
-  @R' = eval \Store \Perm \VEnv i e@
-  %$\Store, \Perm, \VEnv \vdash {e}  \Downarrow^i R'$
-  and $R'\ne \TimeOut$, 
-  then
-  $\exists$ $\Store'$, $\Perm'$, $r'$, $\SE'$ such that
-  \begin{enumerate}[({R}1)]
-  \item \resultOk{}{'}
-  \item \resultEnv{}{'}
-  \item $\SE' \vdash r' : \tau$
-  \item \resultPermDom{}{'}
-  \item \resultReachPerm{}{'}
-  \item \resultFrame{}{}{'}
-    %% must be \Store because \Perm has no idea of \Perm'
-  \item \resultImmutables{}{}{'}
-  \item \resultMutables{}{}{'}
-    % \\\textbf{PJT: this is a really weak statement! anything else that
-    %   can be said?}
-  \item \resultSuspended{}{}{'}
-  \item \resultResources{}{}{'}
-  \item \resultThinAir{}{'}
-  \end{enumerate}
+  \label{thm:metatheory-extra:soundness}
+  \SoundnessThmBody
 \end{theorem}
 
 Some explanations are in order for the resource-related assumptions
@@ -421,9 +287,9 @@ Affine borrows and resources may or may not spend their
 permission. Borrows are not freed, but resources may be freed.
 
 Incoming suspended borrows have no permission attached to them and
-their permission has been retracted on exit of their region. 
+their permission has been retracted on exit of their region.
 
-A linear resource is always freed. 
+A linear resource is always freed.
 
 Outgoing permissions are either inherited from the caller or they
 refer to newly created values.
@@ -456,9 +322,9 @@ refer to newly created values.
   \end{gather}
   Moreover (using $\uplus$ for disjoint union),
   \begin{itemize}
-  \item $\Active\VEnv = \Active{\VEnv_1} \uplus\Active{\VEnv_2}$, 
+  \item $\Active\VEnv = \Active{\VEnv_1} \uplus\Active{\VEnv_2}$,
   \item $\MutableBorrows\VEnv = \MutableBorrows{\VEnv_1} \uplus
-    \MutableBorrows{\VEnv_2}$, 
+    \MutableBorrows{\VEnv_2}$,
   \item $\ImmutableBorrows\VEnv =
     \ImmutableBorrows{\VEnv_1} = \ImmutableBorrows{\VEnv_2}$,
   \item $\Suspended\VEnv = \Suspended{\VEnv_1} \uplus
@@ -482,11 +348,11 @@ refer to newly created values.
   \item\label{item:8} \resultEnv{}{_1}
   \item\label{item:9} $\SE_1 \vdash r_1 : \tau_1$
   \item\label{item:14} \resultPermDom{}{_1}
-  \item\label{item:13} \resultReachPerm{}{_1} 
-  \item\label{item:16} \resultFrame{}{_1}{_1} 
-  \item\label{item:24} \resultImmutables{}{}{_1} 
+  \item\label{item:13} \resultReachPerm{}{_1}
+  \item\label{item:16} \resultFrame{}{_1}{_1}
+  \item\label{item:24} \resultImmutables{}{}{_1}
   \item\label{item:26} \resultMutables{}{}{_1}
-  \item\label{item:28} \resultSuspended{}{}{_1} 
+  \item\label{item:28} \resultSuspended{}{}{_1}
   \item\label{item:30} \resultResources{}{}{_1}
   \item\label{item:10} \resultThinAir{}{_1}
   \end{enumerate}
@@ -497,16 +363,16 @@ refer to newly created values.
   \item From inversion: $\inferS{C}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2}$
   \item From~\eqref{eq:17} we have $\SE \vdash \VEnv_2 : \E_2$.
     By store weakening (Lemma~\ref{lemma:store-weakening}) and
-    using~\ref{item:8}, we have 
+    using~\ref{item:8}, we have
     $\SE_1 \vdash \VEnv_2 : \E_2$.
     With~\ref{item:9}, we obtain
     $\SE_1 \vdash \VEnv_2 (x \mapsto r_1 ) : \E_2;\bvar x {\tau_1}$
     and hence
     $\SE_1 \vdash \VEnv_2 (x \mapsto r_1 ) : \E_2;\bvar x {\schm}$
-    %% PJT: generalization lemma needed 
+    %% PJT: generalization lemma needed
     because $\schm$ generalizes $\tau_1$.
   \item Immediate from~\ref{item:8}.
-  \item Immediate from~\ref{item:14}. 
+  \item Immediate from~\ref{item:14}.
   \item $\Reach{\Store_1}{\Active{\VEnv_2'}, \MutableBorrows{\VEnv_2'},
       \ImmutableBorrows{\VEnv_2'}} \subseteq \Perm_1$ \\
     From~\ref{item:12}, we have
@@ -533,9 +399,9 @@ refer to newly created values.
   \item\label{item:18} \resultEnv{_1}{_2}
   \item\label{item:19} $\SE_2 \vdash r_2 : \tau_2$
   \item\label{item:20} \resultPermDom{_1}{_2}
-  \item\label{item:21} \resultReachPerm{_1}{_2} 
-  \item\label{item:22} \resultFrame{_1}{_2'}{_2} 
-  \item\label{item:23} \resultImmutables{_1}{_2'}{_2} 
+  \item\label{item:21} \resultReachPerm{_1}{_2}
+  \item\label{item:22} \resultFrame{_1}{_2'}{_2}
+  \item\label{item:23} \resultImmutables{_1}{_2'}{_2}
   \item\label{item:25} \resultMutables{_1}{_2'}{_2}
   \item\label{item:27} \resultSuspended{_1}{_2'}{_2}
   \item\label{item:29} \resultResources{_1}{_2'}{_2}
@@ -549,14 +415,14 @@ refer to newly created values.
   \item \resultEnv{}{_2}
     \\ Transitivity of store extension
     (Lemma~\ref{lemma:store-extension-transitive}), \ref{item:18},
-    and~\ref{item:8}. 
+    and~\ref{item:8}.
   \item  $\SE_2 \vdash r_2 : \tau_2$
     \\ Immediate from~\ref{item:19}.
   \item \resultPermDom{}{_2}
     \\ Immediate from~\ref{item:20}.
   \item \resultReachPerm{}{_2}
     \\ Immediate from~\ref{item:21}.
-  \item \resultFrame{}{}{_2} 
+  \item \resultFrame{}{}{_2}
     ~\\ Suppose that $\Loc \in \Dom\Store \setminus
     \Rawloc{\Reach{\Store_2}{\VEnv}}$.
     \\ Then $\Loc \in \Dom\Store \setminus
@@ -573,7 +439,7 @@ refer to newly created values.
   \item \resultImmutables{}{}{_2}
     \\ Follows from~\ref{item:23} or~\ref{item:24} because
     $\ImmutableBorrows\VEnv = \ImmutableBorrows{\VEnv_1} =
-    \ImmutableBorrows{\VEnv_2}$. 
+    \ImmutableBorrows{\VEnv_2}$.
   \item \resultMutables{}{}{_2}
     \\ Follows from~\ref{item:25},~\ref{item:26}, and framing.
   \item \resultSuspended{}{}{_2}
@@ -584,7 +450,7 @@ refer to newly created values.
   \item \resultThinAir{}{_2}
     \\ Immediate from~\ref{item:31}.
   \end{enumerate}
-  
+
   \newpage{}
   \textbf{case $e$ of}
   \lstsemrule{sappanf}

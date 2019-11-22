@@ -95,12 +95,12 @@
   file handles, network connections, or dynamically allocated
   memory. Programmers need to follow certain protocols to handle
   these resources correctly. Violating these protocols causes bugs
-  ranging from type mismatches over data races to use-after-free 
+  ranging from type mismatches over data races to use-after-free
   errors and memory leaks. These bugs often lead to security  vulnerabilities.
 
-  While statically typed programming languages guarantee type soundness and memory 
+  While statically typed programming languages guarantee type soundness and memory
   safety by design, most of them do not address issues arising
-  from improper resource handling. 
+  from improper resource handling.
   Linear and affine types guarantee single-threaded resource usage,
   but they are rarely deployed as they are too restrictive for real-world applications.
 
@@ -124,6 +124,7 @@
 \input{motivation}
 \input{lang}
 \input{infer/infer}
+\input{metatheory-common}
 \input{metatheory}
 \input{soa}
 \input{conclusion}
