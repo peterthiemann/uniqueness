@@ -236,9 +236,8 @@ let (<<=) : kind -> kind -> kind * kind =
 
   (* eval header *)
 let rec eval
-  : store -> perm -> venv -> int -> exp ->
-    (store * perm * result) sem
-  = fun delta pi gamma i e ->
+  (delta:store) (pi:perm) (gamma:venv) i e
+  : (store * perm * result) sem =
   if i=0 then TimeOut else
   let i' = i - 1 in
   match e with

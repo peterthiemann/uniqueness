@@ -106,8 +106,10 @@ The complete type inference rules are shown in \cref{appendix:infer}.
     % \ruleILet
     % \hfill
     \ruleIRegion
+    % \and
+    % \ruleIPair
     \and
-    \ruleIPair
+    \ruleIApp
     \and
     \inferrule{}
     { \Weaken_{\bvar{x}{\sigma}}(\Sv) =

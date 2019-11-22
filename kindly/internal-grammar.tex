@@ -5,7 +5,7 @@
   \begin{align*}
     \htag{Elaborated expressions}
     e ::=~& x \mid \ivar x {\Multi k} {\Multi\tau} \mid \lam[k]{x}{e} \mid \iapp\Sp{e}{e'} \\
-    \mid~& \ipair\Sp{k}{e}{e'} \mid \imatchin\Sp\etransfm{x,y}{e}{e'} \tag{Tagged pairs}\\
+    % \mid~& \ipair\Sp{k}{e}{e'} \mid \imatchin\Sp\etransfm{x,y}{e}{e'} \tag{Tagged pairs}\\
     \mid~& \ilet\Sp{x}{e}{e'} \tag{Mono let}\\
     \mid~& \iletfun\Sp{x}\schm{k}{y}{e}{e'} \tag{Poly let}\\
     \mid~& \region{\Sone x\BORROW}{e} \mid \borrow{x} \mid \reborrow{x} \tag{Region \& Borrows}\\
@@ -29,7 +29,7 @@
     \htag{Storables}
     w ::=~& \StPClosure \VEnv {\Multi\kvar} C k x e \tag{Poly Closures}\\
     \mid~& \StClosure \VEnv k x e \tag{Closures} \\
-    \mid~& \StPair k r {r'} \tag{Pairs} \\
+    % \mid~& \StPair k r {r'} \tag{Pairs} \\
     \mid~& \StRes r \tag{Resources} \\
     \mid~& \StFreed \tag{Freed Resource}
     \\

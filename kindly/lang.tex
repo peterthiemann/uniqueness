@@ -289,25 +289,37 @@ kind variables or relate two kind variables.
 \begin{figure*}[tp]
   % \begin{minipage}{0.7\linewidth}
     \begin{mathpar}
+      \ruleSDVar
+      \and
+      \ruleSDApp
+      \and
+      \ruleSDRegion
+      \and
       \ruleSDBorrow
       \and
       \ruleSDLam
       \and
-      \ruleSDRegion
-      \and
-      \ruleSDVar
-      \and
-      \ruleSDPair
-      \and
-      \ruleSDMatchPair
+      \inferrule[BorrowBinding]{
+        \entail{C}{(\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)}\\
+        \BORROW\in\left\{\kun,\kaff\right\}
+      }{
+        \lregion{C}{}
+        {\svar[\BORROW]{x}{\tau}^n}
+        {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau}}}
+      }
+      % \and
+      % \ruleSDPair
+      % \and
+      % \ruleSDMatchPair
     \end{mathpar}
     \vspace{-10pt}
-    \caption{Selected typing rules -- $\inferS{C}{\E}{e}{\tau}$}
+    \caption{Selected typing rules ($\inferS{C}{\E}{e}{\tau}$)
+      and borrowing rules ($\lregion{C}{x}{\E}{\E'}$)} 
     \label{selectrules:borrow}
     \label{selectrules:binders}
-    \label{sdtyp:pair}
+    \label{sdtyp:app}
     \label{selectrules:region}
-    \label{selectrules:matching}
+    \label{env:rule:borrow}
     \vspace{-5pt}
   % \end{minipage}
 \end{figure*}
@@ -377,7 +389,7 @@ Capturing a suspended binding is forbidden.
 \paragraph{Copying and Splitting}
 \label{sdtyping:split}
 
-The {\sc Pair} typing rule in \cref{sdtyp:pair} demonstrates how \lang
+The {\sc App} typing rule in \cref{sdtyp:app} demonstrates how \lang
 deals with duplication and dropping of values.
 The splitting $\lsplit{C}{\E}{\E_1}{\E_2}$ in the rule decomposes the
 type environment $\E$ in two parts, $\E_1$ and $\E_2$, which are used
@@ -401,90 +413,82 @@ which means that a resource can be used first as a borrow on the left
 and then later as a full resource on the right. The {\sc Susp} rule
 works with a full resource, the {\sc SuspB}
 with a borrow and {\sc SuspS} with a suspended binding.
-%
+
 Splitting applies whenever an
-expression has multiple subexpressions:  pairs, function applications,
+expression has multiple subexpressions:  function applications,
 and let bindings. In the
 expression
-$\letin{a}{\text{create}\ 10\ x}
-{\introPair{\region[{}]{\Sone x\IBORROW}{\app{\text{length}}{\borrow[\IBORROW]{a}}}}{a}}$,
+$\letin{a}{\text{create}\ 8\ x}
+{f\ \region[{}]{\Sone a\IBORROW}{\text{length}\ \borrow[\IBORROW]{a}}\ a}$,
 the rule {\sc Susp} splits off a borrow from  the resource
-$a$ to use it in the left component of the pair.
+$a$ to use it in the left argument.
 As usual, a borrow cannot be active in the same scope as its resource.
-The \emph{region} around its use ensures that the borrow in the left component does not
+The \emph{region} around its use ensures that the borrow in the left argument
+does not
 escape, which brings us to the next topic.
 
 
-\paragraph{Pattern matching}
-\label{sdtyping:matching}
+% \paragraph{Pattern matching}
+% \label{sdtyping:matching}
 
-Elimination of pairs is done using a matching construct 
-$(\matchin{x,x'}{e_1}{e_2})$ whose
-typing rule is shown in \cref{selectrules:matching}.
-This construction can eliminate both normal pairs, but also borrows
-of pairs.
-A syntactic marker $\etransfm$ indicates if it applies to
-a pair ($\etransfm = \operatorname{id}$) or a borrow ($\etransfm = \&^\BORROW$).
-If $\etransfm = \operatorname{id}$, the typing simplifies to
-a regular destruct on pairs.
-Otherwise, $e_1$ is expected to be of type
-$\borrowty{k}{\tyPair{\tau_1}{\tau'_1}}$
-while $x$ and $x'$ are of type respectively
-$\borrowty{k}{\tau_1}$ and $\borrowty{k}{\tau'_1}$.
+% Elimination of pairs is done using a matching construct 
+% $(\matchin{x,x'}{e_1}{e_2})$ whose
+% typing rule is shown in \cref{selectrules:matching}.
+% This construction can eliminate both normal pairs, but also borrows
+% of pairs.
+% A syntactic marker $\etransfm$ indicates if it applies to
+% a pair ($\etransfm = \operatorname{id}$) or a borrow ($\etransfm = \&^\BORROW$).
+% If $\etransfm = \operatorname{id}$, the typing simplifies to
+% a regular destruct on pairs.
+% Otherwise, $e_1$ is expected to be of type
+% $\borrowty{k}{\tyPair{\tau_1}{\tau'_1}}$
+% while $x$ and $x'$ are of type respectively
+% $\borrowty{k}{\tau_1}$ and $\borrowty{k}{\tau'_1}$.
 
-Matching is voluntarily simple here and
-could be improved using a richer pattern language
-to access inner components and a typeclass mechanisms
-to avoid the need for explicit markers for borrow matches.
-Both extensions are compatible with our system and have been partially
-implemented in our prototype type-checker.
+% Matching is voluntarily simple here and
+% could be improved using a richer pattern language
+% to access inner components and a typeclass mechanisms
+% to avoid the need for explicit markers for borrow matches.
+% Both extensions are compatible with our system and have been partially
+% implemented in our prototype type-checker.
 
 \paragraph{Regions}
 \label{sdtyping:regions}
 
-\begin{figure}[tp]
-  % \begin{minipage}{0.4\linewidth}
-  %   \centering
-  %   \begin{mathpar}
-  %     \ruleSDRegion
-  %   \end{mathpar}
-  %   \caption{The {\sc Region} rule}
-  %   \label{selectrules:region}
-  % \end{minipage}\hfill
-  % \begin{minipage}{\linewidth}
-    \centering
-    % \begin{tabular}
-    %   {@{}>{$}r<{$}@{ $\vdash_e$ }
-    %   >{$}c<{$}@{ $\rightsquigarrow_n^{x}$ }
-    %   >{$}l<{$}
-    %   r}
+% \begin{figure}[tp]
+%   % \begin{minipage}{0.4\linewidth}
+%   %   \centering
+%   %   \begin{mathpar}
+%   %     \ruleSDRegion
+%   %   \end{mathpar}
+%   %   \caption{The {\sc Region} rule}
+%   %   \label{selectrules:region}
+%   % \end{minipage}\hfill
+%   % \begin{minipage}{\linewidth}
+%     \centering
+%     % \begin{tabular}
+%     %   {@{}>{$}r<{$}@{ $\vdash_e$ }
+%     %   >{$}c<{$}@{ $\rightsquigarrow_n^{x}$ }
+%     %   >{$}l<{$}
+%     %   r}
 
-    %   (\kun_n\lk k\lk\kun_\infty)
-    %   &{\svar[\IBORROW]{x}{\tau}^n}
-    %   &{\bvar{\borrow[\IBORROW]{x}}{\borrowty[\IBORROW] k{\tau}}}
-    %   &Immut\\
+%     %   (\kun_n\lk k\lk\kun_\infty)
+%     %   &{\svar[\IBORROW]{x}{\tau}^n}
+%     %   &{\bvar{\borrow[\IBORROW]{x}}{\borrowty[\IBORROW] k{\tau}}}
+%     %   &Immut\\
 
-    %   (\kaff_n\lk k\lk\kaff_\infty)
-    %   &\svar[\MBORROW]{x}{\tau}^n
-    %   &\bvar{\borrow[\MBORROW]{x}}{\borrowty[\MBORROW] k{\tau}}
-    %   &Mut
-    % \end{tabular}
-    \begin{mathpar}
-      \inferrule{
-        \entail{C}{(\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)}\\
-        \BORROW\in\left\{\kun,\kaff\right\}
-      }{
-        \lregion{C}{}
-        {\svar[\BORROW]{x}{\tau}^n}
-        {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau}}}
-      }
-    \end{mathpar}
-    \vspace{-10pt}
-    \caption{Borrowing rules for bindings -- $\lregion{C}{x}{\E}{\E'}$}
-    \label{env:rule:borrow}
-  \vspace{-10pt}
-  % \end{minipage}
-\end{figure}
+%     %   (\kaff_n\lk k\lk\kaff_\infty)
+%     %   &\svar[\MBORROW]{x}{\tau}^n
+%     %   &\bvar{\borrow[\MBORROW]{x}}{\borrowty[\MBORROW] k{\tau}}
+%     %   &Mut
+%     % \end{tabular}
+%     \begin{mathpar}
+%     \end{mathpar}
+%     \vspace{-10pt}
+%     \caption{Borrowing rules for bindings -- }
+%   \vspace{-10pt}
+%   % \end{minipage}
+% \end{figure}
 
 Borrowing is crucial to support an imperative programming style.
 To guarantee the validity of a borrow, its lifetime must be properly contained in its
@@ -585,10 +589,10 @@ style~\cite{siek13:_type_safet_three_easy_lemmas,DBLP:conf/esop/OwensMKT16,
 @eval \Store \Perm \VEnv i e@
 manipulates the semantic objects defined in
 \cref{fig:syntax-internal-language}.
-To demonstrate resource handling, the semantics comes with an abstract
-notion of linear resources that can be created, destroyed, observed
-(through unrestricted borrows), and
-updated (through affine borrows).
+% To demonstrate resource handling, the semantics comes with an abstract
+% notion of linear resources that can be created, destroyed, observed
+% (through unrestricted borrows), and
+% updated (through affine borrows).
 
 The semantics is defined in terms of \emph{elaborated expressions} $e$
 with kind, constraint, and splitting annotations inserted by the typechecker.
@@ -682,8 +686,8 @@ at that location. The permission to further use this closure  remains
 in force only if the closure is unrestricted. Finally, we evaluate the
 argument, then the function body, and return its result.
 
-The @Pair@ case corresponds to the \TirName{Pair} typing rule. It
-requires no new features.
+% The @Pair@ case corresponds to the \TirName{Pair} typing rule. It
+% requires no new features.
 
 
 The @Region@ case implements a region. It obtains the address for @x@,

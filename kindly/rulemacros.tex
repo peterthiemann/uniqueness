@@ -235,7 +235,7 @@
   \inferrule[App]
   {
     \inferS{C}{\E_1}{e_1}{\tau_2 \tarr{k} \tau_1} \\
-    \inferS{C}{\E_2}{e_2}{\tau'_2} \\
+    \inferS{C}{\E_2}{e_2}{\tau'_2} \\\\
     \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
     \entail C {\Cleq{\tau_2'}{\tau_2}}
   }
@@ -560,11 +560,11 @@
   \inferrule[App$_I$]
   { \tvar,\kvar\text{ fresh}\\
     \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
-    \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\
+    \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\\\
     \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
     D =
     C_1 \Cand C_2 \Cand \Cleq{\tau_1}{\tau_2\tarr{\kvar}\tvar}
-    \Cand \addlin{C_s} \\
+    \Cand \addlin{C_s} \\\\
     \unif' = \unif_1 \mostgeneral \unif_2 \\
     (C,\unif) = \normalize{D}{\unif'}\\
   }
