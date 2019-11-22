@@ -597,14 +597,16 @@ notion of linear resources that can be created, destroyed, observed
 updated (through affine borrows).
 
 The semantics is defined in terms of \emph{elaborated expressions} $e$
-with kind and constraint annotations inserted by the typechecker.
-Polymorphic functions give rise to elaborated
-abstractions which abstract over kind variables $\Multi\kappa$ and
-which are tagged with a constraint $C$ and a kind $k$ indicating their
-usage restriction (linear, affine, etc). Their use
-gives rise to explicit instantiation of these kind variables. Pairs
-come with a kind tag $k$ indicating the usage restriction. Application
-is annotated with evidence $\Sp$ of the inferred splitting.
+with kind, constraint, and splitting annotations inserted by the typechecker.
+A splitting $\Sp$ is evidence of the splitting relation for type environments
+used in the typing rules.
+
+Let-Polymorphism is demonstrated for functions giving rise to elaborated
+$\eletfun$ expressions annotated with a type scheme $\schm$ and a kind $k$ indicating their
+usage restriction (linear, affine, etc) relative to the variables and
+constraints from $\schm$. Their use
+gives rise to explicit instantiation of the kind and type variables. Pairs
+come with a kind tag $k$ indicating the usage restriction.
 
 Addresses $\Addr$ are composed of a raw location $\Loc$, which is just
 a pointer into a store, and a stack of modifiers that indicates the
