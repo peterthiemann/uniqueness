@@ -384,12 +384,12 @@ type environment $\E$ in two parts, $\E_1$ and $\E_2$, which are used
 to typecheck the components of the pair.
 The constraint $C$ characterizes a valid  splitting.
 
-\cref{sdtyp:split} shows the action of the splitting rules on single
-bindings. If $x$'s type is unrestricted, then
-the {\sc Both} rule indicates that we can duplicate it.
-Similarly, unrestricted borrows can be duplicated according to rule
+\cref{sdtyp:split} shows the action of splitting rules on single
+bindings. If $x$'s type is unrestricted, 
+rule {\sc Both} indicates that we can duplicate it.
+Similarly, unrestricted borrows can be duplicated with rule
 {\sc Borrow}.
-The {\sc Left} and {\sc Right} rules are always applicable and move a binding
+{\sc Left} and {\sc Right} rules are always applicable and move a binding
 either to the left or right environment.
 The rules {\sc Susp}, {\sc SuspB} and {\sc SuspS}
 split off suspended bindings to

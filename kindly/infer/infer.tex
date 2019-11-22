@@ -3,8 +3,8 @@
 
 An important contribution of \affe is its principal type inference.
 We now formulate our inference algorithm
-based on the $HM(X)$ framework~\citep{DBLP:journals/tapos/OderskySW99}.
-$HM(X)$ is a Hindley-Milner type system for a language
+based on the $HM(X)$ framework~\citep{DBLP:journals/tapos/OderskySW99},
+a Hindley-Milner type system for a language
 with qualified types where constraints are expressed in an arbitrary
 theory $X$.
 Most importantly,
@@ -15,14 +15,13 @@ We adapt and extend HM(X)'s existing rules to support kind inference,
 track linearity and handle borrows and regions. Finally, we
 formulate an appropriate constraint solving algorithm for $\CL$
 which solves and simplifies constraints in a principled way.
-We start by various preliminary definitions.
 
 \subsection{Preliminaries}
 
-Unlike the syntax-directed version of our type system, knowing which elements
-are input and output or our inference judgements is critical. In the rest
-of this section, when presenting a new judgement,
-we write input parameters in \textbf{\textcolor{DarkSlateBlue}{bold blue}}. The rest will then be
+In the context of inference, it's critical to know which elements
+are input and output of inference judgements.
+In the following, when presenting a new judgement,
+we write input parameters in \textbf{\textcolor{DarkSlateBlue}{bold blue}}. The rest will be
 output parameters.
 
 \paragraph{Usage environments}
@@ -32,18 +31,18 @@ output parameters.
 % write $\Sv$, to summarize how variables and borrows are used inside
 % the expression.
 
-In order to determine if a variable is used in an affine manner, we must track
-its uses and the associated kinds. For instance, in the expression
-$(x,x)$, $x$ is used twice. If $x$ is of type $\tau$, which is of kind $k$,
-we must add the constraint $\Cleq{k}{\kun}$.
+To determine if a variable is used in an affine manner, we must track
+its uses and the associated kinds. In the expression
+$f\ x\ x$, $x$ is used twice. If $x$ is of type $\tau$, which is of kind $k$,
+we add the constraint $\Cleq{k}{\kun}$.
 %
-In order to infer such constraints, our inference judgement will not only
-take an environment as parameter but also return an environment which
-we call ``usage environment'' and which summarizes how variables and borrows
-are used. Usage environments follow the exact same grammar
-as normal environments. In order to distinguish them more easily,
-we denote them by $\Sv$.
-
+To infer such constraints, our inference judgement not only
+take an environment as parameter but also return an environment called
+``usage environment'', denoted $\Sv$,
+which summarizes usages of variables and borrows.
+Usage environments follow the grammar
+of normal environments.
+%
 In \cref{sdtyping}, we used relations to split environments in two and to
 transform suspended bindings into borrows inside a region.
 These relations take as argument a constraint which validates
@@ -52,24 +51,20 @@ In the context of inference, we define new judgements which \emph{infer}
 the constraints.
 \begin{itemize}[leftmargin=*]
 \item $\bsplit{C}{\Sv}{\inP{\Sv_1}}{\inP{\Sv_2}}$.
-  Given two usage environments $\inP{\Sv_1}$ and $\inP{\Sv_2}$
-  (inferred from two subexpressions, for instance),
+  Given two usage environments $\inP{\Sv_1}$ and $\inP{\Sv_2}$,
   we return $\Sv$, the merged environment, and $C$, a set
   of constraints that must be respected.
-  This relation is total and non-ambiguous given $\Sv_1$ and $\Sv_2$
-  and uses the same rules as the one presented in \cref{sdtyping:split}.
 \item $\bregion[\inP{n}]{C}{\inP{x}}{\Sv}{\inP\Sv'}$.
   Given a usage environment $\inP{\Sv'}$, a nesting level $\inP{n}$,
   and a variable name $\inP{x}$, we return
   $\Sv$ where the borrow binding of $x$ in $\Sv'$, if it exists,
   is replaced by
-  a suspended binding. We also return $C$, a set of constraints that must
-  be respected.
-  Again, the relation is total and non-ambiguous for any given $\Sv'$,
-  $n$ and $x$,
-  and uses the rules presented in \cref{sdtyping:regions}.
+  a suspended binding. We also return the constraints $C$.
 \end{itemize}
-
+Both relations are total and non-ambiguous in term of their input
+(i.e., functions), and use
+the rules presented in \cref{sdtyping:split,sdtyping:regions}.
+%
 The relations used for syntax-directed typing can trivially be defined
 in terms of these new relations by using constraint entailment.
 All relations are fully described in \cref{typ:extra:envs}.
@@ -77,14 +72,13 @@ All relations are fully described in \cref{typ:extra:envs}.
 \paragraph{Constraint normalization}
 
 The HM(X) framework assumes the existence of a ``$\operatorname{normalize}$''
-function which takes a constraint $C$, a substitution $\psi$ and returns a
+function which takes a constraint $\inP{C}$, a substitution $\inP\psi$ and returns a
 simplified constraint $C'$
 and an updated substitution $\unif'$.
-Normalization must return a normal form such that $\unif'$ is a most general unifier.
-We detail the implementation
-of the normalization function and its property in \cref{infer:solving}.
-In the meantime, we simply
-assume the existence of such a function for our constraint system.
+Normalization returns a normal form such that $\unif'$ is a most general unifier.
+For now, we simply
+assume the existence of such a function for our constraint system
+and delay details to \cref{infer:solving}.
 
 \subsection{Type inference}
 
@@ -92,12 +86,12 @@ We write $\inferW{\Sv}{(C,\unif)}{\inP{\E}}{\inP{e}}{\tau}$ when
 $\inP{e}$\ has type $\tau$ in $\inP{\E}$ under the constraints $C$ and unifier $\unif$
 with a usage environment $\Sv$. $\inP\E$ and $\inP{e}$ are the input parameters of our
 inference algorithm.
-Unlike in the syntax-directed version, $\E$ only regular and type bindings.
+Unlike in the syntax-directed version, $\E$ contains only regular and type bindings.
 Suspended and borrow bindings can only be present in $\Sv$.
 We revisit some of the syntax-directed rules presented in \cref{sdtyping}
 to highlight the novelties
 of our inference algorithm and the differences with the syntax-directed
-system.
+system in \cref{rule:infer:envs}.
 The complete type inference rules are shown in \cref{appendix:infer}.
 
 \paragraph{Environments and bindings}
@@ -138,32 +132,31 @@ The complete type inference rules are shown in \cref{appendix:infer}.
   \label{rule:infer:let}
 \end{figure*}
 %
-In our syntax-directed system, we ensured
-that linear variables are not discarded at the \emph{leaves}, through
-the {\sc Var} rule. In the inference algorithm, we operate in the opposite
-direction: we collect data from the leaves, and only enforce linearity
+In the syntax-directed system, the {\sc Var} rule ensure
+that linear variables are not discarded at the \emph{leaves}.
+In the inference algorithm, we operate in the opposite
+direction: we collect data from the leaves and enforce linearity
 at \emph{binders}. This is reflected in the {\sc Var$_I$} and
-{\sc Abs$_I$} rules presented in \cref{rule:infer:envs}.
-Typing for variables is very similar to traditional (non-affine) ML
-typing. The only difference is that we collect
-the fact that $x$ was used with the scheme $\schm$ by returning
+{\sc Abs$_I$} rules.
+Typing for variables is very similar to traditional (non-affine) HM.
+The difference is that we record
+that $x$ was used with the scheme $\schm$ by returning
 a usage environment $\Sv = \{ \bvar{x}{\schm} \}$.
 %
 This usage environment is in turn used at each binder to enforce proper
 usage of linear variable via the $\Weaken$ property.
-We demonstrate how this is achieved for lambda expressions
+We demonstrate this for lambda expressions
 in the {\sc Abs$_I$} rule.
 First, we typecheck the body of the lambda and obtain a usage
-environment $\Sv_x$. Just like in the syntax-directed type system,
+environment $\Sv_x$. Like in the syntax-directed type system,
 we introduce the constraint
 $\Cleq{\Sv\Sdel{x}}{\kvar}$ which properly accounts for captures in
-the body of the lambda expression. We also introduce the constraint
+the body of the lambda expression. We then introduce the constraint
 $\Weaken_{\bvar{x}{\sigma}}(\Sv)$, which is false only if weakening
-is necessary but impossible due to linearity.
-The $\Weaken$ constraint is introduced at each binding point in the program
-such as let-bindings and pattern matching.
-
-Finally, we use normalization on complex constraints to ensure
+is necessary-yet-impossible due to linearity.
+The $\Weaken$ constraint is introduced at each binding point in the program.
+%
+Finally, we normalize constraints to ensure
 that the inference algorithm always return the simplest possible
 constraints and unifiers.
 
@@ -173,20 +166,16 @@ constraints and unifiers.
 \label{infer:split}
 \label{infer:regions}
 
-The inference version
-of the {\sc Pair} and {\sc Region} rules is shown in \cref{rule:infer:envrules}.
-While the rules are quite similar to the original version, the usage
-environment $\Sv$ is now an \emph{output} of the algorithm.
+Inference versions
+of the {\sc App} and {\sc Region} rules
+are similar to the original ones, but now \emph{return} the usage
+environment $\Sv$.
 As such, we use the ``inference'' version of the relations on
 the environment,
 $\bsplit{C}{\Sv}{\inP{\Sv_1}}{\inP{\Sv_2}}$
 and $\bregion{C}{\inP{x}}{\Sv}{\inP\Sv'}$,
 which returns the necessary constraints.
-As appropriate for inference, these relations
-are total and non ambiguous for their input parameters ($\Sv_1, \Sv_2$ and $\Sv'$, respectively).
 We then collect all constraints and normalize them.
-
-
 
 \subsection{Constraint solving}
 \label{infer:solving}
