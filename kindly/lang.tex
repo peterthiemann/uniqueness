@@ -24,6 +24,7 @@ and a dynamics that is linearity- and resource-aware (\cref{sec:sem}).
 
 \begin{figure}[!tb]
   \input{grammar}
+  \vspace{-5pt}
   \caption{Syntax}
   \label{grammar}
   \vspace{-10pt}
@@ -593,7 +594,7 @@ manipulates the semantic objects defined in
 % notion of linear resources that can be created, destroyed, observed
 % (through unrestricted borrows), and
 % updated (through affine borrows).
-
+%
 The semantics is defined in terms of \emph{elaborated expressions} $e$
 with kind, constraint, and splitting annotations inserted by the typechecker.
 A splitting $\Sp$ is evidence of the splitting relation for type environments
@@ -644,7 +645,7 @@ or a result. Its return type is a monad
 @'a sem@ which combines error reporting and timeout:
 \begin{lstlisting}
 type 'a sem = Error of string | TimeOut | Ok of 'a
-val eval : store -> perm -> venv -> int -> exp -> (store * perm * result) sem
+val eval: store->perm->venv->int->exp->(store*perm*result) sem
 \end{lstlisting}
 It evaluates the given expression in the context of an initial store, a
 permission to use addresses in the store, a value environment, and a

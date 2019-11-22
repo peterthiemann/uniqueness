@@ -49,7 +49,7 @@ These relations take as argument a constraint which validates
 the transformations.
 In the context of inference, we define new judgements which \emph{infer}
 the constraints.
-\begin{itemize}[leftmargin=*]
+\begin{itemize}[leftmargin=*,topsep=0pt]
 \item $\bsplit{C}{\Sv}{\inP{\Sv_1}}{\inP{\Sv_2}}$.
   Given two usage environments $\inP{\Sv_1}$ and $\inP{\Sv_2}$,
   we return $\Sv$, the merged environment, and $C$, a set
@@ -283,7 +283,7 @@ are directly taken from the syntax-directed derivation.
 The second theorem states that our algorithm is complete: for any given
 syntax-directed typing derivation, our inference algorithm can find
 a derivation that gives a type at least as general.
-For this, we need first to provide a few additional definitions.
+% For this, we need first to provide a few additional definitions.
 
 % \begin{definition}[More general unifier]
 %   Given a set of variable $U$ and $\unif$, $\unif'$ and $\phi$
@@ -316,7 +316,7 @@ where all the binders are replaced by normal ones. More formally:
 \end{definition}
 
 
-We can then state principality.
+% We can then state principality.
 
 % \begin{theorem}[Completeness]
 %   Given $\inferS{C'}{\E'}{e}{\tau'}$ and
@@ -340,7 +340,7 @@ We can then state principality.
 % toplevel programs.
 
 \begin{theorem}[Principality]
-  Let $\inferS{\Ctrue}{\E}{e}{\schm}$ a closed typing judgement.\\
+  Let $\inferS{\Ctrue}{\E}{e}{\schm}$ a closed typing judgement.
   Then $\inferW{\Sv}{(C,\unif)}{\Eflat\E}{e}{\tau}$
   such that:
   \begin{align*}

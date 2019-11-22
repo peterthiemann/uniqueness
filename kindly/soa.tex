@@ -11,7 +11,7 @@
 % \cite{DBLP:conf/popl/BoylandR05}
 
 
-\subsection{Substructural type-systems in functional languages}
+\paragraph{Substructural type-systems in functional languages}
 
 Many systems have attempted to combine
 functional programming and linear types in a practical setting.
@@ -77,8 +77,8 @@ to subkinding.
 %
 Finally, Alms provides excellent support for abstraction through
 modules by allowing to keep some type unrestricted inside a module, but
-exposing it as affine. We support a similar programming style, which
-we showcase in \cref{motivation}.
+exposing it as affine. \lang supports
+such programming style thanks to subsumption.
 
 The goal of Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
 (LH) is to retrofit linear types to Haskell.
@@ -88,8 +88,8 @@ which are functions that \emph{use} their argument exactly once.
 % By contrast, in \lang linearity is only decided
 % by the kinds, and $\tarr{\klin}$ simply denotes \emph{single-use functions}.
 This design is easy to retrofit on top of an existing compiler
-such as GHC, but there are quite controversial discussions about it\footnote{
-  See the in-depth discussion attached to the GHC proposal starting here: \url{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}}.
+such as GHC, but has proven quite controversial\footnote{
+  See the in-depth discussion attached to the GHC proposal starting  \href{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}{here}.}.
 Most relevant to \lang:
 \begin{itemize}[leftmargin=*]
 \item LH does not admit subtyping for arrows and requires
@@ -139,7 +139,7 @@ the existence of a linear type system and develops the associated compilation
 and runtime infrastructure. We believe our approach is
 complementary and aim to combine them in the future.
 
-\subsection{Other substructural type-systems}
+\paragraph{Other substructural type-systems}
 
 % Linear and affine disciplines have  been used in non-functional
 % settings, notably in the context of low-level imperative programming
@@ -177,7 +177,7 @@ It  would be interesting to extend \lang with limited
 forms of typestate as a local, opt-in feature to provide
 more expressivity at the cost of inference.
 
-\subsection{Type-system features}
+\paragraph{Type-system features}
 %
 \lang relies on constrained types
 to introduce the kind inequalities required for linear types.
@@ -190,8 +190,8 @@ GADTs~\citep{DBLP:journals/toplas/SimonetP07},
 and there exists a syntactic soundness proof~\citep{DBLP:journals/entcs/SkalkaP02}.
 These results make us confident that the system developed in \lang
 could be applied to larger and more complex languages such as OCaml.
-Alternatively, we could have based \lang on qualified
-types~\cite{DBLP:journals/scp/Jones94}, similarly to Quill.
+% Alternatively, we could have based \lang on qualified
+% types~\cite{DBLP:journals/scp/Jones94}, similarly to Quill.
 % This
 % choice would also be sustainable as qualified types is part of the
 % foundation of Haskell's type system.
@@ -202,14 +202,14 @@ is at the leaves.
 Such discipline is known to be friendly to inference and has been used in many
 contexts, including OCaml, and has been combined
 with constraints~\citep{DBLP:journals/tapos/OderskySW99,DBLP:conf/sas/TrifonovS96}.
-In particular, Flowcaml~\citep{DBLP:conf/popl/PottierS02}
-extends OCaml with security levels forming a lattice and supports type inference.
-In \lang, we repurpose these ideas to check for linearity and affinity.
-\citet{DBLP:conf/aplas/Simonet03} also presents various algorithmic
-notions to solve lattice-based constraints, which we partially use
-in our constraint solving algorithm. Our main contribution
-is the design of a kind language specialized for checking linearity
-and sufficiently simple to make
+% In particular, Flowcaml~\citep{DBLP:conf/popl/PottierS02}
+% extends OCaml with security levels forming a lattice and supports type inference.
+% In \lang, we repurpose these ideas to check for linearity and affinity.
+It also admits classical simplification rules
+\citep{DBLP:conf/aplas/Simonet03,DBLP:conf/popl/PottierS02} which we partially use
+in our constraint solving algorithm.
+\affe's novelty is a kind language
+sufficiently simple to make
 all simplification rules complete, which allows us to keep type signatures simple.
 
 
