@@ -1,7 +1,7 @@
 \section{Metatheory}
 \label{sec:metatheory}
 
-\lstMakeShortInline[style=rule]@
+\lstMakeShortInline[keepspaces,style=rule]@
 
 There are several connections between the type system and
 the operational semantics, which we state as a single type soundness
@@ -79,7 +79,7 @@ times $x$ occurs in multiset $M$.
   % input, inputenv, output
   Affine borrows and resources:\\
   For all $\Addr \in  \Reach{\Store#3}{\MutableBorrows{\VEnv#2}, \Suspended[\kaff]{\VEnv#2}}$
-  with $\Rawloc\Addr = \{\Loc\}$, it must be that 
+  with $\Rawloc\Addr = \{\Loc\}$, it must be that
   $\Loc\in\Dom{\Store#1}$. If $\Addr\ne\Loc$, then
   $\Store#3 (\Loc) \ne \StFreed$.
   If $\Addr \in \Reach{\Store#3}{\Suspended[\kaff]{\VEnv#2}}$, then
