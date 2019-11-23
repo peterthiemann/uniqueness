@@ -16,7 +16,8 @@ For ease of presentation, we simplify the language.
 \end{itemize}
 
 The rest of this section formalizes  \lang: the syntax (\cref{syntax}),
-the statics in terms of syntax-directed typing (\cref{sdtyping}),
+the statics in terms of a region annotation pass (\cref{regionannot}) and
+syntax-directed typing (\cref{sdtyping}),
 and a dynamics that is linearity- and resource-aware (\cref{sec:sem}).
 
 \subsection{Syntax}
@@ -24,7 +25,7 @@ and a dynamics that is linearity- and resource-aware (\cref{sec:sem}).
 
 \begin{figure}[!tb]
   \input{grammar}
-  \vspace{-5pt}
+  \vspace{-7pt}
   \caption{Syntax}
   \label{grammar}
   \vspace{-10pt}
@@ -209,12 +210,12 @@ these properties.
 \subsection{Typing}
 \label{sdtyping}
 
-In this section, we focus on the essential and novel parts of the type system. A complete
+We now focus on the essential and novel parts of the type system. A complete
 description is available in \cref{appendix:sdtyping}.
 % In this section, we focus on chosen parts of our system
 % through a set of selected rules.
 %
-We discuss judgments for typing, kinding, and constraint entailment:
+We discuss the following judgments:
 \begin{description}
 \item[$\inferS{C}{\E}{e}{\tau}$ --]
   Expression $e$ has type $\tau$ in environment $\E$ under constraints $C$.
@@ -252,7 +253,7 @@ kind variables or relate two kind variables.
 
 \begin{figure}[tp]
   \input{infer/lattice}
-  \vspace{-5pt}
+  \vspace{-10pt}
   \caption{Lattice ordering -- $k \lk_\Lat k'$}
   \label{sdtyp:lattice}
   \vspace{-10pt}
@@ -362,7 +363,7 @@ This intuitive explanation is sufficient to understand
 the {\sc Abs} and {\sc Var} rules shown in
 \cref{selectrules:binders}.
 
-The {\sc Var} rule looks up the type scheme of the variable $x$ in
+Rule {\sc Var} looks up the type scheme of the variable $x$ in
 the environment $\E$
 and instantiates it using the substitution $\unif$. The rule also
 checks that the other bindings in $\E$ can be safely discarded by
@@ -370,11 +371,11 @@ imposing the constraint $\Cleq{\E\Sdel{x}}{\kaff_\infty}$.
 It enforces that all remaining bindings (except $x$) are affine or
 unrestricted and can therefore be discarded.
 
-The {\sc Abs} rule ensures that the kind annotation on the arrow type
-($\tau_2 \tarr{k} \tau_1$) reflects the restrictions on the captured variables.
-To do so, the rule imposes the constraint $\Cleq\E k$.
+Rule {\sc Abs} ensures the kind annotation on the arrow type
+($\tau_2 \tarr{k} \tau_1$) reflects the restrictions on captured variables
+via the constraint $\Cleq\E k$.
 If, for instance, any binding in $\E$ is affine, it gives rise to the
-constraint $\Cleq{\kaff_n}{k}$, so that  the arrow kind is at least
+constraint $\Cleq{\kaff_n}{k}$ and the arrow kind is at least
 affine at nesting level $n$.
 Capturing a borrow is perfectly fine: the kind of the borrow is also a
 lower bound of the arrow kind $k$ which restricts the closure
@@ -427,31 +428,6 @@ The \emph{region} around its use ensures that the borrow in the left argument
 does not
 escape, which brings us to the next topic.
 
-
-% \paragraph{Pattern matching}
-% \label{sdtyping:matching}
-
-% Elimination of pairs is done using a matching construct
-% $(\matchin{x,x'}{e_1}{e_2})$ whose
-% typing rule is shown in \cref{selectrules:matching}.
-% This construction can eliminate both normal pairs, but also borrows
-% of pairs.
-% A syntactic marker $\etransfm$ indicates if it applies to
-% a pair ($\etransfm = \operatorname{id}$) or a borrow ($\etransfm = \&^\BORROW$).
-% If $\etransfm = \operatorname{id}$, the typing simplifies to
-% a regular destruct on pairs.
-% Otherwise, $e_1$ is expected to be of type
-% $\borrowty{k}{\tyPair{\tau_1}{\tau'_1}}$
-% while $x$ and $x'$ are of type respectively
-% $\borrowty{k}{\tau_1}$ and $\borrowty{k}{\tau'_1}$.
-
-% Matching is voluntarily simple here and
-% could be improved using a richer pattern language
-% to access inner components and a typeclass mechanisms
-% to avoid the need for explicit markers for borrow matches.
-% Both extensions are compatible with our system and have been partially
-% implemented in our prototype type-checker.
-
 \paragraph{Regions}
 \label{sdtyping:regions}
 
@@ -496,14 +472,14 @@ ancestor's lifetime. \lang ensures proper nesting of lifetimes by using
 regions. The expression $\region{\Sone x\BORROW}{e}$ indicates a
 region at nesting level $n$ in which a $\BORROW$-borrow can be taken of $x$.
 
-The typing for a region (see the {\sc Region} rule in \cref{selectrules:region})
+The typing for a region (rule {\sc Region} in \cref{selectrules:region})
 replaces suspended bindings by borrow bindings
-(\cref{env:rule:borrow}), typechecks the body
-of the region, and finally ensures that the borrow does not leak outside.
+(rule {\sc BorrowBinding}), typechecks the body
+of the region, and ensures that the borrow does not leak outside.
 This last check is done with indices that correspond to the nesting
 level of the region. The kind $k$ of the borrow is indexed with the level $n$
 corresponding to its region, thanks to the constraint $(\BORROW_n\lk
-k)$, and the constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures that
+k)$. The constraint $\Cleq{\tau}{\klin_{n-1}}$ ensures that
 the return type of the region must live at some enclosing, lower level.
 
 As an example, consider the expression $\region{\Sone x\IBORROW}{f(\borrow[\IBORROW]{c})}$
@@ -527,7 +503,7 @@ levels $n$ and higher.
 % (for instance, $\borrowty[\IBORROW]{\kun_n}{\text{c}}$ has kind
 % $\kun_n$ and thus cannot be returned).
 %
-The \TirName{Region} rule also imposes the constraint
+Rule {\sc Region} also imposes the constraint
 $\Cleq{\tau}{\klin_{n-1}}$, which prevents the borrow, having kind $k$ of level
 $\geq n$, from escaping the region's body of type $\tau$.
 
@@ -545,39 +521,62 @@ $\geq n$, from escaping the region's body of type $\tau$.
 
 % \TODO{Present this if we have enough space}
 
+
+\paragraph{Pattern matching}
+\label{sdtyping:matching}
+
+Elimination of pairs is done using a matching construct
+$(\matchin{x,x'}{e_1}{e_2})$.
+This construct is mostly standard, except it can operate both
+on normal pairs and borrows of pairs.
+The intuition is as follow:
+A syntactic marker $\etransfm$ indicates if it applies to
+a pair ($\etransfm = \operatorname{id}$) or a borrow ($\etransfm = \&^\BORROW$).
+If $\etransfm = \operatorname{id}$, the typing simplifies to
+a regular destruct on pairs.
+Otherwise, $e_1$ is expected to be of type
+$\borrowty{k}{\tyPair{\tau_1}{\tau'_1}}$
+while $x$ and $x'$ are of type respectively
+$\borrowty{k}{\tau_1}$ and $\borrowty{k}{\tau'_1}$.
+
+% Matching is voluntarily simple here and
+% could be improved using a richer pattern language
+% to access inner components and a typeclass mechanisms
+% to avoid the need for explicit markers for borrow matches.
+% Both extensions are compatible with our system and have been partially
+% implemented in our prototype type-checker.
+
+
 \paragraph{Resource management}
 
 As a model of resource, we consider a simple abstract
 type $\tapp{\tres}{\tau}$ whose content of type $\tau$ must be $\kun_0$ and
-equipped with four operations:
-\begin{itemize}
+equipped with the four class of operations describe in \cref{motivation}:
+\begin{itemize}[topsep=0pt]
 \item
 $\create$:
 $\forall{\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
 \qual{\Cleq {\kvar_\tvar} {\kun_0}}
-{\tvar \tarr{} \tapp\tres\tvar}$\\
-Creates a new resource.
-
+{\tvar \tarr{} \tapp\tres\tvar}$
+% Creates a new resource.
 \item
 $\observe$:
 $\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
 \qual{\Cleq {\kvar_\tvar} {\kun_0}}
-{\borrowty[\IBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar}$\\
-Reads from a shared borrow of a resource.
-
+{\borrowty[\IBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar}$
+% Reads from a shared borrow of a resource.
 \item
 $\update$:
 $\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
 \qual{\Cleq {\kvar_\tvar} {\kun_0}}
-\borrowty[\MBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar \tarr{\kaff} \tunit$\\
-Writes to an exclusive borrow of a resource.
-
+\borrowty[\MBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar \tarr{\kaff} \tunit$
+% Writes to an exclusive borrow of a resource.
 \item
 $\destroy$:
-$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
+$\forall{\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
 \qual{\Cleq {\kvar_\tvar} {\kun_0}}
-\tapp\tres\tvar \tarr{} \tunit$\\
-Destroys a resource.
+\tapp\tres\tvar \tarr{} \tunit$
+% Destroys a resource.
 \end{itemize}
 
 % \clearpage
