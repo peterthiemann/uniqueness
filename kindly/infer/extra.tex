@@ -1,6 +1,20 @@
 \section{Type Inference}
 \label{appendix:infer}
 
+\begin{figure*}[tbp]
+  \centering
+  \input{infer/kinds}
+  \caption{Kind inference rules -- $\inferK{(C,\unif)}{{\inP\E}}{{\inP\tau}}{k}$}
+  \label{rules:kinding}
+% \end{figure*}
+
+% \begin{figure*}[!tbp]
+  \input{infer/typing}
+  \caption{Type inference rules --
+    $\inferW{\Sigma}{(C,\psi)}{{\inP\E}}{{\inP e}}{\tau}$ }
+  \label{rules:typing:full}
+\end{figure*}
+
 In this appendix, we provide the complete type inference rules
 and show that our type inference algorithm is sound and complete.
 The constraints rules are already shown in \cref{inference}.
@@ -10,7 +24,6 @@ and the detailed treatment of let-bindings in
 The type inference rules are shown in \cref{rules:typing:full}.
 The various theorems and their proofs are direct adaptations
 of the equivalent statements for HM(X) \citep{sulzmann1997proofs}.
-
 
 \subsection{Kind inference}
 \label{rules:kinding:full}
@@ -32,22 +45,6 @@ arrow and borrow types.
 The $\operatorname{normalize}$ function is used every time several constraints
 must be composed in order to simplify the constraint and return a most general
 unifier.
-
-\begin{figure}[tbh]
-  \centering
-  \input{infer/kinds}
-  \caption{Kind inference rules -- $\inferK{(C,\unif)}{{\inP\E}}{{\inP\tau}}{k}$}
-  \label{rules:kinding}
-\end{figure}
-
-\begin{figure*}[!tbp]
-  \input{infer/typing}
-  \caption{Type inference rules --
-    $\inferW{\Sigma}{(C,\psi)}{{\inP\E}}{{\inP e}}{\tau}$ }
-  \label{rules:typing:full}
-  % Hack to get full page for figure without messing up placement.
-  \vspace{2cm}
-\end{figure*}
 
 
 \subsection{Generalization and constraints}

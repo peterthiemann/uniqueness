@@ -113,12 +113,12 @@ where all the binders are replaced by normal ones. More formally:
   \begin{enumerate}[leftmargin=*,noitemsep,topsep=5pt]
   \item If $x\in\Sv_x$, then $\Weaken_{x}(\unif\Sv_x) = \Ctrue$
     and by \cref{lemma:env:flat}, $\Sv_x = \Sv;\bvar{x}{\alpha}$.
-    We can deduce that
+    We can deduce\\
     $\inferS{C'\Cand \Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x)}{\unif\Sv;\E_\tau;\bvar{x}{\unif(\tvar)}}{e}{\tau}$.
   \item If $x\notin\Sv_x$, then $\Sv = \Sv_x$ and
     $\Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x) = \Cleq{\unif\tvar}{\kaff_\infty}$.
     By \cref{lemma:typ:weakening},
-    we have that
+    we have\\
     $\inferS{C'\Cand \Weaken_{\bvar{x}{\tvar}}(\unif\Sv_x)}{\unif\Sv;\E_\tau;\bvar{x}{\unif(\tvar)}}{e}{\tau}$
   \end{enumerate}
   % By \cref{lemma:env:flat}, we know that if $x\in\Sv_x$, then
@@ -353,12 +353,14 @@ Finally, we present the completeness theorem.
   \begin{align*}
     \inferW{\Sv_x}{(C,\unif)}{\Eflat\E_x;\bvar{x}{\tvar}&}{e}{\tau}
     &\unif &\leq^{\phi}_{\fv{\E_x}\cup\{\tvar;\kvar\}} \unif'
-    &\entail{C'&}{\phi C}
-    &\entail{&}{\phi \schm \preceq \schm'}
   \end{align*}
   \begin{align*}
-    \Sv_x&\subset\E_x;\bvar{x}{\tvar}
-    &\schm' &= \generalize{C'}{\E_x';\bvar{x}{\tau'_2}}{\tau'_1}
+    \entail{C'&}{\phi C}
+    &\entail{&}{\phi \schm \preceq \schm'}
+    &\Sv_x&\subset\E_x;\bvar{x}{\tvar}
+  \end{align*}
+  \begin{align*}
+    \schm' &= \generalize{C'}{\E_x';\bvar{x}{\tau'_2}}{\tau'_1}
     &\schm &= \generalize{C}{\E_x;\bvar{x}{\tvar}}{\tau_1}
   \end{align*}
 
@@ -399,7 +401,8 @@ Finally, we present the completeness theorem.
     }
     { \inferS{C'}
       {\E'}{\app{e_1}{e_2}}{\tyPair{\tau'_1}{\tau'_2}} }
-    $ and $\entail{}{\unif'\E \preceq \E'}$}
+    $\\
+    and $\entail{}{\unif'\E \preceq \E'}$}
 
   The only new elements compared to HM(X) is
   the environment splitting.
