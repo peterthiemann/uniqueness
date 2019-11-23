@@ -308,7 +308,7 @@
   \inferrule[Let]
   { \inferS{C \Cand D}{\E_1}{e_1}{\tau_1} \\
     (C_\schm,\schm) = \generalize{D}{\E}{\tau_1}\\
-    \entail{C}{C_\schm} \\
+    \entail{C}{C_\schm} \\\\
     \inferS{C}{\E;\bvar{x}{\schm}}{e_2}{\tau_2} \\
     \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
   }

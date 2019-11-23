@@ -1,7 +1,7 @@
 \section{Automatic region annotation}
 \label{appendix:regionannot}
 
-In this section, we define our automatic region annotation
+We now define our automatic region annotation
 which is presented in \cref{regionannot}.
 First, we extend the region annotation to $\region{S}{E}$ where $S$ is
 a map from variables to borrow indicator $b$. This annotation, defined below, is equivalent to nested
@@ -116,7 +116,7 @@ when $\entail{C}{D}$ and $\entail{D}{C}$.
 % \citep{DBLP:journals/tapos/OderskySW99} for
 % details).
 %
-Following HM(X), we define a cylindric constraint system as
+Following \hmx, we define a cylindric constraint system as
 a system which respects the following properties for any variable $x$:
 \begin{align*}
   \entail{C&}{\Cproj{x}{C}}
@@ -271,7 +271,7 @@ rules which help reduce the size of inferred signatures even further
 \subsection{Principal constraint system}
 
 We now prove that $\CL$ supports all the properties necessary for
-principal type inference, as defined by HM(X).
+principal type inference, as defined by \hmx.
 We first prove that constraint solving
 does compute normal forms, and that such normal forms are unique.
 
@@ -394,7 +394,7 @@ We can now prove all the necessary high level properties.
 \end{proof}
 
 Finally, we can conclude with all the properties we need for
-HM(X):
+\hmx:
 
 \begin{theorem}[Principal constraints]
   $\CL$ has the principal constraint property,\\
@@ -404,9 +404,9 @@ HM(X):
 
 
 This is sufficient to show that $HM(\CL)$ is principal. However,
-we do not use HM(X) directly but an extended version with kind inference,
+we do not use \hmx directly but an extended version with kind inference,
 linear and affine types, and borrow.
-We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
+We extend the proofs of \hmx to such a system in \cref{appendix:infer}.
 
 
 \section{Syntax-directed typing}
@@ -428,20 +428,20 @@ We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
     binders $\bsplit Cb{\inP{b_r}}{\inP{b_l}}$}
   \label{fig:sd-splitting}
 \end{figure}
-\begin{figure*}[!tbp]
+\begin{figure}[!tbp]
   \input{sdtyping/sd-borrowing}
   \caption{Borrowing ---
     environments $\lregion[n]{C}{x}{\E}{\E'}$;
     inference $\bregion[\inP n]{C}{\inP x}{\E}{\inP{\E'}}$;
     binders $\bregion[\inP n]{C}{\inP x}{b}{\inP{b'}}$}
   \label{fig:sd-borrowing}
-\end{figure*}
-\begin{figure*}[!tbp]
+\end{figure}
+\begin{figure*}[tbp]
   \input{sdtyping/sd-environments}
   \caption{Rewriting constraints on environments --- $\inP{\Cleq{\E}{k}}\Crewrite  C$}
   \label{fig:contraints-environments-types}
-\end{figure*}
-\begin{figure*}[!tbp]
+% \end{figure*}
+% \begin{figure*}[!tbp]
   \input{sdtyping/sd-typing}
   \caption{Syntax-directed typing rules --
     $\inferS{C}{\E}{e}{\tau}$}
@@ -453,12 +453,12 @@ We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
     $\inferS{C}{\E}{e}{\tau}$}
   \label{fig:syntax-directed-typing-internal}
 \end{figure*}
-\begin{figure*}[!btp]
-  \input{sdtyping/sd-typing-internal-a}
-  \caption{Syntax-directed typing rules for internal language in A-normal form --
-    $\inferS{C}{\E}{e}{\tau}$}
-  \label{fig:syntax-directed-typing-internal-a}
-\end{figure*}
+% \begin{figure*}[!btp]
+%   \input{sdtyping/sd-typing-internal-a}
+%   \caption{Syntax-directed typing rules for internal language in A-normal form --
+%     $\inferS{C}{\E}{e}{\tau}$}
+%   \label{fig:syntax-directed-typing-internal-a}
+% \end{figure*}
 
 \subsection{Kinding}
 
@@ -513,8 +513,8 @@ where
 $\Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}$.
 The typing rules specific to the internal language are shown in
 \cref{fig:syntax-directed-typing-internal}.
-The typing rules specific to the internal language in A-normal form are shown in
-\cref{fig:syntax-directed-typing-internal-a}.
+% The typing rules specific to the internal language in A-normal form are shown in
+% \cref{fig:syntax-directed-typing-internal-a}.
 
 %%% Local Variables:
 %%% mode: latex
