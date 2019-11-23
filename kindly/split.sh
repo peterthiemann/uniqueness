@@ -1,3 +1,2 @@
-pdfjam -o paper.pdf main.pdf '1-27'
-pdfjam -o appendix.pdf main.pdf '28-'
-
+qpdf --pages main.pdf 1-14 -- main.pdf paper.pdf
+qpdf --pages main.pdf 15-z -- main.pdf appendix.pdf
