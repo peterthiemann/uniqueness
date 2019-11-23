@@ -447,6 +447,18 @@ We extend the proofs of HM(X) to such a system in \cref{appendix:infer}.
     $\inferS{C}{\E}{e}{\tau}$}
   \label{fig:syntax-directed-typing}
 \end{figure*}
+\begin{figure*}[!btp]
+  \input{sdtyping/sd-typing-internal}
+  \caption{Syntax-directed typing rules for internal language --
+    $\inferS{C}{\E}{e}{\tau}$}
+  \label{fig:syntax-directed-typing-internal}
+\end{figure*}
+\begin{figure*}[!btp]
+  \input{sdtyping/sd-typing-internal-a}
+  \caption{Syntax-directed typing rules for internal language in A-normal form --
+    $\inferS{C}{\E}{e}{\tau}$}
+  \label{fig:syntax-directed-typing-internal-a}
+\end{figure*}
 
 \subsection{Kinding}
 
@@ -499,21 +511,10 @@ We define $\generalize{C}{\E}{\tau} =
 \forall \Multi{\kvar},\Multi{\tvar}.\qual{C}{\tau})$
 where
 $\Multi{\kvar},\Multi{\tvar} = (\fv{\tau}\cup\fv{C})\setminus\fv{\E}$.
-
-
-\begin{figure*}[hbtp]
-  \input{sdtyping/sd-typing-internal}
-  \caption{Syntax-directed typing rules for internal language --
-    $\inferS{C}{\E}{e}{\tau}$}
-  \label{fig:syntax-directed-typing-internal}
-\end{figure*}
-
-\begin{figure*}[hbtp]
-  \input{sdtyping/sd-typing-internal-a}
-  \caption{Syntax-directed typing rules for internal language in A-normal form --
-    $\inferS{C}{\E}{e}{\tau}$}
-  \label{fig:syntax-directed-typing-internal-a}
-\end{figure*}
+The typing rules specific to the internal language are shown in
+\cref{fig:syntax-directed-typing-internal}.
+The typing rules specific to the internal language in A-normal form are shown in
+\cref{fig:syntax-directed-typing-internal-a}.
 
 %%% Local Variables:
 %%% mode: latex
