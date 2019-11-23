@@ -1,12 +1,12 @@
 \section{The \lang language}
 
 \lang is a minimal ML-like language with
-let-polymorphism, abstract types, and pairs. Its type system manages
+let-polymorphism and abstract types. Its type system manages
 linearity and borrows using kinds and (kind-) constrained types.
 For ease of presentation, we simplify the language.
 \begin{itemize}
-\item Pattern matching is demonstrated on pairs rather than algebraic
-  datatypes, and is covered in \cref{appendix:pairs}.
+% \item Pattern matching is demonstrated on pairs rather than algebraic
+%   datatypes, and is covered in \cref{appendix:pairs}.
 \item There are separate operators for borrowing and reborrowing (taking
   the borrow of a borrow).
 \item Regions are explicit in the code and must be annotated using the
@@ -393,7 +393,7 @@ The {\sc App} typing rule in \cref{sdtyp:app} demonstrates how \lang
 deals with duplication and dropping of values.
 The splitting $\lsplit{C}{\E}{\E_1}{\E_2}$ in the rule decomposes the
 type environment $\E$ in two parts, $\E_1$ and $\E_2$, which are used
-to typecheck the components of the pair.
+to typecheck the components of the application.
 % The constraint $C$ characterizes a valid  splitting.
 
 \cref{sdtyp:split} shows the action of splitting rules on single
@@ -632,8 +632,10 @@ A storable $w$ describes the content of a location in the store. There are five
 kinds of storables. A \emph{poly closure} represents a polymorphic
 function. It consists of an environment and the components of an
 elaborated abstraction. A \emph{closure} represents a monomorphic
-function in the usual way. A \emph{pair}
-consists of a kind and two results. A \emph{resource} contains
+function in the usual way.
+% A \emph{pair}
+% consists of a kind and two results.
+A \emph{resource} contains
 a result and the \emph{hole} $\StFreed$ fills a released location.
 
 A store $\Store$ is a partial map from raw locations to
