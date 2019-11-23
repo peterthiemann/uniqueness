@@ -43,30 +43,11 @@
   \end{mathpar}
 \item Relating storables to types $ \SE \vdash w : \tau$
   \begin{mathpar}
-    \inferrule{
-      (\exists \E, C)~ \SE \vdash \VEnv : \E
-      \\
-      \Disjoint\E
-      \\
-      \inferS{C}{\E;\bvar x{\tau_2}}{e}{\tau_1}
-      \\
-      \addlin{\entail{C}{\Cleq{\E}{k}}}
-    }{
-      \SE \vdash (\VEnv, \lam[k]xe) : \tau_2\tarr{k}\tau_1
-    }
+    \ruleStorableClosure
+    
+    \ruleStorablePair
 
-    \inferrule{
-      \SE \vdash r_1 : \tau_1 \\
-      \SE \vdash r_2 : \tau_2
-    }{
-      \SE \vdash \introPair[k]{r_1}{r_2} : \tyPair[k]{\tau_1}{\tau_2}
-    }
-
-    \inferrule{
-      \SE \vdash r : \IType{\tcon}{\Multi\tau}
-    }{
-      \SE \vdash {[r]} : \tapp{\tcon}{\Multi\tau}
-    }
+    \ruleStorableResource
 
     \ruleStorableFreed
   \end{mathpar}
@@ -276,8 +257,9 @@ $\MultiNumber\Loc\REACH = \infty$.
 \end{definition}
 
 \begin{lemma}[Containment]\label{lemma:containment}
-  Suppose that $\SE \vdash r : \tau$ and $\entail C
-  {\Cleq{\tau}{\klin_{m-1}}}$.
+  Suppose that $\vdash \Store : \SE$,
+  $\SE \vdash r : \tau$, $\entail C
+  {\Cleq{\tau}{k} \Cand \Cleq{k}{\klin_{m-1}}}$.
   Then $\Reach\Store r$ cannot contain addresses $\Addr$ such that
   $\Addr = \BORROW_n\Addr'$ with $n\ge m$.
 \end{lemma}
@@ -294,7 +276,23 @@ $\MultiNumber\Loc\REACH = \infty$.
   dereferencing $\Loc$ and inverting store typing.
 
   \textbf{Case }$\ruleStorableFreed$. Trivial.
-  
+
+  \textbf{Case }$\ruleStorableResource$. We assume the implementation
+  type of a result to be unrestricted.
+
+  \textbf{Case }$\ruleStorablePair$.
+
+  The typing constraint yields that $k \le \klin_{m-1}$.
+  By induction and transitivity of $\le$, we find that
+  $\Reach\Store{r_1}$ and $\Reach\Store{r_2}$ cannot contain offending addresses.
+
+  \textbf{Case }$\ruleStorableClosure$.
+
+  The typing constraint yields that $k\le\klin_{m-1}$.
+  By transitivity of $\le$ and $\SE \vdash \VEnv:\E$, we find that the
+  types of all addresses in 
+  $\VEnv$ have types bounded by $\klin_{m-1}$ and, by induction, they
+  cannot contain offending addresses.
 \end{proof}
 \clearpage{}
 \lstMakeShortInline[keepspaces,style=rule]@

@@ -666,9 +666,41 @@
 }
 
 \newcommand\ruleStorableFreed{%
-    \inferrule{}{
-      \SE \vdash \StFreed : \tau
-    }
+  \inferrule{}{
+    \SE \vdash \StFreed : \tau
+  }
+}
+
+\newcommand\ruleStorableResource{%
+  \inferrule{
+    \SE \vdash r : \IType{\tcon}{\Multi\tau}
+  }{
+    \SE \vdash {[r]} : \tapp{\tcon}{\Multi\tau}
+  }
+}
+
+\newcommand\ruleStorablePair{%
+  \inferrule{
+    \SE \vdash r_1 : \tau_1 \\
+    \SE \vdash r_2 : \tau_2 \\
+    \entail\Cempty\Cleq{\tau_1}{k} \Cand \Cleq{\tau_1}{k}
+  }{
+    \SE \vdash \introPair[k]{r_1}{r_2} : \tyPair[k]{\tau_1}{\tau_2}
+  }
+}
+
+\newcommand\ruleStorableClosure{%
+  \inferrule{
+    (\exists \E, C)~ \SE \vdash \VEnv : \E
+    \\
+    \Disjoint\E
+    \\
+    \inferS{C}{\E;\bvar x{\tau_2}}{e}{\tau_1}
+    \\
+    \addlin{\entail{C}{\Cleq{\E}{k}}}
+  }{
+    \SE \vdash (\VEnv, \lam[k]xe) : \tau_2\tarr{k}\tau_1
+  }
 }
 
 %%% Local Variables:
