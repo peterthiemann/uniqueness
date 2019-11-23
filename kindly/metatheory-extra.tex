@@ -326,15 +326,17 @@ Outgoing permissions are either inherited from the caller or they
 refer to newly created values.
 
 
+
 \newpage
 \begin{proof}
-    By induction on the evaluation of
+  By induction on the evaluation of
   @eval \Store \Perm \VEnv i e@.
 
   The base case is trivial as
   @eval \Store \Perm \VEnv 0 e = \TimeOut@.
 
-  For $i>0$ consider the different cases for expressions.
+  For $i>0$ consider the different cases for expressions. For lack of
+  spacetime, we only give details on some important cases.
 
   \textbf{Case $e$ of}
   \lstsemrule{slet}
@@ -636,7 +638,46 @@ refer to newly created values.
     Immediate
   \end{enumerate}
 
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \newpage{}
+  \textbf{Case $e$ of}
+  \lstsemrule{screateanf}
 
+  We need to invert the corresponding rule
+  \begin{mathpar}
+    \ruleSDCreate
+  \end{mathpar}
+
+  It is sufficient to show that there is some $\SE_1 = \SE(\ell_1 :
+  \tapp\tres\tau)$ such that  
+  $\Store_1$, $\Perm_1$, and $r_1 = \ell_1$ fulfill the following requirements.
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{_1}
+  \item \resultEnv{}{_1} \\
+    For the last item, we need to show that $\SE (\ell_1) :
+    \tapp\tres\tau$, but this follows from the setting of $w$ to a
+    resource storable in the semantics.
+  \item $\SE_1 \vdash r_1 : \tapp\tres\tau$ \\
+    Immediate from the discussion of the preceding case
+  \item \resultPermDom{}{_1} \\
+    Follows from the assumption on $\Perm$ and for $\ell_1$ from the
+    allocation of the resource.
+  \item \resultReachPerm{}{_1} \\
+    Immediate from the assignment to $\Perm_1$.
+  \item \resultFrame{}{}{_1} 
+    Obvious as no existing location is changed.
+  \item \resultImmutables{}{}{_1} \\
+    Obvious as no existing location has changed and no permission is withdrawn.
+  \item \resultMutables{}{}{_1} \\
+    Obvious as no existing location has changed and no permission is
+    withdrawn.
+    % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{_1} \\
+    By the constraint on $\E$ in the \TirName{Create} rule, $\Active\VEnv = \emptyset$.
+  \item \resultThinAir{}{_1} \\
+    Immediate
+  \end{enumerate}
+  
 \end{proof}
 
 %%% Local Variables:

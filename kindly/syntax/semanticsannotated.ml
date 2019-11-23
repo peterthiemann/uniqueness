@@ -48,7 +48,7 @@ type exp = Const of int
          | Matchborrow of ident * ident * exp * exp * splitting
          | Region of exp * int * ident * borrow
          | Borrow of borrow * ident
-         | Create of exp
+         | Create (* of exp *)
          | Destroy of exp
          | Observe of exp
          | Update of exp * exp * splitting
@@ -393,12 +393,19 @@ let rec eval
     let*? () = rho' <|= pi in
     Ok (delta, pi, RADDR rho')
   (* rule screate *)
-  | Create (e_1) ->
-    let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
-    let w = STRSRC (r_1) in
-    let (ell', delta') = salloc delta w in
-    let pi_1' = pi <+> !$ ell' in
-    Ok (delta_1, pi_1', RADDR !$ ell')
+  | Create ->
+    let w = STRSRC (RCONST 0) in
+    let (ell_1, delta_1) = salloc delta w in
+    let pi_1 = pi <+> !$ ell_1 in
+    Ok (delta_1, pi_1, RADDR !$ ell_1)
+  (**)
+  (* rule screateanf *)
+  | VCreate (x) ->
+    let* r = gamma.!(x) in
+    let w = STRSRC (r) in
+    let (ell_1, delta_1) = salloc delta w in
+    let pi_1 = pi <+> !$ ell_1 in
+    Ok (delta_1, pi_1, RADDR !$ ell_1)
   (**)
   (* rule sdestroy *)
   | Destroy (e_1) ->

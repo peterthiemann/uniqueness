@@ -278,29 +278,28 @@
 \newcommand\ruleSDCreate{
   \inferrule[Create]
   { \inferSK{C}{\E}{\tau}{k} \\
-    \entail C {\Cleq k {\kun_0}} }
+    \entail C {\Cleq k {\kun_0} \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} }
   { \inferS{C}{\E}{\create}{\tau \tarr{} \tapp\tres\tau } }
 }
 \newcommand\ruleSDObserve{
   \inferrule[Observe]
   { \inferSK{C}{\E}{\tau}{k} \\
-    \entail C {\Cleq k {\kun_0}} \\
-    \kvar \text{ fresh}
+    \entail C {\Cleq k {\kun_0}  \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} \\
   }
-  { \inferS{C}{\E}{\observe}{\borrowty[\IBORROW]{\kvar}{\tapp\tres\tau} \tarr{} \tau} }
+  { \inferS{C}{\E}{\observe}{\borrowty[\IBORROW]{k'}{\tapp\tres\tau} \tarr{} \tau} }
 }
 \newcommand\ruleSDUpdate{
   \inferrule[Update]
   { \inferSK{C}{\E}{\tau}{k} \\
-    \entail C {\Cleq k {\kun_0}} \\
-    \kvar \text{ fresh}
+    \entail C {\Cleq k {\kun_0}  \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} \\
   }
-  { \inferS{C}{\E}{\update}{\borrowty[\MBORROW]{\kvar}{\tapp\tres\tau} \tarr{} \tau \tarr{\kaff} \tunit } }
+  { \inferS{C}{\E}{\update}{\borrowty[\MBORROW]{k'}{\tapp\tres\tau} \tarr{} \tau \tarr{\kaff} \tunit } }
 }
 \newcommand\ruleSDDestroy{
   \inferrule[Destroy]
   { \inferSK{C}{\E}{\tau}{k} \\
-    \entail C {\Cleq k {\kun_0}} }
+    \entail C {\Cleq k {\kun_0}  \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} \\
+  }
   { \inferS{C}{\E}{\destroy}{\tapp\tres\tau \tarr{} \tunit} }
 }
 
