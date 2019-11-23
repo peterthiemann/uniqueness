@@ -57,10 +57,10 @@ by a nesting level $n \in \Nat \cup \{\infty\}$.
 A type $\tau$ is either a type variable, a function type indexed by a
 kind,
 a type application $\tapp{\tcon}{\Multi{\tau}}$ of an abstract type constructor
-$\T t$, or a borrowed type  $\borrowty{k}{\tau}$.
+$\T T$, or a borrowed type  $\borrowty{k}{\tau}$.
 
 Type schemes $\schm$ add quantification over kind
-variables $\kappa$, kinded type variables $\alpha:k$, and constraints
+variables $\kappa$, kinded type variables $(\alpha:k)$, and constraints
 $C$ to a type, where a constraint is a list of inequalities over
 kinds.
 
@@ -158,7 +158,7 @@ on the following program:
 }
 \]
 %
-$a$ only has one borrow, its region covers its whole lexical scope.
+Since $a$ only has one borrow, its region covers its whole lexical scope.
 $x$ has multiple conflicting borrows and requires more consideration.
 We place a first
 region around the exclusive borrow and its function application,

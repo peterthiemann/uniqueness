@@ -80,7 +80,7 @@ where all the binders are replaced by normal ones. More formally:
   then $\inferS{C}{\unif(\Sv;\E_\tau)}{e}{\tau}$, $\unif C = C$ and $\unif \tau = \tau$
 \begin{proof}
   We proceed by induction over the derivation of $\vdash_w$.
-  Most of the cases follow the proofs from HM(X) closely.
+  Most of the cases follow the proofs from \hmx closely.
   For brevity, we showcase three rules: the treatment of binders
   and weakening, where our inference algorithm differ significantly
   from the syntax-directed rule, and the $Pair$ case
@@ -323,7 +323,7 @@ Finally, we present the completeness theorem.
   instanciation and generalization for type-schemes.
   This part is already proven
   by \citet{sulzmann1997proofs} in the context
-  of HM(X). As before, we will only present few cases
+  of \hmx. As before, we will only present few cases
   which highlights the handling of bindings and environments.
   For clarity, we will only present the part of the proof that
   only directly relate to the new aspect introduced by \lang.
@@ -387,7 +387,7 @@ Finally, we present the completeness theorem.
   By application of {\sc Abs$_I$}, we have
   $\inferW{\Sv_x\Sdel{x}}{(C,\unif_D\Sdel{\tvar,\kvar})}{\Eflat\E_x}
   {\lam{x}{e}}{\unif_D(\tvar)\tarr{\unif_D(\kvar)}\tau_1}$.\\
-  The rest of the proof proceeds as in the original HM(X) proof.
+  The rest of the proof proceeds as in the original \hmx proof.
   \\
 
   % $\ruleIAbs$
@@ -404,7 +404,7 @@ Finally, we present the completeness theorem.
     $\\
     and $\entail{}{\unif'\E \preceq \E'}$}
 
-  The only new elements compared to HM(X) is
+  The only new elements compared to \hmx is
   the environment splitting.
   By induction:
   \begin{align*}
@@ -445,7 +445,7 @@ Finally, we present the completeness theorem.
   $\entail{}{\unif'_i\E_i \preceq \E'_i}$ and $\Sv_i\subset\E_i$.
   By \cref{split:gen},
   we have $\entail{C}{\unif' C_s}$.
-  The rest of the proof follows HM(X).
+  The rest of the proof follows \hmx.
 
 \end{proof}
 

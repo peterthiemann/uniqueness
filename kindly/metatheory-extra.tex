@@ -2,6 +2,12 @@
 \label{sec:metatheory:proofs}
 
 \begin{itemize}
+\item
+  For simplicity, we only consider terms in A-normal forms following the grammar:
+  \begin{align*}
+    e ::=~& \ldots \mid \aiapp{x}{x'} \mid \aipair{k}{x}{x'} \mid \aimatchin\etransfm{x,y}{z}{e}
+  \end{align*}
+  Typing and semantics rules are unchanged.
 \item Borrow qualifiers  $\BQ ::= \IBORROW_n \mid \MBORROW_n$ where
   $n\ge0$ is a region level. A vector of borrow qualifiers $\Multi\BQ$
   is wellformed if all $\IBORROW$s come before all $\MBORROW$s in the vector. 

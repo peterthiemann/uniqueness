@@ -4,21 +4,21 @@
   }{
     \bregion{C_r}{x}{\E;\svar{x}{\tau}^n}{\E; b}
   }
-  
-  \inferrule[EBorrow-Binder]{
-    \BORROW\in\left\{\kun,\kaff\right\}\\\\
-    C = (\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)
-  }{
-    \bregion{C}{}
-    {\svar[\BORROW]{x}{\tau}^n}
-    {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau}}}
-  }
 
   \inferrule[EBorrow-Check]{
     \entail{C}{D}\\\\
     \bregion{D}{x}{\E;\svar{x}{\tau}^n}{\E; b}
   }{
     \lregion{C}{x}{\E;\svar{x}{\tau}^n}{\E; b}
+  }
+  
+  \inferrule[EBorrow-Binder]{
+    \BORROW\in\left\{\kun,\kaff\right\}\\
+    C = (\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)
+  }{
+    \bregion{C}{}
+    {\svar[\BORROW]{x}{\tau}^n}
+    {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau}}}
   }
 \end{mathpar}
 %%% Local Variables:

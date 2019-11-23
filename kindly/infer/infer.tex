@@ -3,15 +3,15 @@
 
 An important contribution of \affe is its principal type inference.
 We now formulate our inference algorithm
-based on the $HM(X)$ framework~\citep{DBLP:journals/tapos/OderskySW99},
+based on the \hmx framework~\citep{DBLP:journals/tapos/OderskySW99},
 a Hindley-Milner type system for a language
 with qualified types where constraints are expressed in an arbitrary
 theory $X$.
 Most importantly,
-$HM(X)$ ensures principal type inference
+\hmx ensures principal type inference
 when $X$ respects the specified properties.
-We apply HM(X) to a concrete constraint language which we name $\CL$.
-We adapt and extend HM(X)'s existing rules to support kind inference,
+We apply \hmx to a concrete constraint language which we name $\CL$.
+We adapt and extend \hmx's existing rules to support kind inference,
 track linearity and handle borrows and regions. Finally, we
 formulate an appropriate constraint solving algorithm for $\CL$
 which solves and simplifies constraints in a principled way.
@@ -71,7 +71,7 @@ All relations are fully described in \cref{typ:extra:envs}.
 
 \paragraph{Constraint normalization}
 
-The HM(X) framework assumes the existence of a ``$\operatorname{normalize}$''
+The \hmx framework assumes the existence of a ``$\operatorname{normalize}$''
 function which takes a constraint $\inP{C}$, a substitution $\inP\psi$ and returns a
 simplified constraint $C'$
 and an updated substitution $\unif'$.
@@ -217,7 +217,7 @@ defined in \cref{appendix:constraints}.
 \input{infer/exampleconstr}
 
 Our algorithm respect the properties
-of HM(X), computes principal normal forms
+of \hmx, computes principal normal forms
 and simplifies constraints significantly.
 All the simplification mechanisms presented
 here, including the variance-based one, are complete.
@@ -253,17 +253,17 @@ rules which help reduce the size of inferred signatures even further
 
 % The proofs are given in \cref{appendix:constraints}. These three properties
 % are sufficient to state that $HM(\CL)$ provides principal type inference.
-% However, we use an extension of HM(X) with kind inference
+% However, we use an extension of \hmx with kind inference
 % and affine types and borrows.
-% We now show that HM(X)'s completeness and soundness theorems are still valid on
+% We now show that \hmx's completeness and soundness theorems are still valid on
 % this extended system.
 
 \subsection{Soundness and Principality}
 
 We now state that our extended inference algorithm still satisfies the soundness
-and completeness properties of HM(X).
+and completeness properties of \hmx.
 % This is achieved by extending
-% the original proofs from HM(X), which is done in \cref{appendix:infer}.
+% the original proofs from \hmx, which is done in \cref{appendix:infer}.
 %
 The first theorem states that our inference algorithm is sound
 with respect to the syntax-directed type system.
