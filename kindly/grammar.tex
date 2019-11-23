@@ -3,7 +3,7 @@
   \htag{Expressions}
   e ::=&\ c \mid x \mid \app{e}{e'} \mid \lam{x}{e} \mid \letin{x}{e}{e'}\\
   % |&\ \fix{e}\tag{Fixpoint}\\
-  % |&\ \introPair{e}{e'} \mid \matchin{x,y}{e}{e'}\tag{Pairs}\\
+  |&\ \introPair{e}{e'} \mid \matchin{x,y}{e}{e'}\tag{Pairs}\\
   |&\ \region{\Sone x\BORROW}{e} \mid \borrow{x} \mid \reborrow{x} \tag{Region \& Borrows}\\
   |&\ \create \mid \observe \mid \update \mid \destroy \tag{Resources}\\
   % |&\ \introK{K}{e}\tag{Data Constructor introduction}\\
@@ -22,7 +22,7 @@
 % \begin{align*}
   \htag{Types}
   \tau ::=&\ \tvar% \tag{Type variables}\\
-  % \mid \tyPair{\tau}{\tau'}% \tag{Pair types}\\
+  \mid \tyPair{\tau}{\tau'}% \tag{Pair types}\\
   \mid \tapp{\tcon}{\Multi\tau}% \tag{Type constructors}\\
   \tag{ML types}\\
   |&\ \tau\tarr{k}\tau'\tag{Function types}\\

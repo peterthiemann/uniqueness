@@ -42,8 +42,8 @@ then we need to use the reborrow expression $\reborrow{x}$.
 %
 A region $\region{\Sone x\BORROW}{e}$ is annotated with its nesting $n$, the variable $x$ that may be borrowed in $e$, and the kind of borrow $\BORROW$.
 %
-% A match is indexed with a \emph{match specification} $\etransfm$ that indicates
-% whether the match should work on borrows ($\etransfm=\&^b$) or not ($\etransfm=id$).
+A match is indexed with a \emph{match specification} $\etransfm$ that indicates
+whether the match should work on borrows ($\etransfm=\&^b$) or not ($\etransfm=id$).
 %
 We consider four primitive operations to manipulate resources:
 $\create$, $\observe$, $\update$ and $\destroy$.
@@ -416,7 +416,7 @@ with a borrow and {\sc SuspS} with a suspended binding.
 
 Splitting applies whenever an
 expression has multiple subexpressions:  function applications,
-and let bindings. In the
+let bindings and pairs. In the
 expression
 $\letin{a}{\text{create}\ 8\ x}
 {f\ \region[{}]{\Sone a\IBORROW}{\text{length}\ \borrow[\IBORROW]{a}}\ a}$,
@@ -609,7 +609,7 @@ $\eletfun$ expressions annotated with a type scheme $\schm$ and a kind $k$ indic
 usage restriction (linear, affine, etc) relative to the variables and
 constraints of $\schm$. Their use
 gives rise to explicit instantiation of the kind and type variables.
-% Pairs come with a kind tag $k$ indicating the usage restriction.
+Pairs come with a kind tag $k$ indicating the usage restriction.
 
 Addresses $\Addr$ are composed of a raw location $\Loc$, which is just
 a pointer into a store, and a stack of modifiers that indicates the
