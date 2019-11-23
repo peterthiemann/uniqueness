@@ -2,16 +2,19 @@
 \label{sec:metatheory:proofs}
 
 \begin{itemize}
+\item Borrow qualifiers  $\BQ ::= \IBORROW_n \mid \MBORROW_n$ where
+  $n\ge0$ is a region level. A vector of borrow qualifiers $\Multi\BQ$
+  is wellformed if all $\IBORROW$s come before all $\MBORROW$s in the vector. 
 \item Borrow compatibility
-  $\Multi\IBORROW\Multi\MBORROW \Bcompatible \BORROW$,
+  $\Multi\BQ \Bcompatible \BQ$,
   \begin{mathpar}
   \inferrule{}{
-    \IBORROW\Multi\IBORROW\Multi\MBORROW \Bcompatible \IBORROW
+    \BQ_n\Multi\BQ \Bcompatible \BQ_n
   }
-
-  \inferrule{}{
-    \MBORROW\Multi\MBORROW \Bcompatible \MBORROW
-  }
+  %
+  % \inferrule{}{
+  %   \MBORROW_n\Multi\MBORROW \Bcompatible \MBORROW_n
+  % }
   \end{mathpar}
 \item Store typing $ \vdash \Store : \SE$,
   \begin{mathpar}
@@ -65,22 +68,16 @@
       \SE \vdash {[r]} : \tapp{\tcon}{\Multi\tau}
     }
 
-    \inferrule{}{
-      \SE \vdash \StFreed : \tau
-    }
+    \ruleStorableFreed
   \end{mathpar}
 %\item Relating  results to types $ \SE \vdash r : \tau$,
 \item Relating results to type schemes $\SE \vdash r : \schm$
   \begin{mathpar}
-  \inferrule{}{ \SE \vdash c : \CType{c} }
+    \ruleResultConstant
 
-  \inferrule{}{ \SE \vdash \ell : \SE (\ell) }
+    \ruleResultLocation
 
-  \inferrule{
-    \Multi\IBORROW\Multi\MBORROW \Bcompatible \BORROW \\
-    \SE \vdash \Loc  : \tau
-  }{  \SE \vdash
-    \Multi\IBORROW\Multi\MBORROW\Loc : \borrow{\tau}}
+    \ruleResultBorrow
   \end{mathpar}
 \item
 We write $\Affine\SE\Loc$ to express that $\Loc$ points to a resource
@@ -224,7 +221,7 @@ We write $\Rawloc\cdot$ for the function that extracts a multiset of
 environment.
 
 \begin{align*}
-  \Rawloc{\Multi\IBORROW\Multi\MBORROW\Loc} &= \{\Loc\} \\
+  \Rawloc{\Multi\BQ\Loc} &= \{\Loc\} \\
   \Rawloc{c} &= \{ \} \\
   \Rawloc\Eempty &= \{\} \\
   \Rawloc{\VEnv( x \mapsto r)} &= \Rawloc\VEnv \cup \Rawloc r
@@ -269,7 +266,7 @@ $\MultiNumber\Loc\REACH = \infty$.
 \begin{align*}
   \REACH &\supseteq \RS\Store\VEnv \\
   \REACH &\supseteq \RS\Store w & \text{if }
-                                     \Multi\IBORROW\Multi\MBORROW\Loc
+                                     \Multi\BQ\Loc
                                      \in \REACH \wedge w = \Store (\Loc)
 \end{align*}
 
@@ -277,6 +274,28 @@ $\MultiNumber\Loc\REACH = \infty$.
   A permission $\Perm$ is \emph{wellformed} if it contains at most one
   address for each raw location.
 \end{definition}
+
+\begin{lemma}[Containment]\label{lemma:containment}
+  Suppose that $\SE \vdash r : \tau$ and $\entail C
+  {\Cleq{\tau}{\klin_{m-1}}}$.
+  Then $\Reach\Store r$ cannot contain addresses $\Addr$ such that
+  $\Addr = \BORROW_n\Addr'$ with $n\ge m$.
+\end{lemma}
+\begin{proof}
+  By inversion of result typing there are three cases.
+
+  \textbf{Case }$\ruleResultConstant$. Immediate: reachable set
+  is empty.
+
+  \textbf{Case }$\ruleResultBorrow$. The typing constraint enforces
+  that $n < m$.
+
+  \textbf{Case }$\ruleResultLocation$. We need to continue by
+  dereferencing $\Loc$ and inverting store typing.
+
+  \textbf{Case }$\ruleStorableFreed$. Trivial.
+  
+\end{proof}
 \clearpage{}
 \lstMakeShortInline[keepspaces,style=rule]@
 
@@ -319,7 +338,7 @@ refer to newly created values.
 
   For $i>0$ consider the different cases for expressions.
 
-  \textbf{case $e$ of}
+  \textbf{Case $e$ of}
   \lstsemrule{slet}
   We need to invert rule \TirName{Let}:
   \begin{gather*}
@@ -463,7 +482,7 @@ refer to newly created values.
   \end{enumerate}
 
   \newpage{}
-  \textbf{case $e$ of}
+  \textbf{Case $e$ of}
   \lstsemrule{sappanf}
 
   We need to invert rule \TirName{App}:
@@ -531,6 +550,95 @@ refer to newly created values.
   \item \resultThinAir{'}{_3}
   \end{enumerate}
   The desired results are immediate because $\Dom\Store = \Dom{\Store'}$.
+
+  \newpage{}
+  \textbf{Case $e$ of}
+  \lstsemrule{sregion}
+
+  We need to invert rule \TirName{Region}
+  \begin{mathpar}
+    \ruleSDRegion
+  \end{mathpar}
+
+  We need to establish the assumptions for the recursive call
+  @eval \Store \Perm' \VEnv' i' e'@ where  $\VEnv' =
+  \VEnv (x\mapsto \Addr')$.
+
+  \begin{enumerate}[({A1-}1)]
+  \item $\inferS{C}{\E'}{e}{\tau}$ \\
+    immediate from premise
+  \item $\SE \vdash \VEnv' : \E'$ \\
+    the only change of the environments is at $x$; adding the borrow
+    modifier $\BORROW$ succeeds due to the second premise; the address $\Addr'$
+    stored into $x$ is compatible to its type by store typing
+  \item $\vdash \Store : \SE$ \\
+    Immediate by outer assumption
+  \item\label{item:11} \assumeWellformed{} \\
+    Immediate by outer assumption; adding the modifier does not change
+    the underlying raw location
+  \item\label{item:12} $\Reach\Store\VEnv' \subseteq \Perm$ \\
+    locations were swapped simultaneously
+  \item $\Rawloc{\Active{\VEnv'}}$,
+    $\Rawloc{\MutableBorrows{\VEnv'}}$,
+    $\Rawloc{\ImmutableBorrows{\VEnv'}}$, and
+    $\Rawloc{\Suspended{\VEnv'}}$ are all disjoint \\
+    Immediate by assumption
+  % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
+  %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
+  \item\label{item:15} \assumeIncoming{}{'}
+    Immediate by assumption.
+  \end{enumerate}
+
+  The induction hypothesis yields the following statements.
+  $\exists$ $\Store_1$, $\Perm_1$, $r_1$, $\SE_1$ such that
+  \begin{enumerate}[({R1-}1)]
+  \item \resultOk{}{_1}
+  \item \resultEnv{}{_1}
+  \item $\SE_1 \vdash r_1 : \tau$
+  \item \resultPermDom{}{_1}
+  \item \resultReachPerm{}{_1}
+  \item \resultFrame{}{'}{_1}
+  \item \resultImmutables{}{'}{_1}
+  \item \resultMutables{}{'}{_1}
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{'}{_1}
+  \item \resultThinAir{}{_1}
+  \end{enumerate}
+
+  It remains to derive the induction hypothesis in the last line. The
+  only additional action is the exchange of permissions which
+  withdraws the borrow.
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{_1}\\
+    Immediate
+  \item \resultEnv{}{_1}\\
+    Immediate
+  \item $\SE_1 \vdash r_1 : \tau$\\
+    Immediate
+  \item \resultPermDom{}{_1} \\
+    The addresses $\Addr$ and $\Addr'$ have the same raw location, so
+    exchanging them does not affect wellformedness. The underlying set
+    of locations does not change.
+  \item \resultReachPerm{}{_1} \\
+    This case is critical for region encapsulation. Here we need to
+    argue that $\Addr'$ is not reachable from $r_1$ because its type
+    $\tau$ is bounded by $\klin_{n-1}$ according to the fourth
+    premise. We conclude with Lemma~\ref{lemma:containment}.
+    %%% need lemma
+  \item \resultFrame{}{'}{_1}
+    Immediate
+  \item \resultImmutables{}{'}{_1} \\
+    Immediate
+  \item \resultMutables{}{'}{_1} \\
+    Immediate
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{'}{_1} \\
+    Immediate
+  \item \resultThinAir{}{_1} \\
+    Immediate
+  \end{enumerate}
+
+
 \end{proof}
 
 %%% Local Variables:

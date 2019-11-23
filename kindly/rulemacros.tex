@@ -649,6 +649,28 @@
   }  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{\Sone x \BORROW}{e}}{\tau} }
 }
 
+\newcommand\ruleResultConstant{%
+  \inferrule{}{ \SE \vdash c : \CType{c} }
+}
+
+\newcommand\ruleResultLocation{%
+  \inferrule{}{ \SE \vdash \ell : \SE (\ell) }
+}
+
+\newcommand\ruleResultBorrow{%
+  \inferrule{
+    \Multi\BQ \Bcompatible \BORROW_n \\
+    \SE \vdash \Loc  : \tau
+  }{  \SE \vdash
+    \Multi\BQ\Loc : \borrowty[\BORROW]{\BORROW_n}{\tau}}
+}
+
+\newcommand\ruleStorableFreed{%
+    \inferrule{}{
+      \SE \vdash \StFreed : \tau
+    }
+}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "main"
