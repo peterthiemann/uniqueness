@@ -684,6 +684,41 @@ refer to newly created values.
     Immediate
   \end{enumerate}
   
+  \newpage
+  \textbf{Case $e$ of}
+  \lstsemrule{sdestroyanf}
+
+  We need to invert rule \TirName{Destroy}.
+  \begin{mathpar}
+    \ruleSDDestroy
+  \end{mathpar}
+  It is sufficient to show that $\SE_1 = \SE$,
+  $\Store_1$, $\Perm_1$, and $r_1 = ()$ fulfill the following
+  requirements.
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{_1}
+  \item \resultEnv{}{_1} \\
+    Immediate: $\ell$ was updated to void, which has any type.
+  \item $\SE_1 \vdash () : \tunit$
+  \item \resultPermDom{}{_1}\\
+    By assumption on $\Perm$ and because $\Loc$ was removed.
+  \item \resultReachPerm{}{_1} \\
+    Immediate because the reach set is empty
+  \item \resultFrame{}{}{_1} 
+    Only $\Store (\Loc)$ was changed, which is not reachable from the frame.
+  \item \resultImmutables{}{}{_1} \\
+    Immediate because we updated (destroyed) a resource (in $\Active\VEnv$).
+  \item \resultMutables{}{}{_1} \\
+    Immediate because we updated (destroyed) a resource (in $\Active\VEnv$).
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{_1} \\
+    By the constraint on $\E$, $\Loc$ was the only resource passed to
+    this invocation of eval. The claimed condition holds as $\Loc$ was
+    removed from $\Perm_1$ and the location's contents cleared.
+  \item \resultThinAir{}{_1}
+    \\ Immediate
+  \end{enumerate}
+
 \end{proof}
 
 %%% Local Variables:

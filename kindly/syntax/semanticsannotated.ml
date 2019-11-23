@@ -419,6 +419,18 @@ let rec eval
     let pi_1' = pi_1 <-> !$ ell in
     Ok (delta_1', pi_1', RVOID)
   (**)
+  (* rule sdestroyanf *)
+  | VDestroy (x) ->
+    let* r = gamma.!(x) in
+    let* rho = getaddress r in
+    let* ell = getloc r in
+    let* w = delta.*(ell) in
+    let* r = getstrsrc w in
+    let*? () = rho <|= pi in
+    let* delta_1 = delta.*(ell) <- STRELEASED in
+    let pi_1 = pi <-> !$ ell in
+    Ok (delta_1, pi_1, RVOID)
+  (**)
   (* rule sobserve *)
   | Observe (e_1) ->
     let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
