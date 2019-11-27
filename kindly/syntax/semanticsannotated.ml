@@ -48,7 +48,7 @@ type exp = Const of int
          | Matchborrow of ident * ident * exp * exp * splitting
          | Region of exp * int * ident * borrow
          | Borrow of borrow * ident
-         | Create of exp
+         | Create (* of exp *)
          | Destroy of exp
          | Observe of exp
          | Update of exp * exp * splitting
@@ -236,9 +236,8 @@ let (<<=) : kind -> kind -> kind * kind =
 
   (* eval header *)
 let rec eval
-  : store -> perm -> venv -> int -> exp ->
-    (store * perm * result) sem
-  = fun delta pi gamma i e ->
+  (delta:store) (pi:perm) (gamma:venv) i e
+  : (store * perm * result) sem =
   if i=0 then TimeOut else
   let i' = i - 1 in
   match e with
@@ -294,9 +293,10 @@ let rec eval
     let*? () = !$ ell_1 <|= pi in
     let* w = delta.*(ell_1) in
     let* (gamma', k', x', e') = getstclos w in
-    let pi = (if k' <= KUNR None then pi else pi <-> !$ ell_1) in
+    let pi' = (if k' <= KUNR None then pi else pi <-> !$ ell_1) in
+    let* delta' = delta.*(ell_1) <- (if k' <= KUNR None then w else STRELEASED) in
     let* r_2 = gamma.!(x_2) in
-    let* (delta_3, pi_3, r_3) = eval delta pi gamma'.+(x'-:> r_2) i' e' in
+    let* (delta_3, pi_3, r_3) = eval delta' pi' gamma'.+(x'-:> r_2) i' e' in
     Ok (delta_3, pi_3, r_3)
   (**)
   (* rule slet *)
@@ -363,10 +363,10 @@ let rec eval
     let* RADDR rho = gamma.!(x) in
     let* rho' = b<.>rho in
     let gamma' = gamma.+(x -:>RADDR rho') in
-    let pi' = (pi <+> rho') <-> rho in
-    let* (delta_1, pi_1, r_1) = eval delta pi' gamma' i' e in
-    let pi_1' = (pi_1 <-> rho') <+> rho in
-    Ok (delta_1, pi_1', r_1)
+    let pi = (pi <+> rho') <-> rho in
+    let* (delta_1, pi_1, r_1) = eval delta pi gamma' i' e in
+    let pi_1 = (pi_1 <-> rho') <+> rho in
+    Ok (delta_1, pi_1, r_1)
   (**)
   (* previous *)
   | Region (e_1, n, x, b) ->
@@ -393,12 +393,19 @@ let rec eval
     let*? () = rho' <|= pi in
     Ok (delta, pi, RADDR rho')
   (* rule screate *)
-  | Create (e_1) ->
-    let* (delta_1, pi_1, r_1) = eval delta pi gamma i' e_1 in
-    let w = STRSRC (r_1) in
-    let (ell', delta') = salloc delta w in
-    let pi_1' = pi <+> !$ ell' in
-    Ok (delta_1, pi_1', RADDR !$ ell')
+  | Create ->
+    let w = STRSRC (RCONST 0) in
+    let (ell_1, delta_1) = salloc delta w in
+    let pi_1 = pi <+> !$ ell_1 in
+    Ok (delta_1, pi_1, RADDR !$ ell_1)
+  (**)
+  (* rule screateanf *)
+  | VCreate (x) ->
+    let* r = gamma.!(x) in
+    let w = STRSRC (r) in
+    let (ell_1, delta_1) = salloc delta w in
+    let pi_1 = pi <+> !$ ell_1 in
+    Ok (delta_1, pi_1, RADDR !$ ell_1)
   (**)
   (* rule sdestroy *)
   | Destroy (e_1) ->
@@ -411,6 +418,18 @@ let rec eval
     let* delta_1' = delta_1.*(ell) <- STRELEASED in
     let pi_1' = pi_1 <-> !$ ell in
     Ok (delta_1', pi_1', RVOID)
+  (**)
+  (* rule sdestroyanf *)
+  | VDestroy (x) ->
+    let* r = gamma.!(x) in
+    let* rho = getaddress r in
+    let* ell = getloc r in
+    let* w = delta.*(ell) in
+    let* r = getstrsrc w in
+    let*? () = rho <|= pi in
+    let* delta_1 = delta.*(ell) <- STRELEASED in
+    let pi_1 = pi <-> !$ ell in
+    Ok (delta_1, pi_1, RVOID)
   (**)
   (* rule sobserve *)
   | Observe (e_1) ->

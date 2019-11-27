@@ -86,7 +86,7 @@ let use { spawn ; queue } f =
     | None () -> spawn ()
   in
   let r = {| f &!o |} in(*@\label{line:pool:region}*)
-  Queue.push o &queue;
+  CQueue.push o &queue;
   r
 \end{lstlisting}
     \vspace{-15pt}

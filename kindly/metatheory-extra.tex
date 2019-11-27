@@ -2,16 +2,25 @@
 \label{sec:metatheory:proofs}
 
 \begin{itemize}
+\item
+  For simplicity, we only consider terms in A-normal forms following the grammar:
+  \begin{align*}
+    e ::=~& \ldots \mid \aiapp{x}{x'} \mid \aipair{k}{x}{x'} \mid \aimatchin\etransfm{x,y}{z}{e}
+  \end{align*}
+  Typing and semantics rules are unchanged.
+\item Borrow qualifiers  $\BQ ::= \IBORROW_n \mid \MBORROW_n$ where
+  $n\ge0$ is a region level. A vector of borrow qualifiers $\Multi\BQ$
+  is wellformed if all $\IBORROW$s come before all $\MBORROW$s in the vector. 
 \item Borrow compatibility
-  $\Multi\IBORROW\Multi\MBORROW \Bcompatible \BORROW$,
+  $\Multi\BQ \Bcompatible \BQ$,
   \begin{mathpar}
   \inferrule{}{
-    \IBORROW\Multi\IBORROW\Multi\MBORROW \Bcompatible \IBORROW
+    \BQ_n\Multi\BQ \Bcompatible \BQ_n
   }
-
-  \inferrule{}{
-    \MBORROW\Multi\MBORROW \Bcompatible \MBORROW
-  }
+  %
+  % \inferrule{}{
+  %   \MBORROW_n\Multi\MBORROW \Bcompatible \MBORROW_n
+  % }
   \end{mathpar}
 \item Store typing $ \vdash \Store : \SE$,
   \begin{mathpar}
@@ -21,11 +30,16 @@
     }{ \vdash \Store : \SE }
   \end{mathpar}
 \item Relating storables to type schemes $\SE \vdash w : \schm$
+
+  We write $\Disjoint\E$ for $\Active\VEnv$ and $\MutableBorrows\VEnv$
+  and $\ImmutableBorrows\VEnv$ and $\Suspended\VEnv$ are all disjoint.
   \begin{mathpar}
   \inferrule{
     (\exists \E)~ \SE \vdash \VEnv : \E
     \\
-    \inferS{C}{\E, (x:\tau_2)}{e}{\tau_1}
+    \Disjoint\E
+    \\
+    \inferS{C}{\E; \bvar x{\tau_2}}{e}{\tau_1}
     \\
     \Multi\tvar = \fv{\tau_1,\tau_2} \setminus \fv{\E}
   }{
@@ -35,45 +49,22 @@
   \end{mathpar}
 \item Relating storables to types $ \SE \vdash w : \tau$
   \begin{mathpar}
-    \inferrule{
-      (\exists \E, C)~ \SE \vdash \VEnv : \E
-      \\
-      \inferS{C}{\E\bvar x{\tau_2}}{e}{\tau_1}
-      \\
-      \addlin{\entail{C}{\Cleq{\E}{k}}}
-    }{
-      \SE \vdash (\VEnv, \lam[k]xe) : \tau_2\tarr{k}\tau_1
-    }
+    \ruleStorableClosure
+    
+    \ruleStorablePair
 
-    \inferrule{
-      \SE \vdash r_1 : \tau_1 \\
-      \SE \vdash r_2 : \tau_2
-    }{
-      \SE \vdash \introPair[k]{r_1}{r_2} : \tyPair[k]{\tau_1}{\tau_2}
-    }
+    \ruleStorableResource
 
-    \inferrule{
-      \SE \vdash r : \IType{\tcon}{\Multi\tau}
-    }{
-      \SE \vdash {[r]} : \tapp{\tcon}{\Multi\tau}
-    }
-
-    \inferrule{}{
-      \SE \vdash \StFreed : \tau
-    }
+    \ruleStorableFreed
   \end{mathpar}
 %\item Relating  results to types $ \SE \vdash r : \tau$,
 \item Relating results to type schemes $\SE \vdash r : \schm$
   \begin{mathpar}
-  \inferrule{}{ \SE \vdash c : \CType{c} }
+    \ruleResultConstant
 
-  \inferrule{}{ \SE \vdash \ell : \SE (\ell) }
+    \ruleResultLocation
 
-  \inferrule{
-    \Multi\IBORROW\Multi\MBORROW \Bcompatible \BORROW \\
-    \SE \vdash \Loc  : \tau
-  }{  \SE \vdash
-    \Multi\IBORROW\Multi\MBORROW\Loc : \borrow{\tau}}
+    \ruleResultBorrow
   \end{mathpar}
 \item
 We write $\Affine\SE\Loc$ to express that $\Loc$ points to a resource
@@ -113,18 +104,20 @@ It remains to characterize unrestricted resources.
 Define $\Unrestricted\SE\Loc$ if neither $\Affine\SE\Loc$ nor
 $\Linear\SE\Loc$ holds.
 \item
-Relating environments to contexts $\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
-\ImmutableBorrows\VEnv, \Suspended\VEnv : \E$.
+  Relating environments to contexts\\
+  $\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+\ImmutableBorrows\VEnv, \Suspended[\kaff]\VEnv, \Suspended[\kun]\VEnv : \E$.
 
 Here we consider an
 environment $\VEnv = (\Active\VEnv, \MutableBorrows\VEnv,
-\ImmutableBorrows\VEnv, \Suspended\VEnv)$ as a quadruple
+\ImmutableBorrows\VEnv, \Suspended\VEnv)$ as a tuple
 consisting of the active entries in $\Active\VEnv$ and the
 entries for exclusive borrows in $\MutableBorrows\VEnv$ and for
 shared borrows in $\ImmutableBorrows\VEnv$, and suspended entries
-in $\Suspended\VEnv$. The
+in $\Suspended\VEnv = \Suspended[\kaff]\VEnv, \Suspended[\kun]\VEnv$
+for affine and unrestricted entries. The
 suspended entries cannot be used directly, but they can be activated
-by borrowing.
+by appropriate borrowing on entry to a region.
 \end{itemize}
 
 
@@ -157,11 +150,18 @@ by borrowing.
     x\schm }
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
-    \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\
+    \ImmutableBorrows\VEnv, \Suspended[\kaff]\VEnv, \Suspended[\kun]\VEnv : \E \\
     \SE \vdash r : \schm}
   { \SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
-    \ImmutableBorrows\VEnv, \Suspended\VEnv[ x\mapsto r] :
-    \E;\svar x\schm^n }
+    \ImmutableBorrows\VEnv, \Suspended[\kaff]\VEnv, \Suspended[\kun]\VEnv[ x\mapsto r] :
+    \E;\svar[\IBORROW] x\schm^n }
+
+  \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv, \Suspended[\kaff]\VEnv, \Suspended[\kun]\VEnv : \E \\
+    \SE \vdash r : \schm}
+  { \SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
+    \ImmutableBorrows\VEnv, \Suspended[\kaff]\VEnv[ x\mapsto r], \Suspended[\kun]\VEnv :
+    \E;\svar[\MBORROW] x\schm^n }
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
@@ -208,7 +208,7 @@ We write $\Rawloc\cdot$ for the function that extracts a multiset of
 environment.
 
 \begin{align*}
-  \Rawloc{\Multi\IBORROW\Multi\MBORROW\Loc} &= \{\Loc\} \\
+  \Rawloc{\Multi\BQ\Loc} &= \{\Loc\} \\
   \Rawloc{c} &= \{ \} \\
   \Rawloc\Eempty &= \{\} \\
   \Rawloc{\VEnv( x \mapsto r)} &= \Rawloc\VEnv \cup \Rawloc r
@@ -253,7 +253,7 @@ $\MultiNumber\Loc\REACH = \infty$.
 \begin{align*}
   \REACH &\supseteq \RS\Store\VEnv \\
   \REACH &\supseteq \RS\Store w & \text{if }
-                                     \Multi\IBORROW\Multi\MBORROW\Loc
+                                     \Multi\BQ\Loc
                                      \in \REACH \wedge w = \Store (\Loc)
 \end{align*}
 
@@ -261,13 +261,49 @@ $\MultiNumber\Loc\REACH = \infty$.
   A permission $\Perm$ is \emph{wellformed} if it contains at most one
   address for each raw location.
 \end{definition}
+
+\begin{lemma}[Containment]\label{lemma:containment}
+  Suppose that $\vdash \Store : \SE$,
+  $\SE \vdash r : \tau$, $\entail C
+  {\Cleq{\tau}{k} \Cand \Cleq{k}{\klin_{m-1}}}$.
+  Then $\Reach\Store r$ cannot contain addresses $\Addr$ such that
+  $\Addr = \BORROW_n\Addr'$ with $n\ge m$.
+\end{lemma}
+\begin{proof}
+  By inversion of result typing there are three cases.
+
+  \textbf{Case }$\ruleResultConstant$. Immediate: reachable set
+  is empty.
+
+  \textbf{Case }$\ruleResultBorrow$. The typing constraint enforces
+  that $n < m$.
+
+  \textbf{Case }$\ruleResultLocation$. We need to continue by
+  dereferencing $\Loc$ and inverting store typing.
+
+  \textbf{Case }$\ruleStorableFreed$. Trivial.
+
+  \textbf{Case }$\ruleStorableResource$. We assume the implementation
+  type of a result to be unrestricted.
+
+  \textbf{Case }$\ruleStorablePair$.
+
+  The typing constraint yields that $k \le \klin_{m-1}$.
+  By induction and transitivity of $\le$, we find that
+  $\Reach\Store{r_1}$ and $\Reach\Store{r_2}$ cannot contain offending addresses.
+
+  \textbf{Case }$\ruleStorableClosure$.
+
+  The typing constraint yields that $k\le\klin_{m-1}$.
+  By transitivity of $\le$ and $\SE \vdash \VEnv:\E$, we find that the
+  types of all addresses in 
+  $\VEnv$ have types bounded by $\klin_{m-1}$ and, by induction, they
+  cannot contain offending addresses.
+\end{proof}
 \clearpage{}
 \lstMakeShortInline[keepspaces,style=rule]@
 
-\begin{theorem}
-  \label{thm:metatheory-extra:soundness}
-  \SoundnessThmBody
-\end{theorem}
+\SoundnessThm
 
 Some explanations are in order for the resource-related assumptions
 and statements.
@@ -284,10 +320,11 @@ Unrestricted values, resources, and borrows do not change their
 underlying resource and do not spend their permission.
 
 Affine borrows and resources may or may not spend their
-permission. Borrows are not freed, but resources may be freed.
+permission. Borrows are not freed, but resources may be freed. The
+permissions for suspended entries remain intact.
 
-Incoming suspended borrows have no permission attached to them and
-their permission has been retracted on exit of their region.
+% Incoming suspended borrows have no permission attached to them and
+% their permission has been retracted on exit of their region.
 
 A linear resource is always freed.
 
@@ -295,21 +332,24 @@ Outgoing permissions are either inherited from the caller or they
 refer to newly created values.
 
 
+
 \newpage
 \begin{proof}
-    By induction on the evaluation of
+  By induction on the evaluation of
   @eval \Store \Perm \VEnv i e@.
 
   The base case is trivial as
   @eval \Store \Perm \VEnv 0 e = \TimeOut@.
 
-  For $i>0$ consider the different cases for expressions.
+  For $i>0$ consider the different cases for expressions. For lack of
+  spacetime, we only give details on some important cases.
 
-  \textbf{case $e$ of}
+  \textbf{Case $e$ of}
   \lstsemrule{slet}
   We need to invert rule \TirName{Let}:
   \begin{gather*}
-    \ruleSDLet
+    \ruleSDILet
+    % \ruleSDLet
   \end{gather*}
   %% PJT: separate lemma about splitting needed
   As $\Sp$ is the evidence for the splitting judgment and @vsplit@
@@ -328,14 +368,14 @@ refer to newly created values.
   \item $\ImmutableBorrows\VEnv =
     \ImmutableBorrows{\VEnv_1} = \ImmutableBorrows{\VEnv_2}$,
   \item $\Suspended\VEnv = \Suspended{\VEnv_1} \uplus
-    \Suspended{\VEnv_2}$
+    \Suspended{\VEnv_2}$ (this splitting does not distinguish potentially
+    unrestricted or affine bindings)
   \end{itemize}
   We establish the assumptions for the call
   @eval \Store \Perm \VEnv_1  i' e_1@.
   \begin{enumerate}[({A1-}1)]
   \item From inversion: $\inferS{C \Cand D}{\E_1}{e_1}{\tau_1} $
   \item From~\eqref{eq:16}: $\SE \vdash \VEnv_1 : \E_1$
-  \item From assumption
   \item From assumption
   \item From assumption
   \item From assumption because $\VEnv_1$ is projected from $\VEnv$.
@@ -352,7 +392,7 @@ refer to newly created values.
   \item\label{item:16} \resultFrame{}{_1}{_1}
   \item\label{item:24} \resultImmutables{}{}{_1}
   \item\label{item:26} \resultMutables{}{}{_1}
-  \item\label{item:28} \resultSuspended{}{}{_1}
+  % \item\label{item:28} \resultSuspended{}{}{_1}
   \item\label{item:30} \resultResources{}{}{_1}
   \item\label{item:10} \resultThinAir{}{_1}
   \end{enumerate}
@@ -360,17 +400,13 @@ refer to newly created values.
   @eval delta_1 pi_1 gamma_2(x-:>r_1) i' e_2@,
   we write $\VEnv_2' = \VEnv (x \mapsto r_1)$.
   \begin{enumerate}[({A2-}1)]
-  \item From inversion: $\inferS{C}{\E;\bvar{x}{\sigma}}{e_2}{\tau_2}$
+  \item From inversion: $\inferS{C}{\E;\bvar{x}{\tau_1}}{e_2}{\tau_2}$
   \item From~\eqref{eq:17} we have $\SE \vdash \VEnv_2 : \E_2$.
     By store weakening (Lemma~\ref{lemma:store-weakening}) and
     using~\ref{item:8}, we have
     $\SE_1 \vdash \VEnv_2 : \E_2$.
     With~\ref{item:9}, we obtain
-    $\SE_1 \vdash \VEnv_2 (x \mapsto r_1 ) : \E_2;\bvar x {\tau_1}$
-    and hence
-    $\SE_1 \vdash \VEnv_2 (x \mapsto r_1 ) : \E_2;\bvar x {\schm}$
-    %% PJT: generalization lemma needed
-    because $\schm$ generalizes $\tau_1$.
+    $\SE_1 \vdash \VEnv_2 (x \mapsto r_1 ) : \E_2;\bvar x {\tau_1}$.
   \item Immediate from~\ref{item:8}.
   \item Immediate from~\ref{item:14}.
   \item $\Reach{\Store_1}{\Active{\VEnv_2'}, \MutableBorrows{\VEnv_2'},
@@ -403,7 +439,7 @@ refer to newly created values.
   \item\label{item:22} \resultFrame{_1}{_2'}{_2}
   \item\label{item:23} \resultImmutables{_1}{_2'}{_2}
   \item\label{item:25} \resultMutables{_1}{_2'}{_2}
-  \item\label{item:27} \resultSuspended{_1}{_2'}{_2}
+  % \item\label{item:27} \resultSuspended{_1}{_2'}{_2}
   \item\label{item:29} \resultResources{_1}{_2'}{_2}
   \item\label{item:31} \resultThinAir{_1}{_2}
   \end{enumerate}
@@ -442,8 +478,8 @@ refer to newly created values.
     \ImmutableBorrows{\VEnv_2}$.
   \item \resultMutables{}{}{_2}
     \\ Follows from~\ref{item:25},~\ref{item:26}, and framing.
-  \item \resultSuspended{}{}{_2}
-    ~\\ Follows from~\ref{item:27},~\ref{item:28}, and framing.
+  % \item \resultSuspended{}{}{_2}
+  %   ~\\ Follows from~\ref{item:27},~\ref{item:28}, and framing.
   \item \resultResources{}{}{_2}
     \\ Follows from disjoint splitting of
     $\Active\VEnv$,~\ref{item:29},~\ref{item:30}, and framing.
@@ -452,613 +488,236 @@ refer to newly created values.
   \end{enumerate}
 
   \newpage{}
-  \textbf{case $e$ of}
+  \textbf{Case $e$ of}
   \lstsemrule{sappanf}
 
   We need to invert rule \TirName{App}:
   \begin{mathpar}
-    \ruleSDVApp
+    \ruleSDAIApp
+    %\ruleSDVApp
   \end{mathpar}
 
   We need to establish the assumptions for the recursive call
-  @eval \Store \Perm \VEnv'(x'-:>r_2) i' e'@.
+  @eval \Store' \Perm' \VEnv'(x'-:>r_2) i' e'@.
   We write $\VEnv_2' = \VEnv' (x'\mapsto r_2)$.
   \begin{enumerate}[({A1-}1)]
-  \item $\inferS{C}{\E}{e'}{\tau'}$
-  \item $\SE \vdash \VEnv' (x' \mapsto r_2) : \E; \bvar{x'}{\tau}$
-  \item $\vdash \Store : \SE$
-  \item \assumeWellformed{}
-  \item $\Reach\Store{\Active{\VEnv_2'}, \MutableBorrows{\VEnv_2'},
-      \ImmutableBorrows{\VEnv_2'}} \subseteq \Perm$
+  \item $\inferS{C'}{\E'; \bvar{x'}{\tau_2}}{e'}{\tau_1}$, for some
+    $C'$ and $\E'$\\
+    Applying the first premise of \TirName{App} to $r_1 = \VEnv
+    (x_1)$, $\SE \vdash \VEnv : \E$, and inversion of result typing
+    yields that $r_1 = \Loc_1$ with $\SE (\Loc_1) = \tau_2 \tarr{k}
+    \tau_1$.
+    By inversion of store typing and storable typing, we find that
+    there exist $\E'$ and $C'$ such that
+    \begin{enumerate}
+    \item $\Store (\Loc_1) = (\VEnv', \lam[k]{x'}{e'})$
+    \item $\Disjoint{\E'}$
+    \item\label{item:32} $\SE \vdash \VEnv', \E'$
+    \item $\inferS{C'}{\E';\bvar {x'}{\tau_2}}{e'}{\tau_1}$
+    \item $\addlin{\entail{C'}{\Cleq{\E'}{k}}}$
+    \end{enumerate}
+  \item $\SE \vdash \VEnv' (x' \mapsto r_2) : \E';
+    \bvar{x'}{\tau_2}$\\
+    By~\ref{item:32}, assumption on $\VEnv$, and the subtyping premise.
+  \item $\vdash \Store' : \SE'$ \\
+    by assumption and the released rule of store typing (where we
+    write $\SE'=\SE$ henceforth)
+  \item \assumeWellformed{'} \\
+    the possible removal of a permission does not violate
+    wellformedness; the permission is taken away exactly when the
+    closure is destroyed
+  \item $\Reach\Store{\VEnv_2'} \subseteq \Perm$\\
+    as the reach set is a subset of the incoming environment's reach
   \item $\Rawloc{\Active{\VEnv_2'}}$,
     $\Rawloc{\MutableBorrows{\VEnv_2'}}$,
     $\Rawloc{\ImmutableBorrows{\VEnv_2'}}$, and
-    $\Rawloc{\Suspended{\VEnv_2'}}$ are all disjoint
-  \item \assumeIncoming{}{_2'}
+    $\Rawloc{\Suspended{\VEnv_2'}}$ are all disjoint follows from
+    $\Disjoint{\E'}$ and since $r_2= \E (x_2)$ which is an entry
+    disjoint from the closure $\E(x_1)$.
+  \item \assumeIncoming{'}{_2'}
+    The first item holds because of assumption~\ref{item:15}.
+
+    The second item holds because $\REACH' \subseteq \REACH$ from
+    assumption~\ref{item:15}.
   \end{enumerate}
+  The inductive hypothesis yields that
+    $\exists$ $\Store_3$, $\Perm_3$, $r_3$, $\SE_3$ such that
+  \begin{enumerate}[({R1-}1)]
+  \item \resultOk{}{_3}
+  \item \resultEnv{'}{_3}
+  \item $\SE_3 \vdash r_3 : \tau_1$
+  \item \resultPermDom{}{_3}
+  \item \resultReachPerm{}{_3}
+  \item \resultFrame{'}{_2'}{_3}
+  \item \resultImmutables{'}{_2'}{_3}
+  \item \resultMutables{'}{_2'}{_3}
+    % \item \resultSuspended{}{}{'}
+  \item \resultResources{'}{_2'}{_3}
+  \item \resultThinAir{'}{_3}
+  \end{enumerate}
+  The desired results are immediate because $\Dom\Store = \Dom{\Store'}$.
 
-\end{proof}
-
-\clearpage{}
-\begin{theorem}[OLD]
-  Suppose that
-  \begin{itemize}
-  \item $\inferS{C}{\E}{e}{\tau}$
-  \item $\SE \vdash \VEnv : \E$
-  \item $\vdash \Store : \SE$
-  \item $\Rawloc\Perm \subseteq \Dom\Store$
-  \item $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv} \subseteq \Perm$
-  % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
-  %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
-  \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
-    \begin{itemize}
-    \item
-      For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active\VEnv}} >0$,
-      if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc\REACH= 1$
-    \item For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store}{\MutableBorrows\VEnv}} >0$, it
-      must be that $\MultiNumber\Loc\REACH=1$.
-    \item For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store}{\Suspended\VEnv}} >0$, it
-      must be that $\MultiNumber\Loc\REACH=1$.
-    \end{itemize}
-  \item  $i\in\Nat$ and $\Store, \Perm, \VEnv \vdash {e}
-    \Downarrow^i R$ and $R\ne \TimeOut$.
-  \end{itemize}
-  Then,
-  $\exists$ $\Store'$, $\Perm'$, $r'$, $\SE'$ such that
-  \begin{itemize}
-  \item
-    $R = \Ok{\Store', \Perm', r'}$
-  \item $\SE \le \SE'$, $\Store \le \Store'$,
-    $\vdash \Store' : \SE'$
-  \item $\Rawloc{\Perm'} \subseteq \Dom{\Store'}$
-  \item $\SE' \vdash r' : \tau$
-  \item $\Reach{\Store'}{r'} \subseteq \Perm'$
-  \item Outside: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store'}{\VEnv}$ it must be that
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
-    %% must be \Store because \Perm has no idea of \Perm'
-  \item Immutables: For all $\Loc \in
-    \Reach{\Store'}{\ImmutableBorrows\VEnv}$ it must be that
-    $\Loc\in\Dom\Store$,
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
-  \item Resources:
-    Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
-    For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
-    \MultiNumber\Loc{\REACH'}$,
-    \begin{itemize}
-    \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
-    \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
-    \item if $n'=0$, then $\Loc\notin\Perm'$.
-    \end{itemize}
-  \item ReadOnly: For all $\Loc \in \Reach
-    {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Loc$ then
-    $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm'$.
-  \item No thin air permission: For all $\Loc\in \Perm'$, $\Loc
-    \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
-  \end{itemize}
-\end{theorem}
-
-%\clearpage
-\begin{proof}
-  By induction on the evaluation of
-  @eval \Store \Perm \VEnv i e@.
-
-  The base case is trivial as
-  @eval \Store \Perm \VEnv 0 e = \TimeOut@.
-
-  Let now $i>0$ and consider the different cases for expressions.
-
-  \textbf{case $e$ of}
-  \lstsemrule{sapp}
-
-  By assumption\\ $\ruleSDApp$.
-
-  As \lstinline{sp}  is evidence for the split in the typing rule,
-  we find that
-  \begin{align}
-    \label{eq:1}
-    \SE \vdash \VEnv_1 : \E_1 && \SE \vdash \VEnv_2 : \E_2
-  \end{align}
-
-  Hence, we can establish the assumptions for the recursive call
-  @eval delta pi gamma_1 i' e_1@.
-  \begin{itemize}
-  \item  $\inferS{C}{\E_1}{e_1}{\tau_2\tarr{k}\tau_1}$ by inversion of typing
-  \item $\SE \vdash \VEnv_1 : \E_1$ by \eqref{eq:1}
-  \item $\vdash \Store : \SE$ by assumption
-  \item $\Rawloc\Perm \subseteq \Dom\Store$ by assumption
-  \item $
-    \Reach\Store{\Active{\VEnv_1}, \MutableBorrows{\VEnv_1},
-      \ImmutableBorrows{\VEnv_1}}
-    \subseteq
-    \Reach\Store{\Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv}
-    \subseteq \Perm$
-  \item Incoming Resources: For $\REACH_1 = \Reach\Store{\VEnv_1}$.
-    \begin{itemize}
-    \item
-      For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active{\VEnv_1}}} >0$,
-      if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc{\REACH_1}= 1$
-    \item For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store}{\MutableBorrows{\VEnv_1}}} >0$, it
-      must be that $\MultiNumber\Loc{\REACH_1}=1$.
-    \end{itemize}
-  \item $i'<i$ and   @eval \Store \Perm gamma_1 i' e_1@ terminates
-    with $R_1 \ne \TimeOut$.
-  \end{itemize}
-  Hence, we can apply the inductive hypothesis and obtain:
-  \begin{gather}
-    \label{eq:2}
-    R_1 = \Ok{\Store_1, \Perm_1, r_1}
-    \\
-    \SE \le \SE_1 \qquad
-    \Store \le \Store_1 \qquad
-    \vdash \Store_1 :    \SE_1
-    \\
-    \Rawloc{\Perm_1} \subseteq \Dom{\Store_1}
-    \\\label{eq:3}
-    \SE_1 \vdash r_1 : \tau_2\tarr{k}\tau_1
-    \\\label{eq:10}
-    \Reach{\Store_1}{r_1} \subseteq \Perm_1
-  \end{gather}
-  \begin{itemize}
-  \item Outside: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store_1}{\VEnv_1}$ it must be that
-    $\Store_1 (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1$
-  \item Immutables: For all $\Loc \in
-    \Reach{\Store_1}{\ImmutableBorrows{\VEnv_1}}$ it must be that
-    $\Loc\in\Dom\Store$,
-    $\Store_1 (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1$
-  \item Resources:
-    Let $\REACH_1 =\Reach{\Store_1}{\Active{\VEnv_1}}$.
-    For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_1} >0$,
-    \begin{itemize}
-    \item if $\Affine{\SE_1}\Loc$ then $n\le 1$; if $n=0$, then $\Loc\notin\Perm_1$.
-    \item if $\Linear{\SE_1}\Loc$ then $n=0$ and $\Loc\notin\Perm_1$.
-    \end{itemize}
-  \item Immutables: For all $\Loc \in \Reach
-    {\Store_1}{\Active{\VEnv_1}}$, if $\neg\Writeable{\SE_1}\loc$ then
-    $\Store_1 (\ell) = \Store (\ell)$ and $\Loc\in \Perm_1$.
-  \item No thin air permission: For all $\Loc\in \Perm_1$, $\Loc
-    \in \Perm \cup  \Dom{\Store_1} \setminus \Dom{\Store}$.
-  \end{itemize}
-
-  By inversion of \eqref{eq:3}, it must be that $r_1$ is a location
-  $\Loc_1$ typed by $\SE_1 (\Loc_1) = \tau_2\tarr{k}\tau_1$.
-  Hence, $w= \Store_1 (\Loc_1)$ with $\SE_1 \vdash w :
-  \tau_2\tarr{k}\tau_1$, so that $w$ is a closure of the form
-  $(\VEnv', k', x', e')$.
-
-  By inversion of the store typing $\SE_1 \vdash   (\VEnv', k', x',
-  e') : \tau_2\tarr{k}\tau_1$, we obtain some $\E'$ and $C'$ such that
-  \begin{gather}
-    \label{eq:4}
-    \SE_1 \vdash \VEnv' : \E'
-    \\\label{eq:5}
-    \inferS{C'}{\E'\bvar{x'}{\tau_2}}{e'}{\tau_1}
-    \\
-    {\entail{C'}{\Cleq{\E'}{k'}}}
-  \end{gather}
-
-  Next, we establish the assumptions for the recursive call
-  @eval delta_1 pi_1' gamma_2 i' e_2@
-  \begin{itemize}
-  \item  $\inferS{C}{\E_2}{e_2}{\tau_2}$ by inversion of typing
-  \item $\SE_1 \vdash \VEnv_2 : \E_2$ by \eqref{eq:1} and Weakening
-    (Lemma~\ref{lemma:store-weakening}).
-  \item $\vdash \Store_1 : \SE_1$ by IH on $e_1$
-  \item $\Rawloc{\Perm_1'} \subseteq \Dom{\Store_1}$ by assumption
-    and no-thin-air permission for $e_1$
-  \item Show that for $\Active{\Theta_2} =
-    \Reach{\Store_1}{\Active{\VEnv_2}}$, $\MutableBorrows{\Theta_2} =
-    \Reach{\Store_1}{ \MutableBorrows{\VEnv_2}}$, and
-    $\ImmutableBorrows{\Theta_2} = \Reach{\Store_1}{
-      \ImmutableBorrows{\VEnv_2}}$ it holds that $\Active{\Theta_2}  \subseteq
-    \Perm_1'$, $\MutableBorrows{\Theta_2} \subseteq \Perm_1'$, and
-    $\ImmutableBorrows{\Theta_2} \subseteq \Perm_1'$.
-
-    As these sets are disjoint, we can argue separately.
-    Let $n = \MultiNumber\Loc{\Active{\Theta_2}}>0$.
-    If $\Affine{\SE_1}\Loc$, then $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store_1}{\VEnv_1}$. Hence, $\Loc\in\Perm_1$ iff
-    $\Loc\in\Perm$. Moreover, $\Loc\ne\Loc_1$. Hence,
-    $\Loc\in\Perm_1'$.
-
-    If  $n = \MultiNumber\Loc{\MutableBorrows{\Theta_2}}>0$,
-    then $\Loc$ is affine as it is a exclusive borrow and
-    $\Loc\in\Perm_1'$ by analogous argument.
-
-    If  $n = \MultiNumber\Loc{\ImmutableBorrows{\Theta_2}}>0$,
-    then its permission is never withdrawn an $\Loc\in\Perm_1'$.
-  \item Incoming resources considering $\REACH_2$.
-    \begin{itemize}
-    \item
-      For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store_1}{\Active{\VEnv_2}}} >0$,
-      if $\Affine{\SE_2}\Loc$ then $\MultiNumber\Loc{\REACH_2}= 1$.
-    \item For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store_1}{\MutableBorrows{\VEnv_2}}} >0$, it
-      must be that $\MultiNumber\Loc{\REACH_2}=1$.
-    \end{itemize}
-    In both cases the rationale is that this statement was true for
-    the incoming environment $\VEnv$ (by assumption) and splitting did
-    not pass affine resources to $\VEnv_1$.
-  \item $i'<i$ and  @eval delta_1 pi_1' gamma_2 i' e_2@ terminates
-    with $R_2 \ne \TimeOut$.
-  \end{itemize}
-  Hence, we can apply the inductive hypothesis and obtain
-  $\Store_2$, $\Perm_2$, $r_2$, $\SE_2$ such that
-  \begin{gather}
-    \label{eq:6}
-    R_2 = \Ok{\Store_2, \Perm_2, r_2}
-    \\\label{eq:7}
-    \SE_1 \le \SE_2 \qquad
-    \Store_1 \le \Store_2 \qquad
-    \vdash \Store_2 :  \SE_2
-    \\\label{eq:9}
-    \Rawloc{\Perm_2} \subseteq \Dom{\Store_2}
-    \\\label{eq:8}
-    \SE_2 \vdash r_2 : \tau_2
-    \\\label{eq:11}
-    \Reach{\Store_2}{r_2} \subseteq \Perm_2
-  \end{gather}
-  \begin{itemize}
-  \item Outside: For all $\Loc \in \Dom{\Store_1} \setminus
-    \Reach{\Store_2}{\VEnv_2}$ it must be that
-    $\Store_2(\Loc) = \Store_1 (\Loc)$
-    and $\Loc\in\Perm_1' \Leftrightarrow \Loc\in\Perm_2$
-  \item Immutables: For all $\Loc \in
-    \Reach{\Store_2}{\ImmutableBorrows{\VEnv_2}}$ it must be that
-    $\Loc\in\Dom{\Store_1}$,
-    $\Store_2 (\Loc) = \Store_1 (\Loc)$
-    and $\Loc\in{\Perm_1'} \Leftrightarrow \Loc\in\Perm_2$
-  \item Resources:
-    Let $\REACH_2' =\Reach{\Store_2}{\Active{\VEnv_2}}$.
-    For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_2} >0$ and $n' =
-    \MultiNumber\Loc{\REACH_2'}$,
-    \begin{itemize}
-    \item if $\Affine{\SE_2}\Loc$ then $n=1$ and $n'\le 1$,
-    \item if $\Linear{\SE_2}\Loc$ then $n=1$ and $n' = 0$,
-    \item if $n'=0$, then $\Loc\notin\Perm_2$.
-    \end{itemize}
-  \item Immutables: For all $\Loc \in \Reach
-    {\Store_2}{\Active{\VEnv_2}}$, if $\neg\Writeable{\SE_2}\Loc$ then
-    $\Store_2 (\ell) = \Store_1 (\ell)$ and $\Loc\in \Perm_2$.
-  \item No thin air permission: For all $\Loc\in \Perm_2$, $\Loc
-    \in \Perm_1' \cup  \Dom{\Store_2} \setminus \Dom{\Store_1}$.
-  \end{itemize}
-
-  Finally, we establish the assumptions for the recursive call
-  @eval delta_2 pi_2 gamma'(x'-:>r_2) i' e'@.
-  To this end, let $\VEnv_3 = \VEnv' (x'\mapsto r_2)$.
-  \begin{itemize}
-  \item $\inferS{C'}{\E'\bvar{x'}{\tau_2}}{e'}{\tau_1}$
-
-    which holds by \eqref{eq:5}.
-  \item $\SE_2 \vdash \VEnv' (x' \mapsto r_2) : \E'\bvar{x'}{\tau_2} $
-
-    By \eqref{eq:4}, $\SE_1\le\SE_2$ by \eqref{eq:7}, and weakening
-    Lemma~\ref{lemma:store-weakening}, we have
-    $\SE_2 \vdash \VEnv' : \E'$.
-    It remains to show $\SE_2 \vdash r_2 : \tau_2$, which is
-    \eqref{eq:8}.
-  \item  $\vdash \Store_2 : \SE_2$\\
-    holds by \eqref{eq:7}.
-  \item  $\Rawloc{\Perm_2} \subseteq \Dom{\Store_2}$\\
-    by \eqref{eq:9}.
-  \item $\Reach{\Store_2}{\Active{\VEnv_3}, \MutableBorrows{\VEnv_3}, \ImmutableBorrows{\VEnv_3}} \subseteq \Perm_2$\\
-    This fact follows from (\ref{eq:10}) becase $\VEnv'$ is contained
-    in the closure for $r_1$ and $\Store_1 \le \Store_2$. Moreover,
-    either the closure is unreachable from $\VEnv_2$ or it is
-    immutable, so that the permissions are retained to $\Perm_2$.
-    For $r_2$ bound to $x'$, we obtain this from (\ref{eq:11}).
-  \item Incoming Resources: Let $\REACH_3 = \Reach{\Store_2}{\VEnv_3}$.
-    \begin{itemize}
-    \item
-      For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store_2}{\Active{\VEnv_3}}} >0$,
-      if $\Affine{\SE_2}\Loc$ then $\MultiNumber\Loc{\REACH_3}= 1$
-    \item For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store_2}{\MutableBorrows{\VEnv_3}}} >0$, it
-      must be that $\MultiNumber\Loc{\REACH_3}=1$.
-    \end{itemize}
-  \item $i'<i$ and  @eval delta_2 pi_2 gamma' i' e'@ terminates
-    with $R_3 \ne \TimeOut$.
-  % \item  $i\in\Nat$ and $\Store_2, \Perm_2, \VEnv' (x'\mapsto r_2) \vdash {e'}
-  %   \Downarrow^i R_3$ and $R_3\ne \TimeOut$.
-  \end{itemize}
-  Hence, we can apply the inductive hypothesis and obtain
-  $\Store_3$, $\Perm_3$, $r_3$, $\SE_3$ such that
-  \begin{gather}
-    R_3 = \Ok{\Store_3, \Perm_3, r_3}
-    \\\label{eq:12}
-    \SE_2 \le \SE_3 \qquad
-    \Store_2 \le \Store_3 \qquad
-    \vdash \Store_3 :  \SE_3
-    \\\label{eq:13}
-    \Rawloc{\Perm_3} \subseteq \Dom{\Store_3}
-    \\\label{eq:14}
-    \SE_3 \vdash r_3 : \tau_1
-    \\\label{eq:15}
-    \Reach{\Store_3}{r_3} \subseteq \Perm_3
-  \end{gather}
-  \begin{itemize}
-  \item Outside: For all $\Loc \in \Dom{\Store_2} \setminus
-    \Reach{\Store_3}{\VEnv_3}$ it must be that
-    $\Store_3(\Loc) = \Store_2 (\Loc)$
-    and $\Loc\in\Perm_2 \Leftrightarrow \Loc\in\Perm_3$
-  \item Immutables: For all $\Loc \in
-    \Reach{\Store_3}{\ImmutableBorrows{\VEnv_3}}$ it must be that
-    $\Loc\in\Dom{\Store_2}$,
-    $\Store_3 (\Loc) = \Store_2 (\Loc)$
-    and $\Loc\in{\Perm_2} \Leftrightarrow \Loc\in\Perm_3$
-  \item Resources:
-    Let $\REACH_3' =\Reach{\Store_3}{\Active{\VEnv_3}}$.
-    For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_3} >0$ and $n' =
-    \MultiNumber\Loc{\REACH_3'}$,
-    \begin{itemize}
-    \item if $\Affine{\SE_2}\Loc$ then $n=1$ and $n'\le 1$,
-    \item if $\Linear{\SE_2}\Loc$ then $n=1$ and $n' = 0$,
-    \item if $n'=0$, then $\Loc\notin\Perm_3$.
-    \end{itemize}
-  \item Immutables: For all $\Loc \in \Reach
-    {\Store_3}{\Active{\VEnv_2}}$, if $\neg\Writeable{\SE_2}\Loc$ then
-    $\Store_3 (\ell) = \Store_2 (\ell)$ and $\Loc\in \Perm_3$.
-  \item No thin air permission: For all $\Loc\in \Perm_3$, $\Loc
-    \in \Perm_2 \cup  \Dom{\Store_3} \setminus \Dom{\Store_2}$.
-  \end{itemize}
-  From this we can finally conclude the inductive step.
-
-  Let $\Store' = \Store_3$, $\Perm' = \Perm_3$, $r' = r_3$, and $\SE'
-  = \SE_3$. Clearly $R' = R_3$ hence
-  \begin{itemize}
-  \item $R' = \Ok{\Store', \Perm', r'}$
-  \item by transitivity, $\Store \le \Store'$ and $\SE \le \SE'$
-  \item by (\ref{eq:12}), $\vdash \Store' : \SE'$
-  \item by (\ref{eq:13}), $\Rawloc{\Perm'} \subseteq \Dom{\Store'}$
-  \item by (\ref{eq:14}), $\SE' \vdash r' : \tau_1$
-  \item by (\ref{eq:15}), $\Reach{\Store'}{r'} \subseteq \Perm'$
-  \item Outside: Let $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store'}{\VEnv}$ and show that that
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
-
-    Inspecting the ``Outside'' cases for the subterms, we find that
-    all of them only modify (permissions of) objects reachable from
-    $\VEnv$ or newly allocated ones. Hence, the claim follows.
-  \item Immutables: Let $\Loc \in
-    \Reach{\Store'}{\ImmutableBorrows\VEnv}$ and show that
-    $\Loc\in\Dom\Store$,
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm'$.
-
-    By definition of splitting, $\ImmutableBorrows{\VEnv_1} =
-    \ImmutableBorrows{\VEnv_2} = \ImmutableBorrows\VEnv$. Moreover,
-    $\VEnv_3$ refers to objects reachable from $\VEnv_1$ and $\VEnv_2$
-    or that are new. By the inductive hypothesis on each
-    subevaluation, contents and permissions of the immutable objects
-    remain the same.
-  \item Resources:
-    Let $\REACH' =\Reach{\Store'}{\Active\VEnv}$.
-    For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
-    \MultiNumber\Loc{\REACH'}$,
-    \begin{itemize}
-    \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
-    \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
-    \item if $n'=0$, then $\Loc\notin\Perm'$.
-    \end{itemize}
-    Follows from the inductive hypotheses on the subevaluations.
-  \item Immutables: For all $\Loc \in \Reach
-    {\Store'}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Loc$ then
-    $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm'$.
-
-    Follows from Immutable and Outside conditions of the subevaluations.
-  \item No thin air permission: For all $\Loc\in \Perm'$, $\Loc
-    \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
-
-    Immediate.
-  \end{itemize}
-
-%  \clearpage{}
-  \textbf{case $e$ of}
+  \newpage{}
+  \textbf{Case $e$ of}
   \lstsemrule{sregion}
 
-  By assumption $\ruleSDRegion$.
+  We need to invert rule \TirName{Region}
+  \begin{mathpar}
+    \ruleSDRegion
+  \end{mathpar}
 
   We need to establish the assumptions for the recursive call
-  @eval delta pi' gamma i' e_1@.
-  \begin{itemize}
-  \item $\inferS{C}{\E'}{e}{\tau}$ by inversion of typing.
-  \item To establish $\SE \vdash \VEnv' : \E'$, we find that
-    $\lregion{C}{x}{\E}{\E'}$ only changes the $x$ entry of $\E$ to
-    ${\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau_x}}}$ in
-    $\E'$ where $C \vdash_e {(\BORROW_n\lk k\lk\BORROW_\infty)}$. This
-    change moves the entry for $x$ from $\Suspended\VEnv$ to either
-    $\MutableBorrows\VEnv$ or $\ImmutableBorrows\VEnv$. The same
-    happens in the semantics by mapping updating $\VEnv$ to $\VEnv'$.
-  \item $\vdash \Store : \SE$ by assumption.
-  \item $\Rawloc{\Perm'} \subseteq \Dom\Store$: we only change
-    $\rho$ to $\rho'$, but their raw location is the same.
-  \item $\Reach\Store{\Active{\VEnv'}, \MutableBorrows{\VEnv'},
-      \ImmutableBorrows{\VEnv'}} \subseteq \Perm'$ because we
-    ``activate'' the borrow for $x$ by putting $\rho'$ into $\Perm'$:
-    with the assumption $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv,
-      \ImmutableBorrows\VEnv} \subseteq \Perm$, we covers the remaining addresses.
-  \item Incoming Resources: For $\REACH = \Reach\Store\VEnv$ we know that
-    \begin{enumerate}
-    \item\label{item:1}
-      For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active\VEnv}} >0$,
-      if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc\REACH= 1$
-    \item\label{item:2} For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store}{\MutableBorrows\VEnv}} >0$, it
-      must be that $\MultiNumber\Loc\REACH=1$.
-    \item\label{item:3} For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store}{\Suspended\VEnv}} >0$, it
-      must be that $\MultiNumber\Loc\REACH=1$.
-    \end{enumerate}
-    For $\REACH' = \Reach\Store{\VEnv'}$ we know that
-    Item~\ref{item:1} and Item~\ref{item:3} do not change. Item~\ref{item:2} is not
-    affected if $\BORROW=\IBORROW$. If $\BORROW=\MBORROW$, then we
-    can deduce $\MultiNumber\Loc\REACH=1$ for the
-    underlying location of $\rho'$ from Item~\ref{item:3}.
-  \item  $i'<i\in\Nat$ and @eval delta pi' gamma' i' e@ terminates
-    with $R\ne \TimeOut$.
-  \end{itemize}
-  Induction yields that
-  \begin{itemize}
-  \item
-    $R_1 = \Ok{\Store_1, \Perm_1, r_1}$
-  \item $\SE \le \SE_1$, $\Store \le \Store_1$,
-    $\vdash \Store_1 : \SE_1$
-  \item $\Rawloc{\Perm_1} \subseteq \Dom{\Store_1}$
-  \item $\SE_1 \vdash r_1 : \tau$
-  \item $\Reach{\Store_1}{r_1} \subseteq \Perm_1$
-  \item Outside: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store_1}{\VEnv'}$ it must be that
-    $\Store_1 (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm' \Leftrightarrow \Loc\in\Perm_1$.
-  \item Immutables: For all $\Loc \in
-    \Reach{\Store_1}{\ImmutableBorrows{\VEnv'}}$ it must be that
-    $\Loc\in\Dom\Store$,
-    $\Store_1 (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm' \Leftrightarrow \Loc\in\Perm_1$.
-  \item Resources:
-    Let $\REACH_1 =\Reach{\Store_1}{\Active{\VEnv'}}$.
-    For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH_1} >0$ and $n' =
-    \MultiNumber\Loc{\REACH_1}$,
-    \begin{itemize}
-    \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
-    \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
-    \item if $n'=0$, then $\Loc\notin\Perm_1$.
-    \end{itemize}
-  \item Immutables: For all $\Loc \in \Reach
-    {\Store_1}{\Active{\VEnv'}}$, if $\neg\Writeable{\SE}\Loc$ then
-    $\Store_1 (\ell) = \Store (\ell)$ and $\Loc\in \Perm_1$.
-  \item No thin air permission: For all $\Loc\in \Perm_1$, $\Loc
-    \in \Perm' \cup  \Dom{\Store_1} \setminus \Dom{\Store}$.
-  \end{itemize}
-  From these outcomes, we prove the inductive step.
-  Let $\Store' = \Store_1$, $\Perm_1' = \Perm_1-\rho'$, $r' = r_1$ and
-  \begin{itemize}
-  \item $R' = \Ok{\Store', \Perm_1', r'}$
-  \item  $\SE \le \SE'$, $\Store \le \Store'$,
-    $\vdash \Store' : \SE'$  by the subevaluation.
-  \item $\Rawloc{\Perm_1'} = \Rawloc{\Perm_1-\rho'} \subseteq \Dom{\Store'}$
-  \item $\SE' \vdash r' : \tau$
-    %%% ok the next bit is fishy, but morally correct
-  \item The constraint $\entail C {\Cleq{\tau}{\klin_{n-1}}}$
-    along with the previous assumption on the kind $k$ of the type of $x$,
-    $C \vdash_e {(\BORROW_n\lk k\lk\BORROW_\infty)}$, yields a
-    contradiction, which shows that $\rho'$ cannot be reachable from $r'$.
+  @eval \Store \Perm' \VEnv' i' e'@ where  $\VEnv' =
+  \VEnv (x\mapsto \Addr')$.
 
-    Hence, we conclude  $\Reach{\Store'}{r'} \subseteq \Perm_1- \rho'
-    = \Perm_1'$.
-  \item Outside: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store'}{\VEnv}$ it must be that
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1'$. Immediate from
-    the subevaluation as $\VEnv$ and $\VEnv'$ reach the same set of locations.
-  \item Immutables: For all $\Loc \in
-    \Reach{\Store'}{\ImmutableBorrows{\VEnv}}$ it must be that
-    $\Loc\in\Dom\Store$,
-    $\Store' (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm_1'$.
-    This set can only be affected if $\rho'$ is an shared
-    borrow. But in this case, $\rho'$ is not reachable from
-    $\ImmutableBorrows\VEnv$ so that the conclusion holds.
-  \item Resources are not affected by this evaluation rule:
-    Let $\REACH' =\Reach{\Store'}{\Active{\VEnv}}$.
-    For all $\Loc$ such that $n= \MultiNumber\Loc{\REACH} >0$ and $n' =
-    \MultiNumber\Loc{\REACH'}$,
-    \begin{itemize}
-    \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
-    \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
-    \item if $n'=0$, then $\Loc\notin\Perm_1$.
-    \end{itemize}
-  \item Immutables: For all $\Loc \in \Reach
-    {\Store'}{\Active{\VEnv}}$, if $\neg\Writeable{\SE}\Loc$ then
-    $\Store' (\ell) = \Store (\ell)$ and $\Loc\in \Perm_1'$.
-  \item No thin air permission: For all $\Loc\in \Perm_1'$, $\Loc
-    \in \Perm \cup  \Dom{\Store'} \setminus \Dom{\Store}$.
-  \end{itemize}
-%  \clearpage{}
-  \textbf{case $e$ of}
-  \lstsemrule{sborrow}
-
-  By assumption
-  \begin{enumerate}
-  \item $\ruleSDBorrow$.
-  \item\label{item:4} $\SE \vdash \VEnv : \E$
-  \item\label{item:7} $\vdash \Store : \SE$
-  \item\label{item:6} $\Rawloc\Perm \subseteq \Dom\Store$
-  \item\label{item:5} $\Reach\Store{\Active\VEnv, \MutableBorrows\VEnv, \ImmutableBorrows\VEnv} \subseteq \Perm$
+  \begin{enumerate}[({A1-}1)]
+  \item $\inferS{C}{\E'}{e}{\tau}$ \\
+    immediate from premise
+  \item $\SE \vdash \VEnv' : \E'$ \\
+    the only change of the environments is at $x$; adding the borrow
+    modifier $\BORROW$ succeeds due to the second premise; the address $\Addr'$
+    stored into $x$ is compatible to its type by store typing
+  \item $\vdash \Store : \SE$ \\
+    Immediate by outer assumption
+  \item\label{item:11} \assumeWellformed{} \\
+    Immediate by outer assumption; adding the modifier does not change
+    the underlying raw location
+  \item\label{item:12} $\Reach\Store\VEnv' \subseteq \Perm$ \\
+    locations were swapped simultaneously
+  \item $\Rawloc{\Active{\VEnv'}}$,
+    $\Rawloc{\MutableBorrows{\VEnv'}}$,
+    $\Rawloc{\ImmutableBorrows{\VEnv'}}$, and
+    $\Rawloc{\Suspended{\VEnv'}}$ are all disjoint \\
+    Immediate by assumption
   % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
-  \item Incoming Resources: Let $\REACH = \Reach\Store\VEnv$.
-    \begin{itemize}
-    \item
-      For all $\Loc$ such that $\MultiNumber\Loc{\Reach{\Store}{\Active\VEnv}} >0$,
-      if $\Affine{\SE}\Loc$ then $\MultiNumber\Loc\REACH= 1$
-    \item For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store}{\MutableBorrows\VEnv}} >0$, it
-      must be that $\MultiNumber\Loc\REACH=1$.
-    \item For all $\Loc$ such that $
-      \MultiNumber\Loc{\Reach{\Store}{\Suspended\VEnv}} >0$, it
-      must be that $\MultiNumber\Loc\REACH=1$.
-    \end{itemize}
-  \item As $i>0$ @eval delta pi gamma i (Borrow (b,x))@ yields some $R\ne \TimeOut$.
+  \item\label{item:15} \assumeIncoming{}{'}
+    Immediate by assumption.
   \end{enumerate}
-  First, $\VEnv (x)$ yields an address $\rho$ by
-  assumption~\ref{item:4}.
 
-  Second, $\rho$ is a borrow address ending with $\BORROW$ also
-  by~\ref{item:4}.
+  The induction hypothesis yields the following statements.
+  $\exists$ $\Store_1$, $\Perm_1$, $r_1$, $\SE_1$ such that
+  \begin{enumerate}[({R1-}1)]
+  \item \resultOk{}{_1}
+  \item \resultEnv{}{_1}
+  \item $\SE_1 \vdash r_1 : \tau$
+  \item \resultPermDom{}{_1}
+  \item \resultReachPerm{}{_1}
+  \item \resultFrame{}{'}{_1}
+  \item \resultImmutables{}{'}{_1}
+  \item \resultMutables{}{'}{_1}
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{'}{_1}
+  \item \resultThinAir{}{_1}
+  \end{enumerate}
 
-  By assumption~\ref{item:5}, $\rho \in \Perm$ as $\rho$ is either in
-  $\MutableBorrows\VEnv$ or $\ImmutableBorrows\VEnv$.
+  It remains to derive the induction hypothesis in the last line. The
+  only additional action is the exchange of permissions which
+  withdraws the borrow.
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{_1}\\
+    Immediate
+  \item \resultEnv{}{_1}\\
+    Immediate
+  \item $\SE_1 \vdash r_1 : \tau$\\
+    Immediate
+  \item \resultPermDom{}{_1} \\
+    The addresses $\Addr$ and $\Addr'$ have the same raw location, so
+    exchanging them does not affect wellformedness. The underlying set
+    of locations does not change.
+  \item \resultReachPerm{}{_1} \\
+    This case is critical for region encapsulation. Here we need to
+    argue that $\Addr'$ is not reachable from $r_1$ because its type
+    $\tau$ is bounded by $\klin_{n-1}$ according to the fourth
+    premise. We conclude with Lemma~\ref{lemma:containment}.
+    %%% need lemma
+  \item \resultFrame{}{'}{_1}
+    Immediate
+  \item \resultImmutables{}{'}{_1} \\
+    Immediate
+  \item \resultMutables{}{'}{_1} \\
+    Immediate
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{'}{_1} \\
+    Immediate
+  \item \resultThinAir{}{_1} \\
+    Immediate
+  \end{enumerate}
 
-  Hence,
-  \begin{itemize}
-  \item $R=\Ok{\Store, \Perm, \rho}$.
-  \item $\SE \le \SE$, $\Store \le \Store$ trivially
-  \item $\vdash \Store : \SE$ by assumption~\ref{item:7}.
-  \item $\Rawloc{\Perm} \subseteq \Dom{\Store}$ by
-    assumption~\ref{item:6}.
-  \item $\SE \vdash \rho : \borrowty{k}{\tau}$ by inversion of typing.
-  \item $\Reach{\Store}{\rho} \subseteq \Perm$ by assumption~\ref{item:5}.
-  \item Outside holds trivially: For all $\Loc \in \Dom{\Store} \setminus
-    \Reach{\Store}{\VEnv}$ it must be that
-    $\Store (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm$.
-  \item Immutables holds trivially: For all $\Loc \in
-    \Reach{\Store}{\ImmutableBorrows\VEnv}$ it must be that
-    $\Loc\in\Dom\Store$,
-    $\Store (\Loc) = \Store (\Loc)$
-    and $\Loc\in\Perm \Leftrightarrow \Loc\in\Perm$.
-  \item Resources:
-    Let $\REACH =\Reach{\Store}{\Active\VEnv}$.
-    For all $\Loc$ such that $n= \MultiNumber\Loc\REACH >0$ and $n' =
-    \MultiNumber\Loc{\REACH}$,
-    \begin{itemize}
-    \item if $\Affine{\SE}\Loc$ then $n=1$ and $n'\le 1$,
-    \item if $\Linear{\SE}\Loc$ then $n=1$ and $n' = 0$,
-    \item if $n'=0$, then $\Loc\notin\Perm$.
-    \end{itemize}
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \newpage{}
+  \textbf{Case $e$ of}
+  \lstsemrule{screateanf}
 
-    This statement is void because $\REACH=\emptyset$ due to the
-    constraint on $\E$ in the typing.
-  \item Immutables: For all $\Loc \in \Reach
-    {\Store}{\Active\VEnv}$, if $\neg\Writeable{\SE}\Loc$ then
-    $\Store (\ell) = \Store (\ell)$ and $\Loc\in \Perm$.
+  We need to invert the corresponding rule
+  \begin{mathpar}
+    \ruleSDCreate
+  \end{mathpar}
 
-    Void for the same reason as before.
-  \item No thin air permission holds trivially: For all $\Loc\in \Perm$, $\Loc
-    \in \Perm \cup  \Dom{\Store} \setminus \Dom{\Store} = \Perm$.
-  \end{itemize}
+  It is sufficient to show that there is some $\SE_1 = \SE(\ell_1 :
+  \tapp\tres\tau)$ such that  
+  $\Store_1$, $\Perm_1$, and $r_1 = \ell_1$ fulfill the following requirements.
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{_1}
+  \item \resultEnv{}{_1} \\
+    For the last item, we need to show that $\SE (\ell_1) :
+    \tapp\tres\tau$, but this follows from the setting of $w$ to a
+    resource storable in the semantics.
+  \item $\SE_1 \vdash r_1 : \tapp\tres\tau$ \\
+    Immediate from the discussion of the preceding case
+  \item \resultPermDom{}{_1} \\
+    Follows from the assumption on $\Perm$ and for $\ell_1$ from the
+    allocation of the resource.
+  \item \resultReachPerm{}{_1} \\
+    Immediate from the assignment to $\Perm_1$.
+  \item \resultFrame{}{}{_1} 
+    Obvious as no existing location is changed.
+  \item \resultImmutables{}{}{_1} \\
+    Obvious as no existing location has changed and no permission is withdrawn.
+  \item \resultMutables{}{}{_1} \\
+    Obvious as no existing location has changed and no permission is
+    withdrawn.
+    % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{_1} \\
+    By the constraint on $\E$ in the \TirName{Create} rule, $\Active\VEnv = \emptyset$.
+  \item \resultThinAir{}{_1} \\
+    Immediate
+  \end{enumerate}
+  
+  \newpage
+  \textbf{Case $e$ of}
+  \lstsemrule{sdestroyanf}
 
+  We need to invert rule \TirName{Destroy}.
+  \begin{mathpar}
+    \ruleSDDestroy
+  \end{mathpar}
+  It is sufficient to show that $\SE_1 = \SE$,
+  $\Store_1$, $\Perm_1$, and $r_1 = ()$ fulfill the following
+  requirements.
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{_1}
+  \item \resultEnv{}{_1} \\
+    Immediate: $\ell$ was updated to void, which has any type.
+  \item $\SE_1 \vdash () : \tunit$
+  \item \resultPermDom{}{_1}\\
+    By assumption on $\Perm$ and because $\Loc$ was removed.
+  \item \resultReachPerm{}{_1} \\
+    Immediate because the reach set is empty
+  \item \resultFrame{}{}{_1} 
+    Only $\Store (\Loc)$ was changed, which is not reachable from the frame.
+  \item \resultImmutables{}{}{_1} \\
+    Immediate because we updated (destroyed) a resource (in $\Active\VEnv$).
+  \item \resultMutables{}{}{_1} \\
+    Immediate because we updated (destroyed) a resource (in $\Active\VEnv$).
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{_1} \\
+    By the constraint on $\E$, $\Loc$ was the only resource passed to
+    this invocation of eval. The claimed condition holds as $\Loc$ was
+    removed from $\Perm_1$ and the location's contents cleared.
+  \item \resultThinAir{}{_1}
+    \\ Immediate
+  \end{enumerate}
 
 \end{proof}
 

@@ -1,6 +1,20 @@
 \section{Type Inference}
 \label{appendix:infer}
 
+\begin{figure*}[tbp]
+  \centering
+  \input{infer/kinds}
+  \caption{Kind inference rules -- $\inferK{(C,\unif)}{{\inP\E}}{{\inP\tau}}{k}$}
+  \label{rules:kinding}
+% \end{figure*}
+
+% \begin{figure*}[!tbp]
+  \input{infer/typing}
+  \caption{Type inference rules --
+    $\inferW{\Sigma}{(C,\psi)}{{\inP\E}}{{\inP e}}{\tau}$ }
+  \label{rules:typing:full}
+\end{figure*}
+
 In this appendix, we provide the complete type inference rules
 and show that our type inference algorithm is sound and complete.
 The constraints rules are already shown in \cref{inference}.
@@ -9,18 +23,10 @@ and the detailed treatment of let-bindings in
 \cref{infer:let}.
 The type inference rules are shown in \cref{rules:typing:full}.
 The various theorems and their proofs are direct adaptations
-of the equivalent statements for HM(X) \citep{sulzmann1997proofs}.
-
+of the equivalent statements for \hmx \citep{sulzmann1997proofs}.
 
 \subsection{Kind inference}
 \label{rules:kinding:full}
-
-\begin{figure}[tbh]
-  \centering
-  \input{infer/kinds}
-  \caption{Kind inference rules -- $\inferK{(C,\unif)}{{\inP\E}}{{\inP\tau}}{k}$}
-  \label{rules:kinding}
-\end{figure}
 
 We write $\inferK{(C,\unif)}{{\inP\E}}{{\inP\tau}}{k}$ when type $\tau$ has kind $k$
 in environment $\E$ under constraints $C$ and unifier $\unif$.
@@ -59,7 +65,7 @@ $e_2$, and should not be part of the returned usage environment.
 
 As per tradition in ML languages, generalization is performed
 on let-bindings.
-Following HM(X), we write $(C_\schm, \schm) = \generalize{C}{\E}{\tau}$
+Following \hmx, we write $(C_\schm, \schm) = \generalize{C}{\E}{\tau}$
 for the pair of a constraint and a scheme resulting from
 generalization. The definition is provided in \cref{rule:infer:let}.
 The type scheme $\schm$ is created by quantifying over all the appropriate
@@ -72,14 +78,6 @@ It also reflects the fact that there
 should exist at least one solution for $C$ for the scheme to be valid.
 \citet{DBLP:journals/tapos/OderskySW99} give a detailed account
 on the projection operators in HM inference.
-
-
-\begin{figure*}[!btp]
-  \input{infer/typing}
-  \caption{Type inference rules --
-    $\inferW{\Sigma}{(C,\psi)}{{\inP\E}}{{\inP e}}{\tau}$ }
-  \label{rules:typing:full}
-\end{figure*}
 
 
 % \begin{figure}[tp]

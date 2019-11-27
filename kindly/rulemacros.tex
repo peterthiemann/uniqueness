@@ -235,7 +235,7 @@
   \inferrule[App]
   {
     \inferS{C}{\E_1}{e_1}{\tau_2 \tarr{k} \tau_1} \\
-    \inferS{C}{\E_2}{e_2}{\tau'_2} \\
+    \inferS{C}{\E_2}{e_2}{\tau'_2} \\\\
     \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
     \entail C {\Cleq{\tau_2'}{\tau_2}}
   }
@@ -278,29 +278,28 @@
 \newcommand\ruleSDCreate{
   \inferrule[Create]
   { \inferSK{C}{\E}{\tau}{k} \\
-    \entail C {\Cleq k {\kun_0}} }
+    \entail C {\Cleq k {\kun_0} \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} }
   { \inferS{C}{\E}{\create}{\tau \tarr{} \tapp\tres\tau } }
 }
 \newcommand\ruleSDObserve{
   \inferrule[Observe]
   { \inferSK{C}{\E}{\tau}{k} \\
-    \entail C {\Cleq k {\kun_0}} \\
-    \kvar \text{ fresh}
+    \entail C {\Cleq k {\kun_0}  \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} \\
   }
-  { \inferS{C}{\E}{\observe}{\borrowty[\IBORROW]{\kvar}{\tapp\tres\tau} \tarr{} \tau} }
+  { \inferS{C}{\E}{\observe}{\borrowty[\IBORROW]{k'}{\tapp\tres\tau} \tarr{} \tau} }
 }
 \newcommand\ruleSDUpdate{
   \inferrule[Update]
   { \inferSK{C}{\E}{\tau}{k} \\
-    \entail C {\Cleq k {\kun_0}} \\
-    \kvar \text{ fresh}
+    \entail C {\Cleq k {\kun_0}  \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} \\
   }
-  { \inferS{C}{\E}{\update}{\borrowty[\MBORROW]{\kvar}{\tapp\tres\tau} \tarr{} \tau \tarr{\kaff} \tunit } }
+  { \inferS{C}{\E}{\update}{\borrowty[\MBORROW]{k'}{\tapp\tres\tau} \tarr{} \tau \tarr{\kaff} \tunit } }
 }
 \newcommand\ruleSDDestroy{
   \inferrule[Destroy]
   { \inferSK{C}{\E}{\tau}{k} \\
-    \entail C {\Cleq k {\kun_0}} }
+    \entail C {\Cleq k {\kun_0}  \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} \\
+  }
   { \inferS{C}{\E}{\destroy}{\tapp\tres\tau \tarr{} \tunit} }
 }
 
@@ -308,7 +307,7 @@
   \inferrule[Let]
   { \inferS{C \Cand D}{\E_1}{e_1}{\tau_1} \\
     (C_\schm,\schm) = \generalize{D}{\E}{\tau_1}\\
-    \entail{C}{C_\schm} \\
+    \entail{C}{C_\schm} \\\\
     \inferS{C}{\E;\bvar{x}{\schm}}{e_2}{\tau_2} \\
     \addlin{\lsplit{C}{\E}{\E_1}{\E_2}}\\
   }
@@ -560,11 +559,11 @@
   \inferrule[App$_I$]
   { \tvar,\kvar\text{ fresh}\\
     \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
-    \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\
+    \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\\\
     \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
     D =
     C_1 \Cand C_2 \Cand \Cleq{\tau_1}{\tau_2\tarr{\kvar}\tvar}
-    \Cand \addlin{C_s} \\
+    \Cand \addlin{C_s} \\\\
     \unif' = \unif_1 \mostgeneral \unif_2 \\
     (C,\unif) = \normalize{D}{\unif'}\\
   }
@@ -647,6 +646,60 @@
     D = C' \Cand C_\tau \Cand \Cleq{k_\tau}{\klin_{n-1}} \Cand C_r\\\\
     (C,\unif) = \normalize{D}{\unif' \mostgeneral \unif_\tau}\\
   }  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{\Sone x \BORROW}{e}}{\tau} }
+}
+
+\newcommand\ruleResultConstant{%
+  \inferrule{}{ \SE \vdash c : \CType{c} }
+}
+
+\newcommand\ruleResultLocation{%
+  \inferrule{}{ \SE \vdash \ell : \SE (\ell) }
+}
+
+\newcommand\ruleResultBorrow{%
+  \inferrule{
+    \Multi\BQ \Bcompatible \BORROW_n \\
+    \SE \vdash \Loc  : \tau
+  }{  \SE \vdash
+    \Multi\BQ\Loc : \borrowty[\BORROW]{\BORROW_n}{\tau}}
+}
+
+\newcommand\ruleStorableFreed{%
+  \inferrule{}{
+    \SE \vdash \StFreed : \tau
+  }
+}
+
+\newcommand\ruleStorableResource{%
+  \inferrule{
+    \SE \vdash r : \IType{\tcon}{\Multi\tau}
+  }{
+    \SE \vdash {[r]} : \tapp{\tcon}{\Multi\tau}
+  }
+}
+
+\newcommand\ruleStorablePair{%
+  \inferrule{
+    \SE \vdash r_1 : \tau_1 \\
+    \SE \vdash r_2 : \tau_2 \\
+    \entail\Cempty\Cleq{\tau_1}{k} \Cand \Cleq{\tau_1}{k}
+  }{
+    \SE \vdash \introPair[k]{r_1}{r_2} : \tyPair[k]{\tau_1}{\tau_2}
+  }
+}
+
+\newcommand\ruleStorableClosure{%
+  \inferrule{
+    (\exists \E, C)~ \SE \vdash \VEnv : \E
+    \\
+    \Disjoint\E
+    \\
+    \inferS{C}{\E;\bvar x{\tau_2}}{e}{\tau_1}
+    \\
+    \addlin{\entail{C}{\Cleq{\E}{k}}}
+  }{
+    \SE \vdash (\VEnv, \lam[k]xe) : \tau_2\tarr{k}\tau_1
+  }
 }
 
 %%% Local Variables:
