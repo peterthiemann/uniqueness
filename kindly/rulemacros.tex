@@ -191,7 +191,9 @@
 
 \newcommand\ruleSDConst{
   \inferrule[Const]
-  {}
+  {
+    \entail C {\addlin{\Cleq{\E}{\kaff_\infty}}}
+  }
   { \inferS{C}{\E}{c}{\CType c} }
 }
 

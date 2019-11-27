@@ -739,7 +739,7 @@ refer to newly created values.
   \begin{enumerate}[({R}1)]
   \item \resultOk{}{}
   \item \resultEnv{}{}
-    \\ Immediate by reflexivity.
+    \\ Immediate by reflexivity and assumption.
   \item $\SE \vdash r : \tau$
     \\ Immediate by assumption~\ref{item:32}.
   \item \resultPermDom{}{}
@@ -756,6 +756,39 @@ refer to newly created values.
   \item \resultResources{}{}{}
     \\ As $\Perm$ remains the same, a linear resource in $x$ is
     returned untouched.
+  \item \resultThinAir{}{}
+    \\ Immediate
+  \end{enumerate}
+
+  \newpage
+  \textbf{Case $e$ of}
+  \lstsemrule{const}
+
+  We need to invert rule \TirName{Const}.
+  \begin{mathpar}
+    \ruleSDConst
+  \end{mathpar}
+
+  We need to establish the claims for $\Store' = \Store$,
+  $\Perm'=\Perm$, $r' = c$, and $\SE' = \SE$:
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{}
+  \item \resultEnv{}{} \\
+    By assumption~\ref{item:33}.
+  \item $\SE \vdash c : \CType c$
+    \\by result typing.
+  \item \resultPermDom{}{}
+    \\ By assumption~\ref{item:11}.
+  \item \resultReachPerm{}{}
+    \\ As $\Reach\Store c = \emptyset$.
+  \item \resultFrame{}{}{}
+    \\ Immediate
+  \item \resultImmutables{}{}{}
+    \\ Immediate
+  \item \resultMutables{}{}{}
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{}
+    \\ Immediate as $\Active\VEnv = \emptyset$.
   \item \resultThinAir{}{}
     \\ Immediate
   \end{enumerate}
