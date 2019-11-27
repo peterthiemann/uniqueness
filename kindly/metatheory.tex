@@ -53,6 +53,10 @@ times $x$ occurs in multiset $M$.
 }
 \newcommand\resultReachPerm[2]{
   $\Reach{\Store#2}{r#2} \subseteq \Perm#2$
+  \textcolor{red}{
+    $\cap (\Reach{\Store#2}{\VEnv#1} \setminus
+    \Reach{\Store#2}{\Suspended{\VEnv#1}}
+    \cup \Dom{\Store#2} \setminus \Dom{\Store#1})$}.
 }
 \newcommand\resultFrame[3]{
   % input, inputenv, output
@@ -106,16 +110,14 @@ times $x$ occurs in multiset $M$.
   \\
   For all $\Loc\in \REACH#1$ it must be that
   $\MultiNumber\Loc{\REACH#1}=\MultiNumber\Loc{\REACH#3}=1$,
-  $\Loc\notin\Perm#3$, and if $\Store#1(\Loc)$ is a resource, then
-  $\Store#3 (\Loc) = \StFreed$.
-  % \begin{itemize}
-  % \item if $\Linear{\SE#1}\Loc$
-  %   then $n=n'=1$, $\Loc\notin\Perm#2$, and if $\Store#1(\Loc)$ is a
-  %   resource, then $\Store#2 (\Loc) = \StFreed$;
-  % \item if $\Affine{\SE#1}\Loc$ then $n=1$ and $n'\le 1$;
-  % \item if $\Unrestricted{\SE#1}\Loc$ then
-  %   $\Store#2 (\ell) = \Store#1 (\ell)$ and $\Loc\in \Perm#2$.
-  % \end{itemize}
+  \textcolor{red}{
+    either $\Loc\notin\Perm#3$ and $\Store#3 (\Loc) =\StFreed$
+    or $\Loc\in\Perm#3$ and $\Loc \in \Reach{\Store#3}{r}$.
+  }
+  
+  \textcolor{blue}{  $\Loc\notin\Perm#3$, and if $\Store#1(\Loc)$ is a resource, then
+    $\Store#3 (\Loc) = \StFreed$.
+  }
 }
 \newcommand\resultThinAir[2]{
   No thin air permission: \\
@@ -146,7 +148,7 @@ times $x$ occurs in multiset $M$.
   Suppose that
   \begin{enumerate}[({A}1)]
   \item $\inferS{C}{\E}{e}{\tau}$
-  \item $\SE \vdash \VEnv : \E$
+  \item\label{item:32} $\SE \vdash \VEnv : \E$
   \item $\vdash \Store : \SE$
   \item\label{item:11} \assumeWellformed{}
   \item\label{item:12} $\Reach\Store\VEnv \subseteq \Perm$

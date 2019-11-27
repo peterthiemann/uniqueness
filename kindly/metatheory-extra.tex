@@ -346,7 +346,7 @@ refer to newly created values.
 
   \textbf{Case $e$ of}
   \lstsemrule{slet}
-  We need to invert rule \TirName{Let}:
+  We need to invert rule \TirName{Let} for monomorphic let:
   \begin{gather*}
     \ruleSDILet
     % \ruleSDLet
@@ -457,8 +457,14 @@ refer to newly created values.
   \item \resultPermDom{}{_2}
     \\ Immediate from~\ref{item:20}.
   \item \resultReachPerm{}{_2}
-    \\ Immediate from~\ref{item:21}.
-  \item \resultFrame{}{}{_2}
+    \\ Immediate from~\ref{item:21}
+    \textcolor{red}{because $\Reach{\Store_2}{\VEnv_1}
+    \subseteq \Reach{\Store_2}{\VEnv} $ and
+    $\Reach{\Store_2}{\Suspended{\VEnv_1}} \subseteq
+    \Reach{\Store_2}{\Suspended\VEnv}$.
+    Moreover, $\Dom\Store \subseteq \Dom{\Store_1}$.
+  }
+\item \resultFrame{}{}{_2}
     ~\\ Suppose that $\Loc \in \Dom\Store \setminus
     \Rawloc{\Reach{\Store_2}{\VEnv}}$.
     \\ Then $\Loc \in \Dom\Store \setminus
@@ -716,6 +722,41 @@ refer to newly created values.
     this invocation of eval. The claimed condition holds as $\Loc$ was
     removed from $\Perm_1$ and the location's contents cleared.
   \item \resultThinAir{}{_1}
+    \\ Immediate
+  \end{enumerate}
+
+  \newpage
+  \textbf{Case $e$ of}
+  \lstsemrule{var}
+
+  We need to invert rule \TirName{Var}.
+  \begin{mathpar}
+    \ruleSDIVar
+  \end{mathpar}
+
+  We establish that the claims hold for
+  $\Store' = \Store$, $\Perm' = \Perm$, $r = \VEnv (x)$, and $\SE' = \SE$.
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{}
+  \item \resultEnv{}{}
+    \\ Immediate by reflexivity.
+  \item $\SE \vdash r : \tau$
+    \\ Immediate by assumption~\ref{item:32}.
+  \item \resultPermDom{}{}
+    \\ Immediate by assumption~\ref{item:11}
+  \item \resultReachPerm{}{}
+    \\ Immediate
+  \item \resultFrame{}{}{}
+    Immediate as permissions and store stay the same.
+  \item \resultImmutables{}{}{}
+    \\ Immediate
+  \item \resultMutables{}{}{}
+    \\Immediate
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{}
+    \\ As $\Perm$ remains the same, a linear resource in $x$ is
+    returned untouched.
+  \item \resultThinAir{}{}
     \\ Immediate
   \end{enumerate}
 

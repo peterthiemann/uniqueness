@@ -282,7 +282,8 @@ let rec eval
     let* w = delta_1.*(ell_1) in
     let* (gamma', k', x', e') = getstclos w in
     let pi_1' = if k' <= KUNR None then pi_1 else pi_1 <-> !$ ell_1 in
-    let* (delta_2, pi_2, r_2) = eval delta_1 pi_1' gamma_2 i' e_2 in
+    let* delta_1' = delta_1.*(ell_1) <- (if k' <= KUNR None then w else STRELEASED) in
+    let* (delta_2, pi_2, r_2) = eval delta_1' pi_1' gamma_2 i' e_2 in
     let* (delta_3, pi_3, r_3) = eval delta_2 pi_2 gamma'.+(x'-:> r_2) i' e' in
     Ok (delta_3, pi_3, r_3)
   (**)
