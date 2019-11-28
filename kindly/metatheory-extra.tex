@@ -181,12 +181,12 @@ by appropriate borrowing on entry to a region.
 \begin{mathpar}
   \inferrule{}{\SE \le \SE}
 
-  \inferrule{\SE \le \SE' \\ \ell \notin \Dom\Store}{\SE \le \SE' (\ell : \schm)}
+  \inferrule{\SE \le \SE' \\ \Loc \notin \Dom\Store}{\SE \le \SE' (\Loc : \schm)}
 \\
   \inferrule{}{\Store\le\Store}
 
-  \inferrule{\Store \le \Store' \\ \ell \notin \Dom\Store
-  }{\Store \le \Store'[ \ell \mapsto w] }
+  \inferrule{\Store \le \Store' \\ \Loc \notin \Dom\Store
+  }{\Store \le \Store'[ \Loc \mapsto w] }
 \end{mathpar}
 
 \begin{lemma}[Store Weakening]\label{lemma:store-weakening}
@@ -660,19 +660,19 @@ refer to newly created values.
     \ruleSDCreate
   \end{mathpar}
 
-  It is sufficient to show that there is some $\SE_1 = \SE(\ell_1 :
+  It is sufficient to show that there is some $\SE_1 = \SE(\Loc_1 :
   \tapp\tres\tau)$ such that  
-  $\Store_1$, $\Perm_1$, and $r_1 = \ell_1$ fulfill the following requirements.
+  $\Store_1$, $\Perm_1$, and $r_1 = \Loc_1$ fulfill the following requirements.
   \begin{enumerate}[({R}1)]
   \item \resultOk{}{_1}
   \item \resultEnv{}{_1} \\
-    For the last item, we need to show that $\SE (\ell_1) :
+    For the last item, we need to show that $\SE (\Loc_1) :
     \tapp\tres\tau$, but this follows from the setting of $w$ to a
     resource storable in the semantics.
   \item $\SE_1 \vdash r_1 : \tapp\tres\tau$ \\
     Immediate from the discussion of the preceding case
   \item \resultPermDom{}{_1} \\
-    Follows from the assumption on $\Perm$ and for $\ell_1$ from the
+    Follows from the assumption on $\Perm$ and for $\Loc_1$ from the
     allocation of the resource.
   \item \resultReachPerm{}{_1} \\
     Immediate from the assignment to $\Perm_1$.
@@ -704,7 +704,7 @@ refer to newly created values.
   \begin{enumerate}[({R}1)]
   \item \resultOk{}{_1}
   \item \resultEnv{}{_1} \\
-    Immediate: $\ell$ was updated to void, which has any type.
+    Immediate: $\Loc$ was updated to void, which has any type.
   \item $\SE_1 \vdash () : \tunit$
   \item \resultPermDom{}{_1}\\
     By assumption on $\Perm$ and because $\Loc$ was removed.
@@ -782,7 +782,7 @@ refer to newly created values.
   \item \resultReachPerm{}{}
     \\ As $\Reach\Store c = \emptyset$.
   \item \resultFrame{}{}{}
-    \\ Immediate
+    Immediate
   \item \resultImmutables{}{}{}
     \\ Immediate
   \item \resultMutables{}{}{}
@@ -790,6 +790,40 @@ refer to newly created values.
   \item \resultResources{}{}{}
     \\ Immediate as $\Active\VEnv = \emptyset$.
   \item \resultThinAir{}{}
+    \\ Immediate
+  \end{enumerate}
+
+  \newpage
+  \textbf{Case $e$ of}
+  \lstsemrule{spairanf}
+
+  We need to invert rule \TirName{Pair}.
+  \begin{mathpar}
+    \ruleSDAIPair
+  \end{mathpar}
+  Show that $\Store'$, $\Perm'$, $r' = \Loc'$, $\SE' = \SE (\Loc' : \tyPair[k]{\tau_1}{\tau_2})$ such that
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{'}
+  \item \resultEnv{}{'}
+  \item $\SE' \vdash \Loc' : \tyPair{\tau_1}{\tau_2}$
+  \item \resultPermDom{}{'}
+    \\ By assumption~\ref{item:11} and because $\Loc'$ is properly initialized.
+  \item \resultReachPerm{}{'}
+    \\ By assumption~\ref{item:12}, $\Reach{\Store'}{\Loc'} =
+    \Reach\Store{r_1, r_2} \cup \{\Loc'\} \subseteq
+    \Reach{\Store}\VEnv \cup \{\Loc'\}$ and $\{\Loc'\} = \Dom{\Store'}
+    \setminus \Dom\Store$.
+  \item \resultFrame{}{}{'}
+    Immediate
+  \item \resultImmutables{}{}{'}
+    \\ Immediate
+  \item \resultMutables{}{}{'}
+    \\ Immediate
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{'}
+    \\ Every such $\Loc$ must be reachable either from $r_1$ or
+    $r_2$. So they become reachable from $\Loc'$, as required.
+  \item \resultThinAir{}{'}
     \\ Immediate
   \end{enumerate}
 

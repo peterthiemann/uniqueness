@@ -328,6 +328,15 @@ let rec eval
     let (ell', delta') = salloc delta_2 w in
     Ok (delta', pi_2 <+> !$ ell', RADDR !$ ell')
   (**)
+  (* rule spairanf *)
+  | VPair (k, x_1, x_2) ->
+    let* r_1 = gamma.!(x_1) in
+    let* r_2 = gamma.!(x_2) in
+    let w = STPAIR (k, r_1, r_2) in
+    let (ell', delta') = salloc delta w in
+    let pi' = pi <+> !$ ell' in
+    Ok (delta', pi', RADDR !$ ell')
+  (**)
   (* rule smatch *)
   | Match (x, y, e_1, e_2, sp) ->
     let (gamma_1, gamma_2) = vsplit gamma sp in
