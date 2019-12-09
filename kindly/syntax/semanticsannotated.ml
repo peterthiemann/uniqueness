@@ -55,8 +55,8 @@ type exp = Const of int
          (* anf cases *)
          | VApp of ident * ident
          | VPair of kind * ident * ident
-         | VMatch of ident * ident * ident * exp
-         | VMatchBorrow of ident * ident * ident * exp
+         | VMatch of ident * ident * ident * exp * splitting
+         | VMatchborrow of ident * ident * ident * exp * splitting
          | VCreate of ident
          | VDestroy of ident
          | VObserve of ident
@@ -268,10 +268,11 @@ let rec eval
     Ok (delta', pi' <+> !$ ell', RADDR !$ ell')
   (**)
   (* rule lam *)
-  | Lam (k, x', e') ->
-    let w = STCLOS (gamma, k, x', e') in
+  | Lam (k, x, e) ->
+    let w = STCLOS (gamma, k, x, e) in
     let (ell', delta') = salloc delta w in
-    Ok (delta', pi <+> !$ ell', RADDR !$ ell')
+    let pi' = pi <+> !$ ell' in
+    Ok (delta', pi', RADDR !$ ell')
   (**)
   (* rule sapp *)
   | App (e_1, e_2, sp) ->
@@ -350,6 +351,19 @@ let rec eval
     let* (delta_2, pi_2, r_2) = eval delta_1 pi_1' gamma_2.+(x -:> r_1').+(y -:> r_2') i' e_2 in
     Ok (delta_2, pi_2, r_2)
   (**)
+  (* rule smatchanf *)
+  | VMatch (x, y, z, e', sp) ->
+    let (gamma_1, gamma_2) = vsplit gamma sp in
+    let* r_1 = gamma_1.!(z) in
+    let* ell = getloc r_1 in
+    let* w = delta.*(ell) in
+    let* (k', r_1', r_2') = getstpair w in
+    let pi' =
+      if k' <= KUNR None then pi else pi <-> !$ ell
+    in
+    let* (delta_2, pi_2, r_2) = eval delta pi' gamma_2.+(x -:> r_1').+(y -:> r_2') i' e' in
+    Ok (delta_2, pi_2, r_2)
+  (**)
   (* rule matchborrow *)
   | Matchborrow (x, y, e_1, e_2, sp) ->
     let (gamma_1, gamma_2) = vsplit gamma sp in
@@ -368,6 +382,24 @@ let rec eval
     let pi_2' = (((pi_2 <-> rho_1') <-> rho_2') <+> rho_1) <+> rho_2 in
     Ok (delta_2, pi_2', r_2)
   (**)
+  (* rule matchborrowanf *)
+  | VMatchborrow (x, y, z, e', sp) ->
+    let (gamma_1, gamma_2) = vsplit gamma sp in
+    let* r_1 = gamma_1.!(z) in
+    let* (b, _, ell) = getborrowed_loc r_1 in
+    let* w = delta.*(ell) in
+    let* (k', r_1', r_2') = getstpair w in
+    let* rho_1 = getaddress r_1' in
+    let* rho_2 = getaddress r_2' in
+    let* rho_1' = b<.>rho_1 in
+    let* rho_2' = b<.>rho_2 in
+    let pi' = (((pi <-> rho_1) <-> rho_2) <+> rho_1') <+> rho_2' in
+    let r_1'' = RADDR rho_1' in
+    let r_2'' = RADDR rho_2' in
+    let* (delta_2, pi_2, r_2) = eval delta pi' gamma_2.+(x -:> r_1'').+(y -:> r_2'') i' e' in
+    let pi_2' = (((pi_2 <-> rho_1') <-> rho_2') <+> rho_1) <+> rho_2 in
+    Ok (delta_2, pi_2', r_2)
+  (**)
   (* rule sregion *)
   | Region (e, n, x, b) ->
     let* RADDR rho = gamma.!(x) in
@@ -378,7 +410,7 @@ let rec eval
     let pi_1 = (pi_1 <-> rho') <+> rho in
     Ok (delta_1, pi_1, r_1)
   (**)
-  (* previous *)
+  (*(* previous *)
   | Region (e_1, n, x, b) ->
     let* rx = gamma.!(x) in
     let* rho = getaddress rx in
@@ -389,19 +421,21 @@ let rec eval
     let* (delta_1, pi_1, r_1) = eval delta pi' gamma' i' e_1 in
     let pi_1' = (pi <-> rho') <+> rho in
     Ok (delta_1, pi_1', r_1)
+   *)
   (* rule sborrow *)
   | Borrow (b, x) ->
     let* RADDR rho = gamma.!(x) in
     let*? () = rho <?> b && rho <|= pi in
     Ok (delta, pi, RADDR rho)
   (**)
-  (* previous *)
+  (*(* previous *)
   | Borrow (b, x) ->
     let* rx = gamma.!(x) in
     let* rho = getaddress rx in
     let* rho' = b<.>rho in
     let*? () = rho' <|= pi in
     Ok (delta, pi, RADDR rho')
+   *)
   (* rule screate *)
   | Create ->
     let w = STRSRC (RCONST 0) in
@@ -452,6 +486,17 @@ let rec eval
     let* r = getstrsrc w in
     Ok (delta_1, pi_1, r)
   (**)
+  (* rule sobserveanf *)
+  | VObserve (x) ->
+    let* r = gamma.!(x) in
+    let* rho = getaddress r in
+    let*? () = rho <|= pi in
+    let* (b, _, ell) = getborrowed_loc r in
+    let*? () = (b = Imm) in
+    let* w = delta.*(ell) in
+    let* r' = getstrsrc w in
+    Ok (delta, pi, r')
+  (**)
   (* rule supdate *)
   | Update (e_1, e_2, sp) ->
     let (gamma_1, gamma_2) = vsplit gamma sp in
@@ -466,4 +511,18 @@ let rec eval
     let* delta_2' = delta_2.*(ell) <- STRSRC (r_2) in
     let pi_2' = pi_2 <-> rho in
     Ok (delta_2', pi_2', RVOID)
+  (**)
+  (* rule supdateanf *)
+  | VUpdate (x_1, x_2) ->
+    let* r_1 = gamma.!(x_1) in
+    let* rho = getaddress r_1 in
+    let* (b, _, ell) = getborrowed_loc r_1 in
+    let*? () = (b = Mut) in
+    let* r_2 = gamma.!(x_2) in
+    let* w = delta.*(ell) in
+    let* r = getstrsrc w in
+    let*? () = rho <|= pi in
+    let* delta' = delta.*(ell) <- STRSRC (r_2) in
+    let pi' = pi <-> rho in
+    Ok (delta', pi', RVOID)
 (**)

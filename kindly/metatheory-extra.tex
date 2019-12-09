@@ -827,6 +827,148 @@ refer to newly created values.
     \\ Immediate
   \end{enumerate}
 
+  \newpage
+  \textbf{Case $e$ of}
+  \lstsemrule{lam}
+
+  We need to invert rule \TirName{Abs}
+  \begin{mathpar}
+    \ruleSDLam
+  \end{mathpar}
+
+  Show that $\Store'$, $\Perm'$, $r' = \Loc'$, and $\SE' = \SE (\Loc'
+  : \tau_2\tarr{k}\tau_1)$ fulfill
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{'}
+  \item \resultEnv{}{'} \\
+    Immediate by definition and store typing
+  \item $\SE' \vdash r' : \tau_2\tarr{k}\tau_1$ \\
+    Immediate by store typing
+  \item \resultPermDom{}{'} \\
+    Wellformedness holds by assumption on $\Perm$ and because $\Loc'$ is a new location.
+    The domain constraint is assumed for $\Perm$ and $\Loc'$ is
+    initialized to a  closure.
+  \item \resultReachPerm{}{'} 
+    \begin{align*}
+      \Reach{\Store'}{r'} & = \{ \Loc' \} \cup \Reach{\Store'}{\VEnv} \\
+      &= \Dom{\Store'}\setminus\Dom\Store \cup \Reach{\Store'}{\VEnv}
+    \end{align*}
+    Moreover, the constraint ${\Cleq{\E}{k}}$ implies that
+    $\Suspended\VEnv = \emptyset$.
+  \item \resultFrame{}{}{'} 
+    Immediate
+  \item \resultImmutables{}{}{'}   \\
+    Immediate
+  \item \resultMutables{}{}{'} \\
+    Immediate
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{'} \\
+    The second case is immediately applicable.
+  \item \resultThinAir{}{'} \\
+    Immediate
+  \end{enumerate}
+
+  \newpage
+  \textbf{Case $e$ of}
+  \lstsemrule{sborrow}
+
+  We have to invert rule \TirName{Borrow}
+  \begin{mathpar}
+    \ruleSDBorrow
+  \end{mathpar}
+
+  Show that $\Store' = \Store$, $\Perm' = \Perm$, $r' = \Addr$, $\SE'
+  = \SE$ such that
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{'}
+  \item \resultEnv{}{'} \\
+    Immediate, no changes.
+  \item $\SE' \vdash r' : \borrowty{k}{\tau}$\\
+    Immediate by result typing and because the interpreter checks that
+    the permissions of the borrow are very restricted.
+  \item \resultPermDom{}{'}\\
+    Immediate (no change).
+  \item \resultReachPerm{}{'} \\
+    By typing, $\Addr$ is not in $\Suspended\VEnv$.
+    Hence,  the condition is immediate.
+  \item \resultFrame{}{}{'} 
+    Immediate as no change.
+  \item \resultImmutables{}{}{'}\\
+    Immediate as no change
+  \item \resultMutables{}{}{'} \\
+    Immediate
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{'} \\
+    Immediate because $\REACH$, $\REACH'$ must be empty
+  \item \resultThinAir{}{'}\\
+    Immediate.
+  \end{enumerate}
+
+  \newpage
+  \textbf{Case $e$ of}
+  \lstsemrule{sobserveanf}
+
+  We have to invert the rule \TirName{Observe}
+  \begin{mathpar}
+    \ruleSDObserve
+  \end{mathpar}
+  Show that $\Store' = \Store$, $\Perm' = \Perm$, $r'$, and $\SE' =
+  \SE$ fulfill
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{'}
+  \item \resultEnv{}{'} \\
+    By reflexivity and assumption.
+  \item $\SE' \vdash r' : \tau$ \\
+    Immediate by store typing
+  \item \resultPermDom{}{'} \\
+    Immediate: no changes.
+  \item \resultReachPerm{}{'} \\
+    Immediate
+  \item \resultFrame{}{}{'}
+    Immediate: no changes.
+  \item \resultImmutables{}{}{'} \\
+    Immediate: no changes to immutables.
+  \item \resultMutables{}{}{'}  \\
+    Immediate: one particular $\Addr$ is overwritten, but not freed.
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{'} \\
+    Immediate because $\REACH = \emptyset$
+  \item \resultThinAir{}{'} \\
+    Immediate
+  \end{enumerate}
+
+  \newpage
+  \textbf{Case $e$ of}
+  \lstsemrule{supdateanf}
+
+  We need to invert rule \TirName{Update}
+  \begin{mathpar}
+    \ruleSDUpdate
+  \end{mathpar}
+
+  We need to show that $\Store'$, $\Perm'$, $r' = ()$, $\SE' = \SE$ fulfill
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{'}
+  \item \resultEnv{}{'} \\
+    Immediate by store typing for $\Loc$
+  \item $\SE' \vdash r' : \tunit$ \\
+    Immediate
+  \item \resultPermDom{}{'} \\
+    Immediate, as we remove a permission from $\Perm$
+  \item \resultReachPerm{}{'}\\
+    Immediate, as we only update a reachable $\Loc$
+  \item \resultFrame{}{}{'}
+    Immediate
+  \item \resultImmutables{}{}{'} \\
+    Immediate
+  \item \resultMutables{}{}{'} \\
+    Immediate; for $\Loc$, we observe that it is overwritten, but not  freed.
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{'} \\
+    Immediate because $\Active\VEnv = \emptyset$ and hence $\REACH = \emptyset$.
+  \item \resultThinAir{}{'}
+  \end{enumerate}
+
 \end{proof}
 
 %%% Local Variables:
