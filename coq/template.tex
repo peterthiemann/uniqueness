@@ -1,0 +1,62 @@
+\documentclass[12pt]{report}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{fullpage}
+\usepackage{amsmath,amssymb}
+\usepackage{url}
+\usepackage{makeidx,hyperref}
+
+\usepackage[color]{coqdoc}
+
+\renewcommand\coqdockw    [1] {{\color{\coqdockwcolor}    {\texttt{#1}}}}           % keywords
+\renewcommand\coqdocvar   [1] {{\color{\coqdocvarcolor}   {\textit{#1}}}}           % variable identifiers
+% \renewcommand\coqdocvar   [1] {{\color{\coqdocvarcolor}   {\textsl{#1}}}}           % variable identifiers
+\renewcommand\coqdoccst   [1] {{\color{\coqdoccstcolor}   {\textrm{#1}}}}           % constant identifiers
+\renewcommand\coqdocind   [1] {{\color{\coqdocindcolor}   {\textsf{#1}}}}           % module identifiers
+\renewcommand\coqdocconstr[1] {{\color{\coqdocconstrcolor}{\textsf{#1}}}}           % module constant identifiers (e.g. Parameters in module types)
+\renewcommand\coqdocmod   [1] {{\color{\coqdocmodcolor}   {\textsc{\textsf{#1}}}}}  % inductive type identifiers
+\renewcommand\coqdocax    [1] {{\color{\coqdocaxcolor}    {\textsl{\textrm{#1}}}}}  % constructor identifiers
+\renewcommand\coqdoctac   [1] {{\color{\coqdoctaccolor}   {\texttt{#1}}}}           % tactic identifiers
+
+\renewenvironment{coqdoccode}{\begin{quote}}{\end{quote}}
+
+\newcommand{\naive}[0]{na\"ive}
+
+\title{
+  Kindly Bent to Free Us \\
+  {\large Coq Mechanization}
+}
+\author{Hannes Saffrich}
+
+\makeindex
+
+\begin{document}
+
+\maketitle
+
+\phantomsection
+\tableofcontents
+
+\part{Theories}
+\include{Theories.CpdtTactics}
+\include{Theories.Tactics}
+\include{Theories.Framework}
+\include{Theories.STLCOrig}
+\include{Theories.STLC}
+\include{Theories.STLCIx}
+\include{Theories.STLCAffine}
+\include{Theories.STLCAffUnr}
+\include{Theories.STLCRef}
+\include{Theories.F}
+
+\clearpage
+% \addcontentsline{toc}{chapter}{Bibliography}
+% \bibliographystyle{plain}
+% \bibliography{cpdt}
+
+% \clearpage
+% \addcontentsline{toc}{chapter}{Index}
+% \printindex
+
+\end{document}

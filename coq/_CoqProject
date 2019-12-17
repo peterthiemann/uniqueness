@@ -1,0 +1,5 @@
+-R theories/ Theories
+theories/CpdtTactics.v
+theories/Tactics.v
+theories/Framework.v
+theories/Kindly.v
