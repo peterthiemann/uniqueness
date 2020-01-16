@@ -27,7 +27,7 @@
 %\definecolor{darkalu}{HTML}{555753}
 \definecolor{darkalu}{HTML}{2E3436}
 
-\newcommand{\kwstyle}{}
+\newcommand{\kwstyle}{\bfseries}
 
 \lstset{
 % backgroundcolor=\color{},
@@ -47,7 +47,6 @@
 % keepspaces=true,
   keywordstyle=\kwstyle,
   language=Caml,
-% morekeywords={*,...},
 % numbers=left,
 % numbersep=5pt,
 % numberstyle=\color{},
@@ -64,24 +63,25 @@
   numbersep=2pt,
 % title=\lstname,
   keywordstyle=[1]\kwstyle\color{chameleon},
-  keywordstyle=[2]\kwstyle\color{scarletred},
-  keywordstyle=[3]\kwstyle\color{skyblue},
-  keywordstyle=[4]\kwstyle\color{butter},
-  keywordstyle=[5]\kwstyle\color{skyblue},
-  keywordstyle=[6]\kwstyle\color{skyblue},
+  keywordstyle=[2]\kwstyle\color{chameleon},
+  keywordstyle=[3]\kwstyle\color{chameleon},
+  keywordstyle=[4]\kwstyle\color{chameleon},
+  keywordstyle=[5]\kwstyle\color{chameleon},
+  keywordstyle=[6]\kwstyle\color{chameleon},
   keywordstyle=[7]\kwstyle\color{chameleon},
-  keywordstyle=[8]\kwstyle\color{butter},
-  keywordstyle=[9]\kwstyle\color{butter},
+  keywordstyle=[8]\kwstyle\color{chameleon},
+  keywordstyle=[9]\kwstyle\color{skyblue},
+  otherkeywords={&!,&},
   keywords=[1]{let,val,method,in,and,rec,private,virtual,constraint},
   keywords=[2]{type,open,class,module,exception,external},
   keywords=[3]{fun,function,functor,match,try,with},
   keywords=[4]{as,when,of},
-  keywords=[5]{if,then,else},
-  keywords=[6]{begin,end,object,struct,sig,for,while,do,done,to,downto},
-  keywords=[7]{true,false},
-  keywords=[8]{include,inherit,initializer},
-  keywords=[9]{new,ref,mutable,lazy,assert,raise},
-  keywords=[10]{lin,aff,un},
+  keywords=[5]
+  {if,then,else,begin,end,object,struct,sig,for,while,do,done,to,downto},
+  keywords=[6]{true,false},
+  keywords=[7]{include,inherit,initializer},
+  keywords=[8]{new,ref,mutable,lazy,assert,raise},
+  keywords=[9]{&,&\!,lin,aff,un},
 }
 
 \lstset{literate=
@@ -103,9 +103,9 @@
   % {un}{{{$\kun$}}}1
   % {lin}{{{$\klin$}}}1
   % {aff}{{{$\kaff$}}}1
-  {un}{{{$\texttt{un}$}}}2
-  {lin}{{{$\texttt{lin}$}}}3
-  {aff}{{{$\texttt{aff}$}}}3
+  % {un}{{{$\texttt{un}$}}}2
+  % {lin}{{{$\texttt{lin}$}}}3
+  % {aff}{{{$\texttt{aff}$}}}3
   {_r}{{${}_r$}}1
   {_r1}{{${}_{r+1}$}}2
   {-\{?\}>}{{{$\tarr{?}$}}}2
