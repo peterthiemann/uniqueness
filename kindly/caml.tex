@@ -62,7 +62,8 @@
   numbers=left,
   numbersep=2pt,
 % title=\lstname,
-  keywordstyle=[1]\kwstyle\color{chameleon},
+  keywordstyle=\kwstyle\color{skyblue},
+  keywordstyle=[1]\kwstyle\color{skyblue},
   keywordstyle=[2]\kwstyle\color{chameleon},
   keywordstyle=[3]\kwstyle\color{chameleon},
   keywordstyle=[4]\kwstyle\color{chameleon},
@@ -70,18 +71,15 @@
   keywordstyle=[6]\kwstyle\color{chameleon},
   keywordstyle=[7]\kwstyle\color{chameleon},
   keywordstyle=[8]\kwstyle\color{chameleon},
-  keywordstyle=[9]\kwstyle\color{skyblue},
-  otherkeywords={&!,&},
-  keywords=[1]{let,val,method,in,and,rec,private,virtual,constraint},
-  keywords=[2]{type,open,class,module,exception,external},
+  otherkeywords={&,&!},
+  keywords=[1]{\&,\&\!,lin,aff,un}, % Due to weird behavior of &!, this must be the first class of keywords
+  keywords=[2]{type,open,class,module,exception,external,let,val,method,in,and,rec,private,virtual,constraint},
   keywords=[3]{fun,function,functor,match,try,with},
   keywords=[4]{as,when,of},
-  keywords=[5]
-  {if,then,else,begin,end,object,struct,sig,for,while,do,done,to,downto},
+  keywords=[5]{if,then,else,begin,end,object,struct,sig,for,while,do,done,to,downto},
   keywords=[6]{true,false},
   keywords=[7]{include,inherit,initializer},
   keywords=[8]{new,ref,mutable,lazy,assert,raise},
-  keywords=[9]{&,&\!,lin,aff,un},
 }
 
 \lstset{literate=
