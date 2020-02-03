@@ -55,6 +55,7 @@
 \input{prelude}
 \input{caml}
 \input{notations}
+\input{rulemacros}
 
 
 \lstset{
@@ -349,7 +350,6 @@ Regions are inferred automatically, but can be manually provided.
 \end{onlyenv}
 
 \end{frame}
-
 
 \begin{frame}[fragile]{Closures}
 
@@ -671,6 +671,37 @@ We can express such types using region variables.
 \end{center}
 \end{frame}
 
+\begin{frame}[fragile]{Resource management}
+  To model resource management in the theory, we consider
+  we consider the
+type $\tapp{\tres}{\tau}$ of content $\tau : \kun_0$
+  \begin{itemize}
+\item
+$\create$:
+$\forall{\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+{\tvar \tarr{} \tapp\tres\tvar}$
+% Creates a new resource.
+\item
+$\observe$:
+$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+{\borrowty[\IBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar}$
+% Reads from a shared borrow of a resource.
+\item
+$\update$:
+$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+\borrowty[\MBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar \tarr{\kaff} \tunit$
+% Writes to an exclusive borrow of a resource.
+\item
+$\destroy$:
+$\forall{\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+\tapp\tres\tvar \tarr{} \tunit$
+% Destroys a resource.
+\end{itemize}
+\end{frame}
 
 % \begin{frame}
 %   \frametitle{The calculus}
@@ -691,6 +722,81 @@ We can express such types using region variables.
 %     \end{align*}
 %   \end{columns}
 % \end{frame}
+
+\begin{frame}[fragile]{Regions}
+
+  Regions follow lexical scoping. For every borrow @&x@ or @&!x@, We define a region such that:
+\begin{enumerate}
+\item The region contains at least @&x@/@&!x@.
+\item The region is never larger than the scope of @x@.
+\item An exclusive borrow @&!x@ never share a region with any other borrow of @x@.
+\item A use of @x@ is never in the region of @&x@/@&!x@.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{Region inference}
+
+  The region inference algorithm in practice:
+  \setlength{\jot}{-1pt}
+  \begin{onlyenv}<1>
+    \begin{align*}
+      \lam{a}{}\ %
+      &\letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+      &g\ (\borrow[\kaff]{x});\\
+      &f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})\\
+    \end{align*}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+    \begin{align*}
+      \lam{a}{}\region[1]{\Sone a\MBORROW}{\ %
+      &\letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+      &g\ (\borrow[\kaff]{x});\\
+      &f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})\\
+      &\!\!\!}
+    \end{align*}
+  \end{onlyenv}
+  \begin{onlyenv}<3>
+    \begin{align*}
+      \lam{a}{}\region[1]{\Sone a\MBORROW}{\ %
+      &\letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+      &\region[2]{\Sone x\MBORROW}{g\ (\borrow[\kaff]{x})};\\
+      &f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})\\
+      &\!\!\!}
+    \end{align*}
+  \end{onlyenv}
+  \begin{onlyenv}<4>
+    \begin{align*}
+      \lam{a}{}\region[1]{\Sone a\MBORROW}{\ %
+      &\letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+      &\region[2]{\Sone x\MBORROW}{g\ (\borrow[\kaff]{x})};\\
+      &\region[2]{\Sone x\IBORROW}{f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})}\\
+      &\!\!\!}
+    \end{align*}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{Region inference}
+
+  Another example with explicit region annotations:
+\[
+  \setlength{\jot}{-1pt}
+  \RannotT{
+\begin{aligned}
+  \letin{&r}{\operatorname{ref}\ 0}{}\\
+  \lam{a}{}\ &
+  set\ r\ \region[]{}{g\ (\borrow[\kun]{a})};\\
+  &f\ (\borrow[\kun]{a})
+\end{aligned}
+}{
+\begin{aligned}
+  \letin{&r}{\operatorname{ref}\ 0}{}\\
+  \lam{a}{}\ &
+  set\ r\ \region[1]{\Sone a\IBORROW}{g\ (\borrow[\kun]{a})};\\
+  &\region[1]{\Sone a\IBORROW}{f\ (\borrow[\kun]{a})}
+\end{aligned}
+}
+\]
+\end{frame}
 
 \begin{frame}{Kinds during typing}
 
@@ -741,6 +847,50 @@ We can express such types using region variables.
     \end{tabular}\\
     $\vdots$
   \end{center}
+\end{frame}
+
+\begin{frame}{How to split with regions}
+
+  To handle regions and borrows, we need special binders: 
+  \begin{center}
+    \begin{tabular}
+      {@{}>{$}r<{$}@{ $\vdash_e$ }
+      >{$}c<{$}@{ $=$ }
+      >{$}c<{$}@{ $\ltimes$ }
+      >{$}c<{$}r}
+
+      {\Cempty}
+      &{\bvar{\borrow[\IBORROW]{x}}{\schm}}
+      &{\bvar{\borrow[\IBORROW]{x}}{\schm}}&{\bvar{\borrow[\IBORROW]{x}}{\schm}}
+      &Borrow\\
+      
+      {\Cempty}
+      &{\bvar x \schm}&{\svar x \schm^n}&{\bvar x \schm}
+      &Susp\\
+
+      {\Cempty}
+      &{\bvar{\borrow x} \schm}&{\svar[\IBORROW] x \schm^n}&{\bvar{\borrow x} \schm}
+      &SuspB\\
+
+      {\Cempty}
+      &{\svar{x} \schm}&{\svar[\IBORROW] x \schm^n}&{\svar{x} \schm}
+      &SuspS\\
+    \end{tabular}
+  \end{center}
+
+  ${\bvar{\borrow[b]{x}}{\schm}}$ means a borrow is usable.
+
+  $\svar[b] x \schm^n$ means a borrow \emph{will be usable} when
+  we enter a region.
+
+  When we enter a region $\region[n]{\Sone x b}{\dots}$, we transform the binders of $x$ in the environment:
+  \begin{mathpar}
+    \inferrule{}{
+      \lregion{(\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)}{}
+      {\svar[\BORROW]{x}{\tau}^n}
+      {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau}}}
+    }
+  \end{mathpar}
 \end{frame}
 
 
@@ -1053,6 +1203,17 @@ val compose :
   \end{align*}
 \end{frame}
 
+\begin{frame}{Constraints -- Tricky bits}
+  Some tricky bits on constraints:
+  \begin{itemize}
+  \item Kinds might be polymorphic, and not all instances will
+    have the same kinds
+  \item Constraint solving is perf-sensitive! Adding too much power
+    there (notably, disjunctions) is problematic.
+  \end{itemize}
+  
+\end{frame}
+
 % \begin{frame}
 %   \frametitle{Constraints}
 %   The only requirement is that $\ell^\bot = \kun$.\pause
@@ -1103,6 +1264,9 @@ val compose :
   \item Investigate pattern matching
   \item Extend the expressivity further (at the price of inference ?)
   \end{itemize}
+
+  Finally, this kind system should be able to support other features
+  (unboxing, for instance)
 \end{frame}
 
 \begin{frame}[plain,standout]
