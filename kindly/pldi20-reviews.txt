@@ -1,0 +1,248 @@
+PLDI 2020 Paper #789 Reviews and Comments
+===========================================================================
+Paper #789 Kindly Bent to Free Us
+
+
+Review #789A
+===========================================================================
+
+Overall merit
+-------------
+C. I would not accept this paper but will not argue strongly against
+   accepting it.
+
+Reviewer expertise
+------------------
+Y. Knowledgeable
+
+Paper summary
+-------------
+This paper presents Affe, a language with linear and affine types, borrowing, garbage collection, and principal type inference. Affe distinguishes itself from languages like Rust, because it supports garbage collection, whereas Rust does not. The distinction between Affe and other linearly typed languages with automatic memory management (e.g., Linear Haskell and Alms) are that Affe supports principal type inference.
+
+Comments for author
+-------------------
+I think that programming languages research has only scratched the surface of substructural type systems. There is an enormous design space to explore, and it’s clear that Rust is not the “final answer” in this space. Therefore, work like this paper is needed.
+
+Unfortunately, I think this paper falls short in two principle ways:
+
+1. A key distinction between Affe and existing work in this space  is that Affe supports principal type inference, whereas systems like Linear Haskell and Rust do not. However, it’s worth asking why they don’t. There are a couple of possible reasons.
+
+  a.  Haskell and Rust may have other language features that are necessary to program in the large (e.g., traits and type classes) and these features don’t jive well with principality. So, if Affe were to scale up, wouldn’t it lose the principal type property too?
+
+  b. It may be the case that some language designers aren’t interested in full type inference. Not only is it really hard (or impossible), but type annotations help document code, whereas type inference has a reputation of leading ot extraordinarily bad error messages.
+
+2. The paper critiques Linear Haskell as follows, “The GHC implementation of LH performs type inference, but it is neither formalized nor complete”. I don’t think this is a fair critique. The POPL paper on Linear Haskell formalizes a core calculus just as rigorously as this paper on Affe. In fact, the examples in this paper suggest that there is a lot to the Affe implementation that has not been formalized -- and that’s good -- it means it is a growing, real system.
+
+Overall, I am not convinced that the focus on type inference is an interesting direction. Affe does have an interesting combination of language features, and it is worth seeing if they lend themselves to programming. So, I would have preferred to read a paper that instead emphasized what this choice of features enables that other languages do not.
+
+
+
+Review #789B
+===========================================================================
+
+Overall merit
+-------------
+C. I would not accept this paper but will not argue strongly against
+   accepting it.
+
+Reviewer expertise
+------------------
+Z. Some familiarity
+
+Paper summary
+-------------
+This paper presents a language and type system for an ML-like language which supports Rust-style borrowing and linear/afffine types.  The main difference compared to related work in the imperative world seems to be that it has good type inference and garbage collection.
+
+Comments for author
+-------------------
+The goal of the paper sounds quite laudable and valuable, and it looks like Affe offers some fascinating features. Unfortunately, as a reviewer who is not very familiar with the literature on borrowing, session/linear/etc. typing, I couldn't get much out of the paper. I found the paper very hard to read. It may make perfect sense to an expert in that domain, but the authors take knowledge of too many concepts and terms for granted.
+
+The soundness theorem looks quite powerful - I liked that a lot. But I think there's another kind of validation that I was missing for a language like this, namely an evaluation of its expressiveness and potential to catch real-world bugs. What kinds of usage scenarios would fit well into the type system? And, even more interestingly, what would not fit well? 
+
+Some more detailed comments:
+
+l. 174: What is a kind in your system? The "aff"?
+
+l. 175: "in direct style" - as opposed to what? I don't understand this point.
+
+l. 177, "kinds can be polymorphic" - that sounds confusing. You mean that functions can be parameterized with different kinds, right? But the statement "kinds can be polymorphic" sounds technically wrong.
+
+Fig. 1, what does the "&!" mean?
+
+Fig. 2 l. 3: I can figure out that "un" is supposed to mean "unrestricted", but beyond knowing what the word means in English I have no intuition at all what it means to annotate it like in "create".  Similarly the other kind annotations.
+
+l. 266 what is a "region"? You don't explain it, sadly, and I can't understand the whole paragraph that follows.
+
+
+
+Review #789C
+===========================================================================
+
+Overall merit
+-------------
+B. I support accepting this paper but will not champion it.
+
+Reviewer expertise
+------------------
+Y. Knowledgeable
+
+Paper summary
+-------------
+This paper presents Affe: an extension of ML with linear and affine types, including support for borrowed types a la Rust. Affe enjoys principled properties commonly found in ML dialects such as principal type inference and type abstraction.
+
+Comments for author
+-------------------
+This is a very interesting paper which contributes a valuable point in the design space of linear/affine/borrow types for functional general purpose languages. I was convinced by the paper that the design is a good one and an improvement over prior work. In particular, metatheory results like type soundness and principal type inference are quite appealing, and as far as I know, this is the fist system to support affine type borrowing in a high level functional language to be shown to have these properties.
+
+There is lots of related work in this space and I wish there was a slightly more detailed treatment of related work in the introduction, e.g., comparing to ALMS and giving more design comparisons with LH. I see that the full treatment of related work appears later in the paper; I just suggest folding a few more of these details to earlier in the paper, especially comparisons with ALMS and LH.
+
+Strengths:
+
+- The paper is very well written and was a joy to read.
+- The paper solves a practical and well-motivated problem for typesafe protocols in typed, functional, general purpose language design.
+- The paper is an improvement over related work in this space.
+- In this reviewer's opinion, this should maybe have been used as the design for LH, and acceptance of this paper would add a valuable new perspective in the rapidly evolving design space of linear/affine types for functional languages, which implementers and users seem to be quite motivated to build and use given the success of Rust's affine/linear/borrow types.
+- The design and implementation of inference using the HM(X) framework is potentially valuable in transferring this technology to other langauges which use constraint-directed type inference such as Haskell and (in a very limited sense) Rust.
+
+Weaknesses:
+
+- There is lots of very related work, and it may not be clear what the sum of value of this system is above other designs in this space.
+- The technical section is quite involved and will be hard to follow for outsiders, but is clearly written for experts in affine/linear/borrow type system design and implementation
+
+Figure 2: in my first read I was confused that the write function in Figure 1 was given an affine effect over the function, whereas the set function doesn't have this. I see that this is either because alpha is given affine kind in the set function, or that it is curried, or both. You may want to explain this detail (at least at a high level) earlier on.
+
+Section 2.2: it isn't clear from this discussion if fold can be implemented in the usual way, and whether or not your system infers this type for it.
+
+Questions for the authors: 
+
+1. Does your type system support currying?
+2. What types of "typical" functional programming combinators (map, fold, etc) cannot be easily written in your system, either at all, or with the expected inferred type?
+
+
+
+Review #789D
+===========================================================================
+
+Overall merit
+-------------
+B. I support accepting this paper but will not champion it.
+
+Reviewer expertise
+------------------
+X. Expert
+
+Paper summary
+-------------
+The paper presents, Affe, an ML-like language with linear and affine resources
+managed via kinds and kind constraints.  Affe's type system provides supports
+for exclusive and shared borrowing, where lifetime of borrows is determined by
+lexical scope (no non-lexical lifetimes: NLL).  Affe supports inference of
+regions for borrows.  The paper presents an extension of HM(X) inference
+(extended to handle kinds, regions, and multiplicity constraints) for Affe that
+supports principal type inference.  The authors prove soundness of the type
+system and inference and have a prototype implementation.
+
+Comments for author
+-------------------
+### Strengths
+
+The paper presents a novel type system for managing linear and
+affine resources in a typed functional language, along with exclusive and shared
+borrows.  Region annotations for borrows can be completely inferred and the
+extension of the HM(X) algorithm to support principal type inference for Affe is
+an impressive result and an excellent thing to have in terms of language design.
+This should pay huge dividends in terms of usability as it frees programmers
+from the burden of region annotation.  The metatheory developed in the paper is
+nontrivial: the type soundness result is quite subtle (and looks correct based
+on the parts I checked). 
+
+### Caveats/Limitations
+
+At the heart of the type system design is the idea of
+tracking the region for each borrow via: {| e |}^n_{x->b} which says that there
+is a b (exclusive/shared) borrow of x in this region and that the region
+nesting is n (where deeper regions have higher n).  This together with borrowed
+types &b(k,tau) support the setup of a type system of constraints to ensure
+sound borrowing.  But I think that this strong connection between lexical scope
+and borrow regions is both the main strength and the main weakness of this paper.
+
+- It is a strength because it seems to be the key to getting the region and type 
+  inference to work out, which is a major result of this paper --- as the authors 
+  point out, compared to prior functional languages with support for linear or
+  affine resources, Affe supports full type inference.
+
+- But it is also a serious weakness because it means that the type system cannot
+  support non-lexical lifetimes (NLL) for borrows. Experience with Rust shows
+  that handling NLL is important for usability.  In Section 7, the authors admit
+  that this is the main restriction of the current system.  As far as I can
+  tell, getting rid of this restriction would require fundamental change to the
+  type system, completely threatening type inference for the language.  This
+  makes me highly ambivalent about the value of Affe's design.  If adding NLL
+  requires that we start over, then I don't think there's much value in the 
+  type-system design presented here.
+
+I've focused on non-lexical lifetimes above, but there other limitations as
+well, (and I think there may be others that I'm not entirely certain about). I'd
+like to suggest that the authors clearly spell out Affe's limitations at the end
+of Section 1, otherwise the reader is forced to piece them together while
+reading through different parts of the paper.  For instance: Affe does not
+support successive exclusive borrows (i.e., exclusive reborrows); it also does
+not support existential types which is a limitation, but necessary for complete
+type inference.  In author response, please provide a list of limitations as
+compared to Rust, i.e., all limitations that have to do with
+borrowing/reborrowing/two-phase borrowing/interior mutability/etc.
+
+Also, the paper does not contain sums/enums; but enums in Rust have interesting   
+interactions with borrow checking (see below).  Do you support sums/enums or
+have you thought about difficulties they would cause for type soundness?
+(In core Rust, enums are the reason why mutable references must be unique:
+writing to an enum (like, overwriting a Some(4) with None) can invalidate other
+pointers that point into the enum (like, pointing to the 4 inside the Some).  Is
+this a concern in Affe?)
+
+
+### Other Comments/Concerns
+
+- I find it troubling that there are separate operators for borrowing and
+  reborrowing.  This seems like an unnecessary distinction to ask the programmer
+  to make.  How difficult would it be to simply use &&b x for reborrowing as
+  well?  Also, the Reborrow typing rule appears only in the Appendix (Fig 23).
+  You say later in the paper that Affe doesn't support "successive exclusive
+  reborrows" (and you say so at line 730) but:  
+  (1) Where is this enforced/checked operationally?
+  (2) There seems nothing in the Reborrow typing rule to allow successive shared
+  reborrows, but not exclusive ones.
+  Could you please explain in author response.
+
+- Section 3.3: Please try to add an intuitive explanation of why we need
+  suspended bindings.  For instance, I initially wondered (around page 5/6) how 
+  suspended bindings get added to Gamma.  That happens in the splitting rules,
+  but it's really something you should point out and give intuition for (not
+  just leave it to the reader to pick out from the formalism). 
+
+- Line 727: I could not really follow how the stack of modifiers on locations
+  are being used/checked/updated.  Where are they being updated operationally
+  (in Figure 9 or is that part elided)?  How are they being leveraged in the
+  type soundness proof?  Please explain in author response.
+
+- Big-step interpretation, Figure 9:
+  -- Line 780, column 1: "let pi = (pi + rho') - rho in"
+     Shouldn't that be "let pi' = ..."  and then the same pi' should be used for
+     eval e in line 781?
+  -- In the App case, I don't understand why timer is not decremented after
+  evaluating the first subexpression.  That is, why do we use the same i' when
+  evaluating e1 and when evaluating e2?
+  -- Line 838, column 3: Please explain in author response how to read:
+    "let*? () = rho ? b && rho \in pi ..."
+
+- Line 922: "We then introduce the constraint Weak(x:sigma)(Sigma) which is
+  false only if weakening is necessary-yet-impossible due to linearity."  Please
+  explain Weak and its role in the Abs_I rule.  This paragraph doesn't explain
+  the rule in sufficient depth.
+
+### Minor Comments
+
+- line 264: "expect an shared" --> "expect a shared"
+- line 907: "rule ensure that" --> "rule ensures that"
+- line 1036: "type binding, however, are" --> "type bindings, ..."
+- line 1198: "often rely on" --> "often relies on"
