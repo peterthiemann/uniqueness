@@ -352,16 +352,15 @@ let rec eval
     Ok (delta_2, pi_2, r_2)
   (**)
   (* rule smatchanf *)
-  | VMatch (x, y, z, e', sp) ->
+  | VMatch (x, x', z, e_2, sp) ->
     let (gamma_1, gamma_2) = vsplit gamma sp in
-    let* r_1 = gamma_1.!(z) in
-    let* ell = getloc r_1 in
+    let* r = gamma_1.!(z) in
+    let* ell = getloc r in
     let* w = delta.*(ell) in
-    let* (k', r_1', r_2') = getstpair w in
-    let pi' =
-      if k' <= KUNR None then pi else pi <-> !$ ell
-    in
-    let* (delta_2, pi_2, r_2) = eval delta pi' gamma_2.+(x -:> r_1').+(y -:> r_2') i' e' in
+    let* (k, r_1, r_1') = getstpair w in
+    let pi' = if k <= KUNR None then pi else pi <-> !$ ell in
+    let* delta' = delta.*(ell) <- (if k <= KUNR None then w else STRELEASED) in
+    let* (delta_2, pi_2, r_2) = eval delta pi' gamma_2.+(x -:> r_1).+(x' -:> r_1') i' e_2 in
     Ok (delta_2, pi_2, r_2)
   (**)
   (* rule matchborrow *)

@@ -17,23 +17,42 @@ Y. Knowledgeable
 
 Paper summary
 -------------
-This paper presents Affe, a language with linear and affine types, borrowing, garbage collection, and principal type inference. Affe distinguishes itself from languages like Rust, because it supports garbage collection, whereas Rust does not. The distinction between Affe and other linearly typed languages with automatic memory management (e.g., Linear Haskell and Alms) are that Affe supports principal type inference.
+This paper presents Affe, a language with linear and affine types, borrowing, garbage collection,
+and principal type inference. Affe distinguishes itself from languages like Rust, because it
+supports garbage collection, whereas Rust does not. The distinction between Affe and other linearly
+typed languages with automatic memory management (e.g., Linear Haskell and Alms) are that Affe
+supports principal type inference. 
 
 Comments for author
 -------------------
-I think that programming languages research has only scratched the surface of substructural type systems. There is an enormous design space to explore, and it’s clear that Rust is not the “final answer” in this space. Therefore, work like this paper is needed.
+I think that programming languages research has only scratched the surface of substructural type
+systems. There is an enormous design space to explore, and it’s clear that Rust is not the “final
+answer” in this space. Therefore, work like this paper is needed. 
 
 Unfortunately, I think this paper falls short in two principle ways:
 
-1. A key distinction between Affe and existing work in this space  is that Affe supports principal type inference, whereas systems like Linear Haskell and Rust do not. However, it’s worth asking why they don’t. There are a couple of possible reasons.
+1. A key distinction between Affe and existing work in this space  is that Affe supports principal
+type inference, whereas systems like Linear Haskell and Rust do not. However, it’s worth asking why
+they don’t. There are a couple of possible reasons. 
 
-  a.  Haskell and Rust may have other language features that are necessary to program in the large (e.g., traits and type classes) and these features don’t jive well with principality. So, if Affe were to scale up, wouldn’t it lose the principal type property too?
+  a.  Haskell and Rust may have other language features that are necessary to program in the large
+  (e.g., traits and type classes) and these features don’t jive well with principality. So, if Affe
+  were to scale up, wouldn’t it lose the principal type property too? 
 
-  b. It may be the case that some language designers aren’t interested in full type inference. Not only is it really hard (or impossible), but type annotations help document code, whereas type inference has a reputation of leading ot extraordinarily bad error messages.
+  b. It may be the case that some language designers aren’t interested in full type inference. Not
+  only is it really hard (or impossible), but type annotations help document code, whereas type
+  inference has a reputation of leading ot extraordinarily bad error messages. 
 
-2. The paper critiques Linear Haskell as follows, “The GHC implementation of LH performs type inference, but it is neither formalized nor complete”. I don’t think this is a fair critique. The POPL paper on Linear Haskell formalizes a core calculus just as rigorously as this paper on Affe. In fact, the examples in this paper suggest that there is a lot to the Affe implementation that has not been formalized -- and that’s good -- it means it is a growing, real system.
+2. The paper critiques Linear Haskell as follows, “The GHC implementation of LH performs type
+inference, but it is neither formalized nor complete”. I don’t think this is a fair critique. The
+POPL paper on Linear Haskell formalizes a core calculus just as rigorously as this paper on Affe. In
+fact, the examples in this paper suggest that there is a lot to the Affe implementation that has not
+been formalized -- and that’s good -- it means it is a growing, real system. 
 
-Overall, I am not convinced that the focus on type inference is an interesting direction. Affe does have an interesting combination of language features, and it is worth seeing if they lend themselves to programming. So, I would have preferred to read a paper that instead emphasized what this choice of features enables that other languages do not.
+Overall, I am not convinced that the focus on type inference is an interesting direction. Affe does
+have an interesting combination of language features, and it is worth seeing if they lend themselves
+to programming. So, I would have preferred to read a paper that instead emphasized what this choice
+of features enables that other languages do not. 
 
 
 

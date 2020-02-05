@@ -54,7 +54,7 @@ A kind $k$ is either a kind variable $\kvar$ or a constant
 (linear $\klin$, affine $\kaff$, or unrestricted $\kun$) indexed
 by a nesting level $n \in \Nat \cup \{\infty\}$.
 
-A type $\tau$ is either a type variable, a function type indexed by a
+A type $\tau$ is either a type variable, a pair type, a function type indexed by a
 kind,
 a type application $\tapp{\tcon}{\Multi{\tau}}$ of an abstract type constructor
 $\T T$, or a borrowed type  $\borrowty{k}{\tau}$.
@@ -65,7 +65,7 @@ $C$ to a type, where a constraint is a list of inequalities over
 kinds.
 
 Abstract type constructors possess kind schemes $\kschm$ which relate
-the kinds of the type constructors arguments to the kind of the
+the kinds of the type constructors' arguments to the kind of the
 constructed type.
 
 Generally, we write lists with an overbar and (sometimes) an index as
