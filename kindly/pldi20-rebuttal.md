@@ -38,56 +38,93 @@ reasons leads us to consider complete inference as essential:
 
 # Related works
 
-As reviewer C points out, the related works is very rich. Due to
+As several reviewers point out, the related works is very rich. Due to
 limited space, we only gave a small comparison to each relevant work.
+We plan to expand our article in this direction
+and answer here to specific questions.
 
 ## Linear Haskell
-LH indeed does have a formalized core calculus. However, only type checking is
-formalized, not inference. The inference implemented is
+LH indeed does indeed have a formalized core calculus. 
+However, only type checking is formalized, not inference. 
+The inference implemented is
 partial (as pointed out by the GHC maintainers themselves), which
-is precisely one of the contentious point to consider inclusion in
-GHC.
+is precisely one of the contentious point for inclusion in GHC.
 Not only is our inference algorithm formalized, but we
 prove its correctness and completeness.
 
-## Limitations and comparison with Rust
-
+## Rust
 Rust is an established industrial language with more than 10 years of
-improvements. Affe does not aim to match its range in term of
-use-cases, it simply aims to provide a more accessible point in the
+improvements. Affe does not (yet!) aim to match its range in term of
+use-cases, it simply provides a more accessible point in the
 design-space.
 
-Nevertheless, several features of Rust pointed by reviewer C
+Nevertheless, several features of Rust pointed by reviewer D
 can be adapted to our system. In many cases, we believe these features
 can be added by only modifying the "constraint generation" part of Affe. 
-The constraint language and its solver are unchanged, which is
-precisely the strengths of the typing-by-constraints approach which we use.
+The constraint language and its solver would be unchanged, which is
+precisely the strengths of the typing-by-constraints approach we use.
 
-- Adapting NNL to our system would requires inferring regions
-  that are not lexical scopes. In many cases, this does not require
-  changing our typing rules, only our region inference to obtain
-  piecewise lexical scopes.
-  We aim to leverage the work by Weiss et Al in this direction.
-- In rust, borrows of borrows are done through ad-hoc polymorphism
+- Adapting Non-lexical lifetimes (NNL) to our system would requires 
+  inferring regions that are not lexical scopes. 
+  Concretely, this means that a region is a cover tree of the
+  control flow graph, instead of the graph of all paths between two points.
+  Inferring such precise regions is very desirable and we believe
+  it can be done by only improving our region inference, without affecting the
+  rest of the system.
+- In rust, borrows of borrows are often done through ad-hoc polymorphism
   (the Borrow and Defer traits) which inserts as many
   borrows as necessary.
   The exact same solution works perfectly in Affe: it does not
   compromise inference, works well in a functional setting and
   integrates in our theoretical framework thanks to qualified types.
-- Affe does not need to support successive borrows, as our region
-  inference will simply place appropriate region around each of them.
+- Affe does not need to support successive borrows (i.e., borrows in
+  successive expressions), as region
+  inference will place appropriate regions around each of them.
+- The extension to algebraic data types is easy and done in our
+  prototype. The only difficulty is to verify nesting, in particular
+  linear objects must not live inside unrestricted types.
+- Interior mutability is the ability to mutate an object from a shared
+  borrow. In rust, this is provided by an unsafe primitive.
+  Affe would have the same constraints. However, Affe can safely
+  express types such as Cell using mutable records:
+  
+  type ('a : 'k) ref : 'k = { mutable content : 'a } where ('k <= Un_infty)
 
-
+  
 # Functional idioms and combinators
 
+Reviewer C wonders about Affe's support for functional combinators and idioms.
 Affe supports currying. More generally, any valid core-ML code is valid in
 Affe and the inferred type will be more general. This is immediate by
 our use of HM(X). Typical functional combinators can all be written,
 but their types might not allow manipulating
 linear resources or borrows. 
-In general, Affe will support borrowing patterns that are not
+Affe also supports borrowing patterns that are not
 flow-sensitive. For instance combinators that always borrow each
 element, such as our fold, can be written. 
-Combinators that might or might not borrow,
-depending on their argument (for instance, using permission witnesses)
-requires a richer logic (such as mezzo).
+
+# Limitations
+
+Reviewer C and D asks to details the limitations of our system.
+The main limitations are due to the fact that Affe's type algebra
+is voluntarily simple:
+
+- Affe is not flow sensitive, and will not be able to express
+functions that might or might use something depending on their
+argument.
+This requires richer logic such as Mezzo, or languages with typestates.
+It prevents typing functions such as the merge on linear lists:
+
+  let rec merge l1 l2 = match l1, l2 with
+    | h1::t1, h2::t2 ->
+      if &h1 < &h2 
+      then h1::(merge t1 l2) (* Must expand l2 to h2::t2 here *)
+      else h2::(merge l1 t2)
+    | ....
+
+- In Rust, many primitives are written using unsafe code which is
+  then abstracted. Such unsafe code can be then proven correct (cf
+  RustBelt).
+  Affe does allow using abstraction in a similar way, but is much
+  more limited and doesn't provide such a language-integrate
+  mechanism.
