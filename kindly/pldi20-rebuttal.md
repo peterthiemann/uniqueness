@@ -7,7 +7,7 @@ follows.
 # Inference
 
 Reviewer A argues that inference is not such an important property and
-would forbid other interesting features, notably for programming in the large.
+would preclude other interesting features, notably for programming in the large.
 This is partially a cultural question: Haskell and Rust users are used
 to annotations while ML programmers are not.
 Nevertheless, several 
@@ -27,21 +27,21 @@ reasons leads us to consider complete inference as essential:
   classes, traits, implicits, ...) supports complete inference, and such
   extension of Affe would be highly desirable.
   Affe is also designed to work in tandem with a rich, ML-like module
-  system, which has been shown support programming in the large very well.
+  system, which has been shown to support programming in the large very well.
 
 - Linear types and ownerships are known for being fairly heavy to use.
   Rust is no exception and complex elision rules
   for lifetimes were instrumental in increasing ease-of-use. Affe shows
   that we can go much further thanks to inference. This could be used
-  to improve ease-of-use of systems which, like rust, only support
+  to improve ease-of-use of systems which, like Rust, only support
   partial inference.
 
 # Related works
 
 As several reviewers point out, the related works is very rich. Due to
 limited space, we only gave a small comparison to each relevant work.
-We plan to expand our article in this direction
-and answer here to specific questions.
+We will expand our article in this direction and
+now answer specific questions.
 
 ## Linear Haskell
 LH indeed does indeed have a formalized core calculus. 
@@ -69,7 +69,7 @@ precisely the strengths of the typing-by-constraints approach we use.
   Concretely, this means that a region is a cover tree of the
   control flow graph, instead of the graph of all paths between two points.
   Inferring such precise regions is very desirable and we believe
-  it can be done by only improving our region inference, without affecting the
+  it can be done by improving our region inference, without affecting the
   rest of the system.
 - In rust, borrows of borrows are often done through ad-hoc polymorphism
   (the Borrow and Defer traits) which inserts as many
@@ -78,17 +78,17 @@ precisely the strengths of the typing-by-constraints approach we use.
   compromise inference, works well in a functional setting and
   integrates in our theoretical framework thanks to qualified types.
 - Affe does not need to support successive borrows (i.e., borrows in
-  successive expressions), as region
+  successive expressions) as region
   inference will place appropriate regions around each of them.
 - The extension to algebraic data types is easy and done in our
-  prototype. The only difficulty is to verify nesting, in particular
+  prototype. The only difficulty is to verify nesting: notably
   linear objects must not live inside unrestricted types.
 - Interior mutability is the ability to mutate an object from a shared
   borrow. In rust, this is provided by an unsafe primitive.
-  Affe would have the same constraints. However, Affe can safely
+  Affe would generally have the same constraints. However, Affe can safely
   express types such as Cell using mutable records:
   
-  type ('a : 'k) ref : 'k = { mutable content : 'a } where ('k <= Un_infty)
+  type ('a : 'k) ref : 'k = { mutable content : 'a } where ('k <= un)
 
   
 # Functional idioms and combinators
@@ -106,14 +106,16 @@ element, such as our fold, can be written.
 # Limitations
 
 Reviewer C and D asks to details the limitations of our system.
-The main limitations are due to the fact that Affe's type algebra
+Most limitations are due to the fact that Affe's type algebra
 is voluntarily simple:
 
 - Affe is not flow sensitive, and will not be able to express
 functions that might or might use something depending on their
-argument.
-This requires richer logic such as Mezzo, or languages with typestates.
-It prevents typing functions such as the merge on linear lists:
+argument. More generally, we don't support borrowing pattern
+whose correctness depends on internal invariants of a data-structure.
+This requires richer logic such as Mezzo, typestates, etc.
+As a simple example, Affe can not directly type functions such as the 
+merge on linear lists:
 
   let rec merge l1 l2 = match l1, l2 with
     | h1::t1, h2::t2 ->
@@ -123,8 +125,13 @@ It prevents typing functions such as the merge on linear lists:
     | ....
 
 - In Rust, many primitives are written using unsafe code which is
-  then abstracted. Such unsafe code can be then proven correct (cf
+  then abstracted. Such unsafe code can be then proven correct (see
   RustBelt).
-  Affe does allow using abstraction in a similar way, but is much
+  Affe aims to use module abstraction in a similar way, but is much
   more limited and doesn't provide such a language-integrate
-  mechanism.
+  unsafe mechanism.
+
+- Affe's semantics is similar to ML: pass by reference and GC.
+  Many linear languages, and Rust in particular, supports very precise
+  control over memory structures and call conventions which we do not
+  aim to provide.
