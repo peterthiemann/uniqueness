@@ -19,7 +19,7 @@ reasons leads us to consider complete inference as essential:
   knows when type annotations are needed. 
   In particular, it is possible (and desirable) to extend Affe with
   existential types by requiring type annotations, similarly to Alms.
-  The results we present nevertheless garantee that
+  The results we present nevertheless guarantee that
   full type inference is supported in the absence of existentials.
   This is similar to the current state of OCaml.
 
@@ -29,7 +29,7 @@ reasons leads us to consider complete inference as essential:
   Affe is also designed to work in tandem with a rich, ML-like module
   system, which has been shown to support programming in the large very well.
 
-- Linear types and ownerships are known for being fairly heavy to use.
+- Linear types and ownership are known for being fairly heavy to use.
   Rust is no exception and complex elision rules
   for lifetimes were instrumental in increasing ease-of-use. Affe shows
   that we can go much further thanks to inference. This could be used
@@ -44,7 +44,7 @@ We will expand our article in this direction and
 now answer specific questions.
 
 ## Linear Haskell
-LH indeed does indeed have a formalized core calculus. 
+LH does indeed have a formalized core calculus. 
 However, only type checking is formalized, not inference. 
 The inference implemented is
 partial (as pointed out by the GHC maintainers themselves), which
@@ -64,11 +64,11 @@ can be added by only modifying the "constraint generation" part of Affe.
 The constraint language and its solver would be unchanged, which is
 precisely the strengths of the typing-by-constraints approach we use.
 
-- Adapting Non-lexical lifetimes (NNL) to our system would requires 
+- Adapting Non-lexical lifetimes (NNL) to our system would require 
   inferring regions that are not lexical scopes. 
   Concretely, this means that a region is a cover tree of the
   control flow graph, instead of the graph of all paths between two points.
-  Inferring such precise regions is very desirable and we believe
+  Inferring such precise regions is very desirable, and we believe
   it can be done by improving our region inference, without affecting the
   rest of the system.
 - In rust, borrows of borrows are often done through ad-hoc polymorphism
@@ -109,7 +109,7 @@ Reviewer C and D asks to details the limitations of our system.
 Most limitations are due to the fact that Affe's type algebra
 is voluntarily simple:
 
-- Affe is not flow sensitive, and will not be able to express
+- Affe is not flow-sensitive, and will not be able to express
 functions that might or might use something depending on their
 argument. More generally, we don't support borrowing pattern
 whose correctness depends on internal invariants of a data-structure.
@@ -127,11 +127,11 @@ merge on linear lists:
 - In Rust, many primitives are written using unsafe code which is
   then abstracted. Such unsafe code can be then proven correct (see
   RustBelt).
-  Affe aims to use module abstraction in a similar way, but is much
+  Affe aims to use module abstraction similarly, but is much
   more limited and doesn't provide such a language-integrate
   unsafe mechanism.
 
 - Affe's semantics is similar to ML: pass by reference and GC.
-  Many linear languages, and Rust in particular, supports very precise
+  Many linear languages, and Rust in particular, support very precise
   control over memory structures and call conventions which we do not
   aim to provide.
