@@ -106,13 +106,13 @@ requires a richer logic (such as Mezzo).
 
 # Limitations
 
-Reviewer C and D asks to details the limitations of our system.
+Reviewer C and D asks to detail the limitations of our system.
 Most limitations are due to the fact that Affe's type algebra
 is voluntarily simple:
 
 - Affe is not flow-sensitive, and will not be able to express
-functions that might or might use something depending on their
-argument. More generally, we don't support borrowing pattern
+functions that might or might not use something depending on their
+argument. More generally, we don't support borrowing patterns
 whose correctness depends on internal invariants of a data-structure.
 This requires richer logic such as Mezzo, typestates, etc.
 As a simple example, Affe can not directly type functions such as the 
