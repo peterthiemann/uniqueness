@@ -203,7 +203,7 @@
       \forall \Multi[i]{\kvar} \forall (\Multi[j]{\tvar_j:k}).\ \qual{C_x}{\tau}
     }
     \in \E \\\\
-    \unif = [\Multi[i]{\kvar_i\mapsto k},\Multi[j]{\tvar_j \mapsto \tau}] \\\\
+    \unif = [\Multi[i]{\kvar_i\mapsto k},\Multi[j]{\tvar_j \mapsto \tau}] \\
     \entail C {\unif(C_x) \Cand \addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}}
     % \addlin{
     %   \inferSK{C}{\E}{\unif \tau}{k_\tau}
@@ -526,13 +526,13 @@
 \newcommand\ruleIVar{%
   \inferrule[Var$_I$]
   { \bvar{x}{\sigma}\in \E \\
-    \sigma = \forall \kvar_i \forall (\tvar_j:k_j). \qual{C_x}{\tau} \\
-    \Multi[i]{\kvar'},\Multi[j]{\tvar'} \text{ fresh} \\\\
+    \sigma = \forall \kvar_i \forall (\tvar_j:k_j). \qual{C_x}{\tau} \\\\
+    \Multi[i]{\kvar'},\Multi[j]{\tvar'} \text{ fresh} \\
     % \addlin{
     % \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{k_j}}{\tau}{k_\tau}
     % }\\
     % D = C_x\Cand C_\tau \\
-    \unif' = [\kvar_i\mapsto \kvar'_i,\tvar_j \mapsto \tvar'_j]\\
+    \unif' = [\kvar_i\mapsto \kvar'_i,\tvar_j \mapsto \tvar'_j]\\\\
     (C,\unif) =
     \normalize{C_x}{\unif'}
   }
@@ -548,10 +548,10 @@
     \inferW{\Sv_x}{(C',\unif')}
     {\E;\bvar{x}{\tvar}
       % ;\bvar{\tvar}{\kvar_\tvar}
-    }{e}{\tau} \\
-    \addlin{ \Sv = \Sv_x \Sdel{x} }\\\\
+    }{e}{\tau} \\\\
+    \addlin{ \Sv = \Sv_x \Sdel{x} }\\
     D = C'\Cand
-    \addlin{\Cleq{\Sv}{\kvar} \Cand \Weaken_{\bvar{x}{\tvar}}(\Sv_x)} \\
+    \addlin{\Cleq{\Sv}{\kvar} \Cand \Weaken_{\bvar{x}{\tvar}}(\Sv_x)} \\\\
     (C,\unif) = \normalize{D}{\unif'}
   }
   { \inferW{\addlin{\Sv}}{(C,\unif\Sdel{\tvar,\kvar})}{\E}

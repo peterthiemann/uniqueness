@@ -263,27 +263,26 @@ kind variables or relate two kind variables.
 \label{sdtyping:envs}
 
 \begin{figure}[tp]
+  \begin{minipage}{0.36\linewidth}
   \begin{align*}
-    \E &::=\ \Eempty \mid \E;B\tag{Environments}\\
-    B &::=\ \bnone % \tag{Empty} \\
-    \mid \bvar{\tvar}{\kschm} % \tag{Types}
-    \mid \bvar{x}{\schm}% \tag{Variables}
-    \mid \bvar{\borrow{x}}{\borrowty{k}{\tau}}% \tag{Borrows}\\
-    \mid \svar{x}{\schm}^n % \tag{Suspended}
+    \E ::=&\ \Eempty \mid \E;B\tag{Environments}\\
+    B ::=&\ \bnone \tag{Empty} \\
+    |&\ \bvar{\tvar}{\kschm} \tag{Types}\\
+    |&\ \bvar{x}{\schm} \tag{Variables} \\
+    |&\ \bvar{\borrow{x}}{\borrowty{k}{\tau}} \tag{Borrows}\\
+    |&\ \svar{x}{\schm}^n \tag{Suspended}
     % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
   \end{align*}
   \vspace{-10pt}
   \caption{Type environments}
   \label{grammar:env}
-  \vspace{5pt}
-  % \begin{minipage}{0.5\linewidth}
-  \centering
+  \end{minipage}\hfill
+  \begin{minipage}{0.6\linewidth}
     \input{sdtyping/split-binder}
     \vspace{-5pt}
     \caption{Splitting rules for bindings -- $\lsplit{C}{B}{B_l}{B_r}$}
     \label{sdtyp:split}
-  \vspace{-10pt}
-  % \end{minipage}
+  \end{minipage}
 \end{figure}
 
 
