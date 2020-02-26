@@ -47,14 +47,17 @@ takes the position of the element.
 
 \begin{figure}[tp]
   \centering
-  % \begin{subfigure}{1\linewidth}
+  \begin{subfigure}[t]{0.45\linewidth}
 \begin{lstlisting}
 module type HYBARRAY = sig
   include ARRAY
   val set : &('a t) * int * 'a -> 'a t
   val set_mut : &!('a t) * int * 'a -> unit
 end
-
+\end{lstlisting}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.55\linewidth}
+\begin{lstlisting}
 module Cow : HYBARRAY = struct
   include Array
   let set (a, i0, x0) =
@@ -62,15 +65,20 @@ module Cow : HYBARRAY = struct
   let set_mut = Array.set
 end
 \end{lstlisting}
-    \vspace{-15pt}
-  %   \caption{Implementation using copy-on-write}
-  % \end{subfigure}
-  \caption{Hybrid arrays}
-    \label{sig:hybarray}
-    \label{ex:cow}
+  \end{subfigure}
+  \vspace{-15pt}
+  \caption{Signature and Implementation of hybrid arrays}
+  \label{sig:hybarray}
+  \label{ex:cow}
 
-  \lstinputlisting[linerange=1-31]{code/sukodu.affe}
-    \vspace{-15pt}
+  \begin{subfigure}[t]{0.45\linewidth}
+  \lstinputlisting[linerange=1-13]{code/sukodu.affe}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.55\linewidth}
+  \lstinputlisting[linerange=14-31]{code/sukodu.affe}
+  \end{subfigure}
+  % \lstinputlisting[linerange=1-31,multicols=2]{code/sukodu.affe}
+  \vspace{-15pt}
   \caption{Excerpt of the Sudoku solver}
   \label{ex:sudoku}
 \end{figure}
