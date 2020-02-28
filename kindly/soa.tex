@@ -13,12 +13,12 @@
 
 \paragraph{Substructural type-systems in functional languages}
 
-Many systems have attempted to combine
+Many systems propose combinations of
 functional programming and linear types in a practical setting.
-One contribution of \lang is to combine several ingredients
-from these different languages while still preserving
+\lang is to combine key ingredients
+from these proposals while still preserving
 complete type inference.
-Many of the following languages supports linear or affine types, but rarely
+Many of the following languages support linear or affine types, but rarely
 both. In many cases, it is easy to adapt a system to support both, as
 \lang does.
 None of the following languages support borrows.
@@ -26,7 +26,7 @@ None of the following languages support borrows.
 System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
 extends System F with kinds to distinguish
 between linear and unrestricted types.
-\citet{DBLP:conf/tldi/MazurakZZ10} provide
+The authors provide
 a linearity-aware semantics with a soundness proof.
 Unlike \lang, System F\degree{} does not allow
 quantification over kinds which limits its expressivity. For instance, it
@@ -34,16 +34,14 @@ does not admit a most general type for function composition.
 Being based on System F, it does not admit
 principal type inference.
 
-Quill~\citep{DBLP:conf/icfp/Morris16} is a Haskell-like language with affine
-types through the use of qualified types.
+Quill~\citep{DBLP:conf/icfp/Morris16} is a Haskell-like language with linear
+types.
 Quill does not expose a kind language, but
-uses typeclass-like mechanism and annotation on arrows.
-It supports both a most general type for function composition and
-principal type inference.
-We were able to express the type signatures of all Quill examples
-in \lang by leveraging kind inequalities.
-Unlike Quill,
-we provide a linearity-aware semantics and prove its soundness.
+uses the framework of qualified types to govern linearity annotations on arrows.
+Its type inference algorithm is proven sound and complete.
+\lang infers type signatures for all Quill examples, but often with
+simpler types because Quill does not support subkinding.
+Quill comes with a linearity-aware semantics and soundness proof.
 Quill does not support borrows.
 
 % For instance, the type of the constructor
@@ -54,25 +52,24 @@ Quill does not support borrows.
 
 Alms~\citep{DBLP:conf/popl/TovP11} is an ML-like language with rich, kind-based
 affine types and ML modules, similar to \lang.
-Their system often relies on existential types to track the identity
+Alms examples often rely on existential types to track the identity
 of objects. For instance
 \lstinline/Array.create : int -> 'a -> \E 'b. ('a, 'b) array/ where
-\lstinline/'b/ uniquely identify the array.
+\lstinline/'b/ uniquely identifies the array.
 Due to the reliance on existentials, Alms does not support complete type inference.
-Furthermore, Alms does not support borrow and often rely
-on manual passing of capabilities.
+Furthermore, Alms does not support borrows and often relies
+on explicit capability passing.
 In our experience, \affe's limited support for existential types through
-regions is sufficient to express Alms' examples and leads to
+regions is sufficient to express many of Alms' examples and leads to
 a more convenient programming style for imperative code.
 %
-Kind-wise, Alms relies
-on unions, intersections and dependent kinds while
-\lang uses qualified types.
+Alms kind structure features unions, intersections and dependent kinds while
+\lang uses constrained types.
 We believe most of Alms' kind signatures can be expressed equivalently in
 our system: for instance the pair type constructor
 has kind $\Pi\alpha\Pi\beta. \langle\alpha\rangle \sqcup \langle\beta\rangle$
 (where $\alpha$ and $\beta$ are types and $\Pi$ is the dependent function)
-in Alms and $\kvar\to\kvar\to\kvar$ in \lang thanks
+in Alms compared to $\kvar\to\kvar\to\kvar$ in \lang thanks
 to subkinding.
 %
 Finally, Alms provides excellent support for abstraction through
@@ -82,8 +79,7 @@ such programming style thanks to subsumption.
 
 The goal of Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
 (LH) is to retrofit linear types to Haskell.
-LH introduces a new notion
-of ``linear arrows'', written $\multimap$ similar to linear logic,
+LH relies on ``linear arrows'', written $\multimap$ as in linear logic,
 which are functions that \emph{use} their argument exactly once.
 % By contrast, in \lang linearity is only decided
 % by the kinds, and $\tarr{\klin}$ simply denotes \emph{single-use functions}.
@@ -97,9 +93,10 @@ Most relevant to \lang:
   contexts. This approach is acceptable in a non-strict language such as
   Haskell but changes the semantics in a strict setting.
 \item
-  The GHC implementation of LH performs type inference, but
-  it is neither formalized nor complete.
-  Only type \emph{checking} is formalized.
+  While the LH paper specifies a full type system along with a
+  linearity-aware soundness proof, there is neither formal description of
+  the type inference algorithm nor a proof of the properties of inference.
+  However, there is an implementation of the inference as part of GHC.
 \item
   LH promotes a continuation-passing style with functions such as
   \lstinline/withFile : path -> (file ->. file) ->. unit/
@@ -154,16 +151,16 @@ programming~\citep{DBLP:conf/popl/BoylandR05,DBLP:conf/pldi/GrossmanMJHWC02}.
 Rust~\citep{rust} is the first
 mainstream language to popularize the idea of borrowing and ownership
 for safe low-level programming.
-\lang is inspired from Rust's borrowing system to apply
-it in a functional setting with type inference, a GC, and
-an ML module system.
+\lang is inspired by Rust's borrowing system and transfers some of its
+ideas  to a functional setting with type inference, garbage collection, and
+an ML-like module system.
 Rust's lifetime system is more explicit and more expressive than \lang,
 but Rust does not provide type inference
 and only provides \emph{partial} lifetime inference.
 Recently, \citet{DBLP:journals/corr/abs-1903-00982}
 formalized Rust's ownership discipline, including non-lexical lifetimes.
 We believe this work
-could help us improve our handling of regions and of successive exclusive borrows.
+could help improve our handling of regions and of successive exclusive borrows.
 
 Vault~\citep{DBLP:conf/pldi/DeLineF01}
 and Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}
@@ -190,7 +187,8 @@ bounded quantification and existentials~\citep{DBLP:conf/icfp/Simonet03},
 GADTs~\citep{DBLP:journals/toplas/SimonetP07},
 and there exists a syntactic soundness proof~\citep{DBLP:journals/entcs/SkalkaP02}.
 These results make us confident that the system developed in \lang
-could be applied to larger and more complex languages such as OCaml.
+could be applied to larger and more complex languages such as OCaml
+and the full range of features based on ad-hoc polymorphism.
 % Alternatively, we could have based \lang on qualified
 % types~\cite{DBLP:journals/scp/Jones94}, similarly to Quill.
 % This
@@ -200,7 +198,7 @@ could be applied to larger and more complex languages such as OCaml.
 \lang's  subtyping discipline is similar
 to structural subtyping, where the only subtyping (or here, subkinding)
 is at the leaves.
-Such discipline is known to be friendly to inference and has been used in many
+Such a discipline is known to be friendly to inference and has been used in many
 contexts, including OCaml, and has been combined
 with constraints~\citep{DBLP:journals/tapos/OderskySW99,DBLP:conf/sas/TrifonovS96}.
 % In particular, Flowcaml~\citep{DBLP:conf/popl/PottierS02}
