@@ -1,16 +1,17 @@
 \begin{figure*}
-  \begin{minipage}[t]{0.29\linewidth}
+  \begin{minipage}[t]{0.45\linewidth}
     \lstinputlisting[style=rule,linerange=eval\ header-(**)]
     {syntax/semanticsannotated.ml}
   \lstsemrule{sregion}
-  \end{minipage}%
-  \begin{minipage}[t]{0.36\linewidth}
-  \lstsemrule{varinst}
-  \end{minipage}%
-  \begin{minipage}[t]{0.36\linewidth}
-  \lstsemrule{sapp}
   \medskip
   \lstsemrule{sborrow}
+  \end{minipage}%
+  % \begin{minipage}[t]{0.36\linewidth}
+  % \end{minipage}%
+  \begin{minipage}[t]{0.5\linewidth}
+  \lstsemrule{varinst}
+  \medskip 
+  \lstsemrule{sapp}
   \end{minipage}
   \caption{Big-step interpretation}
   \label{fig:big-step-interpretation}

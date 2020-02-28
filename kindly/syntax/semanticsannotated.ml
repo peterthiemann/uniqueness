@@ -218,8 +218,7 @@ let getstrsrc : storable -> result sem =
   | _ -> Error ("expected STRSRC")
 
 let (let*?) : bool -> (unit -> 'b sem) -> 'b sem =
-  fun b f ->
-  if b then f () else Error ("test failed")
+  fun b f -> if b then f () else Error ("test failed")
 
 let (-:>) : 'a -> 'b -> 'a * 'b =
   fun a b -> a, b
