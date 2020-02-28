@@ -2,52 +2,50 @@
 \label{inference}
 
 An important contribution of \affe is its principal type inference.
-We now formulate our inference algorithm
+Our type inference algorithm is
 based on the \hmx framework~\citep{DBLP:journals/tapos/OderskySW99},
 a Hindley-Milner type system for a language
-with qualified types where constraints are expressed in an arbitrary
+with constrained types where constraints are expressed in an arbitrary
 theory $X$.
-Most importantly,
-\hmx ensures principal type inference
-when $X$ respects the specified properties.
+%Most importantly,
+If $X$ has certain properties, then
+\hmx guarantees principal type inference.
 We apply \hmx to a concrete constraint language which we name $\CL$.
-We adapt and extend \hmx's existing rules to support kind inference,
-track linearity and handle borrows and regions. Finally, we
-formulate an appropriate constraint solving algorithm for $\CL$
-which solves and simplifies constraints in a principled way.
+We adapt and extend \hmx's rules to support kind inference,
+track linearity, and handle borrows and regions. Finally, we
+formulate constraint solving and simplification algorithms for $\CL$.
 
 \subsection{Preliminaries}
 
-In the context of inference, it's critical to know which elements
-are input and output of inference judgements.
-In the following, when presenting a new judgement,
-we write input parameters in \textbf{\textcolor{DarkSlateBlue}{bold blue}}. The rest will be
-output parameters.
+In the context of inference, it is critical to know which elements
+are input and output of inference judgments.
+In the following, when presenting a new judgment,
+we write input parameters in \textbf{\textcolor{DarkSlateBlue}{bold
+    blue}}. The remaining parameters are output parameters.
 
-\paragraph{Usage environments}
+\paragraph{Usage Environments}
 
-% One novelty of our inference  judgement now
+% One novelty of our inference  judgment now
 % returns a type environment, which we call ``usage environment'' and commonly
 % write $\Sv$, to summarize how variables and borrows are used inside
 % the expression.
 
-To determine if a variable is used in an affine manner, we must track
+To determine if a variable is used in an affine manner, we track
 its uses and the associated kinds. In the expression
 $f\ x\ x$, $x$ is used twice. If $x$ is of type $\tau$, which is of kind $k$,
 we add the constraint $\Cleq{k}{\kun}$.
 %
-To infer such constraints, our inference judgement not only
-take an environment as parameter but also return an environment called
-``usage environment'', denoted $\Sv$,
+To infer such constraints, our inference judgment not only
+takes an environment as parameter but also returns a \emph{usage
+  environment}, denoted $\Sv$, 
 which summarizes usages of variables and borrows.
-Usage environments follow the grammar
-of normal environments.
+Usage environments are defined like normal environments.
 %
-In \cref{sdtyping}, we used relations to split environments in two and to
+In \cref{sdtyping}, we use relations to split environments and to
 transform suspended bindings into borrows inside a region.
-These relations take as argument a constraint which validates
+These relations take a constraint parameter which validates
 the transformations.
-In the context of inference, we define new judgements which \emph{infer}
+In the context of inference, we define new judgments which \emph{infer}
 the constraints.
 \begin{itemize}[leftmargin=*,topsep=0pt]
 \item $\bsplit{C}{\Sv}{\inP{\Sv_1}}{\inP{\Sv_2}}$.
@@ -69,18 +67,19 @@ The relations used for syntax-directed typing can trivially be defined
 in terms of these new relations by using constraint entailment.
 All relations are fully described in \cref{typ:extra:envs}.
 
-\paragraph{Constraint normalization}
+\paragraph{Constraint Normalization}
 
-The \hmx framework assumes the existence of a ``$\operatorname{normalize}$''
-function which takes a constraint $\inP{C}$, a substitution $\inP\psi$ and returns a
+The \hmx framework assumes the existence of a function
+``$\operatorname{normalize}$'' which takes a constraint $\inP{C}$ and a
+substitution $\inP\psi$ and returns a 
 simplified constraint $C'$
 and an updated substitution $\unif'$.
 Normalization returns a normal form such that $\unif'$ is a most general unifier.
 For now, we simply
 assume the existence of such a function for our constraint system
-and delay details to \cref{infer:solving}.
+and defer details to \cref{infer:solving}.
 
-\subsection{Type inference}
+\subsection{Type Inference}
 
 We write $\inferW{\Sv}{(C,\unif)}{\inP{\E}}{\inP{e}}{\tau}$ when
 $\inP{e}$\ has type $\tau$ in $\inP{\E}$ under the constraints $C$ and unifier $\unif$
@@ -94,7 +93,7 @@ of our inference algorithm and the differences with the syntax-directed
 system in \cref{rule:infer:envs}.
 The complete type inference rules are shown in \cref{appendix:infer}.
 
-\paragraph{Environments and bindings}
+\paragraph{Environments and Bindings}
 \label{infer:envs}
 %
 \begin{figure*}[tb]
@@ -138,25 +137,24 @@ In the syntax-directed system, the {\sc Var} rule ensure
 that linear variables are not discarded at the \emph{leaves}.
 In the inference algorithm, we operate in the opposite
 direction: we collect data from the leaves and enforce linearity
-at \emph{binders}. This is reflected in the {\sc Var$_I$} and
+at \emph{binders}. This policy is reflected in the {\sc Var$_I$} and
 {\sc Abs$_I$} rules.
-Typing for variables is very similar to traditional (non-affine) HM.
-The difference is that we record
+Typing for variables is very similar to traditional Hindley-Milner
+type inference. To keep track of linearity, we record
 that $x$ was used with the scheme $\schm$ by returning
 a usage environment $\Sv = \{ \bvar{x}{\schm} \}$.
 %
 This usage environment is in turn used at each binder to enforce proper
-usage of linear variable via the $\Weaken$ property.
-We demonstrate this for lambda expressions
-in the {\sc Abs$_I$} rule.
+usage of linear variable via the $\Weaken$ property as shown for
+lambda expressions in the {\sc Abs$_I$} rule.
 First, we typecheck the body of the lambda and obtain a usage
-environment $\Sv_x$. Like in the syntax-directed type system,
+environment $\Sv_x$. As in the syntax-directed type system,
 we introduce the constraint
 $\Cleq{\Sv\Sdel{x}}{\kvar}$ which properly accounts for captures in
 the body of the lambda expression. We then introduce the constraint
-$\Weaken_{\bvar{x}{\sigma}}(\Sv)$, which is false only if weakening
-is necessary-yet-impossible due to linearity.
-The $\Weaken$ constraint is introduced at each binding point in the program.
+$\Weaken_{\bvar{x}{\sigma}}(\Sv)$, which fails if we try
+to abandon a linear variable. 
+The $\Weaken$ constraint is introduced at each binding construct.
 %
 Finally, we normalize constraints to ensure
 that the inference algorithm always return the simplest possible
@@ -179,7 +177,7 @@ and $\bregion{C}{\inP{x}}{\Sv}{\inP\Sv'}$,
 which returns the necessary constraints.
 We then collect all constraints and normalize them.
 
-\subsection{Constraint solving}
+\subsection{Constraint Solving}
 \label{infer:solving}
 
 
@@ -210,8 +208,8 @@ We then collect all constraints and normalize them.
 
 
 
-For concision, we demonstrate our constraint solving
-algorithm on an example. The complete constraint system is
+For concision, we demonstrate the constraint solving
+algorithm with an example. The complete constraint system is
 defined in \cref{appendix:constraints}.
 %
 \input{infer/exampleconstr}
@@ -260,7 +258,7 @@ rules which help reduce the size of inferred signatures even further
 
 \subsection{Soundness and Principality}
 
-We now state that our extended inference algorithm still satisfies the soundness
+The extended inference algorithm still satisfies the soundness
 and completeness properties of \hmx.
 % This is achieved by extending
 % the original proofs from \hmx, which is done in \cref{appendix:infer}.
@@ -340,7 +338,7 @@ where all the binders are replaced by normal ones. More formally:
 % toplevel programs.
 
 \begin{theorem}[Principality]
-  Let $\inferS{\Ctrue}{\E}{e}{\schm}$ a closed typing judgement.
+  Let $\inferS{\Ctrue}{\E}{e}{\schm}$ a closed typing judgment.
   Then $\inferW{\Sv}{(C,\unif)}{\Eflat\E}{e}{\tau}$
   such that:
   \begin{align*}

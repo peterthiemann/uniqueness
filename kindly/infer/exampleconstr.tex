@@ -58,8 +58,8 @@
     \label{example:graph:final}
 \end{figure}
 
-We consider the expression $\lam{f}{\lam{x}{(\app{f}{x},x)}}$.
-The application of our inference algorithm yields the following constraints:
+Consider the expression $\lam{f}{\lam{x}{(\app{f}{x},x)}}$.
+The inference algorithm yields the following constraints:
 %
 \begin{align*}
   \E &= (\tvar_f : \kvar_f)
@@ -73,12 +73,12 @@ The application of our inference algorithm yields the following constraints:
   (\kvar_x \leq \kun)
 \end{align*}
 
-The first step of the algorithm is to use Herbrand unification to obtain
-a type skeleton. We thus obtain
+The first step of the algorithm uses Herbrand unification to obtain
+a type skeleton. 
 $$\alpha_r =
 (\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma$$
 
-and the following kind constraints: 
+In addition, we obtain the following kind constraints: 
 \[\begin{aligned}
     % \Cproj{\kvar_r}\Cproj{\kvar_f}\Cproj{\kvar_x}{}
     &(\kvar_x \leq \kun)
@@ -125,10 +125,10 @@ $$\forall \kvar_\beta \kvar_1 \kvar_2 \kvar_3
 {\Cleq{\kvar_3}{\kvar_1}}
 {(\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma}$$
 
-The algorithm we presented does not use variance, however we can use it to
-simplify this type further by noticing that $\kvar_1$ and $\kvar_2$ are only
-used in covariant position, and can thus be replaced by their lower bound.
-By removing the unneeded quantifier, we obtain the equivalent type:
+We can further simplify this type by exploiting variance. As $\kvar_1$
+and $\kvar_2$ are only used in covariant position, they can be
+replaced by their lower bounds, $\kvar_3$ and $\kun$. 
+By removing the unused quantifiers, we obtain a much simplified equivalent type:
 $$
 \forall \kvar
 (\gamma : \kun).
