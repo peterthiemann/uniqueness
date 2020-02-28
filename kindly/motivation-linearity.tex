@@ -75,7 +75,7 @@ This code is polymorphic in both argument and return types, so it could
 be used with any binary operator.
 %
 \begin{figure}[!h]
-  \begin{subfigure}[t]{\linewidth}
+  \begin{subfigure}[t]{0.5\linewidth}
 \begin{lstlisting}
 let add_service ep =
   let x, ep = receive ep in
@@ -87,8 +87,8 @@ let add_service ep =
     \vspace{-5pt}
     \caption{Addition server}
   \end{subfigure}
-
-  \begin{subfigure}[t]{\linewidth}
+  \hfill
+  \begin{subfigure}[t]{0.45\linewidth}
 \begin{lstlisting}
 let op_client ep x y =
   let ep = send ep x in
@@ -96,7 +96,8 @@ let op_client ep x y =
   let result, ep = receive ep in
   close ep;
   result
-# op_client : ('a_1 ? 'a_2 ? 'b ! end) st -> 'a_1 -{lin}> 'a_2 -{lin}> 'b
+# op_client : 
+   ('a_1 ? 'a_2 ? 'b ! end) st -> 'a_1 -{lin}> 'a_2 -{lin}> 'b
 \end{lstlisting}
 % The actual answer from the typechecker looks like this:
 % # ('m2:^k2), ('m1:^k1).

@@ -45,7 +45,7 @@ In practice, the type checker inserts this region automatically.
 
 \begin{figure}[tp]
   \centering
-  \begin{subfigure}[t]{1\linewidth}
+  \begin{subfigure}[t]{0.5\linewidth}
 \begin{lstlisting}
 type ('a:'k) pool : 'k
 create : (unit -> 'a) -> 'a pool
@@ -53,7 +53,7 @@ consume : ('a -> unit) -> 'a pool -> unit
 use : ('a_1:'k_1),('a_2:'k_2),('k_2 <= aff_r) =>
   &('a_1 pool) -> (&!(aff_r1,'a_1) -{lin}> 'a_2) -{'k_1}> 'a_2
 \end{lstlisting}
-    \vspace{-10pt}
+    \vspace{-8pt}
     \caption{Signature}
     \label{intf:pool}
 
@@ -70,15 +70,17 @@ let main users =
   List.parallel_iter (create_user &pool) users;
   Pool.consume (fun c -> Db.close c)
 \end{lstlisting}
-    \vspace{-10pt}
+    \vspace{-8pt}
     \caption{Example of use}
     \label{ex:pool}
   \end{subfigure}
-
-  \begin{subfigure}[t]{1\linewidth}
+  \hfill
+  \begin{subfigure}[t]{0.45\linewidth}
 \begin{lstlisting}
-type ('a:'k) pool : 'k = {spawn: unit -> 'a; queue: 'a CQueue.t}
-let create spawn = { spawn ; queue = CQueue.create () }
+type ('a:'k) pool : 'k =
+  { spawn: unit -> 'a; queue: 'a CQueue.t }
+let create spawn = 
+  { spawn ; queue = CQueue.create () }
 let consume f c = CQueue.iter f c.queue
 let use { spawn ; queue } f =
   let o = match CQueue.pop &queue with
@@ -89,7 +91,7 @@ let use { spawn ; queue } f =
   CQueue.push o &queue;
   r
 \end{lstlisting}
-    \vspace{-15pt}
+    \vspace{-8pt}
     \caption{Implementation}
     \label{impl:pool}
   \end{subfigure}
