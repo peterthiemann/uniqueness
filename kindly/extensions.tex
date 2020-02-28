@@ -35,7 +35,7 @@ types and preserves all properties of our language such
 as principal type inference. Its soundness is orthogonal to linear types
 and has been explored in the literature~\citep{DBLP:conf/fpca/OderskyWW95}.
 
-\subsection{Non-Lexical Lifetimes}
+\subsection{Non-Lexical Regions}
 
 A recent important addition to Rust is the notion of non-lexical lifetimes.
 With this feature code is acceptable even if borrowing does not respect
@@ -69,8 +69,8 @@ rules.
 
 Applied to the program above, only the first two lines would be annotated
 to be ``in the region associated with @&x@'', but not the last line.
-When typing the sequence, since the annotations are different, we will apply
-the region rule to the right hand side.
+Thanks to these annotations, when type checking the sequence we check
+that the borrow does not escape the left-hand side (i.e., the second line).
 
 \lstDeleteShortInline@
 
