@@ -8,8 +8,8 @@ Although the inferred types are much richer internally than plain ML types, most
 The main restriction of the current system is that the lifetime of borrows is determined by lexical scoping. Overcoming this restriction is subject of future work and will probably require extending the type system by some notion of effect, which is currently discussed in the OCaml community. 
 Moreover, other systems rely on existential types for extra expressiveness. We chose not to include existentials to preserve complete type inference, but our design can be extended in this direction.
 Finally, our matching construct is very simplistic.
-Our implementation supports full ADT and we believe it
-can be further extend to supports manipulating borrows of data-structures and
+Our implementation supports full algebraic data types and we believe it
+can be further extended to support manipulating borrows of data-structures and
 internal mutability.
 
 %%% Local Variables:
