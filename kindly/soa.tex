@@ -82,11 +82,10 @@ such programming style thanks to subsumption.
 
 The goal of Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
 (LH) is to retrofit linear types to Haskell.
-LH introduces a new notion
-of ``linear arrows'', written $\multimap$ similar to linear logic,
-which are functions that \emph{use} their argument exactly once.
-% By contrast, in \lang linearity is only decided
-% by the kinds, and $\tarr{\klin}$ simply denotes \emph{single-use functions}.
+As opposed to approaches presented previously, including \lang,
+LH annotates linearity on the arrow, similarly to linear logic.
+LH's ``linear arrows'', written $\multimap$ 
+are functions that \emph{use} their argument exactly once
 This design is easy to retrofit on top of an existing compiler
 such as GHC, but has proven quite controversial\footnote{
   See the in-depth discussion attached to the GHC proposal starting  \href{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}{here}.}.
@@ -100,6 +99,8 @@ Most relevant to \lang:
   The GHC implementation of LH performs type inference, but
   it is neither formalized nor complete.
   Only type \emph{checking} is formalized.
+  Subsequent work~\cite{DBLP:journals/corr/abs-1911-00268}
+  formalizes the inference for rank 1 qualified-types.
 \item
   LH promotes a continuation-passing style with functions such as
   \lstinline/withFile : path -> (file ->. file) ->. unit/
@@ -162,8 +163,16 @@ but Rust does not provide type inference
 and only provides \emph{partial} lifetime inference.
 Recently, \citet{DBLP:journals/corr/abs-1903-00982}
 formalized Rust's ownership discipline, including non-lexical lifetimes.
-We believe this work
-could help us improve our handling of regions and of successive exclusive borrows.
+Another important difference is that Rust allows
+to specify precisely the memory layout of objects
+and to pass arguments by value.
+These features are crucial for the efficiency goals of Rust.
+In \lang, we assume that all arguments are passed by reference and
+that a garbage collector is still available. This forgo numerous
+issues regarding interior mutability and algebraic data types.
+In particular, it
+allows us to easily nest mutable references inside objects, regardless
+if they are linear or unrestricted.
 
 Vault~\citep{DBLP:conf/pldi/DeLineF01}
 and Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}
