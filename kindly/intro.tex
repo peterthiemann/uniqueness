@@ -9,27 +9,29 @@ file. If it was opened for reading, then read operations will succeed,
 but write operations will fail. Once the handle is closed, it cannot
 be used for reading or writing, anymore.
 %
-Dynamic allocation of memory is analogous. An API call returns a
+Dynamic allocation of memory is similar. An API call returns a
 pointer to a memory area, which can then be read and written to until
-the memory is released by another API call.
+the area is released by another API call.
 
 In both cases, a resource is created in a certain state and a resource
 handle is returned to the program. Depending on this state, certain API calls
 can safely be applied to it. Finally, there is another API call to
-release the resource, which yields the handle invalid.
+release the resource, which renders the handle invalid.
 Taken to the extreme, each API call changes the state so that a
 different set of API calls is enabled afterwards.
 Ignoring such life cycle protocols is a common source of errors.
 %% this is about typestate \cite{DBLP:conf/ecoop/BeckmanKA11}.
 
 
-Most type systems provide just type soundness, but neglect the
-protocol aspect. The systems that do build on linear types \cite{DBLP:journals/tcs/Girard87} and/or
+Most type systems provide type soundness and memory safety, but neglect the
+protocol aspect. Systems that can support reasoning about protocols
+build on linear types \cite{DBLP:journals/tcs/Girard87} and/or 
 uniqueness types~\cite{DBLP:conf/plilp/BarendsenS95}. A value of linear
 type is guaranteed to be consumed
 exactly once. That is, a file that has been opened must be closed and
 memory that has been allocated must be released. A value of unique
-type is guaranteed to have a single reference to it.
+type is guaranteed to have a single reference to it. Thus, memory can
+be reused on consumption of the value. 
 
 These systems work well if one is prepared to write programs
 functionally in resource-passing style. In this style, all operations
@@ -37,25 +39,27 @@ in the resource's API take the resource as a parameter and return it
 in possibly modified state~\cite{DBLP:journals/jfp/AchtenP95}. In
 typestate-oriented programming, they would also modify its
 type~\cite{DBLP:conf/oopsla/AldrichSSS09}. Functional session types
-represent a popular example~\cite{DBLP:journals/jfp/GayV10}.
+represent a popular
+example~\cite{DBLP:journals/jfp/GayV10,lindley17:_light_funct_session_types}. 
 
 Explicit resource passing places a heavy burden on the programmer and
 complicates the program structure. For imperative APIs,
 resource-passing style is not an option at all. To this end,
 \citet{DBLP:conf/popl/BoylandR05}  proposed the notion of
 \emph{borrowing} a resource. The idea is that a linear resource can be
-borrowed to a function call, which can work with the resource, but
-cannot release it. Only the original owner of the resource has all
-rights to it and can release it.
+borrowed to a function call. The function can work with a borrow of
+the resource, but it cannot release the resource. Only the original
+owner of the resource has all rights to it and can release it.
 
 The concepts of ownership and borrowing have grown popular over time
 and they form the foundation of the type system of the Rust language
-\cite{rust}. Rust supports two kinds of borrows of data structures, shared and
-exclusive ones.
-Exclusive borrows generally enable modification of the data structure
-whereas shared borrows only grant read-only access.
-Several shared borrows can be active at the same time, but
-can not be active while an exclusive borrow is.
+\cite{rust}, which considers any memory-allocated data structure a
+resource. Rust supports two kinds of borrows,
+shared and exclusive ones.
+Exclusive borrows enable modification of the data structure
+whereas shared borrows only grant read access.
+At any given time, either a single exclusive borrow is active or 
+any number of shared borrows can be active.
 Moreover, Rust makes sure that the lifetime of a
 borrow is properly contained in the lifetime of its lender.
 
@@ -70,38 +74,41 @@ could seemlessly switch to safe, manual resource management if that
 was required.
 %
 As a concrete example, consider a functional programmer who wants to
-safely interact with a C library. Invoking the C functions is easy via
+safely interact with a C library. Invoking a C function is easy via
 the existing foreign function interface, but managing the underlying
 resources like malloc'd storage is not: It cannot be left to the
-garbage collector, but the proper calls to \texttt{free()} must be
+garbage collector, but proper release of the storage via calls to \texttt{free()} must be
 ensured by programming conventions.
 
-Our work provides a solution to programmers in this situation. We
+Our work provides a safe solution to programmers in this situation. We
 propose an extended type system for ML-like languages that comes with
 linear and affine types, exclusive and shared borrows, but all that
 integrated with full principal type inference, garbage collected data, and
 automatic placement of borrowing regions.
+In our system, it is a type error to omit the call to release the
+storage given a suitably typed API for storage allocation.
 
 The most closely related contenders in this design space are Linear Haskell
 \cite{DBLP:journals/pacmpl/BernardyBNJS18}, henceforth LH,
 Quill \cite{DBLP:conf/icfp/Morris16}, and ALMS \cite{DBLP:conf/popl/TovP11}.
-Compared to LH, the goals and means are
-similar as both systems permit abstraction over the number of uses of
+Compared to LH and Quill, the goals and means are
+similar as these systems also permit abstraction over the number of uses of
 values and retain type inference, but the details are different.
 \begin{enumerate}
-\item LH's multiplicities are either linear or unrestricted whereas
+\item Multiplicities in LH and Quill are either linear or unrestricted whereas
   we also distinguish affine values.
-\item \lang{} supports two flavors of borrowing: affine (exclusive,
-  mutable) and unrestricted (shared, immutable) borrows.
-\item Multiplicities are directly attached to the type of the
+\item In \lang{} and in Quill multiplicities are directly attached to the type of a
   value. For example, in \lang{} the function type \lstinline/'a-{lin}>'b/
   denotes the type of a \emph{single-use function} that can be called
   just once, whereas the multiplicities in LH choose
   between $\alpha\to\beta$ and $\alpha \multimap\beta$ where the
   latter is a function that promises to \emph{use its argument exactly
     once}.
-\item Similar to Quill, we make use of multiplicity contraints. Kind
-  subsumption in \lang{} helps simplify inferred types.
+\item \lang{} makes use of multiplicity contraints (like Quill) and kind
+  subsumption (unlike Quill). Kind subsumption results in significantly simpler, more readable
+  inferred types.
+\item Neither LH nor Quill have borrowing whereas \lang{} supports
+  two flavors: affine (exclusive, mutable) and unrestricted (shared, immutable) borrows.
 \end{enumerate}
 See \cref{sec:related-work} for further in-depth discussion of these
 and other related works.
@@ -133,7 +140,7 @@ let main () =
   \end{subfigure}
   \vspace{-10pt}
   \caption{Writing files}
-  \label{fig:writing-fiules}
+  \label{fig:writing-files}
 \end{figure}
 
 
@@ -141,20 +148,20 @@ let main () =
 As a first, well-known example we consider a simplified API for
 writing files shown in \cref{fig:writing-files-api}.  It introduces a
 linear abstract type @File.t@. A call like
-@fopen "foo"@ returns a linear handle to a newly created
-file, which \emph{must} be released later on with @close@
+@File.fopen "foo"@ returns a linear handle to a newly created
+file, which \emph{must} be released later on with @File.close@
 as shown in \cref{fig:writing-files-example}. Failing to do so is a
 static type error.  To write to the file, we must take an exclusive
 borrow @&!h@ of the handle and pass it to the
-@write@ function. Exclusive borrows are affine:
+@File.write@ function. Exclusive borrows are affine:
 they must not be duplicated, but there is no requirement to use
 them. This affinity shows up in the annotation @-{aff}>@ of the second arrow in
-the type of @write@: a partial application like
-@write &!h@ captures the affine borrow and hence the
+the type of @File.write@: a partial application like
+@File.write &!h@ captures the affine borrow and hence the
 resulting function is also affine. It
 would be an error to use the affine closure twice as in
 \begin{lstlisting}
-let w = File.write &!h in w "Hello "; w "world!" (*error*)
+let w = File.write &!h in w "Hello "; w "world!" (*type error*)
 \end{lstlisting}
 The remaining arrows in
 the API are unrestricted and we write @->@ instead of the
@@ -163,15 +170,33 @@ explicitly annotated @-{un}>@.
 
 This example demonstrates three features of our system:
 \begin{enumerate}
-\item full type inference without annotations in user code,
+\item full type inference without annotations in user code (\cref{fig:writing-files-example}),
 \item types carry multiplicity annotations in the form of kinds,
 \item resource APIs can be written in direct style as linearity is a
   property of the type @File.t@.
 \end{enumerate}
 
+Direct style means that there is a function like @fopen@ that creates
+and returns a linear resource. In contrast, LH forces programmers to
+use resource-passing style because, in LH, linearity is a property of
+a function, rather than a property of a value that restricts the way
+that value can be handled (as in \lang). An LH API analogous to @File@
+might provide functions like
+\begin{itemize}
+\item @withFile : path -> (handle o-> r) -> r@, which creates a new
+  file handle and takes a continuation that uses the @handle@ linearly,
+\item @writeFile : string -> handle o-> handle@, which
+  returns the transformed resource @handle@, and
+\item @closeFile : handle o-> unit@, which consumes the @handle@ by
+  closing the file.
+\end{itemize}
+
 In general, kinds can be polymorphic and constrained. Function
 application and composition are the archetypical
-examples for functions exploiting that feature.
+examples for functions exploiting that feature.\footnote{Compared to
+  Quill \cite{DBLP:conf/icfp/Morris16} the signatures of application and
+  composition are simpler because \lang{} supports kind subsumption.}
+For application, \lang{} infers the following type.
 \begin{lstlisting}
 let app f x = f x
 # app : ('a -{'k}> 'b) -> ('a -{'k}> 'b)
@@ -181,11 +206,14 @@ The reading of the type inferred by our system is straightforward. If
 @app f@. The multiplicities of @'a@ and
 @'b@ play no role. As usual in ML-like languages, we
 implicitly assume prenex quantification by
-$\forall\kappa\forall\alpha\forall\beta$. In reality, the
+$\forall\kappa\forall\alpha\forall\beta$. Internally, the
 type checker also quantifies over the kinds of $\alpha$ and $\beta$,
-hence the full prefix is
-$\forall\kappa\kappa_1\kappa_2\forall(\alpha:\kappa_1)\forall(\beta:\kappa_2)$,
-which is only revealed as much as necessary for understanding the type.
+but the full prefix
+$\forall\kappa\kappa_1\kappa_2\forall(\alpha:\kappa_1)\forall(\beta:\kappa_2)$
+of the type of @app@ is only revealed as much as necessary for
+understanding the type. 
+
+For @compose@, \lang{} infers this type.
 \begin{lstlisting}
 let compose f g x = f (g x)
 # compose : ('k <= 'k_1) => ('b -{'k}> 'c) -> ('a -{'k_1}> 'b) -{'k}> ('a -{'k_1}> 'c)
@@ -196,12 +224,12 @@ Like in @app@, the multiplicities of the type variables
 because @compose f@ is a closure that inherits
 @f@'s multiplicity. The multiplicities of @g@  and
 @f@ both influence the multiplicity of the last arrow, so
-that we would expect its annotation to be the least upper bound
+we would expect its annotation to be the least upper bound
 $\kappa \sqcup \kappa_1$. Thanks to subsumption of multiplicities, it
 is sufficient to assume $\kappa \le \kappa_1$ and @g@'s
 actual multiplicity gets subsumed to $\kappa_1$. This constraint
-simplification is part of our type inference algorithm. Again, the printout
-of the type scheme only mentions the required constraint
+simplification is part of our type inference algorithm. As before,
+printing the type scheme only mentions the required constraint 
 $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 \kappa_1$ as well as the kinds of @'a,'b,'c@.
 
@@ -211,19 +239,25 @@ $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 \label{sec:contributions}
 
 \begin{itemize}
-\item A type system encoding linearity with
+\item A type system encoding linearity and affinity with
   borrowing. The type system is polymorphic for types and
   for kinds that express constraints on the number of uses of a value.
 \item An extension of the \hmx framework
   \cite{DBLP:journals/tapos/OderskySW99} with kinds, regions, and
   multiplicity constraints that supports full, principal type inference.
-\item Proof of soundness for the semantics and the inference.
+\item Soundness proof of the inference algorithm.
+\item Big-step linearity aware semantics with an expressive soundness theorem.
 \item Constraint simplification techniques.
 \item Automatic inference of regions for borrows.
 \item A prototype implementation of the type inference algorithm, including all
   constraint simplification and extended with pattern matching,
   available at \url{https://affe.netlify.com/}.
 \end{itemize}
+
+As \lang{} is built on top of the \hmx{} framework, which is a general
+framework for expressing constraint-based typing and type inference,
+the extension of our work with features like typeclasses, ad-hoc overloading,
+traits, etc is possible and orthogonal to the presentation in this paper. 
 
 %%% Local Variables:
 %%% mode: latex
