@@ -130,8 +130,8 @@ and other related works.
 \begin{lstlisting}
 let main () =
   let h = File.fopen "foo" in
-  File.write &!h "Hello ";
-  File.write &!h "world!";
+  File.write &!h "Hello ";(*@\label{line:hello}*)
+  File.write &!h "world!";(*@\label{line:world}*)
   File.close h
 \end{lstlisting}
     \vspace{-10pt}
@@ -167,10 +167,18 @@ The remaining arrows in
 the API are unrestricted and we write @->@ instead of the
 explicitly annotated @-{un}>@.
 
+Every borrow is restricted to a \emph{region}, i.e., a lexically
+scoped program fragment from which the borrow must not escape. In
+\cref{fig:writing-files-example}, there are two regions, one 
+consisting of \cref{line:hello} and another consisting of
+\cref{line:world}. Both are fully contained in the scope of the linear
+handle @h@, hence we can take one exclusive borrow @&!h@ in each
+region. In both regions the borrow is consumed immediately by passing
+it to @File.write@. Regions are generally inferred by \lang.
 
 This example demonstrates three features of our system:
 \begin{enumerate}
-\item full type inference without annotations in user code (\cref{fig:writing-files-example}),
+\item type and region inference without annotations in user code (\cref{fig:writing-files-example}),
 \item types carry multiplicity annotations in the form of kinds,
 \item resource APIs can be written in direct style as linearity is a
   property of the type @File.t@.
