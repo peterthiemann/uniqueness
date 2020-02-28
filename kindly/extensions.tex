@@ -3,10 +3,10 @@
 
 \subsection{Algebraic Data Types}
 
-Algebraic Data Types are a staple of functional programming and fit nicely
+Algebraic data types are a staple of functional programming and fit nicely
 in our paradigm. Indeed, it is sufficient to check that the kinds of constructors
 are strictly less than the kind of the datatype.
-For instance, it is allowed to define a linear datatype containing unrestricted
+For instance, we may define a linear datatype containing unrestricted
 parts.
 On the contrary, it is forbidden to include affine elements in an unrestricted
 datatype.
@@ -18,29 +18,29 @@ type ('a : 'k) llist : lin = Nil | Cons of ('a * 'a llist)
 
 This extension is implemented in our prototype.
 
-\subsection{Ad-hoc polymorphism and borrows}
+\subsection{Ad-hoc Polymorphism and Borrows}
 
 In our formalization, we use two operators, $\borrow{x}$ and $\reborrow{x}$ to
 distinguish between borrows and borrows of borrows.
 Such a distinction is inconvenient for programming.
-Using typeclass-like mechanisms, we can replace these operators
-by a single one, $\borrow{x}$, which expects $x$ to be @Borrowable@ and
+Using a typeclass-like mechanism, we can replace these operators
+by a single overloaded operator, $\borrow{x}$, which expects $x$ to be @Borrowable@ and
 would then desugar to the more precise operators.
 A similar solution is used in Rust through the @Borrow@ and @Defer@
 traits.
-It also allows method calls on objects without
+This approach also enables method calls on objects without
 explicit borrows, such as @foo.len()@ where len expects a shared borrow.
 
 Ad-hoc polymorphism fits nicely in the framework of constrained
-types and would preserve all the good properties of our language such
+types and preserves all properties of our language such
 as principal type inference. Its soundness is orthogonal to linear types
 and has been explored in the literature~\citep{DBLP:journals/scp/Jones94}.
 
-\subsection{Non lexical lifetimes}
+\subsection{Non-Lexical Lifetimes}
 
-A recent important addition to Rust in the notion of ``non-lexical lifetimes''.
-It allows code where borrowing doesn't follow
-lexical scoping:
+A recent important addition to Rust is the notion of non-lexical lifetimes.
+With this feature code is acceptable even if borrowing does not respect
+lexical scoping as in this example:
 
 \begin{lstlisting}
 let a = &x in
@@ -48,14 +48,15 @@ f a;
 g (&!x)
 \end{lstlisting}
 
-Such patterns are dynamically safe, since $a$ is not used after
+Patterns like this one are dynamically safe because $a$ is not used after
 the second line.
-Non-lexical lifetimes handles such patterns by ``removing'' the instructions
-that do not mention $a$ from its region, here the last one.
+Non-lexical lifetimes handle such patterns by removing expressions
+that do not mention $a$ from its region; in this example,  the
+expression on the last line.
 %
 In \lang, regions are purely lexical and marked by the
-expressions $\region{b}{e}$.
-During inference, region typing is only done when *existing* the region:
+expression $\region{b}{e}$.
+During inference, region typing is only done when exiting the region:
 we modify the usage environment and introduce a kind constraint to prevent
 escaping.
 
@@ -64,11 +65,11 @@ an annotation on each subexpression indicating which borrowing it is associated
 to. When exploring a subexpression, we compare the annotations, and automatically
 apply the $\textsc{Region}$ rule when they differ.
 %
-This is equivalent to inlining the $\textsc{Region}$ rule in all the other
+This approach is equivalent to inlining the $\textsc{Region}$ rule in all the other
 rules.
 
-On the program above, the first two line will be annotated
-to be ``in the region associated with @&x@'', but the last line will not.
+Applied to the program above, only the first two lines would be annotated
+to be ``in the region associated with @&x@'', but not the last line.
 When typing the sequence, since the annotations are different, we will apply
 the region rule to the right hand side.
 
