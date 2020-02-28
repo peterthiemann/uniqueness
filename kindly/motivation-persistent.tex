@@ -39,7 +39,7 @@ The code in \cref{ex:cow} contains a very simple implementation of
 as regular arrays and uses copy-on-write for persistent
 modifications. The function
 @mapi: (int -> &'a -> 'b) -> &('a t) -> 'b t@
-is a simple variation on @Array.map@ where the mapping function
+is a simple variation on @Array.map@ where the mapping function also
 takes the position of the element.
 % A more elaborate implementation could use persistent arrays
 % \cite{DBLP:conf/ml/ConchonF07}.
@@ -87,17 +87,17 @@ Our implementation of a Sudoku solver (\cref{ex:sudoku}) performs
 modifications that correspond to choice points using @set@,
 which makes it trivial to come back to the previous version
 of the array, while other modifications use @set_mut@, which
-forbids uses of the previous version.
+cannot be reverted.
 
 The board is represented as a 2D-matrix (\cref{line:boardtype}), where
 the @Matrix@ type uses the same API as @PersistArray@
 but with two indices.
-Each cell contains an integer set that represent admissible solutions so far.
+Each cell contains an integer set that represents admissible solutions so far.
 The Sudoku solver iterates over the cells and tries each possible solution (\cref{line:try_solution}).
 When a value is picked for the current cell, we create a choice point,
 change the cell with an immutable modification (\cref{line:immutset}), and propagate
 the changes with the @propagate@ function.
-The @propagate@ function uses direct mutation through a
+The @propagate@ function uses direct mutation through an
 exclusive borrow of the matrix as it need not preserve the previous
 version of the board.
 The implementation of @propagate@ is split into three parts
@@ -111,8 +111,8 @@ As the @set@ function only requires an unrestricted shared borrow,
 the closure @try_solution@ remains unrestricted even though
 it captures the borrow @&g@.
 The price is that @try_solution@ cannot escape from
-@&g@'s region. In this example, inference places the region
-around the @begin@/@end@ scope.
+@&g@'s region. In this example, the inferred region corresponds to the
+@begin@/@end@ scope. 
 Hence, @try_solution@ can be used in
 the iteration in \cref{line:iter}.
 % As @&g@ is unrestricted, we could even use a parallel iteration

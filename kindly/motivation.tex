@@ -6,16 +6,18 @@
 \lang{} is amenable to a functional resource-passing style
 common in functional encodings of session types (e.g.,
 \cite{DBLP:journals/jfp/Padovani17}; see also
-\cref{sec:session-linearity} in the supplement). But it really shines
+\cref{sec:session-linearity} in the supplement) as well as other
+functional resource handling. But it really shines
 when manipulating mutable resources like buffers or connection pools
-using a mixed functional and imperative programming style.
+using a mix of functional and imperative programming styles.
 %
-To support this usage pattern of linearity, we rely on
-the notion of borrowing \cite{DBLP:conf/popl/BoylandR05} which
-we demonstrate first through the example of linear arrays to demonstrate
-simple borrowing and imperative programming and second with iterators
-on linear values to demonstrate advanced uses of regions.
-Further examples are also available in \cref{sec:extra-example}.
+To support this usage pattern of linearity, \lang{} relies on
+the notion of borrowing \cite{DBLP:conf/popl/BoylandR05}. Our first
+example of linear arrays demonstrates simple borrowing and
+imperative programming; the second example is a Sudoko solver using a
+hybrid copy-on-write data structure; the third example demonstrates advanced uses
+of regions with iterators on linear values.
+Further examples are available in \cref{sec:extra-example}.
 
 \subsection{Imperative programming with linear arrays}
 \label{sec:imper-progr}
@@ -40,15 +42,15 @@ end
   \vspace{-10pt}
 \end{figure}
 
-The API for mutable linear arrays (shown in \cref{sig:array})
+The API for mutable linear arrays (\cref{sig:array})
 aims to safely handle manual allocation and
 deallocation of arrays that may contain affine elements.
-One would first use @create n v@ to create
-an (unrestricted) array of size @n@ initialized with value
-@v@. This value must be unrestricted as it is duplicated to
+A program would first use @create n v@ to create
+an array of size @n@ initialized with value
+@v@. The value @v@ must be unrestricted as it is duplicated to
 initialize all array elements. Using the @map@ function we
 can transform the unrestricted elements into linear (affine)
-ones. This array can be processed further using @map@ (or @set@ if
+ones. The resulting array can be processed further using @map@ (or @set@ if
 affine). The @get@ function is only applicable if the element type
 is unrestricted as one element is duplicated. The @length@
 function is always applicable. To @free@ an array the elements must be
@@ -63,7 +65,7 @@ The constructor
 During the lifetime of the array resource @a@, we can split
 off \emph{shared borrows} @&a@ that provide a read-only
 view or \emph{exclusive borrows} @&!a@ for read-write views.
-Observer functions such as @length@ and @get@ expect an shared borrow
+Observer functions such as @length@ and @get@ expect a shared borrow
 argument, mutator functions such a @set@ expect
 an exclusive borrow.
 
@@ -77,9 +79,9 @@ enclosing region. Borrows are confined to their regions. Inside the region,
 shared borrows are unrestricted (@un@) whereas exclusive
 borrows are affine (@aff@).
 
-We can use the API 
-to create an
-array of Fibonacci numbers following an imperative coding style:
+Using the API 
+we can create an
+array of Fibonacci numbers in an imperative coding style:
 \begin{lstlisting}
 let mk_fib_array n =
   let a = create n 1 in
@@ -101,8 +103,8 @@ belongs to the next enclosing region corresponding to the loop body.
 The whole array can be returned in \cref{ex:array:return} because  the
 borrows are no longer in scope.
 %
-More precisely, here is is an annotated excerpt with explicit regions
-marked in braces @{| ... |}@:
+More precisely, here is is an annotated excerpt with regions explicitly
+marked by braces @{| ... |}@:
 \begin{lstlisting}[firstnumber=3]
   for i = 2 to n - 1 do {|
     let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
@@ -110,7 +112,7 @@ marked in braces @{| ... |}@:
   |} done;
 \end{lstlisting}
 
-A region consists of the header expression of the @let@ in
+One region consists of the header expression of the @let@ in
 \cref{ex:array:region:get}. It is contained in another region
 spanning the body of the @for@ loop. \lang guarantees that borrows
 never escape the smallest enclosing region. It employs a system of
@@ -162,30 +164,28 @@ The input of the fold is a shared borrow of the array,
 which ensures that we have the right to share borrows of the inner content and
 make multiple concurrent folds.
 
-We can then easily use this function to fold over an array of files. Here
-we compute the sum of their sizes:
+As an easy example, we fold over an array of files to compute the sum of their sizes:
 \begin{lstlisting}
 let total_size = fold (fun f s -> File.size f + s) &all_files 0
 \end{lstlisting}
 
-Naturally, this is not sufficient if we want to mutate the array during iteration.
-For this purpose, we need to take an exclusive borrow of the structure to iterate
+This approach is not sufficient if we want to mutate the array during iteration.
+To this end, we need to take an exclusive borrow of the structure to iterate
 on:
 \begin{lstlisting}
 val iter_mut : &!('a array) -> (&!(aff_r1,'a) -{un}> unit) -{aff}> unit
 \end{lstlisting}
 
-Since the callback will be called multiple times, it is explicitly
-annotated with @un@.
+The callback is explicitly annotated with @un@ because  it will be called multiple times.
 
 While the distinction between mutable and immutable iteration functions
-might seem unfortunate, it is typical of
+seems unfortunate, it is typical of
 programming with borrows and is also present in the Rust standard library.
-It allows the programmer to explicitly state how various iterations
-are allowed to compose and be optimized.
-\lang's region variables ensures that the content iterated on can never
+It enables the programmer to explicitly state how different iterations
+may be composed and optimized.
+\lang's region variables ensure that the content iterated on can never
 be leaked outside of the iteration function.
-This pattern is essential in many use-cases of linearity such
+This pattern is essential in many use cases of linearity such
 as pools of linear objects (see \cref{tuto:pool}).
 
 \lstDeleteShortInline@
