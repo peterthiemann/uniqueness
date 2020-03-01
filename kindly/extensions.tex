@@ -1,16 +1,15 @@
 \lstMakeShortInline[keepspaces,basicstyle=\small\ttfamily]@
 \section{Extensions}
 
-\subsection{Algebraic Data Types}
+\subsection{Algebraic Datatypes}
 
 Algebraic data types are a staple of functional programming and fit nicely
-in our paradigm. Indeed, it is sufficient to check that the kinds of constructors
-are strictly less than the kind of the datatype.
-For instance, we may define a linear datatype containing unrestricted
-parts.
-On the contrary, it is forbidden to include affine elements in an unrestricted
-datatype.
-Here is the definition of a linear lists. The objects inside the list do not have to be linear.
+in our paradigm. Indeed, it is sufficient to ensure  that the kinds of
+the constructor arguments are less than or equal to the kind of the datatype.
+Hence, it is forbidden to include affine elements in an unrestricted
+datatype, whereas the elements in a linear list may be linear or
+unrestricted. 
+Here is the definition of a datatype for linear lists.
 
 \begin{lstlisting}
 type ('a : 'k) llist : lin = Nil | Cons of ('a * 'a llist)
@@ -31,10 +30,10 @@ traits.
 This approach also enables method calls on objects without
 explicit borrows, such as @foo.len()@ where len expects a shared borrow.
 
-Ad-hoc polymorphism fits nicely in the framework of constrained
+Ad-hoc polymorphism fits demonstrably in the \hmx framework of constrained
 types and preserves all properties of our language such
 as principal type inference. Its soundness is orthogonal to linear types
-and has been explored in the literature~\citep{DBLP:journals/scp/Jones94}.
+and has been explored in the literature~\citep{DBLP:conf/fpca/OderskyWW95}.
 
 \subsection{Non-Lexical Lifetimes}
 
