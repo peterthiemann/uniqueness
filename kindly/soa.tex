@@ -11,7 +11,7 @@
 % \cite{DBLP:conf/popl/BoylandR05}
 
 
-\paragraph{Substructural type-systems in functional languages}
+\subsection{Substructural type-systems in functional languages}
 
 Many systems propose combinations of
 functional programming and linear types in a practical setting.
@@ -86,7 +86,7 @@ This design is easy to retrofit on top of an existing compiler
 such as GHC, but has proven quite controversial\footnote{
   See the in-depth discussion attached to the GHC proposal starting  \href{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}{here}.}.
 Most relevant to \lang:
-\begin{itemize}[leftmargin=*,topsep=0pt]
+\begin{itemize}[leftmargin=*]
 \item LH does not admit subtyping for arrows and requires
   $\eta$-expansion to pass unrestricted functions in linear
   contexts. This approach is acceptable in a non-strict language such as
@@ -138,7 +138,7 @@ the existence of a linear type system and develops the associated compilation
 and runtime infrastructure. We believe our approach is
 complementary and aim to combine them in the future.
 
-\paragraph{Other substructural type-systems}
+\subsection{Other substructural type-systems}
 
 % Linear and affine disciplines have  been used in non-functional
 % settings, notably in the context of low-level imperative programming
@@ -184,7 +184,7 @@ It  would be interesting to extend \lang with limited
 forms of typestate as a local, opt-in feature to provide
 more expressivity at the cost of inference.
 
-\paragraph{Type-system features}
+\subsection{Type-system features}
 %
 \lang relies on constrained types
 to introduce the kind inequalities required for linear types.

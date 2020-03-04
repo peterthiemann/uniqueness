@@ -183,6 +183,8 @@ seems unfortunate, it is typical of
 programming with borrows and is also present in the Rust standard library.
 It enables the programmer to explicitly state how different iterations
 may be composed and optimized.
+It also enables different implementations such as
+using parallel iterations in the immutable case.
 \lang's region variables ensure that the content iterated on can never
 be leaked outside of the iteration function.
 This pattern is essential in many use cases of linearity such
