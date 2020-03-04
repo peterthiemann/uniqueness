@@ -504,18 +504,19 @@
 
 \newcommand\ruleSDAIMatchPair{
   \inferrule[MatchPair] {
-    \bvar x {\transfm{\tyPair{\tau_1}{\tau_2}}} \in \Gamma \\\\
+    \Sp : \addlin{\lsplit{C}{\E}{\E_1}{\E_2}} \\
+    \E_1 = \bvar z {\transfm{\tyPair{\tau_1'}{\tau_1'}}}  \\\\
     \inferS
       {C}
-      {\E\Sdel{x}; \bvar{x_1}{\transfm{\tau_1}}; \bvar{x_2}{\transfm{\tau_2}}}
-      {e}
-      {\tau} \\
+      {\E_2; \bvar{x}{\transfm{\tau_1}}; \bvar{x'}{\transfm{\tau_1'}}}
+      {e_2}
+      {\tau_2} \\
   } {
     \inferS
       {C}
       {\E}
-      {\aimatchin\etransfm{x_1,x_2}{x}{e}}
-      {\tau}
+      {\aimatchin\etransfm{x,x'}{z}{e_2}}
+      {\tau_2}
   }
 }
 

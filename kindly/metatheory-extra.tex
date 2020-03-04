@@ -975,19 +975,19 @@ refer to newly created values.
 
   We need to invert rule \TirName{MatchPair}
   \begin{mathpar}
-    \ruleSDIMatchPair
+    \ruleSDAIMatchPair
   \end{mathpar}
   The case VMatch corresponds to the match specification
-  $\operatorname{id}$.
+  $\etransfm = \operatorname{id}$.
 
   Establish the assumptions for the recursive call
-  with $\VEnv'_2 =  (x\mapsto r_1) (x' \mapsto r_1')$:
+  with $\VEnv'_2 =  (x\mapsto r_1) (x' \mapsto r_1')$ and $\SE' = \SE$:
   \begin{enumerate}[({A1-}1)]
   \item $\inferS{C}{\E_2 (x:\tau_1) (x':\tau'_1)}{e_2}{\tau_2}$ by inversion
   \item $\SE \vdash \VEnv_2 : \E_2$  by assumption; moreover, $\SE
     \vdash r_1 : \tau_1$ and $\SE \vdash r_1' : \tau'_1$ by inversion
-    of the store typing for $\Loc$. Hence $\SE \vdash \VEnv_2' : \E_2 (x:\tau_1) (x':\tau_1')$.
-  \item $\vdash \Store' : \SE$ : the only change from assumption is in
+    of the store typing for $\Loc$. As $\SE'=\SE$, we have $\SE' \vdash \VEnv_2' : \E_2 (x:\tau_1) (x':\tau_1')$.
+  \item $\vdash \Store' : \SE'$ : the only change from assumption is in
     $\Loc$ which potentially maps to $\StFreed$.
   \item \assumeWellformed{'} : permission to $\Loc$ is removed iff
     $\Loc$ is mapped to $\StFreed$.
@@ -995,29 +995,29 @@ refer to newly created values.
   \item $\Rawloc{\Active{\VEnv'_2}}$,
     $\Rawloc{\MutableBorrows{\VEnv'_2}}$,
     $\Rawloc{\ImmutableBorrows{\VEnv'_2}}$, and
-    $\Rawloc{\Suspended{\VEnv'_2}}$ are all disjoint : by assumption
+    $\Rawloc{\Suspended{\VEnv'_2}}$ are all disjoint: by assumption
     and splitting
   % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
   %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
   \item \assumeIncoming{'}{'_2}
   \end{enumerate}
 
-  Hence the call to \lstinline{eval} yields
+  Hence the call to @eval@ yields
   $\exists$ $\Store_2$, $\Perm_2$, $r_2$, $\SE_2$ such that
   \begin{enumerate}[({R1-}1)]
   \item \resultOk{}{_2}
-  \item \resultEnv{}{_2}
-  \item $\SE' \vdash r' : \tau$
-  \item \resultPermDom{}{'}
-  \item \resultReachPerm{}{'}
-  \item \resultFrame{}{}{'}
+  \item \resultEnv{'}{_2}
+  \item $\SE_2 \vdash r_2 : \tau_2$
+  \item \resultPermDom{}{_2}
+  \item \resultReachPerm{}{_2}
+  \item \resultFrame{}{}{_2}
   \item \resultImmutables{}{}{'}
   \item \resultMutables{}{}{'}
   % \item \resultSuspended{}{}{'}
   \item \resultResources{}{}{'}
   \item \resultThinAir{}{'}
   \end{enumerate}
-
+  As $R_2$ is also returned from the match, these results carry over.
   
 \end{proof}
 

@@ -359,7 +359,7 @@ let rec eval
     let* (k, r_1, r_1') = getstpair w in
     let pi' = if k <= KUNR None then pi else pi <-> !$ ell in
     let* delta' = delta.*(ell) <- (if k <= KUNR None then w else STRELEASED) in
-    let* (delta_2, pi_2, r_2) = eval delta pi' gamma_2.+(x -:> r_1).+(x' -:> r_1') i' e_2 in
+    let* (delta_2, pi_2, r_2) = eval delta' pi' gamma_2.+(x -:> r_1).+(x' -:> r_1') i' e_2 in
     Ok (delta_2, pi_2, r_2)
   (**)
   (* rule matchborrow *)
