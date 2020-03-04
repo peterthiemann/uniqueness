@@ -321,9 +321,7 @@ let rec eval
   | Pair (k, e_1, e_2, sp) ->
     let (gamma_1, gamma_2) = vsplit gamma sp in
     let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
-    let* (delta_2, pi_2, r_2) =
-      eval delta_1 pi_1 gamma_2 i' e_2
-    in
+    let* (delta_2, pi_2, r_2) = eval delta_1 pi_1 gamma_2 i' e_2 in
     let w = STPAIR (k, r_1, r_2) in
     let (ell', delta') = salloc delta_2 w in
     Ok (delta', pi_2 <+> !$ ell', RADDR !$ ell')
@@ -344,10 +342,9 @@ let rec eval
     let* ell = getloc r_1 in
     let* w = delta_1.*(ell) in
     let* (k', r_1', r_2') = getstpair w in
-    let pi_1' =
-      if k' <= KUNR None then pi_1 else pi_1 <-> !$ ell
-    in
-    let* (delta_2, pi_2, r_2) = eval delta_1 pi_1' gamma_2.+(x -:> r_1').+(y -:> r_2') i' e_2 in
+    let pi_1' = (if k' <= KUNR None then pi_1 else pi_1 <-> !$ ell) in
+    let gamma_2' = gamma_2.+(x -:> r_1).+(x' -:> r_1') in
+    let* (delta_2, pi_2, r_2) = eval delta_1 pi_1' gamma_2' i' e_2 in
     Ok (delta_2, pi_2, r_2)
   (**)
   (* rule smatchanf *)
@@ -359,13 +356,15 @@ let rec eval
     let* (k, r_1, r_1') = getstpair w in
     let pi' = if k <= KUNR None then pi else pi <-> !$ ell in
     let* delta' = delta.*(ell) <- (if k <= KUNR None then w else STRELEASED) in
-    let* (delta_2, pi_2, r_2) = eval delta' pi' gamma_2.+(x -:> r_1).+(x' -:> r_1') i' e_2 in
+    let gamma_2' = gamma_2.+(x -:> r_1).+(x' -:> r_1') in
+    let* (delta_2, pi_2, r_2) = eval delta' pi' gamma_2' i' e_2 in
     Ok (delta_2, pi_2, r_2)
   (**)
   (* rule matchborrow *)
-  | Matchborrow (x, y, e_1, e_2, sp) ->
+  | Matchborrow (x, x', e_1, e_2, sp) ->
     let (gamma_1, gamma_2) = vsplit gamma sp in
     let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
+    let* rho = getaddress r_1 in
     let* (b, _, ell) = getborrowed_loc r_1 in
     let* w = delta_1.*(ell) in
     let* (k', r_1', r_2') = getstpair w in
@@ -374,9 +373,11 @@ let rec eval
     let* rho_1' = b<.>rho_1 in
     let* rho_2' = b<.>rho_2 in
     let pi_1' = (((pi_1 <-> rho_1) <-> rho_2) <+> rho_1') <+> rho_2' in
+    let pi_1'' = (if k' <= KUNR None then pi_1' else pi_1' <-> rho) in
     let r_1'' = RADDR rho_1' in
     let r_2'' = RADDR rho_2' in
-    let* (delta_2, pi_2, r_2) = eval delta_1 pi_1' gamma_2.+(x -:> r_1'').+(y -:> r_2'') i' e_2 in
+    let gamma_2'' = gamma_2.+(x -:> r_1'').+(x' -:> r_2'') in
+    let* (delta_2, pi_2, r_2) = eval delta_1 pi_1'' gamma_2'' i' e_2 in
     Ok (delta_2, pi_2, r_2)
   (**)
   (* let pi_2' = (((pi_2 <-> rho_1') <-> rho_2') <+> rho_1) <+> rho_2 in *)
@@ -388,7 +389,7 @@ let rec eval
     let* w = delta.*(ell) in
     let* (k', r_1', r_2') = getstpair w in
     let* rho = getaddress r_1 in
-    let pi' = if k' <= KUNR None then pi else pi <-> rho in
+    let pi' = (if k' <= KUNR None then pi else pi <-> rho) in
     let delta'' = delta in
     let* rho_1 = getaddress r_1' in
     let* rho_2 = getaddress r_2' in
