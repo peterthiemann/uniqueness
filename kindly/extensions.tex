@@ -35,7 +35,19 @@ types and preserves all properties of our language such
 as principal type inference. Its soundness is orthogonal to linear types
 and has been explored in the literature~\citep{DBLP:conf/fpca/OderskyWW95}.
 
-\subsection{Non-Lexical Lifetimes}
+\subsection{Branching constructs}
+
+Our formalization of \lang does not contain branching constructs. As a consequence,
+subexpressions are always executed sequentially. This is of great importance
+for the splitting relation introduced in \cref{sdtyping}, as it must
+coincide with the order of evaluation. To account for borrows and linear
+values in different branches, we need a new (symmetric) join relation.
+This relation immediately follows from the semantics of borrows and linearity
+shown so far, and allow to easily define branching constructs such as if-then-else
+and pattern matching.
+This extension is implemented in our prototype.
+
+\subsection{Non-Lexical Regions}
 
 A recent important addition to Rust is the notion of non-lexical lifetimes.
 With this feature code is acceptable even if borrowing does not respect
@@ -47,21 +59,21 @@ f a;
 g (&!x)
 \end{lstlisting}
 
-Patterns like this one are dynamically safe because $a$ is not used after
+Such code patterns are dynamically safe since $a$ is not used after
 the second line.
-Non-lexical lifetimes handle such patterns by removing expressions
+Non-lexical lifetimes handle this by removing expressions
 that do not mention $a$ from its region; in this example,  the
 expression on the last line.
 %
 In \lang, regions are purely lexical and marked by the
 expression $\region{b}{e}$.
-During inference, region typing is only done when exiting the region:
-we modify the usage environment and introduce a kind constraint to prevent
-escaping.
+During inference, we introduce kind constraints to prevent escaping from
+a region.
 
-We can thus replace the lexical region by
-an annotation on each subexpression indicating which borrowing it is associated
-to. When exploring a subexpression, we compare the annotations, and automatically
+To add support for non-lexical lifetimes, we could replace the
+lexical region by an annotation on each expression indicating which borrows are
+live in this expression.
+When exploring a subexpression, we would compare the annotations, and automatically
 apply the $\textsc{Region}$ rule when they differ.
 %
 This approach is equivalent to inlining the $\textsc{Region}$ rule in all the other
@@ -69,8 +81,8 @@ rules.
 
 Applied to the program above, only the first two lines would be annotated
 to be ``in the region associated with @&x@'', but not the last line.
-When typing the sequence, since the annotations are different, we will apply
-the region rule to the right hand side.
+Thanks to these annotations, when type checking the sequence we would check
+that the borrow does not escape the left-hand side (i.e., the second line).
 
 \lstDeleteShortInline@
 
