@@ -377,26 +377,29 @@ let rec eval
     let r_1'' = RADDR rho_1' in
     let r_2'' = RADDR rho_2' in
     let* (delta_2, pi_2, r_2) = eval delta_1 pi_1' gamma_2.+(x -:> r_1'').+(y -:> r_2'') i' e_2 in
-    let pi_2' = (((pi_2 <-> rho_1') <-> rho_2') <+> rho_1) <+> rho_2 in
-    Ok (delta_2, pi_2', r_2)
+    Ok (delta_2, pi_2, r_2)
   (**)
+  (* let pi_2' = (((pi_2 <-> rho_1') <-> rho_2') <+> rho_1) <+> rho_2 in *)
   (* rule matchborrowanf *)
-  | VMatchborrow (x, y, z, e', sp) ->
+  | VMatchborrow (x, x', z, e_2, sp) ->
     let (gamma_1, gamma_2) = vsplit gamma sp in
     let* r_1 = gamma_1.!(z) in
     let* (b, _, ell) = getborrowed_loc r_1 in
     let* w = delta.*(ell) in
     let* (k', r_1', r_2') = getstpair w in
+    let* rho = getaddress r_1 in
+    let pi' = if k' <= KUNR None then pi else pi <-> rho in
+    let delta'' = delta in
     let* rho_1 = getaddress r_1' in
     let* rho_2 = getaddress r_2' in
     let* rho_1' = b<.>rho_1 in
     let* rho_2' = b<.>rho_2 in
-    let pi' = (((pi <-> rho_1) <-> rho_2) <+> rho_1') <+> rho_2' in
+    let pi'' = (((pi' <-> rho_1) <-> rho_2) <+> rho_1') <+> rho_2' in
     let r_1'' = RADDR rho_1' in
     let r_2'' = RADDR rho_2' in
-    let* (delta_2, pi_2, r_2) = eval delta pi' gamma_2.+(x -:> r_1'').+(y -:> r_2'') i' e' in
-    let pi_2' = (((pi_2 <-> rho_1') <-> rho_2') <+> rho_1) <+> rho_2 in
-    Ok (delta_2, pi_2', r_2)
+    let gamma_2'' = gamma_2.+(x -:> r_1'').+(x' -:> r_2'') in
+    let* (delta_2, pi_2, r_2) = eval delta'' pi'' gamma_2'' i' e_2 in
+    Ok (delta_2, pi_2, r_2)
   (**)
   (* rule sregion *)
   | Region (e, n, x, b) ->

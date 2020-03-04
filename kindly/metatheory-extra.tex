@@ -981,7 +981,7 @@ refer to newly created values.
   $\etransfm = \operatorname{id}$.
 
   Establish the assumptions for the recursive call
-  with $\VEnv'_2 =  (x\mapsto r_1) (x' \mapsto r_1')$ and $\SE' = \SE$:
+  with $\VEnv'_2 = \VEnv_2 (x\mapsto r_1) (x' \mapsto r_1')$ and $\SE' = \SE$:
   \begin{enumerate}[({A1-}1)]
   \item $\inferS{C}{\E_2 (x:\tau_1) (x':\tau'_1)}{e_2}{\tau_2}$ by inversion
   \item $\SE \vdash \VEnv_2 : \E_2$  by assumption; moreover, $\SE
@@ -1019,6 +1019,74 @@ refer to newly created values.
   \end{enumerate}
   As $R_2$ is also returned from the match, these results carry over.
   
+  \newpage
+  \textbf{Case $e$ of}
+  \lstsemrule{matchborrowanf}
+
+  We need to invert rule \TirName{MatchPair}
+  \begin{mathpar}
+    \ruleSDAIMatchPair
+  \end{mathpar}
+  The case VMatchborrow corresponds to the match specification
+  $\etransfm = \&^{\BORROW}$.
+  In contrast to the non-borrowing match, the borrowed pair is never deallocated.
+
+  Establish the assumptions for the recursive call
+  with  $\SE'' = \SE$:
+  \begin{enumerate}[({A1-}1)]
+  \item $\inferS{C}{\E_2 (x:\borrow{\tau_1}) (x':\borrow{\tau'_1})}{e_2}{\tau_2}$ by inversion
+  \item $\SE \vdash \VEnv_2 : \E_2$  by assumption; moreover, $\SE
+    \vdash r_1'' : \borrow{\tau_1}$ and $\SE \vdash r_2'' : \borrow{\tau'_1}$ by inversion
+    of the store typing for $\Addr$. As $\SE''=\SE$, we have $\SE'' \vdash \VEnv_2'' : \E_2 (x:\borrow{\tau_1}) (x':\borrow{\tau_1'})$.
+  \item $\vdash \Store' : \SE''$ : the only change from assumption is in
+    $\Loc$ which potentially maps to $\StFreed$.
+  \item \assumeWellformed{''} : permission to $\Loc$ is removed iff
+    $\Loc$ is mapped to $\StFreed$.
+  \item $\Reach\Store{\VEnv_2''} \subseteq \Perm''$ by assumption
+  \item $\Rawloc{\Active{\VEnv''_2}}$,
+    $\Rawloc{\MutableBorrows{\VEnv''_2}}$,
+    $\Rawloc{\ImmutableBorrows{\VEnv''_2}}$, and
+    $\Rawloc{\Suspended{\VEnv''_2}}$ are all disjoint: by assumption
+    and splitting
+  % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
+  %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
+  \item \assumeIncoming{''}{'_2}
+  \end{enumerate}
+
+  Hence the call to @eval@ yields
+  $\Store_2$, $\Perm_2$, $r_2$, $\SE_2$ such that
+  \begin{enumerate}[({R1-}1)]
+  \item \resultOk{}{_2}
+  \item\label{item:1} \resultEnv{''}{_2}
+  \item\label{item:3} $\SE_2 \vdash r_2 : \tau_2$
+  \item\label{item:4} \resultPermDom{}{_2}
+  \item\label{item:5} \resultReachPerm{_2''}{_2}
+  \item\label{item:6} \resultFrame{''}{_2''}{_2}
+  \item\label{item:7} \resultImmutables{''}{_2''}{_2}
+  \item\label{item:34} \resultMutables{''}{_2''}{_2}
+  % \item \resultSuspended{}{}{'}
+  \item\label{item:35} \resultResources{''}{_2''}{_2}
+  \item\label{item:36} \resultThinAir{''}{_2}
+  \end{enumerate}
+
+  It remains to relate to result with the original call to @eval@.
+  \begin{enumerate}[(R1)]
+  \item \resultOk{}{_2}
+  \item \resultEnv{}{_2} because $\SE'' = \SE$ and \ref{item:1}.
+  \item $\SE_2 \vdash r_2 : \tau_2$ by \ref{item:3}
+  \item \resultPermDom{}{_2}
+    Immediate from~\ref{item:4}.
+  \item \resultReachPerm{}{_2} By~\ref{item:5} and because $\Store =\Store''$.
+  \item \resultFrame{}{}{_2} Immediate from~\ref{item:6} because
+    $\Store = \Store''$
+  \item \resultImmutables{}{}{_2}
+  \item \resultMutables{}{}{_2}
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{_2}
+    Immediate by~\ref{item:35} because the borrowing match does not deallocate.
+  \item \resultThinAir{}{_2}
+  \end{enumerate}
+
 \end{proof}
 
 %%% Local Variables:

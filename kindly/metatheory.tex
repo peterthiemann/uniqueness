@@ -49,14 +49,15 @@ times $x$ occurs in multiset $M$.
 \newcommand\resultPermDom[2]{
   $\Perm#2$ is wellformed and
   $\Rawloc{\Perm#2} \subseteq \Dom{\Store#2} \setminus {\Store#2}^{-1}
-  (\StFreed)$
+  (\StFreed)$.
 }
 \newcommand\resultReachPerm[2]{
   $\Reach{\Store#2}{r#2} \subseteq \Perm#2$
-  \textcolor{red}{
+  % \textcolor{red}{
     $\cap (\Reach{\Store#2}{\VEnv#1} \setminus
     \Reach{\Store#2}{\Suspended{\VEnv#1}}
-    \cup \Dom{\Store#2} \setminus \Dom{\Store#1})$}.
+    \cup \Dom{\Store#2} \setminus \Dom{\Store#1})$.
+  % }
 }
 \newcommand\resultFrame[3]{
   % input, inputenv, output
