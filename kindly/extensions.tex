@@ -70,10 +70,10 @@ expression $\region{b}{e}$.
 During inference, we introduce kind constraints to prevent escaping from
 a region.
 
-We can replace the lexical region by
-an annotation on each expression indicating which borrows are live
-in this expression.
-When exploring a subexpression, we compare the annotations, and automatically
+To add support for non-lexical lifetimes, we could replace the
+lexical region by an annotation on each expression indicating which borrows are
+live in this expression.
+When exploring a subexpression, we would compare the annotations, and automatically
 apply the $\textsc{Region}$ rule when they differ.
 %
 This approach is equivalent to inlining the $\textsc{Region}$ rule in all the other
@@ -81,7 +81,7 @@ rules.
 
 Applied to the program above, only the first two lines would be annotated
 to be ``in the region associated with @&x@'', but not the last line.
-Thanks to these annotations, when type checking the sequence we check
+Thanks to these annotations, when type checking the sequence we would check
 that the borrow does not escape the left-hand side (i.e., the second line).
 
 \lstDeleteShortInline@
