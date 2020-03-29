@@ -11,7 +11,9 @@ type address = Address of borrow list * loc
 let loc : loc -> address =
   fun ell -> Address ([], ell)
 
-type result = RADDR of address | RCONST of int | RVOID
+type result = RADDR of address
+            | RCONST of int
+            | RVOID
 
 type venv = VEmpty | VUpd of venv * ident * result
 
@@ -31,6 +33,7 @@ type constr = (kind * kind) list
 
 type ty = TYVAR of alpha
         | TYARR of kind * ty * ty
+        | TYPAIR of ty * ty
         | TYCON of ty list * ident
         | TYBOR of borrow * ty
 
@@ -46,7 +49,7 @@ type exp = Const of int
          | Pair of kind * exp * exp * splitting
          | Match of ident * ident * exp * exp * splitting
          | Matchborrow of ident * ident * exp * exp * splitting
-         | Region of exp * int * ident * borrow
+         | Region of exp * int * ident * ty * borrow
          | Borrow of borrow * ident
          | Create (* of exp *)
          | Destroy of exp
@@ -77,10 +80,15 @@ type perm = address list
 
 let s_add : perm -> address -> perm =
   fun p a -> a :: p
-let s_rem : perm -> address -> perm = assert false
+let s_rem : perm -> address -> perm =
+  assert false
+let s_sub : perm -> perm -> perm =
+  assert false
 
 let (<+>) = s_add
 let (<->) = s_rem
+let (--) = s_sub
+let (++) = (@)
 
 let (<|=) = List.mem
 
@@ -233,6 +241,64 @@ let (<=>) : constr -> constr -> bool = assert false
 let (<<=) : kind -> kind -> kind * kind =
   fun k1 k2 -> k1, k2
 
+let rec borrowedperm : borrow -> address -> ty -> store -> perm sem =
+  fun b rho t delta ->
+  let* rho' = b<.>rho in
+  let* pi = match t with
+      TYPAIR (t_1, t_2) ->
+        let Address (bs, ell) = rho' in
+        let* w = delta.*(ell) in
+        let* (k, r_1, r_2) = getstpair w in
+        let* rho_1 = getaddress r_1 in
+        let* rho_2 = getaddress r_2 in
+        let* pi_1 = borrowedperm b rho_1 t_1 delta in
+        let* pi_2 = borrowedperm b rho_2 t_2 delta in
+        Ok (rho' :: (pi_1 ++ pi_2))
+    | _ ->
+        Ok ([rho'])
+  in
+  Ok pi
+   
+let rec reach : address -> ty -> store -> perm sem =
+  fun rho t delta ->
+  match t with
+    TYPAIR (t_1, t_2) ->
+     let Address (bs, ell) = rho in
+     let* w = delta.*(ell) in
+     let* (k, r_1, r_2) = getstpair w in
+     let* rho_1 = getaddress r_1 in
+     let* rho_2 = getaddress r_2 in
+     let* pi_1 = reach rho_1 t_1 delta in
+     let* pi_2 = reach rho_2 t_2 delta in
+     Ok (rho :: (pi_1 ++ pi_2))
+  | _ ->
+     Ok ([rho])
+
+let withaddr : result sem -> (address -> 'a sem) -> 'a sem =
+  fun rsem acont ->
+  let* r = rsem in
+  match r with
+  | RADDR a ->
+     acont a
+  | _ ->
+     Error "address expected"
+
+let (let+) = withaddr
+    
+let rec mapsem : ('a -> 'b sem) -> 'a list -> 'b list sem =
+  fun f xs ->
+  match xs with
+  | [] ->
+     Ok []
+  | x :: xs ->
+     let* y = f x in
+     let* ys = mapsem f xs in
+     Ok (y :: ys)
+
+let (<..>) =
+  fun b pi ->
+  mapsem (rborrowed b) pi
+
   (* eval header *)
 let rec eval
   (delta:store) (pi:perm) (gamma:venv) i e
@@ -336,7 +402,7 @@ let rec eval
     Ok (delta', pi', RADDR !$ ell')
   (**)
   (* rule smatch *)
-  | Match (x, y, e_1, e_2, sp) ->
+  | Match (x, x', e_1, e_2, sp) ->
     let (gamma_1, gamma_2) = vsplit gamma sp in
     let* (delta_1, pi_1, r_1) = eval delta pi gamma_1 i' e_1 in
     let* ell = getloc r_1 in
@@ -372,11 +438,8 @@ let rec eval
     let* rho_2 = getaddress r_2' in
     let* rho_1' = b<.>rho_1 in
     let* rho_2' = b<.>rho_2 in
-    let pi_1' = (((pi_1 <-> rho_1) <-> rho_2) <+> rho_1') <+> rho_2' in
-    let pi_1'' = (if k' <= KUNR None then pi_1' else pi_1' <-> rho) in
-    let r_1'' = RADDR rho_1' in
-    let r_2'' = RADDR rho_2' in
-    let gamma_2'' = gamma_2.+(x -:> r_1'').+(x' -:> r_2'') in
+    let pi_1'' = (if k' <= KUNR None then pi_1 else pi_1 <-> rho) in
+    let gamma_2'' = gamma_2.+(x -:> RADDR rho_1').+(x' -:> RADDR rho_2') in
     let* (delta_2, pi_2, r_2) = eval delta_1 pi_1'' gamma_2'' i' e_2 in
     Ok (delta_2, pi_2, r_2)
   (**)
@@ -389,13 +452,12 @@ let rec eval
     let* w = delta.*(ell) in
     let* (k', r_1', r_2') = getstpair w in
     let* rho = getaddress r_1 in
-    let pi' = (if k' <= KUNR None then pi else pi <-> rho) in
+    let pi'' = (if k' <= KUNR None then pi else pi <-> rho) in
     let delta'' = delta in
     let* rho_1 = getaddress r_1' in
     let* rho_2 = getaddress r_2' in
     let* rho_1' = b<.>rho_1 in
     let* rho_2' = b<.>rho_2 in
-    let pi'' = (((pi' <-> rho_1) <-> rho_2) <+> rho_1') <+> rho_2' in
     let r_1'' = RADDR rho_1' in
     let r_2'' = RADDR rho_2' in
     let gamma_2'' = gamma_2.+(x -:> r_1'').+(x' -:> r_2'') in
@@ -403,14 +465,16 @@ let rec eval
     Ok (delta_2, pi_2, r_2)
   (**)
   (* rule sregion *)
-  | Region (e, n, x, b) ->
-    let* RADDR rho = gamma.!(x) in
-    let* rho' = b<.>rho in
-    let gamma' = gamma.+(x -:>RADDR rho') in
-    let pi = (pi <+> rho') <-> rho in
-    let* (delta_1, pi_1, r_1) = eval delta pi gamma' i' e in
-    let pi_1 = (pi_1 <-> rho') <+> rho in
-    Ok (delta_1, pi_1, r_1)
+  | Region (e, n, x, ty_x, b) ->
+     let+ rho = gamma.!(x) in
+     let* rho' = b<.>rho in
+     let* pi' = reach rho ty_x delta in
+     let* pi'' = b<..>pi' in
+     let gamma' = gamma.+(x -:>RADDR rho') in
+     let pi = (pi ++ pi'') -- pi' in
+     let* (delta_1, pi_1, r_1) = eval delta pi gamma' i' e in
+     let pi_1 = (pi_1 -- pi'') ++ pi' in
+     Ok (delta_1, pi_1, r_1)
   (**)
   (*(* previous *)
   | Region (e_1, n, x, b) ->
@@ -426,9 +490,9 @@ let rec eval
    *)
   (* rule sborrow *)
   | Borrow (b, x) ->
-    let* RADDR rho = gamma.!(x) in
-    let*? () = rho <?> b && rho <|= pi in
-    Ok (delta, pi, RADDR rho)
+     let+ rho = gamma.!(x) in
+     let*? () = rho <?> b && rho <|= pi in
+     Ok (delta, pi, RADDR rho)
   (**)
   (*(* previous *)
   | Borrow (b, x) ->

@@ -261,6 +261,15 @@ $\MultiNumber\Loc\REACH = \infty$.
   A permission $\Perm$ is \emph{wellformed} if it contains at most one
   address for each raw location.
 \end{definition}
+\begin{definition}[Permission closure]
+  The closure of a permission $\Sclos\Perm$ is the set of addresses
+  reachable from $\Perm$ by stripping an arbitrary number of borrows
+  from it. It is the homomorphic extension of the closure
+  $\Sclos\Addr$ for a single address.
+  \begin{align*}
+    \Sclos\Loc & = \{ \Loc \} & \Sclos{(\BQ\Addr)} & = \{ \BQ\Addr \}  \cup \Sclos\Addr
+  \end{align*}
+\end{definition}
 
 \begin{lemma}[Containment]\label{lemma:containment}
   Suppose that $\vdash \Store : \SE$,
@@ -409,11 +418,14 @@ refer to newly created values.
     $\SE_1 \vdash \VEnv_2 (x \mapsto r_1 ) : \E_2;\bvar x {\tau_1}$.
   \item Immediate from~\ref{item:8}.
   \item Immediate from~\ref{item:14}.
-  \item $\Reach{\Store_1}{\Active{\VEnv_2'}, \MutableBorrows{\VEnv_2'},
-      \ImmutableBorrows{\VEnv_2'}} \subseteq \Perm_1$ \\
+  \item Show \assumeReachable{_1}{'_2}\\
+    % $\Reach{\Store_1}{\Active{\VEnv_2'}, \MutableBorrows{\VEnv_2'},
+    %   \ImmutableBorrows{\VEnv_2'}} \subseteq \Perm_1$ \\
     From~\ref{item:12}, we have
-     $\Reach{\Store_1}{\Active{\VEnv_2}, \MutableBorrows{\VEnv_2},
-      \ImmutableBorrows{\VEnv_2}} \subseteq \Perm_1$. The extra
+    \assumeReachable{_1}{_2}
+    % $\Reach{\Store_1}{\Active{\VEnv_2}, \MutableBorrows{\VEnv_2},
+    %   \ImmutableBorrows{\VEnv_2}} \subseteq \Perm_1$.
+    The extra
     binding $(x \mapsto r_1)$ goes into one of the compartments
     according to its type. We conclude by~\ref{item:13}.
   \item Disjointness holds by assumption for $\VEnv_2$ and it remains
@@ -458,7 +470,8 @@ refer to newly created values.
     \\ Immediate from~\ref{item:20}.
   \item \resultReachPerm{}{_2}
     \\ Immediate from~\ref{item:21}
-    \textcolor{red}{because $\Reach{\Store_2}{\VEnv_1}
+    %% \textcolor{red}
+    {because $\Reach{\Store_2}{\VEnv_1}
     \subseteq \Reach{\Store_2}{\VEnv} $ and
     $\Reach{\Store_2}{\Suspended{\VEnv_1}} \subseteq
     \Reach{\Store_2}{\Suspended\VEnv}$.
@@ -532,7 +545,8 @@ refer to newly created values.
     the possible removal of a permission does not violate
     wellformedness; the permission is taken away exactly when the
     closure is destroyed
-  \item $\Reach\Store{\VEnv_2'} \subseteq \Perm$\\
+  \item
+    \assumeReachable{}{'_2} \\
     as the reach set is a subset of the incoming environment's reach
   \item $\Rawloc{\Active{\VEnv_2'}}$,
     $\Rawloc{\MutableBorrows{\VEnv_2'}}$,
@@ -578,18 +592,21 @@ refer to newly created values.
 
   \begin{enumerate}[({A1-}1)]
   \item $\inferS{C}{\E'}{e}{\tau}$ \\
-    immediate from premise
+    immediate from the inverted premise
   \item $\SE \vdash \VEnv' : \E'$ \\
     the only change of the environments is at $x$; adding the borrow
     modifier $\BORROW$ succeeds due to the second premise; the address $\Addr'$
-    stored into $x$ is compatible to its type by store typing
+    stored into $x$ is compatible with its type by store typing
   \item $\vdash \Store : \SE$ \\
     Immediate by outer assumption
   \item\label{item:11} \assumeWellformed{} \\
     Immediate by outer assumption; adding the modifier does not change
     the underlying raw location
-  \item\label{item:12} $\Reach\Store\VEnv' \subseteq \Perm$ \\
+  \item\label{item:12} 
+    \assumeReachable{}{'} \\
     locations were swapped simultaneously
+    %% this may not work because the pair's components do not change
+    %% their permissions
   \item $\Rawloc{\Active{\VEnv'}}$,
     $\Rawloc{\MutableBorrows{\VEnv'}}$,
     $\Rawloc{\ImmutableBorrows{\VEnv'}}$, and
@@ -628,12 +645,13 @@ refer to newly created values.
   \item $\SE_1 \vdash r_1 : \tau$\\
     Immediate
   \item \resultPermDom{}{_1} \\
-    The addresses $\Addr$ and $\Addr'$ have the same raw location, so
+    The addresses $\Addr$ and $\Addr'$ (as well as the elements of
+    $\Perm'$ and $\Perm''$) have the same raw location, so
     exchanging them does not affect wellformedness. The underlying set
     of locations does not change.
   \item \resultReachPerm{}{_1} \\
     This case is critical for region encapsulation. Here we need to
-    argue that $\Addr'$ is not reachable from $r_1$ because its type
+    argue that $\Addr'$ (and hence $\Perm''$) is not reachable from $r_1$ because its type
     $\tau$ is bounded by $\klin_{n-1}$ according to the fourth
     premise. We conclude with Lemma~\ref{lemma:containment}.
     %%% need lemma
@@ -991,7 +1009,8 @@ refer to newly created values.
     $\Loc$ which potentially maps to $\StFreed$.
   \item \assumeWellformed{'} : permission to $\Loc$ is removed iff
     $\Loc$ is mapped to $\StFreed$.
-  \item $\Reach\Store{\VEnv_2'} \subseteq \Perm'$ by assumption
+  \item \assumeReachable{'}{'_2} \\
+    by assumption
   \item $\Rawloc{\Active{\VEnv'_2}}$,
     $\Rawloc{\MutableBorrows{\VEnv'_2}}$,
     $\Rawloc{\ImmutableBorrows{\VEnv'_2}}$, and
@@ -1042,7 +1061,8 @@ refer to newly created values.
     $\Loc$ which potentially maps to $\StFreed$.
   \item \assumeWellformed{''} : permission to $\Loc$ is removed iff
     $\Loc$ is mapped to $\StFreed$.
-  \item $\Reach\Store{\VEnv_2''} \subseteq \Perm''$ by assumption
+  \item \assumeReachable{''}{''_2} \\
+    by assumption
   \item $\Rawloc{\Active{\VEnv''_2}}$,
     $\Rawloc{\MutableBorrows{\VEnv''_2}}$,
     $\Rawloc{\ImmutableBorrows{\VEnv''_2}}$, and

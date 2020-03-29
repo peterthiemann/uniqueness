@@ -52,7 +52,8 @@ times $x$ occurs in multiset $M$.
   (\StFreed)$.
 }
 \newcommand\resultReachPerm[2]{
-  $\Reach{\Store#2}{r#2} \subseteq \Perm#2$
+  $\Reach0{r#2} \subseteq \Perm#2$,
+  $\Reach{\Store#2}{r#2} \subseteq \Sclos{\Perm#2}$
   % \textcolor{red}{
     $\cap (\Reach{\Store#2}{\VEnv#1} \setminus
     \Reach{\Store#2}{\Suspended{\VEnv#1}}
@@ -144,6 +145,10 @@ times $x$ occurs in multiset $M$.
     $\MultiNumber\Loc{\REACH#1}= 1$.
   \end{enumerate}
 }
+\newcommand\assumeReachable[2]{
+  $\Reach0{\VEnv#2} \subseteq {\Perm#1}$, 
+  $\Reach{\Store#1}{\VEnv#2} \subseteq \Sclos{\Perm#1}$.
+}
 
 \begin{restatable}[Type Soundness]{theorem}{SoundnessThm}\label{thm:soundness}
   Suppose that
@@ -152,7 +157,7 @@ times $x$ occurs in multiset $M$.
   \item\label{item:32} $\SE \vdash \VEnv : \E$
   \item\label{item:33} $\vdash \Store : \SE$
   \item\label{item:11} \assumeWellformed{}
-  \item\label{item:12} $\Reach\Store\VEnv \subseteq \Perm$
+  \item\label{item:12} \assumeReachable{}{}
   \item $\Rawloc{\Active\VEnv}$,
     $\Rawloc{\MutableBorrows\VEnv}$,
     $\Rawloc{\ImmutableBorrows\VEnv}$, and
