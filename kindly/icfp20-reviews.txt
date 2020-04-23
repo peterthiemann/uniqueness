@@ -1,0 +1,272 @@
+ICFP 2020 Paper #74 Reviews and Comments
+===========================================================================
+Paper #74 Kindly Bent to Free Us
+
+
+Review #74A
+===========================================================================
+
+Overall merit
+-------------
+B. I support accepting this paper but will not champion it.
+
+Reviewer expertise
+------------------
+X. Expert
+
+Paper summary
+-------------
+The paper presents **Affe**: a functional programming language with a
+substructural type system that is able to enforce protocols on correct usage of
+resources. While many ideas in Affe overlap with Rust (like support for a
+"borrowing" mechanism) there are some significant differences. Contrary to Rust,
+Affe is a language in the ML-style with garbage collection and principal typing.
+The paper presents various motivating examples, a formal presentation of the
+Affe type system, the (instrumented) Affe operational semantics, and proofs of
+type soundness and principal typing.
+
+Comments for author
+-------------------
+I believe the paper addresses an important problem: substructural type systems
+are promising (as shown by the success of the Rust language), but the design
+space is huge and many aspects are yet to be explored---both in terms of
+expressivity and the ability to minimize type annotations that need to be given
+by the user. The Affe language as presented in this paper puts an interesting
+new data point in this design space. Furthermore, the paper was quite pleasant
+to read. However, I have some concerns:
+
+- The use of "absolute" natural numbers to identify regions seems not modular.
+  How do these absolute levels work in the presence of function definitions? I
+  suppose you need a more "relative" notion of levels for that, since the levels
+  in one function are unrelated to the levels in another function.
+- It is very hard to get a grasp what kind of programming idioms can be type
+  checked using Affe. Since Affe has been implemented, it expect a (small)
+  empirical study to make sure that a large-enough class of programming idioms
+  indeed work.
+- The example in Section 2.2 could be improved significantly.
+  + It is not clear what is the key point of the example.
+  + Conceptually the example is hard to grasp, which is exacerbated by the
+    large amount of code.
+  + The code makes use of variants of the data structures that are presented
+    in the paper (`Matrix`).
+  + There are no types in the code. I understand types not needed due to
+    principal type inference, but they would help the reader a lot to understand
+    what's going on.
+
+Other questions to the author:
+
+- What is the reason the borrow is fixed to `U` in the splitting rules `SuspB`
+  and `SuspS` (page 10). It appears that this makes it impossible to reborrow
+  an affine resource.
+- Kinds are used to distinguish affine and unrestricted types, whereas Rust
+  uses traits like `Copy` for that. For concurrency, Rust has the traits `Send`
+  and `Sync` that indicate if types can be shared between threads. Is Affe's
+  kind mechanism also powerful enough to keep track of things like `Send` and
+  `Sync`?
+
+Minor comments:
+
+- p3: The type `withFile : path → (handle ⊸ r) → r` for opening a file in Linear
+  Haskell is wrong, the `r` inside the closure needs to be unrestricted to
+  guarantee that the handle cannot leak. The correct type is as follows:
+  `withFile : path → (handle ⊸ unrestricted r) → r`.
+- p3: The phrasing of the contributions could be improved, some of the
+  contributions overlap and other are not crisp. For example, "constraint
+  simplification techniques" is not a contribution unless it's said why it's
+  needed and what's novel about it. Also, what makes a soundness theorem
+  "expressive"?
+- p5: Why are some operations in Fig 5 curried (e.g., `create`) and others
+  uncurried (e.g., `get` and `set`)?
+- p5: "After creation of the array, the presence of a borrow in the for loop
+  prevents access to the “raw” resource inside the loop’s body." Maybe add that
+  this means one cannot `free` the resource in the loop body, which would indeed
+  be unsafe.
+- p6: "the array elements are unrestricted" How is that evident from the code?
+- p7: The type `PersistArray` has not been introduced.
+- p7: In `fold` the type `α array` is used, but `array` has not been introduced.
+  I suppose it should be `α Array.t`?
+- p8: "exclusive (A) or shared (U)". Maybe change that into "exclusive/affine
+  (A) or shared/unrestricted (U)", then it would be clearer where the A and U
+  come from.
+- p9: The functions `create`, `observe`, `update` and `destroy` appear out of
+  thin air. On page 12 it's stated they were described in Section 2, but they
+  have not been described there.
+- p9: In order to reduce the conceptual overhead of the reader, it would be
+  good to align the two examples in Sec 3.2. The first example could be
+  annotated with regions as follows `f {| &^U x |} {[ &^U x |}`.
+- p10: Why have the `b` twice in the construct `&^b x : &^b (k,τ)` (Fig 7)?
+  This is confusing, since it seems they are always the same.
+- p10: The construct `(&^b x : σ)` as used in Fig 8 does not align with the
+  grammar in Fig 8. The RHS of `(&^b x : σ)` cannot be a type `σ`, but it should
+  always be of the shape `&^b (k,τ)`.
+- p11: "Kind k restricts the lifetime of the borrow to the region (see Fig. 9)."
+  Please refer to the specific rule in Fig 9 that demonstrates this.
+- p11: It would be illustrative to show the rule for reborrowing in Fig 9.
+- p12: Please explain in the beginning of Sec 3.4 why an instrumented semantics
+  that keeps track of types/borrows/etc is needed.
+- p15: I would like to see some more information about the properties of the
+  theory X that HM(X) (and the paper's extension thereof) need to guarantee
+  principal typing.
+- p15: In the beginning of Sec 4 it would be worth mentioning that it has been
+  proved in the appendix that the extension of HM(X) still guarantees principal
+  type inference.
+- p15: Input parameters are displayed in bold and blue, however, the variant
+  of blue that is used is barely distinguishable from black. Please use another
+  color.
+- p21: I suppose "Affe is to combine ..." should be something like "The goal of
+  Affe is to combine ...".
+- p21: Some text appears to be missing in footnote 3. What GHC proposal does
+  the paper refer to? Where is it "attached"?
+- p22: An omission in Sec 7.2 is the RustBelt project, which has developed
+  a formal version of the Rust type system, and proved type soundness and
+  data-race freedom of it and some of the Rust standard libraries.
+
+
+
+Review #74B
+===========================================================================
+
+Overall merit
+-------------
+B. I support accepting this paper but will not champion it.
+
+Reviewer expertise
+------------------
+Y. Knowledgeable
+
+Paper summary
+-------------
+The article presents an extension of ML with a linear (and affine)
+type system for safely using resources like user-managed
+heap-allocated data. To enable an imperative programming style that
+wouldn't work well with linear resource passing, the type system
+enjoys a borrowing mechanism that can give read-only access to
+resources or read-and-write access ("exclusive borrowing"). A central
+concept in the type theory is a region that limits the scope of
+borrowed resources. It is shown that regions can be inferred.
+
+The design of the type system is motivated with two use cases: linear
+arrays and a Sudoku solver that relies on hybrid data structures. Then
+the static semantics (regions, constraints, type system) and a
+big-step model are sketched. Next, the region inference algorithm is
+presented and proved sound. Finally, type soundness and related work
+are discussed. The type soundness proof is provided in the appendix
+and the type system has been implemented in a publically available
+prototype called Affe.
+
+Comments for author
+-------------------
+Pros
+
+ + prototype implementation available online
+
+ + detailed type soundness proof (in the appendix)
+
+ + region inference with soundness proof
+
+Cons
+
+ - presentation could be improved at places
+
+ - complex type system and soundness theorem
+
+ - only barely self-contained
+
+There's a lot of material in this paper and I found that both
+overwhelming and impressive. I feel overall positive about the paper
+but also have some concerns.
+
+First, this research area is a crowded space and there's a lot of
+existing work (Rust, Linear Haskell, Quill, ...). I'm not familiar
+enough with the details of these type systems to judge whether the
+delta over existing work is significant and if the complexity of the
+presented type system is justified. To some extent, I blame the
+presentation (How about a comparison table or an implementing of a couple
+of examples in different systems?) but the provided information should
+be sufficient for experts.
+
+Second, the type system seems rather complex and I'm not convinced
+that it would really help simplify working with linear and affine
+resources. I understand that there are some benefits over resource
+passing but there are trade-offs. This is probably best illustrated by
+the type soundness theorem (my go-to place for getting some intuition
+about a type system), which occupies three-quarters of page 19. This
+is only the theorem; the proof is carried out on 20 pages in the
+appendix.
+
+Again, the presentation could potentially be improved to address this
+concern. For example, the overview section seems to (at least partly)
+aim at showing off the expressivity of the type system with larger
+examples instead of showing how it works with small code snippets. So
+it didn't become clear to me at all why you need to distinguish
+between borrows and exclusive borrows. What could go wrong, for
+example, if the set function of the array module would use a
+non-exclusive borrow type in the argument?
+
+A minor issue was the claim (in the abstract) that expressions don't
+require linearity annotations. Do you mean that linearity annotations
+are only required for function calls (which are expressions)?
+
+That said, the work does contain everything I expected: an
+implementation, type rules, an operational model, and the type
+soundness proof. Provided borrowing in an ML-style setting and the
+other novelties listed in the intro are indeed a significant increment
+over existing work, I'm in favor of accepting the paper.
+
+
+
+Review #74C
+===========================================================================
+
+Overall merit
+-------------
+A. I will champion accepting this paper.
+
+Reviewer expertise
+------------------
+X. Expert
+
+Paper summary
+-------------
+The paper presents Affe, a novel extension to the ML type system that seamlessly integrates borrows à la Rust. Affe unifies and blends together borrowing, which enforces a well-nested lexical lifetime of borrows and classic ML features (polymorphism, unrestricted duplication) in a framework that retains much of the elegance and clarity we have come to expect from ML-like type systems. To that end, Affe proposes a novel combination of ingredients:
+- an indexed kind system that is used as a technical device to enforce proper nesting of regions and prevent escaping
+- bounded kind polymorphism to encode generality over the linearity of a type
+- linearity over *values* rather than over *usage*
+- a technical notion of "pre-borrow" (called "suspended borrow" in the paper) that allows decoupling environment splitting from actual borrowing -- this is a key innovation and allows tying borrows to the lexical structure of regions, and to kind (index) checking to enforce lexical nesting and prevent escaping.
+
+This work comprises not only the design of the language, but also a proof of soundness, an extension of HM(X) to perform principal inference, proof of correctness of the algorithm, and an implementation written in OCaml, and uploaded online via js_of_ocaml to be tried (anonymously) on the Web.
+
+Comments for author
+-------------------
+I very much liked this paper which presents an elegant and clear formalization for an *extension* of the existing classic ML system. Having seamless interaction between GC'd data and manually-managed linear resources integrated within the HM(X) framework is a novel and exciting contribution, which could lend itself to, say, an extension of OCaml for manually-managing parts of memory in performance-critical contexts. As such, I am very much in favor of accepting this paper.
+
+The paper was well-written and pleasant to read. The formalization was convincing, keeping in mind that most of the proofs are paper proofs in a 42-page appendix. I was very much liked the novel and original use of index kinds with constraints, which turns out to be very expressive and allows expressing the well-formedness of regions and borrows. This makes rules simple and lexical nesting/escaping checks easy to express.
+
+The perhaps central issue is that non-lexical borrows, a key feature of Rust, are not supported and are left to future work. This is, however, correctly acknowledged and the paper already contains enough of a framework to foster future research on how to add those to Affe. The other limitation is the lack of a mechanized proof: I spotted what seems like minor typos and/or notational puns in the various figures, but the design and ideas are novel and interesting enough that I don't consider this to be a deal breaker.
+
+Another point that may be an issue is that by "baking in" lexical regions & borrows so deeply into the system, local relaxations might be hard to express. For instance, the `get` at line 201 seems overly restrictive in that it effectively restricts arrays to be arrays of unrestricted types, if you want to be able to access the elements (other than via a map or a fold). This makes the example somewhat less convincing -- in other systems, one might use existential quantification tricks or magic wands to express temporarily borrowing an *element* of an array before returning the element to the array. What would be the equivalent here? A new rule for extending the syntax of borrows with paths through structures and arrays? It would be good to discuss this and provide ideas / future directions.
+
+Finally, a criticism that is often levied against Rust-like borrowing systems is that they do not lend themselves well to "escape hatches" and require the use of unsafe blocks. The canonical example is a doubly-linked list that must be somewhat assumed. Do you envision a similar discipline for your system where one might write, say, a doubly-linked list in regular GC'd ML, then assume an interface for it that exposes it as a resource? What would be the runtime semantics and would "forced freeing" be supported by the GC?
+
+### Detailed remarks
+
+In section 3.3, I found that earmarked borrows were a central idea in this work, in that they allow to suspend borrow taking until a region is encountered later on during type checking. Since the region is not available at the time of environment-splitting (e.g. because in App the region is to be found further down $e_1$), this allows deferring the check later, when rule Region triggers. This is a departure from the way linear type systems and/or borrows were previously modeled, which deserves highlighting. It's also the key ingredient, because it allows tying together the act of taking a borrow, the index `n` on the lexical region (found in the expression tree) and enforce a bound on the index of the kind of $\tau$. Perhaps more importantly, it allows avoiding big compound rules. This is, in my opinion, worth emphasizing more.
+
+I think the inference status of regions was somewhat unclear for the first few pages of the paper: insofar as I understand, regions are elaborated (3.2) and are considered to not be part of the principality result regarding type inference; they benefit from a special inference procedure described in detail in appendix B. Without this context, line 122 seem somewhat confusing, as "generally infers" seems to contradict the earlier principal inference claim.
+
+Fig 2: free operates on $\alpha: aff$ -- is this syntactic sugar for $\forall \kappa. \forall (\alpha: \kappa). (\kappa \leq aff) \Rightarrow \alpha t \to unit$? or is the subkinding generated automatically as part of the constraints?
+
+I was somewhat confused by region inference: line 238 has two occurrences of `&a` in a single region, which seems to contradict line 418, saying "the variable $x$ cannot occur in the region of $\&^bx$, but then there's a word at line 461 about allowing merging two regions?
+
+### Typos & focused remarks
+
+- 70 ": It" (capitalization)
+- 424: why was $\&^U$ in the first line of the code snippet upgraded to $\&^A$?
+- 466: how is zero region per borrow allowed? we didn't hear this mentioned until this line
+- 499: in the fourth premise of rule Region, is $\tau \leq L_{n-1}$ sugar for $\tau: \kappa$ and $\kappa \leq L_{n-1}$?
+- 505: in the conclusion of BorrowBinding, the squiggly arrow does not have anything in superscript
+- 613: you write borrows (plural), how can there be multiple affine borrows? (if I understand affine to mean "strictly affine")
+- 645: what is $=_e$?
+- 692: how come suspended bindings have an address that's different from their borrow? is there a key reason?
+- 811: I was confused here: $\alpha_r$ seems to stand for the type of $(f\ x, x)$ per the constraint $(\beta\ast\alpha_x\leq\alpha_r)$ but at line 811 $\alpha_r$ seems to stand for the type of the whole abstraction
+- 970: I am under the impression that this specific example could be reparenthesized as `(let a = &x in f a); g &!x` to work around the issue
