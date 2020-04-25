@@ -54,7 +54,6 @@ Section 6.2, which would allow to implement such mechanisms.
 
 > What could go wrong, for example, if the set function of the array module would use a non-exclusive borrow type in the argument?
 
-<<<<<<< HEAD
 The real question here is: "What guarantee is offered by an API?".
 ML references and arrays permit concurrent writes but are prone to
 data races, which give rise to subtle bugs.
