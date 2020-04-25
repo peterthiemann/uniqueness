@@ -29,12 +29,22 @@ The main limitation of Affe is that it is not flow sensitive.
 Code idioms that rely on subtle flow-sensitive usage of 
 permissions and linearity do not typecheck in Affe. Such patterns often
 do not work in Rust either and require a richer logic as in Mezzo.
+As a simple example, Affe can not directly type functions such as the 
+merge on linear lists:
+```
+let rec merge l1 l2 = match l1, l2 with
+  | h1::t1, h2::t2 ->
+    if &h1 < &h2 
+    then h1::(merge t1 l2) (* Must expand l2 to h2::t2 here *)
+    else h2::(merge l1 t2)
+  | ....
+```
 
 Rust slightly relaxes these constraints through the use of non-lexical lifetimes
 and double-borrows. 
 Following the work by Weiss et al. [38] on the Rust semantics, we believe
 these techniques can also be applied to Affe and 
-sketch how in section 6.
+sketch how in section 6, which would help for the example above.
 
 > What is the reason the borrow is fixed to `U` in the splitting rules `SuspB` and `SuspS` (page 10).
 
