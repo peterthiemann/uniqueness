@@ -54,19 +54,21 @@ Section 6.2, which would allow to implement such mechanisms.
 
 > What could go wrong, for example, if the set function of the array module would use a non-exclusive borrow type in the argument?
 
-This question should be reframed in a larger context: "What guarantee
-is offered by an API?".
-For instance, ML references and arrays allow concurrent writes in a perfectly
-safe manner. In a more general concurrent context, 
-many data-structures are designed to allow concurrent mutations, via mutexes for
-instance. 
+<<<<<<< HEAD
+The real question here is: "What guarantee is offered by an API?".
+ML references and arrays permit concurrent writes but are prone to
+data races, which give rise to subtle bugs.
 
-However, if the API prevents concurrent mutations, this ensures that no data-races
-can happen on this data-structure. Data-races are often the source of subtle
-and hard-to-fix bugs.
-Exclusive borrow allows the author to choose if they want or not to provide
-such guarantee. This has been used with huge success in the Rust community to 
-write safe and fast concurrent programs.
+One can prevent such issues dynamically with mutexes, whereas exclusive borrows
+forbid concurrent mutations *statically*. The choice then falls on the 
+API designer: a file handle is probably better checked statically.
+A distributed queue on the other hand would 
+feature a `push` function taking a shared borrow precisely
+to permit concurrent writes.
+
+While a full description of a concurrent story for Affe is out of scope 
+of this paper, such concepts have been used with huge success in the Rust
+community to write safe and fast concurrent programs.
 
 # Reviewer C
 
@@ -77,21 +79,21 @@ Such functions can already be implemented via closures,
 as demonstrated in the iteration examples in section 2.3:
 
     val get_borrow :
-      ('b <= affₖ) < &('a t) * int * (&(linₖ₊₁, 'a) -{linₖ₊₁}> 'b) -> 'b
+      ('b <= linₖ) => &('a t) * int * (&(linₖ₊₁, 'a) -{linₖ₊₁}> 'b) -> 'b
 
 This API is however a bit inconvenient. We can improve it using
 so called "existential tricks" to match on borrows:
 
     let &x = get_borrow (a,3) in (* &x must not escape here *)
 
-In general, existentials tricks are not incompatible with Affe and are in fact
-one of the foremost way to extend its expressivity.
+In general, existential types are not incompatible with Affe and are in fact
+one of the first way to extend its expressivity. They also happen to be already implemented in several ML-family languages (OCaml, notably).
 
 > Do you envision a similar discipline for your system where one might write, say, a doubly-linked list in regular GC'd ML, then assume an interface for it that exposes it as a resource?
 
 This pattern is indeed essential and is well demonstrated by Alms.
-Affe allows such patterns via subkinding and module type abstraction:
+Affe supports such patterns via subkinding and module type abstraction:
 a type can be defined as unrestricted and exposed as linear.
 
-Integrating "forced freeing" of such objects with the GC is more delicate
-and is explored by Munch-Maccagnoni [21].
+Integrating "forced freeing" of such objects with the GC is more delicate,
+and we hope to reuse the work by Munch-Maccagnoni [21] for this purpose.
