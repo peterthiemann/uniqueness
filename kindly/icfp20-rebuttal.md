@@ -7,18 +7,18 @@ We will take their comments into account and revise our article as follows.
 
 > The use of "absolute" natural numbers to identify regions seems not modular.
 
-Affe requires that each region is identified by an index along with a partial
+Affe requires that each region is identified by an index, along with a partial
 order on indices that is compatible with the nesting of regions.
 This can be implemented in many ways, including region variables
-often used in algebraic effects systems, existentials, etc.
+often used in algebraic effect systems, existentials, etc.
 
 Natural numbers are the absolute simplest way to implement such indices
 which is why
-we use them in the formalisation. Our formalisation only relies on
+we use them in the formalization. Our formalization only relies on
 the partial order and could easily use any of these
 more sophisticated systems. This would certainly be the case in a 
 realistic implementation for OCaml, for instance, to leverage
-the on-going work on algebraic effects.
+the ongoing work on algebraic effects.
 The properties of the system would stay identical.
 
 We plan to add this point to section 6.
@@ -29,7 +29,7 @@ Affe can easily express rich data-structures (notably
 persistent ones) or manipulate resources and protocols (for instance with session types).
 
 The main limitations of Affe is that it is not flow sensitive.
-Code idioms that relies of subtle flow-sensitive usage of 
+Code idioms that relies on subtle flow-sensitive usage of 
 permissions and linearity will not work in Affe. Such patterns often
 do not work in Rust either, and require richer logic more akin to theorem
 proving, such as Mezzo.
@@ -54,18 +54,20 @@ Section 6.2, which would allow to implement such mechanisms.
 
 > What could go wrong, for example, if the set function of the array module would use a non-exclusive borrow type in the argument?
 
-This question should be reframed in a larger context: "What does my API guarantee ?".
-For instance, ML references and arrays allow concurrent writes in a perfectly
-safe manner. In a more general concurrent context, 
-many data-structures are designed to allow concurrent mutations, via mutexes for
-instance. 
+This refers to a larger question: "What does my API guarantee ?".
+ML references and arrays allow concurrent writes but are subject to data-races.
+Data-races are the source of subtle and hard-to-fix bugs.
 
-However, if the API prevents concurrent mutations, this ensures that no data-races
-can happen on this data-structure. Data-races are often the source of subtle
-and hard-to-fix bugs.
-Exclusive borrow allows the author to choose if they want or not to provide
-such guarantee. This has been used with huge success in the Rust community to 
-write safe and fast concurrent programs.
+One can prevent such issues dynamically with mutexes. Exclusive borrows
+aims to forbid concurrent mutations *statically*. The choice then falls on the 
+API designer: a file handle is probably better checked statically.
+A distributed queue on the other hand would 
+feature a `push` function taking a shared borrow precisely
+to allow concurrent writes.
+
+While a full description of a concurrent story for Affe is out of scope 
+of this paper, such concepts have been used with huge success in the Rust
+community to write safe and fast concurrent programs.
 
 # Reviewer C
 
@@ -76,21 +78,21 @@ Such functions can already be implemented via closures,
 as demonstrated in the iteration examples in section 2.3:
 
     val get_borrow :
-      ('b <= affₖ) < &('a t) * int * (&(linₖ₊₁, 'a) -{linₖ₊₁}> 'b) -> 'b
+      ('b <= linₖ) => &('a t) * int * (&(linₖ₊₁, 'a) -{linₖ₊₁}> 'b) -> 'b
 
 This API is however a bit inconvenient. We can improve it using
 so called "existential tricks" to allow matching on borrows:
 
     let &x = get_borrow (a,3) in (* &x must not escape here *)
 
-In general, existentials tricks are not incompatible with Affe and are in fact
-one of the foremost way to extend its expressivity.
+In general, existential types are not incompatible with Affe and are in fact
+one of the first way to extend its expressivity. They also happen to be already implemented in several ML-family languages (OCaml, notably).
 
 > Do you envision a similar discipline for your system where one might write, say, a doubly-linked list in regular GC'd ML, then assume an interface for it that exposes it as a resource?
 
 This pattern is indeed essential and was well demonstrated by Alms.
-Affe already allow such patterns via subkinding and module type abstraction:
+Affe already allows such patterns via subkinding and module type abstraction:
 a type can be defined as unrestricted and exposed as linear.
 
-Integrating "forced freeing" of such objects with the GC is more delicate
-and is explored by Munch-Maccagnoni [21].
+Integrating "forced freeing" of such objects with the GC is more delicate,
+and we hope to reuse the work by Munch-Maccagnoni [21] for this purpose.
