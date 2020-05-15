@@ -191,8 +191,9 @@ a function, rather than a property of a value that restricts the way
 that value can be handled (as in \lang). An LH API analogous to @File@
 might provide functions like
 \begin{itemize}
-\item @withFile : path -> (handle o-> r) -> r@, which creates a new
-  file handle and takes a continuation that uses the @handle@ linearly,
+\item @withFile : path -> (handle o-> Unrestricted r) -> r@, which creates a new
+  file handle and takes a continuation that uses the @handle@
+  linearly, but returns an unrestricted value,
 \item @writeFile : string -> handle o-> handle@, which
   returns the transformed resource @handle@, and
 \item @closeFile : handle o-> unit@, which consumes the @handle@ by
@@ -247,20 +248,22 @@ $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 \label{sec:contributions}
 
 \begin{itemize}
-\item A type system encoding linearity and affinity with
-  borrowing. The type system is polymorphic for types and
-  for kinds that express constraints on the number of uses of a value.
+\item A polymorphic type system that encodes linearity and affinity with
+  borrowing in lexical regions. Polymorphism covers types and kinds that
+  express multiplicity constraints on the number of uses of a
+  value. This type system is a conservative extension of systems for
+  existing ML-like languages.
+\item Expressive type soundness theorem with respect to a big-step linearity-aware semantics. 
 \item An extension of the \hmx framework
-  \cite{DBLP:journals/tapos/OderskySW99} with kinds, regions, and
-  multiplicity constraints that supports full, principal type inference.
+  \cite{DBLP:journals/tapos/OderskySW99} for constrained type
+  inference to equip the type system with full, principal type inference.
 \item Soundness proof of the inference algorithm.
-\item Big-step linearity aware semantics with an expressive soundness theorem.
-\item Constraint simplification techniques.
+% \item Constraint simplification techniques.
 \item Automatic inference of regions for borrows.
 \item A prototype implementation of the type inference algorithm, including all
   constraint simplification and extended with algebraic datatypes and
   pattern matching,
-  available at \url{https://affe.netlify.com/}\footnote{This link is safe for double-blind.}.
+  available at \url{https://affe.netlify.com/}.
 \end{itemize}
 
 As \lang{} is built on top of the \hmx{} framework, which is a general

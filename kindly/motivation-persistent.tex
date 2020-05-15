@@ -27,7 +27,8 @@ cheap in-place mutations.
 that enables using mutable and immutable modifications to
 the board through affine types and borrows.
 The signature differs slightly from the @Array@
-signature. For simplicity, the array elements are unrestricted, but
+signature. As our application requires the @get@ function, the array
+elements must be unrestricted, but
 the structure itself remains linear so as to be implemented in terms of @Array@.
 The in-place mutation function @set_mut@ with type
 @&!('a t) * int * 'a -> unit@ works on a exclusive borrow  whereas the persistent
@@ -38,7 +39,7 @@ The code in \cref{ex:cow} contains a very simple implementation of
 @HYBARRAY@ that represents hybrid arrays
 as regular arrays and uses copy-on-write for persistent
 modifications. The function
-@mapi: (int -> &'a -> 'b) -> &('a t) -> 'b t@
+@mapi: (int * &'a -> 'b) * &('a t) -> 'b t@
 is a simple variation on @Array.map@ where the mapping function also
 takes the position of the element.
 % A more elaborate implementation could use persistent arrays
@@ -58,10 +59,10 @@ end
   \end{subfigure}\hfill
   \begin{subfigure}[t]{0.55\linewidth}
 \begin{lstlisting}
-module Cow : HYBARRAY = struct
+module CowArray : HYBARRAY = struct
   include Array
   let set (a, i0, x0) =
-    Array.mapi (fun i x -> if i = i0 then x0 else x) a
+    Array.mapi ((fun (i, x) -> if i = i0 then x0 else x), a)
   let set_mut = Array.set
 end
 \end{lstlisting}
@@ -75,7 +76,7 @@ end
   \lstinputlisting[linerange=1-13]{code/sukodu.affe}
   \end{subfigure}\hfill
   \begin{subfigure}[t]{0.55\linewidth}
-  \lstinputlisting[linerange=14-31]{code/sukodu.affe}
+  \lstinputlisting[linerange=14-31,firstnumber=last]{code/sukodu.affe}
   \end{subfigure}
   % \lstinputlisting[linerange=1-31,multicols=2]{code/sukodu.affe}
   \vspace{-15pt}
@@ -90,7 +91,7 @@ of the array, while other modifications use @set_mut@, which
 cannot be reverted.
 
 The board is represented as a 2D-matrix (\cref{line:boardtype}), where
-the @Matrix@ type uses the same API as @PersistArray@
+the @Matrix@ type uses the same API as @CowArray@
 but with two indices.
 Each cell contains an integer set that represents admissible solutions so far.
 The Sudoku solver iterates over the cells and tries each possible solution (\cref{line:try_solution}).

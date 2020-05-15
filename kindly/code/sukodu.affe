@@ -11,16 +11,16 @@ let propagate i j g n =
   propagate_line i j &!g n;
   propagate_column i j &!g n;
   propagate_square i j &!g n
-
 let rec solve i j g =
   begin if is_solved &g then Matrix.print &g else
     let (new_i, new_j) = next_pos (i,j) in
     let try_solution n =(*@\label{line:try_solution}*)
-      let new_g = Matrix.set (&g,i,j,IntSet.singleton n) in(*@\label{line:immutset}*)
+      let new_g =
+        Matrix.set (&g, i, j, IntSet.singleton n) in(*@\label{line:immutset}*)
       propagate i j &!new_g n;
       if is_valid &new_g then solve new_i new_j new_g
     in
-    let cell = Matrix.get (&g,i,j) in
+    let cell = Matrix.get (&g, i, j) in
     IntSet.iter try_solution cell;(*@\label{line:iter}*)
   end;
   free g(*@\label{line:free:g}*)

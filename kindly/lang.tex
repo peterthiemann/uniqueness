@@ -38,8 +38,8 @@ in an ML-like language.  The novel aspects are match
 specifications, regions, and borrows.
 
 A borrow $\borrow{x}$ is always taken from a variable $x$. The
-\emph{borrow annotation} $\BORROW$ indicates whether the borrow is exclusive
-($\MBORROW$) or shared ($\IBORROW$). If $x$ is already borrowed,
+\emph{borrow annotation} $\BORROW$ indicates whether the borrow is exclusive/affine
+($\MBORROW$) or shared/unrestricted ($\IBORROW$). If $x$ is already borrowed,
 then we need to use the reborrow expression $\reborrow{x}$.
 %
 A region $\region{\Sone x\BORROW}{e}$ is annotated with its nesting $n$, the variable $x$ that may be borrowed in $e$, and the kind of borrow $\BORROW$.
@@ -49,6 +49,11 @@ whether the match operates on borrows ($\etransfm=\&^b$) or not ($\etransfm=id$)
 %
 We consider four primitive operations to manipulate resources:
 $\create$, $\observe$, $\update$ and $\destroy$.
+They serve a prototypes to demonstrate the typing and handling of
+resources. For a concrete type of resource, there are further
+arguments and perhaps different versions of the operations. But the
+typing and behavior of the operations is analogous to the prototype
+operations. 
 
 Many types are indexed with kinds.
 A kind $k$ is either a kind variable $\kvar$ or a constant

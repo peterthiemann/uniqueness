@@ -27,12 +27,12 @@ Further examples are available in \cref{sec:extra-example}.
 \begin{lstlisting}
 module Array : sig
   type ('a : 'k) t : lin
-  val create : ('a : un) => int -> 'a -> 'a t
+  val create : ('a : un) => int * 'a -> 'a t
   val free : ('a : aff) => 'a t -> unit
   val length : &('a t) -> int
   val get : ('a : un) => &('a t) * int -> 'a
   val set : ('a : aff) => &!('a t) * int * 'a -> unit
-  val map : (&'a -> 'b) -> &('a t) -> 'b t
+  val map : (&'a -> 'b) * &('a t) -> 'b t
 end
 \end{lstlisting}
   \vspace{-15pt}
@@ -45,7 +45,7 @@ end
 The API for mutable linear arrays (\cref{sig:array})
 aims to safely handle manual allocation and
 deallocation of arrays that may contain affine elements.
-A program would first use @create n v@ to create
+A program would first use @create (n, v)@ to create
 an array of size @n@ initialized with value
 @v@. The value @v@ must be unrestricted as it is duplicated to
 initialize all array elements. Using the @map@ function we
@@ -84,7 +84,7 @@ we can create an
 array of Fibonacci numbers in an imperative coding style:
 \begin{lstlisting}
 let mk_fib_array n =
-  let a = create n 1 in
+  let a = create (n, 1) in
   for i = 2 to n - 1 do
     let x = get (&a, i-1) + get (&a, i-2) in(*@\label{ex:array:get}*)
     set (&!a, i, x)(*@\label{ex:array:set}*)
@@ -96,7 +96,8 @@ let mk_fib_array n =
 After
 creation of the array, the presence of a borrow in the for loop
 prevents access to the ``raw'' resource inside the loop's
-body. \cref{ex:array:get} contains two shared borrows
+body. In particular, the resource cannot be freed through a
+borrow. \cref{ex:array:get} contains two shared borrows 
 in the same expression which forms a region by itself. These borrows
 are split off the exclusive borrow used in \cref{ex:array:set} which
 belongs to the next enclosing region corresponding to the loop body.
@@ -107,8 +108,8 @@ More precisely, here is is an annotated excerpt with regions explicitly
 marked by braces @{| ... |}@:
 \begin{lstlisting}[firstnumber=3]
   for i = 2 to n - 1 do {|
-    let x = {| get &a (i-1) + get &a (i-2) |} in(*@\label{ex:array:region:get}*)
-    set &!a i x
+    let x = {| get (&a, i-1) + get (&a, i-2) |} in(*@\label{ex:array:region:get}*)
+    set (&!a, i, x)
   |} done;
 \end{lstlisting}
 
@@ -138,7 +139,7 @@ region across a function boundary.
 For instance, how should we fold on an array of linear objects?
 A naive fold function would only work on unrestricted content:
 \begin{lstlisting}
-val fold : ('a : un) => ('a -> 'b -> 'b) -> 'a array -> 'b -> 'b
+val fold : ('a : un) => ('a -> 'b -> 'b) -> 'a Array.t -> 'b -> 'b
 \end{lstlisting}
 
 If we want to work on linear and affine resources,
@@ -147,7 +148,7 @@ content. We obtain the following signature:
 \begin{lstlisting}
 val fold :
   ('b:'k),('k <= aff_r) =>
-  (&(aff_r1,'a) -> 'b -{aff_r1}> 'b) -> &('k_1,'a array) -> 'b -{'k_1}> 'b
+  (&(aff_r1,'a) -> 'b -{aff_r1}> 'b) -> &('k_1,'a Array.t) -> 'b -{'k_1}> 'b
 \end{lstlisting}
 
 The folded function receives a shared borrow of the element in the array.
@@ -173,7 +174,7 @@ This approach is not sufficient if we want to mutate the array during iteration.
 To this end, we need to take an exclusive borrow of the structure to iterate
 on:
 \begin{lstlisting}
-val iter_mut : &!('a array) -> (&!(aff_r1,'a) -{un}> unit) -{aff}> unit
+val iter_mut : &!('a Array.t) -> (&!(aff_r1,'a) -{un}> unit) -{aff}> unit
 \end{lstlisting}
 
 The callback is explicitly annotated with @un@ because  it will be called multiple times.
