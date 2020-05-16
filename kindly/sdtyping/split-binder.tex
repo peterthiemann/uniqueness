@@ -6,12 +6,14 @@
 
   \Cleq{\schm}{\kun_\infty}
   &\bvar{x}{\schm}&\bvar{x}{\schm}&\bvar{x}{\schm}
-  &Both\\
+  &(Both)\\
 
   {\Cempty}&
-             {\bvar{\borrow[\IBORROW]{x}}{\schm}}&
-                                                   {\bvar{\borrow[\IBORROW]{x}}{\schm}}&{\bvar{\borrow[\IBORROW]{x}}{\schm}}
-  &Borrow
+             {\bbvar[\IBORROW]{x} k \schm}&
+                                            \bbvar[\IBORROW]{x}
+                                            k{\schm}&{\bbvar[\IBORROW]{x}
+                                                      k {\schm}}
+  &(Borrow)
   % \\
   
   % {\Cempty}&
@@ -20,20 +22,20 @@
   \\[2mm]
 
   {\Cempty}&{B_x}&{B_x}&{\bnone}
-  &Left\\
+  &(Left)\\
   {\Cempty}&{B_x}&{\bnone}&{B_x}
-  &Right\\[2mm]
+  &(Right)\\[2mm]
 
   {\Cempty}&{\bvar x \schm}&{\svar x \schm^n}&{\bvar x \schm}
-  &Susp\\
+  &(Susp)\\
 
   {\Cempty}&
-             {\bvar{\borrow x} \schm}&{\svar[\IBORROW] x \schm^n}&{\bvar{\borrow x} \schm}
-  &SuspB\\
+             {\bbvar x k \schm}&{\svar[\IBORROW] x \schm^n}&{\bbvar x k \schm}
+  &(SuspB)\\
 
   {\Cempty}&
              {\svar{x} \schm}&{\svar[\IBORROW] x \schm^n}&{\svar{x} \schm}
-  &SuspS\\
+  &(SuspS)\\
 \end{tabular}
 %%% Local Variables:
 %%% mode: latex

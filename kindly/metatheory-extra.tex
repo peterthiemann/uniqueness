@@ -168,14 +168,14 @@ by appropriate borrowing on entry to a region.
     \IBORROW\Addr : \schm}
   {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv[ x\mapsto \IBORROW\Addr], \Suspended\VEnv :
-    \E;\bvar{\borrow[\IBORROW] x}{\borrowty[\IBORROW] k{ \schm}} }
+    \E;\bbvar[\IBORROW] x k{ \schm} }
 
   \inferrule{\SE \vdash \Active\VEnv, \MutableBorrows\VEnv,
     \ImmutableBorrows\VEnv, \Suspended\VEnv : \E \\ \SE \vdash
     \MBORROW\Addr : \schm}
   {\SE \vdash \Active\VEnv, \MutableBorrows\VEnv[ x\mapsto \MBORROW\Addr],
     \ImmutableBorrows\VEnv, \Suspended\VEnv
-    : \E;\bvar{\borrow[\MBORROW] x}{\borrowty[\MBORROW] k{ \schm}} }
+    : \E;\bbvar[\MBORROW] x k{ \schm} }
 \end{mathpar}
 \paragraph{Extending environments and stores}
 \begin{mathpar}

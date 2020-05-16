@@ -267,7 +267,7 @@
 
 \newcommand\ruleSDBorrow{
   \inferrule[Borrow]
-  { \bvar{\borrow x}{\borrowty k\tau} \in \E \\
+  { \bbvar x k\schm \in \E \\
     \entail C {\addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}} \\
   }
   { \inferS{C}{\E}{\borrow{x}}{\borrowty{k}{\tau}} }

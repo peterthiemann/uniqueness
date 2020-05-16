@@ -41,9 +41,9 @@ We define the flattening $\Eflat\E$ of an environment $\E$, as the environment
 where all the binders are replaced by normal ones. More formally:
 \begin{align*}
   \Eflat\E
-  =& \left\{ \bvar{x}{\tau} \in\E \mid
-    \vee \bvar{\borrow{x}}{\borrowty{k}{\tau}}\in\E
-    \vee \svar{x}{\tau}^n\in\E
+  =& \left\{ \bvar x \schm \mid \bvar{x}{\schm} \in\E 
+    \vee \bbvar {x}{k}{\schm}\in\E
+    \vee \svar{x}{\schm}^n\in\E
     \right\}\\
   &\cup \left\{ \bvar{\tvar}{k} \mid \bvar{\tvar}{k}\in\E \right\}
 \end{align*}

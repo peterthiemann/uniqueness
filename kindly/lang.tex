@@ -283,11 +283,12 @@ kind variables or relate two kind variables.
     B ::=&\ \bnone \tag{Empty} \\
     |&\ \bvar{\tvar}{\kschm} \tag{Types}\\
     |&\ \bvar{x}{\schm} \tag{Variables} \\
-    |&\ \bvar{\borrow{x}}{\borrowty{k}{\tau}} \tag{Borrows}\\
-    |&\ \svar{x}{\schm}^n \tag{Suspended}
+    |&\ \svar{x}{\schm}^n \tag{Suspended} \\
+    |&\ \bbvar x k \schm \tag{Borrows}
+    % \bvar{\borrow{x}}{\borrowty{k}{\tau}} \tag{Borrows}\\
     % |&\ \tydecl{t}{\kschm}{K}{\tau}\tag{Type Declaration}\\
   \end{align*}
-  \vspace{-10pt}
+  \vspace{-15pt}
   \caption{Type environments}
   \label{grammar:env}
   \end{minipage}\hfill
@@ -318,8 +319,9 @@ kind variables or relate two kind variables.
         \BORROW\in\left\{\kun,\kaff\right\}
       }{
         \lregion{C}{}
-        {\svar[\BORROW]{x}{\tau}^n}
-        {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau}}}
+        {\svar[\BORROW]{x}{\schm}^n}
+        {\bbvar x k \schm}
+        % {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\schm}}}
       }
       % \and
       % \ruleSDPair
@@ -348,10 +350,15 @@ earmarked for a borrowing use in a nested region
 marked with $x$ % (see \cref{sdtyping:regions}),
 but
 cannot be used directly.
-A borrow binding, $\bvar{\borrow{x}}{\borrowty{k}{\schm}}$, replaces
+A borrow binding,
+$\bbvar x k \schm$,
+%$\bvar{\borrow{x}}{\borrowty{k}{\schm}}$,
+replaces
 such a suspended binding on entry to the $x$-region. It indicates
 that the borrow $\borrow{x}$ can be used directly. Kind $k$
-restricts the lifetime of the borrow to the region (see \cref{selectrules:borrow}).
+restricts the lifetime of the borrow to the region (see rules
+\TirName{Region} and \TirName{BorrowBinding} in
+\cref{selectrules:borrow} and the upcoming discussion of these rules).
 
 % , either
 % through
@@ -502,7 +509,7 @@ is in $\E$.
 When entering the region, rule \TirName{Region} imposes
 $\lregion{C}{x}{\E}{\E'}$, which defines $\E'$
 corresponding to $\E$ where the suspended binding is replaced by the
-borrow binding  $\bvar{\borrow[\IBORROW]{c}}{\borrowty[\IBORROW]{k}{\text{channel}}}$.
+borrow binding  $\bbvar[\IBORROW]{c}{k}{\text{channel}}$.
 To constrain the borrow to this region we impose the constraint
 $\entail{C}{(\kun_n\lk k) \wedge (k \lk\kun_\infty)}$, which affirms
 that the borrow is unrestricted, but can only be used in nesting

@@ -100,7 +100,7 @@ Most relevant to \lang:
   However, there is an implementation of the inference as part of GHC.
 \item
   LH promotes a continuation-passing style with functions such as
-  \lstinline/withFile : path -> (file ->. file) ->. unit/
+  \lstinline/withFile : path -> (file ->. Unrestricted r) ->. r/
   to ensure linear use of resources. This style leads to problems with
   placing the annotation on, e.g., the IO monad.
   \lang follows System F\degree, Quill, and Alms, all of which support
