@@ -53,7 +53,8 @@ They serve a prototypes to demonstrate the typing and handling of
 resources. For a concrete type of resource, there are further
 arguments and perhaps different versions of the operations. But the
 typing and behavior of the operations is analogous to the prototype
-operations. 
+operations. Moreover, $\observe$ and $\update$ serve as eliminators
+for borrow types.
 
 Many types are indexed with kinds.
 A kind $k$ is either a kind variable $\kvar$ or a constant
@@ -311,6 +312,8 @@ kind variables or relate two kind variables.
       \ruleSDRegion
       \and
       \ruleSDBorrow
+      \and
+      \ruleSDReBorrow
       \and
       \ruleSDLam
       \and
@@ -574,7 +577,7 @@ borrows of its components.
 To demonstrate how \lang{} deals with resources, we introduce an abstract
 type $\tapp{\tres}{\tau}$ whose content of type $\tau$ must be
 unrestricted ($\kun_0$) and which is equipped with the four
-operations described in \cref{motivation}: 
+operations introduced in \cref{syntax}: 
 \begin{itemize}[topsep=0pt]
 \item
 $\create$:
@@ -609,6 +612,16 @@ $\forall{\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
 
 % PT: removed style=rule
 \lstMakeShortInline[keepspaces,basicstyle=\normalsize\normalfont]@
+
+It is straightforward to give a standard semantics for \lang, but such
+a semantics would not be very informative. In this section, we give a
+big-step semantics that performs explicit bookkeeping of the number of
+times a value is used and of the mode in which a reference to a
+resource is used (e.g., borrowed or not). This bookkeeping is based on a set of permissions
+that regulate the currently allowed mode of access to resources and
+closures. It enables us to state and prove a highly informative type
+soundness result (see \cref{sec:metatheory}) with expressive invariants that ensure proper
+resource usage.
 
 The dynamics of \lang is given in big-step
 functional

@@ -108,14 +108,18 @@ Minor comments:
   annotated with regions as follows `f {| &^U x |} {[ &^U x |}`.
 - p10: Why have the `b` twice in the construct `&^b x : &^b (k,τ)` (Fig 7)?
   This is confusing, since it seems they are always the same.
+### DONE
 - p10: The construct `(&^b x : σ)` as used in Fig 8 does not align with the
   grammar in Fig 8. The RHS of `(&^b x : σ)` cannot be a type `σ`, but it should
   always be of the shape `&^b (k,τ)`.
 - p11: "Kind k restricts the lifetime of the borrow to the region (see Fig. 9)."
   Please refer to the specific rule in Fig 9 that demonstrates this.
+### DONE
 - p11: It would be illustrative to show the rule for reborrowing in Fig 9.
+### DONE
 - p12: Please explain in the beginning of Sec 3.4 why an instrumented semantics
   that keeps track of types/borrows/etc is needed.
+### DONE
 - p15: I would like to see some more information about the properties of the
   theory X that HM(X) (and the paper's extension thereof) need to guarantee
   principal typing.
@@ -127,8 +131,10 @@ Minor comments:
   color.
 - p21: I suppose "Affe is to combine ..." should be something like "The goal of
   Affe is to combine ...".
+### DONE
 - p21: Some text appears to be missing in footnote 3. What GHC proposal does
   the paper refer to? Where is it "attached"?
+### DONE (the word "here" was a link --- expanded)
 - p22: An omission in Sec 7.2 is the RustBelt project, which has developed
   a formal version of the Rust type system, and proved type soundness and
   data-race freedom of it and some of the Rust standard libraries.

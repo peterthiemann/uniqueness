@@ -15,7 +15,7 @@
 
 Many systems propose combinations of
 functional programming and linear types in a practical setting.
-\lang is to combine key ingredients
+The goal of \lang is to combine key ingredients
 from these proposals while still preserving
 complete type inference.
 Many of the following languages support linear or affine types, but rarely
@@ -84,7 +84,7 @@ arrows'', written $\multimap$ as in linear logic,
 which are functions that \emph{use} their argument exactly once.
 This design is easy to retrofit on top of an existing compiler
 such as GHC, but has proven quite controversial\footnote{
-  See the in-depth discussion attached to the GHC proposal starting  \href{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}{here}.}.
+  See the in-depth discussion attached to the GHC proposal for LH on GitHub: \url{https://github.com/ghc-proposals/ghc-proposals/pull/111\#issuecomment-403349707}.}.
 Most relevant to \lang:
 \begin{itemize}[leftmargin=*]
 \item LH does not admit subtyping for arrows and requires
