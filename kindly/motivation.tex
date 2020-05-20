@@ -49,13 +49,17 @@ deallocation of arrays that may contain affine elements.
 A program would first use @create (n, v)@ to create
 an array of size @n@ initialized with value
 @v@. The value @v@ must be unrestricted as it is duplicated to
-initialize all array elements. Using the @map@ function we
+initialize all array elements. Using the @map@ and @map_copy@ functions we
 can transform the unrestricted elements into linear (affine)
-ones. The resulting array can be processed further using @map@ (or @set@ if
-affine). The @get@ function is only applicable if the element type
-is unrestricted as one element is duplicated. The @length@
+ones. The @map@ function consumes its input array, whereas @map_copy@
+preserves the input. The implementation of @map@ \emph{might} perform
+an in-place update, but this is neither required nor guaranteed. The
+resulting array can be processed further using @map@ or 
+@map_copy@ (or @set@ if affine). The @get@ function is only applicable
+if the element type is unrestricted as one element is duplicated. The @length@
 function is always applicable. To @free@ an array the elements must be
-affine.
+affine. An array with linear elements can only be freed by @map@ping
+an explicit destructor over its elements.
 
 To manage the different kinds of accessing the array we distinguish between constructors, destructors,
 observers, and mutators.
