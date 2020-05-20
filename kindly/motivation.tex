@@ -32,7 +32,8 @@ module Array : sig
   val length : &('a t) -> int
   val get : ('a : un) => &('a t) * int -> 'a
   val set : ('a : aff) => &!('a t) * int * 'a -> unit
-  val map : (&'a -> 'b) * &('a t) -> 'b t
+  val map : ('a -> 'b) * 'a t -> 'b t (* destructive *)
+  val map_copy : (&'a -> 'b) * &('a t) -> 'b t (* copying *)
 end
 \end{lstlisting}
   \vspace{-15pt}
