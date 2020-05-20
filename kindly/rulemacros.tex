@@ -189,6 +189,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% syntax-directed typing
 
+\newcommand\ruleInstance{
+  \inferrule[Instance]{
+    \schm = \forall \Multi[i]{\kvar} \forall (\Multi[j]{\tvar_j:k}).\
+    \qual{C}{\tau} \\\\
+    \unif = [\Multi[i]{\kvar_i\mapsto k},\Multi[j]{\tvar_j \mapsto \tau}] 
+  }{
+    \unif(C),\unif(\tau) = \Instance (\E, \schm)
+  }
+}
+
 \newcommand\ruleSDConst{
   \inferrule[Const]
   {
@@ -200,16 +210,13 @@
 \newcommand\ruleSDVar{%
   \inferrule[Var]
   { \bvar{x}{
-      \forall \Multi[i]{\kvar} \forall (\Multi[j]{\tvar_j:k}).\ \qual{C_x}{\tau}
+      \schm
     }
-    \in \E \\\\
-    \unif = [\Multi[i]{\kvar_i\mapsto k},\Multi[j]{\tvar_j \mapsto \tau}] \\
-    \entail C {\unif(C_x) \Cand \addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}}
-    % \addlin{
-    %   \inferSK{C}{\E}{\unif \tau}{k_\tau}
-    % }
+    \in \E \\
+    C_x , \tau_x = \Instance (\E, \schm) \\\\
+    \entail C {C_x \Cand \addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}}
   }
-  { \inferS{C}{\E}{x}{\unif\tau}
+  { \inferS{C}{\E}{x}{\tau_x}
   }
 }
 
@@ -268,7 +275,8 @@
 \newcommand\ruleSDBorrow{
   \inferrule[Borrow]
   { \bbvar x k\schm \in \E \\
-    \entail C {\addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}} \\
+    C_x, \tau_x = \Instance (\E, \schm) \\\\
+    \entail C {C_x \Cand \addlin{\Cleq{\E\Sdel{x}}{\kaff_\infty}}} \\
   }
   { \inferS{C}{\E}{\borrow{x}}{\borrowty{k}{\tau}} }
 }

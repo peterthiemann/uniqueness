@@ -305,7 +305,11 @@ kind variables or relate two kind variables.
 \begin{figure*}[tp]
   % \begin{minipage}{0.7\linewidth}
     \begin{mathpar}
+      \ruleInstance
+      \and
       \ruleSDVar
+      \and
+      \ruleSDLam
       \and
       \ruleSDApp
       \and
@@ -314,8 +318,6 @@ kind variables or relate two kind variables.
       \ruleSDBorrow
       \and
       \ruleSDReBorrow
-      \and
-      \ruleSDLam
       \and
       \inferrule[BorrowBinding]{
         \entail{C}{(\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)}\\
