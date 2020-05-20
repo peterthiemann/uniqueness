@@ -120,13 +120,13 @@ and other related works.
 \lstMakeShortInline[keepspaces,basicstyle=\small\ttfamily]@
 
 \begin{figure}[tp]
-  \begin{subfigure}[t]{0.53\linewidth}
+  \begin{subfigure}[t]{0.35\linewidth}
     \lstinputlisting{code/writefiles.affe}
     \vspace{-15pt}
     \caption{File API}
     \label{fig:writing-files-api}
   \end{subfigure}~
-  \begin{subfigure}[t]{0.43\linewidth}
+  \begin{subfigure}[t]{0.3\linewidth}
 \begin{lstlisting}
 let main () =
   let h = File.fopen "foo" in
@@ -137,6 +137,18 @@ let main () =
     \vspace{-10pt}
     \caption{File example}
     \label{fig:writing-files-example}
+  \end{subfigure}~
+  \begin{subfigure}[t]{0.3\linewidth}
+\begin{lstlisting}
+let main () =
+  let h = File.fopen "foo" in
+  {| File.write &!h "Hello " |};(*@\label{line:hello}*)
+  {| File.write &!h "world!" |};(*@\label{line:world}*)
+  File.close h
+\end{lstlisting}
+    \vspace{-10pt}
+    \caption{File example with regions}
+    \label{fig:writing-files-example-region}
   \end{subfigure}
   \vspace{-10pt}
   \caption{Writing files}
@@ -169,7 +181,7 @@ explicitly annotated @-{un}>@.
 
 Every borrow is restricted to a \emph{region}, i.e., a lexically
 scoped program fragment from which the borrow must not escape. In
-\cref{fig:writing-files-example}, there are two regions, one 
+\cref{fig:writing-files-example}, there are two regions visualized in \cref{fig:writing-files-example-region}, one 
 consisting of \cref{line:hello} and another consisting of
 \cref{line:world}. Both are fully contained in the scope of the linear
 handle @h@, hence we can take one exclusive borrow @&!h@ in each
@@ -193,7 +205,9 @@ might provide functions like
 \begin{itemize}
 \item @withFile : path -> (handle o-> Unrestricted r) -> r@, which creates a new
   file handle and takes a continuation that uses the @handle@
-  linearly, but returns an unrestricted value,
+  linearly, but returns an unrestricted value\footnote{For technical
+    reasons, LH  requires the programmer to use a type like
+    \lstinline/Unrestricted/ at this  point.},
 \item @writeFile : string -> handle o-> handle@, which
   returns the transformed resource @handle@, and
 \item @closeFile : handle o-> unit@, which consumes the @handle@ by
@@ -210,7 +224,7 @@ For application, \lang{} infers the following type.
 let app f x = f x
 # app : ('a -{'k}> 'b) -> ('a -{'k}> 'b)
 \end{lstlisting}
-The reading of the type inferred by our system is straightforward. If
+The reading of the inferred type is straightforward. If
 @f@ is a @'k@-restricted function, then so is
 @app f@. The multiplicities of @'a@ and
 @'b@ play no role. As usual in ML-like languages, we
@@ -238,7 +252,7 @@ $\kappa \sqcup \kappa_1$. Thanks to subsumption of multiplicities, it
 is sufficient to assume $\kappa \le \kappa_1$ and @g@'s
 actual multiplicity gets subsumed to $\kappa_1$. This constraint
 simplification is part of our type inference algorithm. As before,
-printing the type scheme only mentions the required constraint 
+printing the type scheme only mentions the non-trivial constraint 
 $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 \kappa_1$ as well as the kinds of @'a,'b,'c@.
 
