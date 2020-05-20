@@ -68,7 +68,7 @@ The inference algorithm yields the following constraints:
   \Cand
   (\gamma \leq \tvar_x)
   \Cand
-  (\beta * \tvar_x \leq \alpha_r)
+  (\beta \times  \tvar_x \leq \alpha_r)
   \Cand
   (\kvar_x \leq \kun)
 \end{align*}
@@ -76,7 +76,7 @@ The inference algorithm yields the following constraints:
 The first step of the algorithm uses Herbrand unification to obtain
 a type skeleton. 
 $$\alpha_r =
-(\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma$$
+(\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta \times  \gamma$$
 
 In addition, we obtain the following kind constraints: 
 \[\begin{aligned}
@@ -106,7 +106,7 @@ The algorithm then proceeds as follow:
 \item We add all the dashed arrows by saturating
   lattice inequalities. For clarity, we only show $\kun$.
 \item We identify the connected component circled in
-  {\color{green} green}.
+  {\color{ForestGreen} green}.
   We deduce $\kvar_\gamma = \kvar_x = \kun$.
 \item We take the transitive closure, which adds the
   arrow in {\color{blue} blue} from $\kvar_3$ to $\kvar_1$.
@@ -123,7 +123,7 @@ $$\forall \kvar_\beta \kvar_1 \kvar_2 \kvar_3
 (\gamma : \kun) (\beta : \kvar_\beta).\ %
 \qual
 {\Cleq{\kvar_3}{\kvar_1}}
-{(\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma}$$
+{(\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta \times  \gamma}$$
 
 We can further simplify this type by exploiting variance. As $\kvar_1$
 and $\kvar_2$ are only used in covariant position, they can be
@@ -132,7 +132,7 @@ By removing the unused quantifiers, we obtain a much simplified equivalent type:
 $$
 \forall \kvar
 (\gamma : \kun).
-{(\gamma \tarr{\kvar} \beta) \tarr{} \gamma \tarr{\kvar} \beta * \gamma}$$
+{(\gamma \tarr{\kvar} \beta) \tarr{} \gamma \tarr{\kvar} \beta \times  \gamma}$$
 
 
 

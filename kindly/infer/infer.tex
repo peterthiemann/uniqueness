@@ -12,16 +12,18 @@ If $X$ has certain properties, then
 \hmx guarantees principal type inference.
 We apply \hmx to a concrete constraint language which we name $\CL$.
 We adapt and extend \hmx's rules to support kind inference,
-track linearity, and handle borrows and regions. Finally, we
-formulate constraint solving and simplification algorithms for $\CL$.
+track linearity, and handle borrows and regions. We
+formulate constraint solving and simplification algorithms for
+$\CL$. Finally, we prove that the inference algorithm computes
+principal types. 
 
 \subsection{Preliminaries}
 
 In the context of inference, it is critical to know which elements
 are input and output of inference judgments.
 In the following, when presenting a new judgment,
-we write input parameters in \textbf{\textcolor{DarkSlateBlue}{bold
-    blue}}. The remaining parameters are output parameters.
+we write input parameters in \textbf{\textcolor{ForestGreen}{bold
+    green}}. The remaining parameters are output parameters.
 
 \paragraph{Usage Environments}
 
@@ -52,7 +54,7 @@ the constraints.
   Given two usage environments $\inP{\Sv_1}$ and $\inP{\Sv_2}$,
   we return $\Sv$, the merged environment, and $C$, a set
   of constraints that must be respected.
-\item $\bregion[\inP{n}]{C}{\inP{x}}{\Sv}{\inP\Sv'}$.
+\item $\bregion[\inP{n}]{C}{\inP{x}}{\Sv}{\inP{\Sv'}}$.
   Given a usage environment $\inP{\Sv'}$, a nesting level $\inP{n}$,
   and a variable name $\inP{x}$, we return
   $\Sv$ where the borrow binding of $x$ in $\Sv'$, if it exists,
@@ -173,7 +175,7 @@ environment $\Sv$.
 As such, we use the ``inference'' version of the relations on
 the environment,
 $\bsplit{C}{\Sv}{\inP{\Sv_1}}{\inP{\Sv_2}}$
-and $\bregion{C}{\inP{x}}{\Sv}{\inP\Sv'}$,
+and $\bregion{C}{\inP{x}}{\Sv}{\inP{\Sv'}}$,
 which returns the necessary constraints.
 We then collect all constraints and normalize them.
 

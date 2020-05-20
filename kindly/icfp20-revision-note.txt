@@ -76,7 +76,7 @@ Minor comments:
   simplification techniques" is not a contribution unless it's said why it's
   needed and what's novel about it. Also, what makes a soundness theorem
   "expressive"?
-### DONE: I tend to aggre with the remark about constraint
+### DONE: I tend to agree with the remark about constraint
   simplification (but it's great that they are implemented)
 - p5: Why are some operations in Fig 5 curried (e.g., `create`) and others
   uncurried (e.g., `get` and `set`)?
@@ -106,12 +106,14 @@ Minor comments:
 - p9: In order to reduce the conceptual overhead of the reader, it would be
   good to align the two examples in Sec 3.2. The first example could be
   annotated with regions as follows `f {| &^U x |} {[ &^U x |}`.
+### Gabriel?
 - p10: Why have the `b` twice in the construct `&^b x : &^b (k,τ)` (Fig 7)?
   This is confusing, since it seems they are always the same.
 ### DONE
 - p10: The construct `(&^b x : σ)` as used in Fig 8 does not align with the
   grammar in Fig 8. The RHS of `(&^b x : σ)` cannot be a type `σ`, but it should
   always be of the shape `&^b (k,τ)`.
+### DONE: improved the notation
 - p11: "Kind k restricts the lifetime of the borrow to the region (see Fig. 9)."
   Please refer to the specific rule in Fig 9 that demonstrates this.
 ### DONE
@@ -123,12 +125,21 @@ Minor comments:
 - p15: I would like to see some more information about the properties of the
   theory X that HM(X) (and the paper's extension thereof) need to guarantee
   principal typing.
+### Gabriel? This is in appendix C, but it's not written in a crisp
+  way that is easy to extract. From the HM(X) paper I recall that the
+  constraint system has to be cylindric, but subsequent results do not
+  refer to this property. I suggest that you add a subsection to
+  section 4 that defines the constraint language and states the
+  properties needed to do the completeness proof.
 - p15: In the beginning of Sec 4 it would be worth mentioning that it has been
   proved in the appendix that the extension of HM(X) still guarantees principal
   type inference.
+### DONE
 - p15: Input parameters are displayed in bold and blue, however, the variant
   of blue that is used is barely distinguishable from black. Please use another
   color.
+### DONE. used another color ForestGreen and fixed a few typos from
+  using \inp
 - p21: I suppose "Affe is to combine ..." should be something like "The goal of
   Affe is to combine ...".
 ### DONE
@@ -138,7 +149,7 @@ Minor comments:
 - p22: An omission in Sec 7.2 is the RustBelt project, which has developed
   a formal version of the Rust type system, and proved type soundness and
   data-race freedom of it and some of the Rust standard libraries.
-
+### TODO, TO BE ASSIGNED
 
 
 Review #74B
