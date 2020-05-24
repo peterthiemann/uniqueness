@@ -25,13 +25,13 @@ Ignoring such life cycle protocols is a common source of errors.
 
 Most type systems provide type soundness and memory safety, but neglect the
 protocol aspect. Systems that can support reasoning about protocols
-build on linear types \cite{DBLP:journals/tcs/Girard87} and/or 
+build on linear types \cite{DBLP:journals/tcs/Girard87} and/or
 uniqueness types~\cite{DBLP:conf/plilp/BarendsenS95}. A value of linear
 type is guaranteed to be consumed
 exactly once. That is, a file that has been opened must be closed and
 memory that has been allocated must be released. A value of unique
 type is guaranteed to have a single reference to it. Thus, memory can
-be reused on consumption of the value. 
+be reused on consumption of the value.
 
 These systems work well if one is prepared to write programs
 functionally in resource-passing style. In this style, all operations
@@ -40,7 +40,7 @@ in possibly modified state~\cite{DBLP:journals/jfp/AchtenP95}. In
 typestate-oriented programming, they would also modify its
 type~\cite{DBLP:conf/oopsla/AldrichSSS09}. Functional session types
 represent a popular
-example~\cite{DBLP:journals/jfp/GayV10,lindley17:_light_funct_session_types}. 
+example~\cite{DBLP:journals/jfp/GayV10,lindley17:_light_funct_session_types}.
 
 Explicit resource passing places a heavy burden on the programmer and
 complicates the program structure. For imperative APIs,
@@ -58,7 +58,7 @@ resource. Rust supports two kinds of borrows,
 shared and exclusive ones.
 Exclusive borrows enable modification of the data structure
 whereas shared borrows only grant read access.
-At any given time, either a single exclusive borrow is active or 
+At any given time, either a single exclusive borrow is active or
 any number of shared borrows can be active.
 Moreover, Rust makes sure that the lifetime of a
 borrow is properly contained in the lifetime of its lender.
@@ -76,7 +76,7 @@ was required.
 As a concrete example, consider a functional programmer who wants to
 safely interact with a C library. Invoking a C function is easy via
 the existing foreign function interface, but managing the underlying
-resources like malloc'd storage is not: It cannot be left to the
+resources like malloc'd storage is not: it cannot be left to the
 garbage collector, but proper release of the storage via calls to \texttt{free()} must be
 ensured by programming conventions.
 
@@ -181,7 +181,7 @@ explicitly annotated @-{un}>@.
 
 Every borrow is restricted to a \emph{region}, i.e., a lexically
 scoped program fragment from which the borrow must not escape. In
-\cref{fig:writing-files-example}, there are two regions visualized in \cref{fig:writing-files-example-region}, one 
+\cref{fig:writing-files-example}, there are two regions visualized in \cref{fig:writing-files-example-region}, one
 consisting of \cref{line:hello} and another consisting of
 \cref{line:world}. Both are fully contained in the scope of the linear
 handle @h@, hence we can take one exclusive borrow @&!h@ in each
@@ -234,7 +234,7 @@ type checker also quantifies over the kinds of $\alpha$ and $\beta$,
 but the full prefix
 $\forall\kappa\kappa_1\kappa_2\forall(\alpha:\kappa_1)\forall(\beta:\kappa_2)$
 of the type of @app@ is only revealed as much as necessary for
-understanding the type. 
+understanding the type.
 
 For @compose@, \lang{} infers this type.
 \begin{lstlisting}
@@ -252,7 +252,7 @@ $\kappa \sqcup \kappa_1$. Thanks to subsumption of multiplicities, it
 is sufficient to assume $\kappa \le \kappa_1$ and @g@'s
 actual multiplicity gets subsumed to $\kappa_1$. This constraint
 simplification is part of our type inference algorithm. As before,
-printing the type scheme only mentions the non-trivial constraint 
+printing the type scheme only mentions the non-trivial constraint
 $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 \kappa_1$ as well as the kinds of @'a,'b,'c@.
 
@@ -267,7 +267,7 @@ $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
   express multiplicity constraints on the number of uses of a
   value. This type system is a conservative extension of systems for
   existing ML-like languages.
-\item Expressive type soundness theorem with respect to a big-step linearity-aware semantics. 
+\item Expressive type soundness theorem with respect to a big-step linearity-aware semantics.
 \item An extension of the \hmx framework
   \cite{DBLP:journals/tapos/OderskySW99} for constrained type
   inference to equip the type system with full, principal type inference.
@@ -283,7 +283,7 @@ $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 As \lang{} is built on top of the \hmx{} framework, which is a general
 framework for expressing constraint-based typing and type inference,
 the extension of our work with features like typeclasses, ad-hoc overloading,
-traits, etc is possible and orthogonal to the presentation in this paper. 
+traits, etc is possible and orthogonal to the presentation in this paper.
 While the system is geared towards type inference, it is nonetheless
 compatible with type annotations and thereby amenable to extensions
 where type inference may no longer be possible.

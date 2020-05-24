@@ -290,12 +290,41 @@ I was somewhat confused by region inference: line 238 has two occurrences of `&a
 ### Typos & focused remarks
 
 - 70 ": It" (capitalization)
+###(H) DONE
+
 - 424: why was $\&^U$ in the first line of the code snippet upgraded to $\&^A$?
+###(H) DONE (changed &^A to &^U, as translation should preserve kinds)
+
 - 466: how is zero region per borrow allowed? we didn't hear this mentioned until this line
+###(H) I'm not sure what is referenced here. Line 466 doesn't talk about borrows without regions.
+
 - 499: in the fourth premise of rule Region, is $\tau \leq L_{n-1}$ sugar for $\tau: \kappa$ and $\kappa \leq L_{n-1}$?
+###(H) Should we ignore this? It's clarified for $\sigma = \tau$ on line 515, before the discussion of the region rule on line 556, where it is again informally explained.
+
 - 505: in the conclusion of BorrowBinding, the squiggly arrow does not have anything in superscript
+
 - 613: you write borrows (plural), how can there be multiple affine borrows? (if I understand affine to mean "strictly affine")
+###(H) DONE: while I think the reviewer is correct, the whole sentence seems a bit
+###(H) misleading. He's referring to the second sentence of the following paragraph:
+###(H)   Addresses ρ are composed of a raw location ℓ, which is just a pointer into a
+###(H)   store, and a stack of modifiers that indicates the borrows that have been taken
+###(H)   from the original object. From the raw location, we may take affine borrows and
+###(H)   reborrows. Once we have taken an unrestricted borrow (from a raw location or a
+###(H)   borrowed one), then we can take further unrestricted borrows from it, but no more
+###(H)   affine ones.
+###(H) The second sentence may also be read as "we cannot take unrestricted borrows",
+###(H) which is then directly contradicted in the subsequent sentence.
+###(H) I've removed the second sentence and changed the paragraph as follow:
+###(H)   Addresses ρ are composed of a raw location ℓ, which is just a pointer into a
+###(H)   store, and a stack of modifiers that indicates the borrows and reborrows that have been taken
+###(H)   from ℓ. Once we have taken an unrestricted borrow (from a raw location or a
+###(H)   borrowed one), then we can take further unrestricted borrows from it, but no more
+###(H)   affine ones.
+
 - 645: what is $=_e$?
+
 - 692: how come suspended bindings have an address that's different from their borrow? is there a key reason?
+
 - 811: I was confused here: $\alpha_r$ seems to stand for the type of $(f\ x, x)$ per the constraint $(\beta\ast\alpha_x\leq\alpha_r)$ but at line 811 $\alpha_r$ seems to stand for the type of the whole abstraction
+
 - 970: I am under the impression that this specific example could be reparenthesized as `(let a = &x in f a); g &!x` to work around the issue

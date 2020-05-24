@@ -157,7 +157,7 @@ As an example, consider the following program:
 }{
 \begin{aligned}
   \lam{a}{}\region[1]{\Sone a\MBORROW}{\ &%
-  \letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+  \letin{x}{\app{f}{\borrow[\kun]{a}}}{}\\
   &\region[2]{\Sone x\MBORROW}{g\ (\borrow[\kaff]{x})};\\
   &\region[2]{\Sone x\IBORROW}{f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})}\\
   &\!\!\!}
@@ -219,7 +219,7 @@ these properties.
 \label{sdtyping}
 
 To avoid distraction, this section focuses on the essential and novel
-parts of the type system. A complete 
+parts of the type system. A complete
 description is available in \cref{appendix:sdtyping}.
 % In this section, we focus on chosen parts of our system
 % through a set of selected rules.
@@ -579,7 +579,7 @@ borrows of its components.
 To demonstrate how \lang{} deals with resources, we introduce an abstract
 type $\tapp{\tres}{\tau}$ whose content of type $\tau$ must be
 unrestricted ($\kun_0$) and which is equipped with the four
-operations introduced in \cref{syntax}: 
+operations introduced in \cref{syntax}:
 \begin{itemize}[topsep=0pt]
 \item
 $\create$:
@@ -651,11 +651,10 @@ Pairs come with a kind tag $k$ indicating the usage restriction.
 
 Addresses $\Addr$ are composed of a raw location $\Loc$, which is just
 a pointer into a store, and a stack of modifiers that indicates the
-borrows that have been taken from the original object. From the raw
-location, we may take affine borrows and reborrows. Once we have
-taken an unrestricted borrow (from a raw location or a borrowed one),
-then we can take further unrestricted borrows from it, but no more
-affine ones.
+borrows and reborrows that have been taken from $\Loc$.
+Once we have taken an unrestricted borrow (from a raw location or a borrowed
+one), then we can take further unrestricted borrows from it, but no more affine
+ones.
 
 A permission $\Perm$ is a set of addresses that may be accessed during
 evaluation. A well-formed permission contains at most one address for each raw
