@@ -302,6 +302,28 @@ I was somewhat confused by region inference: line 238 has two occurrences of `&a
 ###(H) Should we ignore this? It's clarified for $\sigma = \tau$ on line 515, before the discussion of the region rule on line 556, where it is again informally explained.
 
 - 505: in the conclusion of BorrowBinding, the squiggly arrow does not have anything in superscript
+###(H) I think the problem here is that we only show the squiggly rule for
+###(H) bindings (which has no superscript) but talk about the rule lifted over
+###(H) environments in the caption of the figure (Fig 9) and in the description of the
+###(H) region rule.
+###(H) Caption of Fig. 9: "... and borrowing rules (C ⊢ₑ Γ ⇝ˣₙ Γ')"
+###(H) Current BorrowBinding rule in Fig. 9:
+###(H) 
+###(H)   C ⊢ₑ (bₙ ≤ k) ∧ (k ≤ b_∞)   b ∈ {U, A}
+###(H)   —————————————————————————————————————–
+###(H)   C ⊢ₑ [x : σ]^n_b ⇝ₙ (x % σ)^k_b
+###(H) 
+###(H) We should probably either add a sentence about the lifting, or
+###(H) alternatively inline the lifting into the BorrowBinding rule.
+###(H) Do you think the following inlining would be a good idea and correct?:
+###(H) 
+###(H)   C ⊢ₑ (bₙ ≤ k) ∧ (k ≤ b_∞)   b ∈ {U, A}
+###(H)   —————————————————————————————————————–
+###(H)   C ⊢ₑ Γ, [x : σ]^n_b ⇝ˣₙ Γ, (x % σ)^k_b
+###(H) 
+###(H) In the appendix we only have `EBorrow*` rules for inference in Fig. 21,
+###(H) so I'm not completely sure that I'm not missing something here for the
+###(H) syntax directed version.
 
 - 613: you write borrows (plural), how can there be multiple affine borrows? (if I understand affine to mean "strictly affine")
 ###(H) DONE: while I think the reviewer is correct, the whole sentence seems a bit
