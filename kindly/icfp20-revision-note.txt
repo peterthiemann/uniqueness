@@ -305,13 +305,14 @@ I was somewhat confused by region inference: line 238 has two occurrences of `&a
 ###(H) I think the problem here is that we only show the squiggly rule for
 ###(H) bindings (which has no superscript) but talk about the rule lifted over
 ###(H) environments in the caption of the figure (Fig 9) and in the description of the
-###(H) region rule.
+###(H) region rule (where we have a superscript).
 ###(H) Caption of Fig. 9: "... and borrowing rules (C ⊢ₑ Γ ⇝ˣₙ Γ')"
 ###(H) Current BorrowBinding rule in Fig. 9:
 ###(H) 
 ###(H)   C ⊢ₑ (bₙ ≤ k) ∧ (k ≤ b_∞)   b ∈ {U, A}
 ###(H)   —————————————————————————————————————–
 ###(H)   C ⊢ₑ [x : σ]^n_b ⇝ₙ (x % σ)^k_b
+###(H)                     ^—— no superscript
 ###(H) 
 ###(H) We should probably either add a sentence about the lifting, or
 ###(H) alternatively inline the lifting into the BorrowBinding rule.
