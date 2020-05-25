@@ -293,7 +293,7 @@ I was somewhat confused by region inference: line 238 has two occurrences of `&a
 ###(H) DONE
 
 - 424: why was $\&^U$ in the first line of the code snippet upgraded to $\&^A$?
-###(H) DONE (changed &^A to &^U, as translation should preserve kinds)
+###(H) DONE (seems like a typo: changed &^U to &^A)
 
 - 466: how is zero region per borrow allowed? we didn't hear this mentioned until this line
 ###(H) I'm not sure what is referenced here. Line 466 doesn't talk about borrows without regions.

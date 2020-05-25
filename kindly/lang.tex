@@ -150,14 +150,14 @@ As an example, consider the following program:
   \RannotT{
 \begin{aligned}
   \lam{a}{}\ &
-  \letin{x}{\app{f}{\borrow[\kun]{a}}}{}\\
+  \letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
   &g\ (\borrow[\kaff]{x});\\
   &f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})\\
 \end{aligned}
 }{
 \begin{aligned}
   \lam{a}{}\region[1]{\Sone a\MBORROW}{\ &%
-  \letin{x}{\app{f}{\borrow[\kun]{a}}}{}\\
+  \letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
   &\region[2]{\Sone x\MBORROW}{g\ (\borrow[\kaff]{x})};\\
   &\region[2]{\Sone x\IBORROW}{f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})}\\
   &\!\!\!}
