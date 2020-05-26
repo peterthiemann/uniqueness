@@ -150,26 +150,45 @@ object-oriented
 programming~\citep{DBLP:conf/popl/BoylandR05,DBLP:conf/pldi/GrossmanMJHWC02}.
 
 Rust~\citep{rust} is the first
-mainstream language to popularize the idea of borrowing and ownership
-for safe low-level programming.
+mainstream language that builds on the concepts of borrowing and ownership
+to enable safe low-level programming.
 \lang is inspired by Rust's borrowing system and transfers some of its
 ideas  to a functional setting with type inference, garbage collection, and
 an ML-like module system.
-Rust's lifetime system is more explicit and more expressive than \lang,
-but Rust does not provide type inference
-and only provides \emph{partial} lifetime inference.
+Rust's lifetime system is more explicit and more expressive than \lang.
+While Rust provides partial lifetime inference, it
+does not support full type inference. 
 Recently, \citet{DBLP:journals/corr/abs-1903-00982}
 formalized Rust's ownership discipline, including non-lexical lifetimes.
-Another important difference is that Rust allows
-to precisely specify the memory layout of objects
-and to pass arguments by value.
+Moreover, Rust programmers have full control over memory allocation
+and memory layout of objects; they can pass arguments by value or by reference.
 These features are crucial for the efficiency goals of Rust.
-In \lang, we assume that all arguments are passed by reference and
-that a garbage collector is available. This forgoes numerous
+In contrast, \lang is garbage collected, assumes a uniform object
+representation, and all arguments are passed by reference. This choice
+forgoes numerous  
 issues regarding interior mutability and algebraic data types.
 In particular, it
 allows us to easily nest mutable references inside objects, regardless
 whether they are linear or unrestricted.
+
+In Rust, programmers can implement their low-level abstractions by
+using unsafe code fragments. Unsafe code is not typechecked with the
+full force of the Rust type system, but with a watered down version
+that ignores ownership and lifetimes. This loophole is needed to implement
+datastructures like doubly-linked lists or advanced concurrency
+abstractions. When unsafe code occurs as part of a 
+function body, the Rust typechecker leaves the adherence of the unsafe
+code to the function's type signature as a proof obligation to
+the programmer. The RustBelt project
+\cite{DBLP:journals/pacmpl/0002JKD18} provides a formal 
+foundation for creating such proofs by exhibiting a framework for
+semantic soundness of the Rust type system that incorporates aspects
+of concurrecy (i.e., data-race freedom). Similar proof obligations
+would be needed in \lang to check that an implementation of the module
+types or the type of fold shown in \cref{motivation} matches the
+semantics of the typings. We aim to develop a suitable framework for
+this task for \lang. At present, the metatheory of \lang does not
+cover concurrency.
 
 Vault~\citep{DBLP:conf/pldi/DeLineF01}
 and Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}

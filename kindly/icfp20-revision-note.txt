@@ -149,7 +149,7 @@ Minor comments:
 - p22: An omission in Sec 7.2 is the RustBelt project, which has developed
   a formal version of the Rust type system, and proved type soundness and
   data-race freedom of it and some of the Rust standard libraries.
-### TODO, TO BE ASSIGNED
+### DONE
 
 
 Review #74B
