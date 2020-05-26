@@ -32,10 +32,12 @@ module Array : sig
   val length : &('a t) -> int
   val get : ('a : un) => &('a t) * int -> 'a
   val set : ('a : aff) => &!('a t) * int * 'a -> unit
-  val map : ('a -> 'b) * 'a t -> 'b t (* destructive *)
-  val map_copy : (&'a -> 'b) * &('a t) -> 'b t (* copying *)
+  val map : (&'a -> 'b) * &('a t) -> 'b t
+  val iter : ('a -> unit) * 'a t -> unit
 end
 \end{lstlisting}
+%  val map : ('a -> 'b) * 'a t -> 'b t (* destructive *)
+%  val map_copy : (&'a -> 'b) * &('a t) -> 'b t (* copying *)
   \vspace{-15pt}
   \caption{Linear arrays}
   \label{ex:array}
@@ -45,21 +47,30 @@ end
 
 The API for mutable linear arrays (\cref{sig:array})
 aims to safely handle manual allocation and
-deallocation of arrays that may contain affine elements.
+deallocation of arrays that may contain affine or linear elements.
 A program would first use @create (n, v)@ to create
 an array of size @n@ initialized with value
 @v@. The value @v@ must be unrestricted as it is duplicated to
-initialize all array elements. Using the @map@ and @map_copy@ functions we
-can transform the unrestricted elements into linear (affine)
-ones. The @map@ function consumes its input array, whereas @map_copy@
-preserves the input. The implementation of @map@ \emph{might} perform
-an in-place update, but this is neither required nor guaranteed. The
-resulting array can be processed further using @map@ or 
-@map_copy@ (or @set@ if affine). The @get@ function is only applicable
-if the element type is unrestricted as one element is duplicated. The @length@
-function is always applicable. To @free@ an array the elements must be
-affine. An array with linear elements can only be freed by @map@ping
-an explicit destructor over its elements.
+initialize all array elements.
+To @free@ an array the elements must be affine. 
+The @length@ function is always applicable.
+The @get@ function is only applicable
+if the element type is unrestricted as one element is duplicated.
+To @set@ an array element displaces the previous content, which must
+be at least affine.
+
+The @map@ function can transform arrays with arbitrary elements. In 
+particular, it can turn unrestricted elements into linear (affine)
+ones. It takes a borrow of the input array and returns a newly created
+output array. As @free@ing requires affine elements, we provide the
+@iter@ function which takes a
+suitable finalizer and an array with arbitrary elements, which is
+consumed. Indeed such an iteration is the only way to free an array
+with linear elements. A real-life
+API would provide a combination of @map@ and @iter@ as a
+``destructive'' map that consumes its input array. Assuming a uniform
+representation, such a destructive map might be implemented by
+in-place update.
 
 To manage the different kinds of accessing the array we distinguish between constructors, destructors,
 observers, and mutators.
@@ -71,7 +82,7 @@ During the lifetime of the array resource @a@, we can split
 off \emph{shared borrows} @&a@ that provide a read-only
 view or \emph{exclusive borrows} @&!a@ for read-write views.
 Observer functions such as @length@ and @get@ expect a shared borrow
-argument, mutator functions such a @set@ expect
+argument, mutator functions such as @set@ expect
 an exclusive borrow.
 
 Each borrow is tied to a region whose lifetime is properly
