@@ -1,0 +1,24 @@
+## Fold
+
+type ('a : 'k) larray : lin
+val fold : \ 'k ('a : 'k) ('b : _). ('a -> 'b -{'k}> 'b) -> 'a larray -> 'b -{lin}> 'b
+
+type file : lin
+val create : int -> file
+val size : \ 'k. &('k,file) -> int
+val close : file -> unit
+
+let total_size files = fold (fun f s -> size f + s) files 0
+
+val all_file_borrows : \ 'k. &('k,file) larray
+let all_borrows_size = fold (fun f s -> size f + s) all_file_borrows 0
+
+val foldB : \ 'k 'ka 'karr ('a : 'k) ('b : _). 
+	(&('ka,'a) -> 'b -{'k}> 'b) -> 
+	&('karr, 'a larray) -> 
+	'b -{'karr}> 
+	'b
+let total_sizeB files = foldB (fun f s -> size f + s) files 0
+val all_files : file larray
+let all_size = total_sizeB &all_files
+
