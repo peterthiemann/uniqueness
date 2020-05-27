@@ -1,0 +1,19 @@
+## Mutable Iteration
+
+type ('a : 'k) larray : lin
+val length : \ ('a:_). &(_, 'a larray) -> int
+val get : \ ('a:un) . &(_, 'a larray) -> int -> 'a
+val get_borrow : \ 'r ('a:_) . &!('r, 'a larray) -> int -> &!('r, 'a)
+val geq : int -> int -> bool
+let iter_mut_core (f, a, i) =
+	f (get_borrow a i)
+let iter_mut (f, a) =
+  let rec iter_mut_helper f a i =
+    match geq i 0 with { 
+    | True -> let _ = iter_mut_core (f, &&!a, i)
+              in iter_mut_helper f &&!a (i - 1)
+    | False ->
+       ()
+    }
+  in iter_mut_core (f, a, length &&a - 1)
+
