@@ -1,26 +1,26 @@
 type board = IntSet.t Matrix.t(*@\label{line:boardtype}*)
 
-let propagate_line i0 j0 g n =(*@\label{line:propline}*)
+let propagate_line i0 j0 board n =(*@\label{line:propline}*)
   for j = j0+1 to 8 do
-    let cell = Matrix.get (&g, i0 , j) in
+    let cell = Matrix.get (&board, i0 , j) in(*@\label{line:reborrow_i}*)
     let cell' = IntSet.remove n cell in
-    Matrix.set_mut (&!g, i0, j, cell')
+    Matrix.set_mut (&!board, i0, j, cell')(*@\label{line:reborrow_m}*)
   done
 
-let propagate i j g n =
-  propagate_line i j &!g n;
-  propagate_column i j &!g n;
-  propagate_square i j &!g n
-let rec solve i j g =
-  begin if is_solved &g then Matrix.print &g else
+let propagate i j board n =
+  propagate_line i j &!board n;(*@\label{line:reborrow1}*)
+  propagate_column i j &!board n;
+  propagate_square i j &!board n(*@\label{line:reborrow3}*)
+let rec solve i j board =(*@\label{line:solve}*)
+  begin if is_solved &board then Matrix.print &board else
     let (new_i, new_j) = next_pos (i,j) in
     let try_solution n =(*@\label{line:try_solution}*)
-      let new_g =
-        Matrix.set (&g, i, j, IntSet.singleton n) in(*@\label{line:immutset}*)
-      propagate i j &!new_g n;
-      if is_valid &new_g then solve new_i new_j new_g
+      let new_board =
+        Matrix.set (&board, i, j, IntSet.singleton n) in(*@\label{line:immutset}*)
+      propagate i j &!new_board n;
+      if is_valid &new_board then solve new_i new_j new_board
     in
-    let cell = Matrix.get (&g, i, j) in
+    let cell = Matrix.get (&board, i, j) in
     IntSet.iter try_solution cell;(*@\label{line:iter}*)
   end;
-  free g(*@\label{line:free:g}*)
+  free board(*@\label{line:free:g}*)

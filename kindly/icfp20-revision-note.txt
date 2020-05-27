@@ -45,13 +45,17 @@ to read. However, I have some concerns:
   indeed work.
 - The example in Section 2.2 could be improved significantly.
   + It is not clear what is the key point of the example.
+### DONE: added first paragraph
   + Conceptually the example is hard to grasp, which is exacerbated by the
     large amount of code.
+### DONE: added some more explanation and structure
   + The code makes use of variants of the data structures that are presented
     in the paper (`Matrix`).
+### DONE: added 1-2 sentences, explaining the minor difference
   + There are no types in the code. I understand types not needed due to
     principal type inference, but they would help the reader a lot to understand
     what's going on.
+### DONE: added type signatures
 
 Other questions to the author:
 

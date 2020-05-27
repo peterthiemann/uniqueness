@@ -1,5 +1,14 @@
 \subsection{Solving sudokus with hybrid data-structures}
 
+This section presents an implementation of a
+backtracking Sudoku solver using a safe API for persistent arrays that
+supports both mutable updates and immutable versioning.
+The implementation showcases safe mixing of resource allocation and
+deallocation in the presence of exclusive (mutable) and immutable
+borrows. It also demonstrates two new aspects: the interaction between
+closures and borrows and the notion of reborrowing.
+%% A function that closes over a borrow must not escape the borrow's region.
+
 Recently introduced persistent data structures
 permit transient mutations where
 non-linear uses lead to degraded performance
@@ -12,18 +21,17 @@ and the library, while borrows avoid the need to thread state explicitly,
 as usually required by an API for immutable data types.
 %
 
-In this section, we present
-a safe API for persistent arrays that support both immutable and mutable features,
-and use it to implement a backtracking Sudoku solver.
+Our implementation of a backtracking Sudoku solver abstracts this scenario.
 % show how \lang allows us to define
-The solver maintains an array to represent the state of
+The solver maintains a two-dimensional array to represent the state of
 the game and uses backtracking when there are several choices to proceed.
-The use of backtracking suggests a persistent data structure for the array.
-However, only changes that correspond to a choice point need to use
-the persistence mechanism, others may be implemented as
+As choice points may be revisited several times, it seems advantageous
+to select a persistent data structure for the array.
+However, local changes between choice points may be implemented as
 cheap in-place mutations.
 
-\cref{sig:hybarray} contains an API @HYBARRAY@
+\cref{sig:hybarray} contains an API @HYBARRAY@ along with an
+implementation @CowArray@
 that enables using mutable and immutable modifications to
 the board through affine types and borrows.
 The signature differs slightly from the @Array@
@@ -31,25 +39,32 @@ signature. As our application requires the @get@ function, the array
 elements must be unrestricted, but
 the structure itself remains linear so as to be implemented in terms of @Array@.
 The in-place mutation function @set_mut@ with type
-@&!('a t) * int * 'a -> unit@ works on a exclusive borrow  whereas the persistent
+@&!('a t) * int * 'a -> unit@ works on an exclusive borrow  whereas the persistent
 @set@ operation has type @&('a t) * int * 'a -> 'a t@. It
 takes a shared borrow because it only reads from the
 argument array, but returns a fresh,  modified structure.
-The code in \cref{ex:cow} contains a very simple implementation of
+The module @CowArray@, also in \cref{ex:cow}, contains a very simple
+implementation of 
 @HYBARRAY@ that represents hybrid arrays
 as regular arrays and uses copy-on-write for persistent
 modifications. The function
 @mapi: (int * &'a -> 'b) * &('a t) -> 'b t@
 is a simple variation on @Array.map@ where the mapping function also
-takes the position of the element.
+takes the position of the element. Recall that @Array.map@ always
+creates a new array for the result.
 % A more elaborate implementation could use persistent arrays
 % \cite{DBLP:conf/ml/ConchonF07}.
+
+In the example code, we make use of a two-dimensional version
+@Matrix@ of the @CowArray@ data\-structure. The only difference is
+that the API functions @get@, @set@, and @set_mut@ now take two index
+parameters of type @int@ instead of one. The internal working is exactly the same.
 
 
 \begin{figure}[tp]
   \centering
   \begin{subfigure}[t]{0.45\linewidth}
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 module type HYBARRAY = sig
   include ARRAY
   val set : &('a t) * int * 'a -> 'a t
@@ -58,7 +73,7 @@ end
 \end{lstlisting}
   \end{subfigure}\hfill
   \begin{subfigure}[t]{0.55\linewidth}
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 module CowArray : HYBARRAY = struct
   include Array
   let set (a, i0, x0) =
@@ -72,6 +87,11 @@ end
   \label{sig:hybarray}
   \label{ex:cow}
 
+\begin{lstlisting}[numbers=none]
+val propagate : int -> int -> &!Matrix.t -> int -> unit
+val solve : int -> int -> Matrix.t -> unit
+\end{lstlisting}
+
   \begin{subfigure}[t]{0.45\linewidth}
   \lstinputlisting[linerange=1-13]{code/sukodu.affe}
   \end{subfigure}\hfill
@@ -84,19 +104,29 @@ end
   \label{ex:sudoku}
 \end{figure}
 
-Our implementation of a Sudoku solver (\cref{ex:sudoku}) performs
-modifications that correspond to choice points using @set@,
-which makes it trivial to come back to the previous version
-of the array, while other modifications use @set_mut@, which
-cannot be reverted.
+% Our implementation of a Sudoku solver (\cref{ex:sudoku}) performs
+% modifications that correspond to choice points using @set@,
+% which makes it trivial to come back to the previous version
+% of the array, while other modifications use @set_mut@, which
+% cannot be reverted.
 
-The board is represented as a 2D-matrix (\cref{line:boardtype}), where
-the @Matrix@ type uses the same API as @CowArray@
-but with two indices.
-Each cell contains an integer set that represents admissible solutions so far.
-The Sudoku solver iterates over the cells and tries each possible solution (\cref{line:try_solution}).
-When a value is picked for the current cell, we create a choice point,
-change the cell with an immutable modification (\cref{line:immutset}), and propagate
+Our implementation of a Sudoku solver (~\cref{ex:sudoku}) represents
+the board as a 2D-matrix (\cref{line:boardtype}).
+Each cell contains an integer set of type @IntSet.t@ that represents
+admissible solutions so far. This type is immutable, i.e.,
+@IntSet.remove@ produces a new value.
+
+The main functions are @solve@ and @propagate@ with the typings shown
+on top of \cref{ex:sudoku}. The types of @propagate_line@ etc are the
+same as for @propagate@. From the types, we can see that @solve@ takes
+ownership of the board, whereas @propagate@ only takes a mutable
+borrow. Hence, the @propagate@ functions can only modify or read the board,
+whereas @solve@ has full control. 
+
+The Sudoku solver @solve@ iterates over the cells and tries each possible
+solution (\cref{line:try_solution}). 
+When a value is picked for the current cell, it creates a choice point
+in @new_board@, where the current cell is updated with an immutable modification (\cref{line:immutset}), and propagate
 the changes with the @propagate@ function.
 The @propagate@ function uses direct mutation through an
 exclusive borrow of the matrix as it need not preserve the previous
@@ -105,20 +135,32 @@ The implementation of @propagate@ is split into three parts
 for lines, columns, and square, which are all very similar to function
 @propagate_lines@ (\cref{line:propline}).
 
+As the @board@ parameter to the @propagate@ function is an exclusive
+borrow, it should be handled 
+in an affine manner. To pass it safely to the three helper functions,
+the body of @propagate@ \emph{reborrows} (i.e., it takes a borrow of a
+borrow) the board three times in 
+\cref{line:reborrow1}-\cref{line:reborrow3}.
+The function @propagate_line@ also contains two reborrows of the
+exclusive borrow argument @board@, an
+immutable one (\cref{line:reborrow_i}) and an exclusive one
+(\cref{line:reborrow_m}). It demonstrates the facility 
+to take immutable borrows from exclusive ones.
+
 The typing ensures that the mutations do not compromise the state at
-the choice point, because they operate on a new state @new_g@ created for one
+the choice point, because they operate on a new state @new_board@ created for one
 particular branch of the choice.
 As the @set@ function only requires an unrestricted shared borrow,
 the closure @try_solution@ remains unrestricted even though
-it captures the borrow @&g@.
+it captures the borrow @&board@.
 The price is that @try_solution@ cannot escape from
-@&g@'s region. In this example, the inferred region corresponds to the
+@&board@'s region. In this example, the inferred region corresponds to the
 @begin@/@end@ scope. 
 Hence, @try_solution@ can be used in
 the iteration in \cref{line:iter}.
 % As @&g@ is unrestricted, we could even use a parallel iteration
 % instead of a sequential one.
-As @g@ is linear we must free it outside of the region
+As @board@ is linear we must free it outside of the region
 before returning (\cref{line:free:g}).
 
 While presented for copy-on-write arrays, the API
