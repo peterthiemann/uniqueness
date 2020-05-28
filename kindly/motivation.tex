@@ -24,7 +24,7 @@ Further examples are available in \cref{sec:extra-example}.
 
 \begin{figure}[tp]
   \centering
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 module Array : sig
   type ('a : 'k) t : lin
   val create : ('a : un) => int * 'a -> 'a t
@@ -154,7 +154,7 @@ But for certain programming idioms, we want to extend the scope of a
 region across a function boundary.
 For instance, how should we fold on an array of linear objects?
 Here is a first attempt at the type of a fold function:
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 val fold : ('a : 'k) => ('a -> 'b -{'k}> 'b) -> 'a Array.t -> 'b -{lin}> 'b
 \end{lstlisting}
 This type puts no restrictions on the element type of the array, but
@@ -166,7 +166,7 @@ If we want to work on borrows of linear and affine resources, then the
 typing gets more involved because
 we must make sure those borrows are not leaked in the result.
 We obtain the following signature for @bfold@, the borrowing fold operation:
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 val bfold : ('b:'k),('k <= aff_r) => (&(aff_r1,'a) -> 'b -{aff_r1}> 'b) -> &('k_1,'a Array.t) -> 'b -{'k_1}> 'b
 \end{lstlisting}
 
@@ -186,7 +186,7 @@ make multiple concurrent folds.
 
 As an easy example, we fold over an array of files
 @all_files : File.t Array.t@ to compute the sum of their sizes:
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 let total_size_of files = bfold (fun f s -> File.size f + s) files 0
 let total_size = total_size_of &all_files
 \end{lstlisting}
@@ -194,7 +194,7 @@ let total_size = total_size_of &all_files
 This approach is not sufficient if we want to mutate the array during iteration.
 To this end, we need to take an exclusive borrow of the structure to iterate
 on:
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 val iter_mut : (&!(aff_r1,'a) -{un}> unit) -> &!('a Array.t) -> unit
 \end{lstlisting}
 
