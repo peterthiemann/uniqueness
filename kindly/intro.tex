@@ -172,7 +172,7 @@ the type of @File.write@: a partial application like
 @File.write &!h@ captures the affine borrow and hence the
 resulting function is also affine. It
 would be an error to use the affine closure twice as in
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 let w = File.write &!h in w "Hello "; w "world!" (*type error*)
 \end{lstlisting}
 The remaining arrows in
@@ -220,7 +220,7 @@ examples for functions exploiting that feature.\footnote{Compared to
   Quill \cite{DBLP:conf/icfp/Morris16} the signatures of application and
   composition are simpler because \lang{} supports kind subsumption.}
 For application, \lang{} infers the following type.
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 let app f x = f x
 # app : ('a -{'k}> 'b) -> ('a -{'k}> 'b)
 \end{lstlisting}
@@ -237,7 +237,7 @@ of the type of @app@ is only revealed as much as necessary for
 understanding the type.
 
 For @compose@, \lang{} infers this type.
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 let compose f g x = f (g x)
 # compose : ('k <= 'k_1) => ('b -{'k}> 'c) -> ('a -{'k_1}> 'b) -{'k}> ('a -{'k_1}> 'c)
 \end{lstlisting}
