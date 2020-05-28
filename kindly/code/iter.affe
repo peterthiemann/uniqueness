@@ -39,3 +39,23 @@ let bfold f a z =
 
 let bfx a =
   bfold (fun b x -> b) a
+
+### the type of these two functions should be similar (if not equal) to the type of bfold
+
+let bf0 f a z =
+  match geq (length a) 1 with {
+  | True ->
+    f (get_iborrow a 1) (f (get_iborrow a 0) z)
+  | False ->
+    z
+  }
+
+## all reborrows are needed in bf1!
+
+let bf1 f a z =
+  match geq (length &&a) 1 with {
+  | True ->
+    f (get_iborrow &&a 1) (f (get_iborrow &&a 0) z)
+  | False ->
+    z
+  }
