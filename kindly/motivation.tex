@@ -167,7 +167,7 @@ typing gets more involved because
 we must make sure those borrows are not leaked in the result.
 We obtain the following signature for @bfold@, the borrowing fold operation:
 \begin{lstlisting}[numbers=none]
-val bfold : ('b:'k),('k <= aff_r) => (&(aff_r1,'a) -> 'b -{aff_r1}> 'b) -> &('k_1,'a Array.t) -> 'b -{'k_1}> 'b
+val bfold : ('b:'k),('k <= lin_r) => (&(aff_r1,'a) -> 'b -{aff_r1}> 'b) -> &('k_1,'a Array.t) -> 'b -{'k_1}> 'b
 \end{lstlisting}
 
 The folded function receives a shared borrow of the element in the array.
@@ -177,8 +177,10 @@ that this borrow is neither captured nor returned by the function.
 This encapsulation is implemented with a universally quantified \emph{kind index variable} $r$.
 The signature prescribes the type @&(aff_r1,'a)@ for the
 shared borrow of the resource with an affine kind at region nesting $r+1$. The return
-type of the callback is constrained to kind @'k <= aff_r@
-so that the callback certainly cannot return the borrowed argument.
+type of the callback is constrained to kind @'k <= lin_r@. The
+important part of this constraint is the $_r$ index, which ensures
+that the callback cannot return the borrowed argument from the more
+deeply nested scope. 
 %
 The input of the fold is a shared borrow of the array,
 which ensures that we have the right to share borrows of the inner content and
@@ -211,6 +213,41 @@ using parallel iterations in the immutable case.
 be leaked outside of the iteration function.
 This pattern is essential in many use cases of linearity such
 as pools of linear objects (see \cref{tuto:pool}).
+
+To close this discussion, let's see which primitives are needed to implement
+functions like @bfold@ and @iter_mut@. The obvious sequential implementation of
+both functions boils down to a loop over the index range of the array:
+\begin{lstlisting}
+let rec bfold_helper f a z i =
+  if i >= 0
+  then bfold_helper f &a (f (get_sb (&a, i))) (i - 1)
+  else z
+let bfold f a z =
+  bfold_helper f a z (length &a - 1)
+\end{lstlisting}
+\begin{lstlisting}
+let rec iter_helper f a i =
+  if i >= 0
+  then (f (get_eb (&!a, i)); iter_helper f &!a (i - 1))
+  else ()
+let iter_mut f a =
+  iter_mut f a (length &a - 1)
+\end{lstlisting}
+Observe that we are forced to use different primitives
+\begin{itemize}
+\item @get_sb : &('r, 'a Array.t) -> int -> &('r, 'a)@ to get a
+  shared borrow from a shared borrow of an array and
+\item @get_eb : &!('r, 'a Array.t) -> int -> &('r, 'a)@ to get an
+  exclusive borrow from an exclusive borrow of  an array.
+\end{itemize}
+These primitives have the same underlying implementing (the same as
+@get@ from \cref{sec:imper-progr}). Their types arise from the
+intuition that the borrow of a structure should entitle to borrows of
+its substructures, roughly, the borrow of an array could be considered as
+array of borrows.
+
+%%% PJT: TBC
+
 
 \lstDeleteShortInline@
 
