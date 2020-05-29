@@ -217,6 +217,7 @@ presented type system is justified. To some extent, I blame the
 presentation (How about a comparison table or an implementing of a couple
 of examples in different systems?) but the provided information should
 be sufficient for experts.
+### DONE: comparison matrix created
 
 Second, the type system seems rather complex and I'm not convinced
 that it would really help simplify working with linear and affine
@@ -226,6 +227,8 @@ the type soundness theorem (my go-to place for getting some intuition
 about a type system), which occupies three-quarters of page 19. This
 is only the theorem; the proof is carried out on 20 pages in the
 appendix.
+### COMMENT: this will be available as an online appendix either on
+arxiv or the DL. 
 
 Again, the presentation could potentially be improved to address this
 concern. For example, the overview section seems to (at least partly)
