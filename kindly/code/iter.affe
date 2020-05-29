@@ -8,6 +8,7 @@ val get_borrow : \ 'r ('a:_) . &!('r, 'a larray) -> int -> &!('r, 'a)
 val get_iborrow : \ 'r ('a:_) . &('r, 'a larray) -> int -> &('r, 'a)
 
 val with_borrow : \ 'r 'q ('a:_) ('b:'q) . &('r, 'a larray) -> (&('r, 'a) -> 'b) -> 'b
+val with_mborrow : \ 'r 'q ('a:_) ('b:'q) . &!('r, 'a larray) -> (&!('r, 'a) -> 'b) -> 'b
 
 val geq : int -> int -> bool
 
