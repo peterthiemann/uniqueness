@@ -155,7 +155,7 @@ region across a function boundary.
 For instance, how should we fold on an array of linear objects?
 Here is a first attempt at the type of a fold function:
 \begin{lstlisting}[numbers=none]
-val fold : ('a : 'k) => ('a -> 'b -{'k}> 'b) -> 'a Array.t -> 'b -{lin}> 'b
+val fold : ('a:'k) => ('a -> 'b -{'k}> 'b) -> 'a Array.t -> 'b -{lin}> 'b
 \end{lstlisting}
 This type puts no restrictions on the element type of the array, but
 it requires the @fold@ function to consume the array and all its
@@ -197,7 +197,7 @@ This approach is not sufficient if we want to mutate the array during iteration.
 To this end, we need to take an exclusive borrow of the structure to iterate
 on:
 \begin{lstlisting}[numbers=none]
-val iter_mut : (&!(aff_r1,'a) -{un}> unit) -> &!('a Array.t) -> unit
+val iter_mut : (&!(aff_r1,'a) -{un}> unit) -> &!('k_1,'a Array.t) -> unit
 \end{lstlisting}
 
 The callback is explicitly annotated with @un@ because  it will be called multiple times.
@@ -215,39 +215,67 @@ This pattern is essential in many use cases of linearity such
 as pools of linear objects (see \cref{tuto:pool}).
 
 To close this discussion, let's see which primitives are needed to implement
-functions like @bfold@ and @iter_mut@. The obvious sequential implementation of
-both functions boils down to a loop over the index range of the array:
+functions like @bfold@ and @iter_mut@. The naive sequential implementations of
+both functions boil down to a loop over the index range of the array:
+\begin{flushleft}\vspace{-\baselineskip}
+  \begin{minipage}[t]{0.49\linewidth}
 \begin{lstlisting}
 let rec bfold_helper f a z i =
-  if i >= 0
-  then bfold_helper f &a (f (get_sb (&a, i))) (i - 1)
-  else z
+  if i < 0 then z
+  else bfold_helper f &a (f (get_sb (&a, i))) (i-1)
 let bfold f a z =
   bfold_helper f a z (length &a - 1)
 \end{lstlisting}
+  \end{minipage}
+  \begin{minipage}[t]{0.49\linewidth}
 \begin{lstlisting}
 let rec iter_helper f a i =
-  if i >= 0
-  then (f (get_eb (&!a, i)); iter_helper f &!a (i - 1))
-  else ()
+  if i < 0 then ()
+  else (f (get_eb (&!a, i)); iter_helper f &!a (i-1))
 let iter_mut f a =
   iter_mut f a (length &a - 1)
 \end{lstlisting}
-Observe that we are forced to use different primitives
+  \end{minipage}
+\end{flushleft}
+Observe that we are proposing two different primitives
 \begin{itemize}
-\item @get_sb : &('r, 'a Array.t) -> int -> &('r, 'a)@ to get a
+\item @get_sb : &('k, 'a Array.t) -> int -> &('k, 'a)@ \\to get a
   shared borrow from a shared borrow of an array and
-\item @get_eb : &!('r, 'a Array.t) -> int -> &('r, 'a)@ to get an
+\item @get_eb :  &!('k, 'a Array.t) -> int -> &!('k, 'a)@ \hfill (unsafe!) \\to get an
   exclusive borrow from an exclusive borrow of  an array.
 \end{itemize}
-These primitives have the same underlying implementing (the same as
+These primitives have the same underlying implemention (the same as
 @get@ from \cref{sec:imper-progr}). Their types arise from the
 intuition that the borrow of a structure should entitle to borrows of
 its substructures, roughly, the borrow of an array could be considered as
 array of borrows.
+However, only @get_sb@ is safe: the shared borrow of the array entitles us to
+obtain shared borrows for the elements \emph{in the same region} as
+the shared borrow for the array freezes the array inside the
+region. This freeze extends to the elements because 
+lifetime of the array fully overlaps with the lifetime of its
+elements. 
+Considering @get_eb@, we see that we may obtain \emph{two different
+exclusive borrows} of the same array element inside a region. Clearly,
+the exclusive borrow for the element should live in a nested region
+where the array is not accessible. Hence, the safe alternative is
+to use a different function for obtaining borrows of elements
+\begin{lstlisting}[numbers=none]
+with_eborrow : ('b:'k),('k <= lin_r) => &!('k_1,'a Array.t) -> int -> (&!(aff_r1,'a) -> 'b) -{'k_1}> 'b
+\end{lstlisting}
+Hence, the helper function for @iter_mut@ should read like this
+\begin{lstlisting}
+let rec iter_helper f a i =
+  if i < 0 then ()
+  else (with_eborrow &!a i f; iter_helper f &!a (i-1))
+\end{lstlisting}
+which also explains the occurrence of @aff_r1@ in the type of
+@iter_mut@.
 
-%%% PJT: TBC
-
+We conclude that borrows of datastructures create the need for
+differently typed access functions that are tailored for different use
+cases. The argumentation whether such an access function is safe is
+sometimes subtle and gives rise to nonobvious types.
 
 \lstDeleteShortInline@
 
