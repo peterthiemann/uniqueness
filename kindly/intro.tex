@@ -186,7 +186,9 @@ consisting of \cref{line:hello} and another consisting of
 \cref{line:world}. Both are fully contained in the scope of the linear
 handle @h@, hence we can take one exclusive borrow @&!h@ in each
 region. In both regions the borrow is consumed immediately by passing
-it to @File.write@. Regions are generally inferred by \lang.
+it to @File.write@. \lang elaborates regions automatically before type
+inference. Alternatively, programmers may mark regions explicitly (See
+\cref{sec:imper-progr}).
 
 This example demonstrates three features of our system:
 \begin{enumerate}

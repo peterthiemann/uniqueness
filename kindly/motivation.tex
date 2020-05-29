@@ -52,7 +52,9 @@ A program would first use @create (n, v)@ to create
 an array of size @n@ initialized with value
 @v@. The value @v@ must be unrestricted as it is duplicated to
 initialize all array elements.
-To @free@ an array the elements must be affine. 
+To @free@ an array the elements must be affine. Thanks to subkinding,
+the type of @free@ is pleasingly simple: any type @'a@ whose kind is
+less than or equal to @aff@ is acceptable. 
 The @length@ function is always applicable.
 The @get@ function is only applicable
 if the element type is unrestricted as one element is duplicated.
@@ -114,7 +116,8 @@ creation of the array, the presence of a borrow in the for loop
 prevents access to the ``raw'' resource inside the loop's
 body. In particular, the resource cannot be freed through a
 borrow. \cref{ex:array:get} contains two shared borrows 
-in the same expression which forms a region by itself. These borrows
+in the same expression which forms a region by itself (recall that
+shared borrows are unrestricted and may thus be duplicated). These borrows
 are split off the exclusive borrow used in \cref{ex:array:set} which
 belongs to the next enclosing region corresponding to the loop body.
 The whole array can be returned in \cref{ex:array:return} because  the

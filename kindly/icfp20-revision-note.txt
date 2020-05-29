@@ -286,13 +286,43 @@ Finally, a criticism that is often levied against Rust-like borrowing systems is
 
 ### Detailed remarks
 
-In section 3.3, I found that earmarked borrows were a central idea in this work, in that they allow to suspend borrow taking until a region is encountered later on during type checking. Since the region is not available at the time of environment-splitting (e.g. because in App the region is to be found further down $e_1$), this allows deferring the check later, when rule Region triggers. This is a departure from the way linear type systems and/or borrows were previously modeled, which deserves highlighting. It's also the key ingredient, because it allows tying together the act of taking a borrow, the index `n` on the lexical region (found in the expression tree) and enforce a bound on the index of the kind of $\tau$. Perhaps more importantly, it allows avoiding big compound rules. This is, in my opinion, worth emphasizing more.
+In section 3.3, I found that earmarked borrows were a central idea in
+this work, in that they allow to suspend borrow taking until a region
+is encountered later on during type checking. Since the region is not
+available at the time of environment-splitting (e.g. because in App
+the region is to be found further down $e_1$), this allows deferring
+the check later, when rule Region triggers. This is a departure from
+the way linear type systems and/or borrows were previously modeled,
+which deserves highlighting. It's also the key ingredient, because it
+allows tying together the act of taking a borrow, the index `n` on the
+lexical region (found in the expression tree) and enforce a bound on
+the index of the kind of $\tau$. Perhaps more importantly, it allows
+avoiding big compound rules. This is, in my opinion, worth emphasizing
+more.
 
-I think the inference status of regions was somewhat unclear for the first few pages of the paper: insofar as I understand, regions are elaborated (3.2) and are considered to not be part of the principality result regarding type inference; they benefit from a special inference procedure described in detail in appendix B. Without this context, line 122 seem somewhat confusing, as "generally infers" seems to contradict the earlier principal inference claim.
+I think the inference status of regions was somewhat unclear for the
+first few pages of the paper: insofar as I understand, regions are
+elaborated (3.2) and are considered to not be part of the principality
+result regarding type inference; they benefit from a special inference
+procedure described in detail in appendix B. Without this context,
+line 122 seem somewhat confusing, as "generally infers" seems to
+contradict the earlier principal inference claim.
+### DONE: "Affe elaborates regions automatically before type
+inference. Alternatively, programmers may mark regions explicitly"
 
-Fig 2: free operates on $\alpha: aff$ -- is this syntactic sugar for $\forall \kappa. \forall (\alpha: \kappa). (\kappa \leq aff) \Rightarrow \alpha t \to unit$? or is the subkinding generated automatically as part of the constraints?
+Fig 2: free operates on $\alpha: aff$ -- is this syntactic sugar for
+$\forall \kappa. \forall (\alpha: \kappa). (\kappa \leq aff)
+\Rightarrow \alpha t \to unit$? or is the subkinding generated
+automatically as part of the constraints?
+### DONE: yes. added sentence that makes this explicit.
 
-I was somewhat confused by region inference: line 238 has two occurrences of `&a` in a single region, which seems to contradict line 418, saying "the variable $x$ cannot occur in the region of $\&^bx$, but then there's a word at line 461 about allowing merging two regions?
+I was somewhat confused by region inference: line 238 has two
+occurrences of `&a` in a single region, which seems to contradict line
+418, saying "the variable $x$ cannot occur in the region of $\&^bx$,
+but then there's a word at line 461 about allowing merging two
+regions?
+### DONE: that was addressed in the text, but added "(recall that
+shared borrows are unrestricted and may thus be duplicated)"
 
 ### Typos & focused remarks
 
