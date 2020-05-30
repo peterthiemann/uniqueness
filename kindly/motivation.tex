@@ -242,9 +242,12 @@ let iter_mut f a =
 \end{flushleft}
 Observe that we are proposing two different primitives
 \begin{itemize}
-\item @get_sb : &('k, 'a Array.t) -> int -> &('k, 'a)@ \\to get a
+\item
+  @get_sb : &('k, 'a Array.t) -> int -> &('k, 'a)@ \\to get a
   shared borrow from a shared borrow of an array and
-\item @get_eb :  &!('k, 'a Array.t) -> int -> &!('k, 'a)@ \hfill (unsafe!) \\to get an
+\item
+  @get_eb : &!('k, 'a Array.t) -> int -> &!('k, 'a) (* Unsafe! *)@
+\\to get an
   exclusive borrow from an exclusive borrow of  an array.
 \end{itemize}
 These primitives have the same underlying implemention (the same as
