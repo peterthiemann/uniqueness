@@ -196,14 +196,13 @@ let total_size_of files = bfold (fun f s -> File.size f + s) files 0
 let total_size = total_size_of &all_files
 \end{lstlisting}
 
-This approach is not sufficient if we want to mutate the array during iteration.
+This approach is not sufficient if we want to mutate the elements of
+the array during iteration.
 To this end, we need to take an exclusive borrow of the structure to iterate
 on:
 \begin{lstlisting}[numbers=none]
-val iter_mut : (&!(aff_r1,'a) -{un}> unit) -> &!('k_1,'a Array.t) -> unit
+val iter_mut : (&!(aff_r1,'a) -> unit) -> &!('k_1,'a Array.t) -> unit
 \end{lstlisting}
-
-The callback is explicitly annotated with @un@ because  it will be called multiple times.
 
 While the distinction between mutable and immutable iteration functions
 seems unfortunate, it is typical of
@@ -225,28 +224,30 @@ both functions boil down to a loop over the index range of the array:
 \begin{lstlisting}
 let rec bfold_helper f a z i =
   if i < 0 then z
-  else bfold_helper f &a (f (get_sb (&a, i))) (i-1)
+  else bfold_helper f &&a (f (get_sb &&a i) z) (i-1)
 let bfold f a z =
-  bfold_helper f a z (length &a - 1)
+  let l = length &&a - 1 in
+  bfold_helper f &&a z l
 \end{lstlisting}
   \end{minipage}
   \begin{minipage}[t]{0.49\linewidth}
 \begin{lstlisting}
 let rec iter_helper f a i =
   if i < 0 then ()
-  else (f (get_eb (&!a, i)); iter_helper f &!a (i-1))
+  else (f (get_eb &&!a i); iter_helper f &&!a (i-1))
 let iter_mut f a =
-  iter_mut f a (length &a - 1)
+  let l = length &&a - 1 in
+  iter_helper f &&!a l
 \end{lstlisting}
   \end{minipage}
 \end{flushleft}
 Observe that we are proposing two different primitives
 \begin{itemize}
 \item
-  @get_sb : &('k, 'a Array.t) -> int -> &('k, 'a)@ \\to get a
+  @get_sb : &('k, 'a Array.t) -> int -{'k}> &('k, 'a)@ \\to get a
   shared borrow from a shared borrow of an array and
 \item
-  @get_eb : &!('k, 'a Array.t) -> int -> &!('k, 'a) (* Unsafe! *)@
+  @get_eb : &!('k, 'a Array.t) -> int -{'k}> &!('k, 'a) (* Unsafe! *)@
 \\to get an
   exclusive borrow from an exclusive borrow of  an array.
 \end{itemize}
