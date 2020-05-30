@@ -39,7 +39,7 @@
       & UL & --- & \N & \N & \N & \N & \YC Coq & System F
       \\
       Alms~\citep{DBLP:conf/popl/TovP11}
-      & UA & --- & \Y & \M & \Y & \NC Local & \N & ML \\
+      & UA & \N & \Y & \M & \Y & \NC Local & \N & ML \\
       Quill~\citep{DBLP:conf/icfp/Morris16}
       & UL & --- & \N & \N & \Y & \YC Principal & \MC Manual & Qualified types\\
       Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
@@ -67,6 +67,14 @@ Many of the following languages support linear or affine types, but rarely
 both. In many cases, it is easy to adapt a system to support both, as
 \lang does.
 None of the following languages support borrows.
+
+The comparison matrix in \cref{fig:comparison-matrix} gives an
+overview over the systems discussed in this section. The column URAL
+specifies the substructural features. Borrows and state are
+self-explanatory. Subsumption indicates that kind U is promoted
+to A and further to L. Polymorphism refers to polymorphism over
+substructural kinds. Inference is self-explanatory, formalisation
+refers to the formal semantics and type soundness proof. Basis is self-explanatory.
 
 System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
 extends System F with kinds to distinguish
