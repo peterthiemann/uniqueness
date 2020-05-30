@@ -28,7 +28,7 @@
     \newcommand*\rot{\multicolumn{1}{R{45}{1em}}}
     
     \begin{tabular}{l|cccccccc}
-      Language
+      \textbf{Language}
       & URAL & \rot{Borrows} & \rot{State}
       & \rot{R. Subsumption}
       & \rot{R. Polymorphism}
@@ -44,9 +44,15 @@
       & UL & --- & \N & \N & \Y & \YC Principal & \MC Manual & Qualified types\\
       Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
       & UL & --- & \M & \N & \Y & \MC Non-principal & \MC Manual & Haskell \\
+      Mezzo~\citep{DBLP:phd/hal/Protzenko14}
+      & $\star$ & --- & \Y & \M & \Y & \N & \MC Manual & --- \\
+      \hline
       Rust~\citep{rust}
-      & UA & \Y & \Y & \Y & \M & \NC Local & \YC Coq & ---
-      \\\hline
+      & UA & \Y & \Y & \Y & \M & \MC Local & \YC Coq & --- \\
+      Vault~\citep{DBLP:conf/pldi/DeLineF01}/
+      Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}
+      & UA & --- & \Y & \Y & \Y & \N & \MC Manual & --- \\
+      \hline
       \lang
       & UAL & \Y & \Y & \Y & \Y & \YC Principal & \MC Manual & ML/HM(X)
       \\
