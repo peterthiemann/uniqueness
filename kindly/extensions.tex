@@ -1,53 +1,33 @@
 \lstMakeShortInline[keepspaces,basicstyle=\small\ttfamily]@
-\section{Extensions}
+\section{Limitations and Extensions}
 
-\subsection{Algebraic Datatypes}
+\subsection{Flow sensitivity}
 
-Algebraic data types are a staple of functional programming and fit nicely
-in our paradigm. Indeed, it is sufficient to ensure  that the kinds of
-the constructor arguments are less than or equal to the kind of the datatype.
-Hence, it is forbidden to include affine elements in an unrestricted
-datatype, whereas the elements in a linear list may be linear or
-unrestricted. 
-Here is the definition of a datatype for linear lists.
+The type system defined so far does not support any
+form of flow sensitivity. This means that code patterns that relies on
+subtle flow-sensitive usage of permissions and linearity likely will not
+typecheck in \lang. As an example the following piece of code,
+which defines the merge function on linear lists,
+cannot be expressed directly.
 
 \begin{lstlisting}
-type ('a : 'k) llist : lin = Nil | Cons of ('a * 'a llist)
+let rec merge l1 l2 = match l1, l2 with
+  | h1::t1, h2::t2 ->
+    if &h1 < &h2 
+    then h1::(merge t1 l2) (* Must expand l2 to h2::t2 here *)
+    else h2::(merge l1 t2)
+  | ....
 \end{lstlisting}
 
-This extension is implemented in our prototype.
+Such pattern usually requires richer logic, such as
+Mezzo~\citep{DBLP:phd/hal/Protzenko14}.
+However
+\citet{DBLP:journals/corr/abs-1903-00982} formalize Rust's
+notion of non-lexical lifetimes which allow to partially support such
+code patterns. We believe this notion can be adapted to \lang's notion of
+regions
 
-\subsection{Ad-hoc Polymorphism and Borrows}
-
-In our formalization, we use two operators, $\borrow{x}$ and $\reborrow{x}$ to
-distinguish between borrows and borrows of borrows.
-Such a distinction is inconvenient for programming.
-Using a typeclass-like mechanism, we can replace these operators
-by a single overloaded operator, $\borrow{x}$, which expects $x$ to be @Borrowable@ and
-would then desugar to the more precise operators.
-A similar solution is used in Rust through the @Borrow@ and @Defer@
-traits.
-This approach also enables method calls on objects without
-explicit borrows, such as @foo.len()@ where len expects a shared borrow.
-
-Ad-hoc polymorphism fits demonstrably in the \hmx framework of constrained
-types and preserves all properties of our language such
-as principal type inference. Its soundness is orthogonal to linear types
-and has been explored in the literature~\citep{DBLP:conf/fpca/OderskyWW95}.
-
-\subsection{Branching constructs}
-
-Our formalization of \lang does not contain branching constructs. As a consequence,
-subexpressions are always executed sequentially. This is of great importance
-for the splitting relation introduced in \cref{sdtyping}, as it must
-coincide with the order of evaluation. To account for borrows and linear
-values in different branches, we need a new (symmetric) join relation.
-This relation immediately follows from the semantics of borrows and linearity
-shown so far, and allow to easily define branching constructs such as if-then-else
-and pattern matching.
-This extension is implemented in our prototype.
-
-\subsection{Non-Lexical Regions}
+\subsubsection{Non-Lexical Regions}
 
 A recent important addition to Rust is the notion of non-lexical lifetimes.
 With this feature code is acceptable even if borrowing does not respect
@@ -83,6 +63,88 @@ Applied to the program above, only the first two lines would be annotated
 to be ``in the region associated with @&x@'', but not the last line.
 Thanks to these annotations, when type checking the sequence we would check
 that the borrow does not escape the left-hand side (i.e., the second line).
+
+\subsection{Capabilities and Identity}
+
+One primary feature of \lang is that its tracking of linearity does
+not use any notion of ``identity'': the type system can't specify that two
+objects are the same, simply that they share the same usage pattern with
+regards to linearity.
+Languages such as Alms~\citep{DBLP:conf/popl/TovP11}, on the other hand,
+often relies on a notion of identity to express capabilities.
+For instance, the Alms function
+@Array.create@ of type @int -> 'a -> \E 'b. ('a, 'b) array@ uses
+@'b@ to uniquely identifies the array.
+Functions such as @Array.acquire : ('a, 'b) array -> 'b cap@
+are then used to manipulate capabilities pertaining to the array.
+
+While such uses are partially covered by borrows and regions,
+a notion of identity associated to regions
+would allow expressing regions directly in type signatures.
+For instance, the @get_eb@ function shown in
+\cref{tuto:vector} could be made safe
+by creating a restricted inner region on function application,
+with the signature:
+@&!('k, 'a Array.t) -> int -> \E ('k' < 'k) &!('k', 'a)@
+
+
+This notion of identity often relies on existential types.
+\lang does not support existentials so far as it would
+forgo principal type inference.
+However existentials
+are compatible with the HM(X) framework~\citep{DBLP:conf/icfp/Simonet03}
+and would make a very desirable addition to \lang. OCaml also show
+that existential types can be made usable without compromising
+inference in the rest of the language, by integrating unpacking
+and pattern matching.
+
+\subsection{Ad-hoc Polymorphism and Borrows}
+
+In our formalization, we use two operators, $\borrow{x}$ and $\reborrow{x}$ to
+distinguish between borrows and borrows of borrows.
+Such a distinction is inconvenient for programming.
+Using a typeclass-like mechanism, we can replace these operators
+by a single overloaded operator, $\borrow{x}$, which expects $x$ to be @Borrowable@ and
+would then desugar to the more precise operators.
+A similar solution is used in Rust through the @Borrow@ and @Defer@
+traits.
+This approach also enables method calls on objects without
+explicit borrows, such as @foo.len()@ where len expects a shared borrow.
+
+Ad-hoc polymorphism fits demonstrably in the \hmx framework of constrained
+types and preserves all properties of our language such
+as principal type inference. Its soundness is orthogonal to linear types
+and has been explored in the literature~\citep{DBLP:conf/fpca/OderskyWW95}.
+
+\subsection{Traditional functional features}
+
+\subsubsection{Algebraic Datatypes}
+
+Algebraic data types are a staple of functional programming and fit nicely
+in our paradigm. Indeed, it is sufficient to ensure  that the kinds of
+the constructor arguments are less than or equal to the kind of the datatype.
+Hence, it is forbidden to include affine elements in an unrestricted
+datatype, whereas the elements in a linear list may be linear or
+unrestricted. 
+Here is the definition of a datatype for linear lists.
+
+\begin{lstlisting}
+type ('a : 'k) llist : lin = Nil | Cons of ('a * 'a llist)
+\end{lstlisting}
+
+This extension is implemented in our prototype.
+
+\subsubsection{Branching constructs}
+
+Our formalization of \lang does not contain branching constructs. As a consequence,
+subexpressions are always executed sequentially. This is of great importance
+for the splitting relation introduced in \cref{sdtyping}, as it must
+coincide with the order of evaluation. To account for borrows and linear
+values in different branches, we need a new (symmetric) join relation.
+This relation immediately follows from the semantics of borrows and linearity
+shown so far, and allow to easily define branching constructs such as if-then-else
+and pattern matching.
+This extension is implemented in our prototype.
 
 \lstDeleteShortInline@
 
