@@ -12,18 +12,43 @@
 
 \begin{figure}[tp]
   \begin{center}
-    \begin{tabular}{l|c|c|c}
-      Language& URAL & (Re)borrowing & Impure
+    \newcommand\YC{\color{Green}}
+    \newcommand\NC{\color{Red}}
+    \newcommand\MC{\color{Orange}}
+    \newcommand\Y{{\YC{\ding{52}}}\xspace}
+    \newcommand\N{{\NC{\ding{56}}}\xspace}
+    \newcommand\M{\MC{\textasciitilde}} % "Meh"
+
+    % Little bit of magic to make angled headers
+    \newcolumntype{R}[2]{%
+      >{\adjustbox{angle=#1,lap=\width-(#2)}\bgroup}%
+      c%
+      <{\egroup}%
+    }
+    \newcommand*\rot{\multicolumn{1}{R{45}{1em}}}
+    
+    \begin{tabular}{l|cccccccc}
+      Language
+      & URAL & \rot{Borrows} & \rot{State}
+      & \rot{R. Subsumption}
+      & \rot{R. Polymorphism}
+      & \rot{Inference} & \rot{Formalisation}
+      & \rot{Basis}
       \\\hline
-      System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10} & UL & --- & N
+      System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
+      & UL & --- & \N & \N & \N & \N & \YC Coq & System F
       \\
-      Alms~\citep{DBLP:conf/popl/TovP11} & UA & --- & Y \\
-      Quill~\citep{DBLP:conf/icfp/Morris16} & UL & --- & N \\
-      Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18} & UL
-                     & --- & N \\
-      Rust~\citep{rust} & UAL & (Y)Y & Y
+      Alms~\citep{DBLP:conf/popl/TovP11}
+      & UA & --- & \Y & \M & \Y & \NC Local & \N & ML \\
+      Quill~\citep{DBLP:conf/icfp/Morris16}
+      & UL & --- & \N & \N & \Y & \YC Principal & \MC Manual & Qualified types\\
+      Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
+      & UL & --- & \M & \N & \Y & \MC Non-principal & \MC Manual & Haskell \\
+      Rust~\citep{rust}
+      & UA & \Y & \Y & \Y & \M & \NC Local & \YC Coq & ---
       \\\hline
-      \lang & UAL & (Y)Y & Y
+      \lang
+      & UAL & \Y & \Y & \Y & \Y & \YC Principal & \MC Manual & ML/HM(X)
       \\
     \end{tabular}
   \end{center}
