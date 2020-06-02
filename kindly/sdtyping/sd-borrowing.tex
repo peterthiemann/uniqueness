@@ -1,6 +1,6 @@
 \begin{mathpar}
   \inferrule[EBorrow]{
-    \bregion{C_r}{}{\svar{x}{\tau}^n}{b}
+    \bregion{C_r}{x}{\svar{x}{\tau}^n}{b}
   }{
     \bregion{C_r}{x}{\E;\svar{x}{\tau}^n}{\E; b}
   }
@@ -16,7 +16,7 @@
     \BORROW\in\left\{\kun,\kaff\right\}\\
     C = (\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)
   }{
-    \bregion{C}{}
+    \bregion{C}{x}
     {\svar[\BORROW]{x}{\schm}^n}
     {\bbvar[\BORROW]{x} k{\schm}}
   }

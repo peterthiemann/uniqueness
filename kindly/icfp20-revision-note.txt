@@ -135,7 +135,7 @@ Minor comments:
 - p15: I would like to see some more information about the properties of the
   theory X that HM(X) (and the paper's extension thereof) need to guarantee
   principal typing.
-### DONE: Added some of the properties in 4.3. We cannot state one of the property (cylindrid) because it requires talking about the ∃ operator on constraints, which we never mention.
+### DONE: Added some of the properties in 4.3. We cannot state one of the property (cylindrid) because it requires talking about the ∃ operator on constraints, which we never mention in the body. The presentation in the appendix is improved.
 - p15: In the beginning of Sec 4 it would be worth mentioning that it has been
   proved in the appendix that the extension of HM(X) still guarantees principal
   type inference.
@@ -338,32 +338,10 @@ shared borrows are unrestricted and may thus be duplicated)"
 ###(H) I'm not sure what is referenced here. Line 466 doesn't talk about borrows without regions.
 
 - 499: in the fourth premise of rule Region, is $\tau \leq L_{n-1}$ sugar for $\tau: \kappa$ and $\kappa \leq L_{n-1}$?
-###(H) Should we ignore this? It's clarified for $\sigma = \tau$ on line 515, before the discussion of the region rule on line 556, where it is again informally explained.
+###Done This is already explained twice in the rule descriptions
 
 - 505: in the conclusion of BorrowBinding, the squiggly arrow does not have anything in superscript
-###(H) I think the problem here is that we only show the squiggly rule for
-###(H) bindings (which has no superscript) but talk about the rule lifted over
-###(H) environments in the caption of the figure (Fig 9) and in the description of the
-###(H) region rule (where we have a superscript).
-###(H) Caption of Fig. 9: "... and borrowing rules (C ⊢ₑ Γ ⇝ˣₙ Γ')"
-###(H) Current BorrowBinding rule in Fig. 9:
-###(H) 
-###(H)   C ⊢ₑ (bₙ ≤ k) ∧ (k ≤ b_∞)   b ∈ {U, A}
-###(H)   —————————————————————————————————————–
-###(H)   C ⊢ₑ [x : σ]^n_b ⇝ₙ (x % σ)^k_b
-###(H)                     ^—— no superscript
-###(H) 
-###(H) We should probably either add a sentence about the lifting, or
-###(H) alternatively inline the lifting into the BorrowBinding rule.
-###(H) Do you think the following inlining would be a good idea and correct?:
-###(H) 
-###(H)   C ⊢ₑ (bₙ ≤ k) ∧ (k ≤ b_∞)   b ∈ {U, A}
-###(H)   —————————————————————————————————————–
-###(H)   C ⊢ₑ Γ, [x : σ]^n_b ⇝ˣₙ Γ, (x % σ)^k_b
-###(H) 
-###(H) In the appendix we only have `EBorrow*` rules for inference in Fig. 21,
-###(H) so I'm not completely sure that I'm not missing something here for the
-###(H) syntax directed version.
+###Done
 
 - 613: you write borrows (plural), how can there be multiple affine borrows? (if I understand affine to mean "strictly affine")
 ###(H) DONE: while I think the reviewer is correct, the whole sentence seems a bit
@@ -384,9 +362,12 @@ shared borrows are unrestricted and may thus be duplicated)"
 ###(H)   affine ones.
 
 - 645: what is $=_e$?
+### Done: defined at the start of 3.3
 
 - 692: how come suspended bindings have an address that's different from their borrow? is there a key reason?
 
 - 811: I was confused here: $\alpha_r$ seems to stand for the type of $(f\ x, x)$ per the constraint $(\beta\ast\alpha_x\leq\alpha_r)$ but at line 811 $\alpha_r$ seems to stand for the type of the whole abstraction
+### Done
 
 - 970: I am under the impression that this specific example could be reparenthesized as `(let a = &x in f a); g &!x` to work around the issue
+### Done: it can in this specific case, but not in general. Comment added

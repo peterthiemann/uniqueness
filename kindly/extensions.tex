@@ -35,11 +35,14 @@ With this feature code is acceptable even if borrowing does not respect
 lexical scoping as in this example:
 
 \begin{lstlisting}[numbers=none]
-let a = &x in (f a; g (&!x))
+let a = &x in (f a; g &!x)
 \end{lstlisting}
 
 This code pattern is dynamically safe because $a$ is not used after
 the function call @f a@.
+Here, this can be made explicit by transforming
+the code to @(let a = &x in f a); g &!x@. However, this is not possible
+in programs with branches who uses different dynamic patterns.
 Non-lexical lifetimes (NLL) handle such a pattern by removing expressions
 that do not mention $a$ from its region; in this example,  NLL removes
 the last expression.
