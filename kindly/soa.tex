@@ -27,34 +27,34 @@
     }
     \newcommand*\rot{\multicolumn{1}{R{45}{1em}}}
     
-    \begin{tabular}{l|cccccccc}
+    \begin{tabular}{l|ccccccccc}
       \textbf{Language}
       & URAL & \rot{Borrows} & \rot{State}
       & \rot{R. Subsumption}
       & \rot{R. Polymorphism}
+      & \rot{Identity}
       & \rot{Inference} & \rot{Formalisation}
       & \rot{Basis}
       \\\hline
       System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
-      & UL & --- & \N & \N & \N & \N & \YC Coq & System F
+      & UL & --- & \N & \N & \N & \N & \N & \YC Coq & System F
       \\
       Alms~\citep{DBLP:conf/popl/TovP11}
-      & UA & \N & \Y & \M & \Y & \NC Local & \N & ML \\
+      & UA & --- & \Y & \M & \Y & \Y & \MC Local & \N & ML \\
       Quill~\citep{DBLP:conf/icfp/Morris16}
-      & UL & --- & \N & \N & \Y & \YC Principal & \MC Manual & Qualified types\\
-      Linear Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
-      & UL & --- & \M & \N & \Y & \MC Non-principal & \MC Manual & Haskell \\
+      & UL & --- & \N & \N & \Y & \N & \YC Principal & \MC Manual & Qualified types\\
+      Lin. Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
+      & UL & --- & \M & \N & \Y & \N & \MC Non-principal & \MC Manual & Haskell \\
       Mezzo~\citep{DBLP:phd/hal/Protzenko14}
-      & $\star$ & --- & \Y & \M & \Y & \N & \MC Manual & --- \\
+      & UAL & --- & \Y & \M & \Y & \Y & \N & \MC Manual & --- \\
       \hline
       Rust~\citep{rust}
-      & UA & \Y & \Y & \Y & \M & \MC Local & \YC Coq & --- \\
-      Vault~\citep{DBLP:conf/pldi/DeLineF01}/
+      & UA & \Y & \Y & \Y & \M & \N & \MC Local & \YC Coq & --- \\
       Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}
-      & UA & --- & \Y & \Y & \Y & \N & \MC Manual & --- \\
+      & UA & --- & \Y & \Y & \Y & \Y & \N & \MC Manual & --- \\
       \hline
       \lang
-      & UAL & \Y & \Y & \Y & \Y & \YC Principal & \MC Manual & ML/HM(X)
+      & UAL & \Y & \Y & \Y & \Y & \N & \YC Principal & \MC Manual & ML/HM(X)
       \\
     \end{tabular}
   \end{center}
@@ -75,11 +75,16 @@ both. In many cases, it is easy to adapt a system to support both, as
 None of the following languages support borrows.
 
 The comparison matrix in \cref{fig:comparison-matrix} gives an
-overview over the systems discussed in this section. The column URAL
+overview over the systems discussed in this section. The column UAL
 specifies the substructural features. Borrows and state are
-self-explanatory. Subsumption indicates that kind U is promoted
-to A and further to L. Polymorphism refers to polymorphism over
-substructural kinds. Inference is self-explanatory, formalisation
+self-explanatory. ``Subsumption'' indicates that unrestricted elements
+can be promoted to affine and then linear. This applies to resources,
+borrows, or closures. ``Polymorphism'' refers to polymorphism over
+usage (unrestricted, affine, linear), notably for closures.
+``Identity'' indicates that the language supports a notion
+of identity, usually through existential types, as described in
+\cref{identity}.
+Inference is self-explanatory, formalisation
 refers to the formal semantics and type soundness proof. Basis is self-explanatory.
 
 System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
