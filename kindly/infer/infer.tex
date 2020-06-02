@@ -179,7 +179,7 @@ and $\bregion{C}{\inP{x}}{\Sv}{\inP{\Sv'}}$,
 which returns the necessary constraints.
 We then collect all constraints and normalize them.
 
-\subsection{Constraint Solving}
+\subsection{Constraints}
 \label{infer:solving}
 
 
@@ -208,55 +208,52 @@ We then collect all constraints and normalize them.
 %   \label{rules:entail}
 % \end{figure}
 
-
-
-For concision, we demonstrate the constraint solving
-algorithm with an example. The complete constraint system is
+To properly define our type system, we need to define $\CL$, a constraint
+system equipped with an entailment relation noted $\operatorname{\vdash_e}$
+and a normalizing function.
+For concision, we first demonstrate the constraint solving
+algorithm with an example. We then state the various properties
+that make it suitable for use in the \hmx framework.
+The complete constraint system is
 defined in \cref{appendix:constraints}.
-%
+
+\subsubsection{Constraints normalization by example}
+
 \input{infer/exampleconstr}
 
-Our algorithm respect the properties
-of \hmx, computes principal normal forms
-and simplifies constraints significantly.
+
+\subsubsection{Properties of the constraint system}
+
+To apply \hmx to $\CL$, normalize must compute principal normal forms
+and $\CL$ must be regular.
+
+\begin{property}[Principal normal form]
+  Normalization computes principal normal forms for $\CL$, i.e.
+  given a constraint $D\in\CL$, a substitution $\phi$ and
+  $(C,\unif) = \normalize{D}{\phi}$,
+  then $\phi\leq\unif$,
+  $C \equivC \unif D$ and
+  $\unif C = C$.
+\end{property}
+
+\begin{property}[Regular constraint system]
+  $\CL$ is regular, ie, for $x, x'$ two types or kinds,
+  $\entail{}{\Ceq{x}{x'}}$ implies
+  $\fv{x} = \fv{x'}$
+\end{property}
+
+These properties
+are sufficient to state that $HM(\CL)$ provides principal type inference.
+The next section states that this properties carries over to our extension
+of \hmx
+with kind inference, affine types and borrows.
+%
+This algorithm also simplifies constraints significantly.
 All the simplification mechanisms presented
 here, including the variance-based one, are complete.
 It is also possible to add ``best-effort'' simplification
 rules which help reduce the size of inferred signatures even further
 \citep{DBLP:conf/aplas/Simonet03}.
-
-%
-% We now show that this algorithm is well-behaved with respect to entailment
-% and computes unique normal forms.
-
-% \begin{property}[Principal normal form]
-%   Normalization computes principal normal forms for $\CL$, i.e.
-%   given a constraint $D\in\CL$, a substitution $\phi$ and
-%   $(C,\unif) = \normalize{D}{\phi}$,
-%   then $\phi\leq\unif$,
-%   $C \equivC \unif D$ and
-%   $\unif C = C$.
-% \end{property}
-
-% \begin{property}[Principal constraints]
-%   $\CL$ has the principal constraint property, i.e.
-%   for every $D\in\CL$, and a substitution $\unif$,
-%   either $D$ does not have a normal form, or it has
-%   a principal normal form.
-% \end{property}
-
-% \begin{property}[Regular constraint system]
-%   $\CL$ is regular, ie, for $x, x'$ two types or kinds,
-%   $\entail{}{\Ceq{x}{x'}}$ implies
-%   $\fv{x} = \fv{x'}$
-% \end{property}
-
-% The proofs are given in \cref{appendix:constraints}. These three properties
-% are sufficient to state that $HM(\CL)$ provides principal type inference.
-% However, we use an extension of \hmx with kind inference
-% and affine types and borrows.
-% We now show that \hmx's completeness and soundness theorems are still valid on
-% this extended system.
 
 \subsection{Soundness and Principality}
 
