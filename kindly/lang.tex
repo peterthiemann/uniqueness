@@ -172,6 +172,9 @@ region around the exclusive borrow and its function application,
 and a second region around both shared borrows. This placement of region
 is optimal: making any region bigger would cause a borrowing
 error.
+In particular, it is essential to place the second borrow around \emph{both}
+occurrence of $(\borrow[\kun]{x}$: we want the function to receive both
+borrows, but its result must not contain any borrow (otherwise it would escape).
 Region indices are assigned after placement, so it is trivial to
 ensure well-nested regions where the inner regions have
 higher indices than the outer ones.
