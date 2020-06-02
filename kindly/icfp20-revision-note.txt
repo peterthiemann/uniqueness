@@ -39,10 +39,12 @@ to read. However, I have some concerns:
   How do these absolute levels work in the presence of function definitions? I
   suppose you need a more "relative" notion of levels for that, since the levels
   in one function are unrelated to the levels in another function.
+### DONE: Mentionned in the extensions
 - It is very hard to get a grasp what kind of programming idioms can be type
   checked using Affe. Since Affe has been implemented, it expect a (small)
   empirical study to make sure that a large-enough class of programming idioms
   indeed work.
+### Mentionned in the limitations/extensions, wrt control-flow sensitivity
 - The example in Section 2.2 could be improved significantly.
   + It is not clear what is the key point of the example.
 ### DONE: added first paragraph
@@ -110,7 +112,7 @@ Minor comments:
 - p9: In order to reduce the conceptual overhead of the reader, it would be
   good to align the two examples in Sec 3.2. The first example could be
   annotated with regions as follows `f {| &^U x |} {[ &^U x |}`.
-### Gabriel?
+### DONE: The proposed simplification is incorrect, explanations are added in 3.2
 - p10: Why have the `b` twice in the construct `&^b x : &^b (k,τ)` (Fig 7)?
   This is confusing, since it seems they are always the same.
 ### DONE
