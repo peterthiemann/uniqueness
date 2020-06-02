@@ -64,6 +64,10 @@ Other questions to the author:
 - What is the reason the borrow is fixed to `U` in the splitting rules `SuspB`
   and `SuspS` (page 10). It appears that this makes it impossible to reborrow
   an affine resource.
+### DONE: correct, splitting is more general for SuspB, for SuspS it's
+  more subtle: case b=U is obviously covered; case b=A must not split
+  off another suspended binding because that could violate affinity
+  for the exclusive borrow
 - Kinds are used to distinguish affine and unrestricted types, whereas Rust
   uses traits like `Copy` for that. For concurrency, Rust has the traits `Send`
   and `Sync` that indicate if types can be shared between threads. Is Affe's
