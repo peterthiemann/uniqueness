@@ -116,6 +116,21 @@ types and preserves all properties of our language such
 as principal type inference. Its soundness is orthogonal to linear types
 and has been explored in the literature~\citep{DBLP:conf/fpca/OderskyWW95}.
 
+\subsection{A richer region system}
+
+\lang requires that each region is identified by an index drawn from a partial
+order that is compatible with the nesting of regions.
+This order can be implemented in many ways, including region variables
+as often used in algebraic effects systems, existentials, etc.
+
+For simplicity, the formalization uses the concrete implementation with 
+natural numbers for indices. The proofs only rely on
+the existence of a partial order and could be adapted to one of the
+more abstract approaches.
+In particular, \lang could reuse regions variables provided by
+the ongoing work on effect systems
+for OCaml~\cite{DBLP:conf/sfp/DolanEHMSW17}.
+
 \subsection{Traditional functional features}
 
 \subsubsection{Algebraic Datatypes}
