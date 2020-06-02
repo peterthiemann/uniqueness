@@ -116,16 +116,22 @@ when $\entail{C}{D}$ and $\entail{D}{C}$.
 % \citep{DBLP:journals/tapos/OderskySW99} for
 % details).
 %
-Following \hmx, we define a cylindric constraint system as
-a system which respects the following properties for any variable $x$:
+
+We directly reuse the following definitions from \hmx.
+
+\begin{property}[Cylindric constraint system]
+  A cylindric constraint system is a constraint system
+  such that, for any constraint $C$:
 \begin{align*}
   \entail{C&}{\Cproj{x}{C}}
   &\entail{C}{D} &\implies \entail{\Cproj{x}C}{\Cproj{x}D}\\
   \Cproj{x}{(C\wedge \Cproj{x}D)}&\equivC \Cproj{x}{C} \wedge \Cproj{x}D
   & \Cproj{x}{\Cproj{y}D}&\equivC \Cproj{y}{\Cproj{x}D}
 \end{align*}
+\end{property}
 
-Furthermore, we define a term rewriting system as a system where, for every
+\begin{property}[Term rewriting system]
+A term rewriting system is a system where, for every
 types $\tau$,$\tau'$, there exists an equality predicates $\Ceq{\tau}{\tau'}$
 which is symmetric, reflexive, transitive, stable under substitution and such that,
 for any predicate $P$:
@@ -134,8 +140,12 @@ for any predicate $P$:
   &\subst{x}{\tau}{P} \equivC \Cproj{x}P \wedge \Ceq{x}{\tau}
                         \text{ where } x\notin\fv{\tau}
 \end{align*}
+\end{property}
+
+\begin{definition}[Constraint system with lattice]
 $\CL$ is defined as the smallest cylindric term constraint system that
 satisfies the axiom shown in \cref{rules:entail}.
+\end{definition}
 
 % \begin{figure*}[!bt]
 %   \centering

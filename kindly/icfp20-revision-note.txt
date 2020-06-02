@@ -131,12 +131,7 @@ Minor comments:
 - p15: I would like to see some more information about the properties of the
   theory X that HM(X) (and the paper's extension thereof) need to guarantee
   principal typing.
-### Gabriel? This is in appendix C, but it's not written in a crisp
-  way that is easy to extract. From the HM(X) paper I recall that the
-  constraint system has to be cylindric, but subsequent results do not
-  refer to this property. I suggest that you add a subsection to
-  section 4 that defines the constraint language and states the
-  properties needed to do the completeness proof.
+### DONE: Added some of the properties in 4.3. We cannot state one of the property (cylindrid) because it requires talking about the ∃ operator on constraints, which we never mention.
 - p15: In the beginning of Sec 4 it would be worth mentioning that it has been
   proved in the appendix that the extension of HM(X) still guarantees principal
   type inference.
