@@ -149,11 +149,12 @@ datatype, whereas the elements in a linear list may be linear or
 unrestricted. 
 Here is the definition of a datatype for linear lists.
 
-\begin{lstlisting}
+\begin{lstlisting}[numbers=none]
 type ('a : 'k) llist : lin = Nil | Cons of ('a * 'a llist)
 \end{lstlisting}
 
-This extension is implemented in our prototype.
+Our prototype implements non-recursive algebraic datatypes with
+pattern matching.
 
 \subsubsection{Branching constructs}
 
