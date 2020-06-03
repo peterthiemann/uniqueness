@@ -146,13 +146,7 @@ in our paradigm. Indeed, it is sufficient to ensure  that the kinds of
 the constructor arguments are less than or equal to the kind of the datatype.
 Hence, it is forbidden to include affine elements in an unrestricted
 datatype, whereas the elements in a linear list may be linear or
-unrestricted. 
-Here is the definition of a datatype for linear lists.
-
-\begin{lstlisting}[numbers=none]
-type ('a : 'k) llist : lin = Nil | Cons of ('a * 'a llist)
-\end{lstlisting}
-
+unrestricted.
 Our prototype implements non-recursive algebraic datatypes with
 pattern matching.
 
