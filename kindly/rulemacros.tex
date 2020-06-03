@@ -224,7 +224,7 @@
   \inferrule[Abs]
   {
     \inferS{C}
-    {\E;\bvar{x}{\tau_2}}{e}{\tau_1} \\
+    {\E;\bvar{x}{\tau_2}}{e}{\tau_1} \\\\
     \addlin{\entail{C}{\Cleq{\E}{k}}}
   }
   { \inferS{C}{\E}
@@ -287,13 +287,13 @@
 }
 \newcommand\ruleSDCreate{
   \inferrule[Create]
-  { \inferSK{C}{\E}{\tau}{k} \\
+  { \inferSK{C}{\E}{\tau}{k} \\\\
     \entail C {\Cleq k {\kun_0} \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} }
   { \inferS{C}{\E}{\create}{\tau \tarr{} \tapp\tres\tau } }
 }
 \newcommand\ruleSDObserve{
   \inferrule[Observe]
-  { \inferSK{C}{\E}{\tau}{k} \\
+  { \inferSK{C}{\E}{\tau}{k} \\\\
     \entail C {\Cleq k {\kun_0}  \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} \\
   }
   { \inferS{C}{\E}{\observe}{\borrowty[\IBORROW]{k'}{\tapp\tres\tau} \tarr{} \tau} }
@@ -307,7 +307,7 @@
 }
 \newcommand\ruleSDDestroy{
   \inferrule[Destroy]
-  { \inferSK{C}{\E}{\tau}{k} \\
+  { \inferSK{C}{\E}{\tau}{k} \\\\
     \entail C {\Cleq k {\kun_0}  \Cand \addlin{\Cleq{\E}{\kaff_\infty}}} \\
   }
   { \inferS{C}{\E}{\destroy}{\tapp\tres\tau \tarr{} \tunit} }
@@ -531,19 +531,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Inference
 
-
 \newcommand\ruleIVar{%
   \inferrule[Var$_I$]
-  { \bvar{x}{\sigma}\in \E \\
-    \sigma = \forall \kvar_i \forall (\tvar_j:k_j). \qual{C_x}{\tau} \\\\
-    \Multi[i]{\kvar'},\Multi[j]{\tvar'} \text{ fresh} \\
-    % \addlin{
-    % \inferK{(C_\tau,\unif_\tau)}{\E;\bvar{\tvar_j}{k_j}}{\tau}{k_\tau}
-    % }\\
-    % D = C_x\Cand C_\tau \\
-    \unif' = [\kvar_i\mapsto \kvar'_i,\tvar_j \mapsto \tvar'_j]\\\\
-    (C,\unif) =
-    \normalize{C_x}{\unif'}
+  { \bvar{x}{\forall \Multi[i]{\kvar} \forall (\Multi[j]{\tvar_j:k}).\
+    \qual{C}{\tau}}\in \E \\
+    \Multi[i]{\kvar'},\Multi[j]{\tvar'} \text{ fresh} \\\\
+    (C,\unif) = \normalize{C_x}{[\Multi[i]{\kvar_i\mapsto \kvar'},\Multi[j]{\tvar_j \mapsto \tvar'}]}
   }
   { \inferW
     {\addlin{\bvar{x}{\sigma}}}
@@ -631,22 +624,22 @@
 }
 \newcommand\ruleIBorrow{%
   \inferrule[Borrow$_I$]
-  { \kvar \text{ fresh}\\
-    \inferW{\Sv}{(C,\unif)}{\E}{x}{\tau} \\
-    % k = \operatorname{kind}(\iota)\\
+  { \inferW{\_}{(C,\unif)}{\E}{x}{\tau} \\
+    \kvar \text{ fresh}
   }
   { \inferW
-    {\addlin{\bvar{\borrow{x}}{\borrowty{\kvar}{\tau}}}}
+    {\addlin{\bbvar x \kvar {\tau}}}
     {(C,\unif)}{\E}{\borrow{x}}{\borrowty{\kvar}{\tau}} }
 }
 \newcommand\ruleIReBorrow{%
   \inferrule[ReBorrow$_I$]
-  { \inferW{\Sv}{(C',\unif')}{\E}{x}{\tau'} \\\\
+  { \inferW{\Sv}{(C',\unif')}{\E}{x}{\tau'} \\
+    \kvar \text{ fresh} \\\\
     % k = \operatorname{kind}(\iota)\\
     (C,\unif) = \normalize{C' \Cand \Cleq{\tau'}{\borrowty{\kvar}{\tau}}}{\unif'}\\
   }
   { \inferW
-    {\addlin{\bvar{\borrow{x}}{\borrowty{\kvar}{\tau}}}}
+    {\addlin{\bbvar x \kvar \tau}}
     {(C,\unif)}{\E}{\borrow{x}}{\borrowty{\kvar}{\tau}} }
 }
 \newcommand\ruleIRegion{%

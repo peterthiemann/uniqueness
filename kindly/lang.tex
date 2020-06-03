@@ -324,7 +324,7 @@ kind variables or relate two kind variables.
       \ruleSDReBorrow
       \and
       \inferrule[BorrowBinding]{
-        \entail{C}{(\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)}\\
+        \entail{C}{(\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)}\\\\
         \BORROW\in\left\{\kun,\kaff\right\}
       }{
         \lregion{C}{x}
@@ -394,7 +394,11 @@ the \TirName{Var} and \TirName{Abs} rules shown in
 
 Rule {\sc Var} looks up the type scheme of the variable $x$ in
 the environment $\E$
-and instantiates it using the substitution $\unif$. The rule also
+and instantiates it with $\Instance(\E,\schm)$.
+Instantiation follows the \hmx formulation and
+takes as input a scheme $\schm$ and an environment $\E$
+and returns a constraint $C$ and a type $\tau$.
+The rule also
 checks that the other bindings in $\E$ can be safely discarded by
 imposing the constraint $\Cleq{\E\Sdel{x}}{\kaff_\infty}$.
 It enforces that all remaining bindings (except $x$) are affine or

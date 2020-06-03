@@ -1,12 +1,12 @@
 \begin{mathpar}
   \ruleIVar
-  
-  \ruleIAbs
-  
-  \ruleIBorrow
  
   \ruleIReBorrow
   
+  \ruleIAbs
+
+  \ruleIBorrow
+
   \ruleIRegion
   
   \ruleIApp
@@ -18,11 +18,9 @@
   \ruleILet
 
   { \Weaken_{\bvar{x}{\sigma}}(\Sv) =
-    \begin{dcases}
-      \Ctrue& \text{if } x\in\Sv\\
-      \Cleq{\sigma}{\kaff_\infty}&\\
-    \end{dcases}
-  }
+    \text{if } (x\in\Sv) \text{ then} \Ctrue \text{else }
+    \Cleq{\sigma}{\kaff_\infty}
+  } 
 \end{mathpar}
 
 % \begin{align*}
