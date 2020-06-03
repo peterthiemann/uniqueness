@@ -441,8 +441,8 @@ into a borrow inside a region. Splitting of suspended bindings is
 asymmetric. It must follow the order of execution from left to right,
 which means that a resource can be used first as a borrow on the left
 and then later as a full resource on the right. The {\sc Susp} rule
-works with a full resource, the {\sc SuspB}
-with a borrow and {\sc SuspS} with a suspended binding.
+works with a full resource, rule {\sc SuspB}
+with a borrow, and rule {\sc SuspS} with a suspended binding.
 
 Splitting applies whenever an
 expression has multiple subexpressions:  function applications,
