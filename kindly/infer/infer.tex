@@ -244,25 +244,24 @@ and $\CL$ must be regular.
 
 These properties
 are sufficient to state that $HM(\CL)$ provides principal type inference.
-The next section states that this properties carries over to our extension
+The next section shows that these properties carry over to the
+inference algorithm for our extension
 of \hmx
-with kind inference, affine types and borrows.
+with kind inference, affine types, and borrows.
 %
-This algorithm also simplifies constraints significantly.
-All the simplification mechanisms presented
-here, including the variance-based one, are complete.
-It is also possible to add ``best-effort'' simplification
-rules which help reduce the size of inferred signatures even further
+This algorithm includes sound and complete constraint simplification.
+In addition, we may add ``best-effort'' simplification
+rules which help reduce the size of inferred signatures 
 \citep{DBLP:conf/aplas/Simonet03}.
 
 \subsection{Soundness and Principality}
 
-The extended inference algorithm still satisfies the soundness
-and completeness properties of \hmx.
+The extended inference algorithm is sound
+and complete with respect to our extension of \hmx.
 % This is achieved by extending
 % the original proofs from \hmx, which is done in \cref{appendix:infer}.
 %
-The first theorem states that our inference algorithm is sound
+The first theorem states that inference is sound
 with respect to the syntax-directed type system.
 
 \begin{theorem}[Soundness of inference]
@@ -273,11 +272,11 @@ with respect to the syntax-directed type system.
 \end{theorem}
 
 The syntax-directed derivation holds with the usage environment $\Sv$ instead of the originally provided environment $\E$. Indeed,
-$\E$ does not contain suspended and borrow bindings, since those
-are discovered on the fly and recorded in $\Sv$. The type binding, however,
-are directly taken from the syntax-directed derivation.
+$\E$ does not contain suspended and borrow bindings. Those
+are discovered on the fly and recorded in $\Sv$. Type bindings
+are taken directly from the syntax-directed derivation.
 
-The second theorem states that our algorithm is complete: for any given
+The second theorem states that inference is complete: for any given
 syntax-directed typing derivation, our inference algorithm can find
 a derivation that gives a type at least as general.
 % For this, we need first to provide a few additional definitions.
