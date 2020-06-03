@@ -243,6 +243,7 @@ non-exclusive borrow type in the argument?
 A minor issue was the claim (in the abstract) that expressions don't
 require linearity annotations. Do you mean that linearity annotations
 are only required for function calls (which are expressions)?
+### Comment: I'm not sure what this references. There are indeed no annotations for linear objects and type annotations are not mandatory. Borrows are not linearity annotations (and are essential to specify programmer intent).
 
 That said, the work does contain everything I expected: an
 implementation, type rules, an operational model, and the type
@@ -282,9 +283,10 @@ The paper was well-written and pleasant to read. The formalization was convincin
 The perhaps central issue is that non-lexical borrows, a key feature of Rust, are not supported and are left to future work. This is, however, correctly acknowledged and the paper already contains enough of a framework to foster future research on how to add those to Affe. The other limitation is the lack of a mechanized proof: I spotted what seems like minor typos and/or notational puns in the various figures, but the design and ideas are novel and interesting enough that I don't consider this to be a deal breaker.
 
 Another point that may be an issue is that by "baking in" lexical regions & borrows so deeply into the system, local relaxations might be hard to express. For instance, the `get` at line 201 seems overly restrictive in that it effectively restricts arrays to be arrays of unrestricted types, if you want to be able to access the elements (other than via a map or a fold). This makes the example somewhat less convincing -- in other systems, one might use existential quantification tricks or magic wands to express temporarily borrowing an *element* of an array before returning the element to the array. What would be the equivalent here? A new rule for extending the syntax of borrows with paths through structures and arrays? It would be good to discuss this and provide ideas / future directions.
-### DONE
+### DONE This is described in the limitation/extension section.
 
 Finally, a criticism that is often levied against Rust-like borrowing systems is that they do not lend themselves well to "escape hatches" and require the use of unsafe blocks. The canonical example is a doubly-linked list that must be somewhat assumed. Do you envision a similar discipline for your system where one might write, say, a doubly-linked list in regular GC'd ML, then assume an interface for it that exposes it as a resource? What would be the runtime semantics and would "forced freeing" be supported by the GC?
+### COMMENT: this is slightly out-of-scope. The abstration aspect is mentionned in the comparison with Alms, the GC aspect is mentionned in the reference to Munch-Maccagnoni's work.
 
 ### Detailed remarks
 
