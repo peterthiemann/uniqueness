@@ -3,7 +3,7 @@
 
 \lstMakeShortInline[keepspaces,basicstyle=\small\ttfamily]@
 
-\lang{} is amenable to a functional resource-passing style
+\lang{} supports the resource-passing style
 common in functional encodings of session types (e.g.,
 \cite{DBLP:journals/jfp/Padovani17}; see also
 \cref{sec:session-linearity} in the supplement) as well as other
@@ -14,9 +14,12 @@ using a mix of functional and imperative programming styles.
 To support this usage pattern of linearity, \lang{} relies on
 the notion of borrowing \cite{DBLP:conf/popl/BoylandR05}. Our first
 example of linear arrays demonstrates simple borrowing and
-imperative programming; the second example is a Sudoko solver using a
-hybrid copy-on-write data structure; the third example demonstrates advanced uses
-of regions with iterators on linear values.
+imperative programming; the second example demonstrates reborrowing
+and the interaction between closures and borrowing by implementing a
+Sudoko solver based on a hybrid copy-on-write data structure; the
+third example demonstrates advanced uses 
+of regions with iterators on linear values and the low-level
+primitives needed to implement them.
 Further examples are available in \cref{sec:extra-example}.
 
 \subsection{Imperative programming with linear arrays}
