@@ -1,3 +1,9 @@
+Thanks to the reviewers for their careful reading and their thought
+provoking comments. This document is an annotated version of the
+reviews that explains the changes we implemented for the revision.
+
+
+
 ICFP 2020 Paper #74 Reviews and Comments
 ===========================================================================
 Paper #74 Kindly Bent to Free Us
