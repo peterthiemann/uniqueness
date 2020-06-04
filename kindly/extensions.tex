@@ -139,7 +139,7 @@ for OCaml~\cite{DBLP:conf/sfp/DolanEHMSW17}.
 
 \subsection{Standard Features}
 
-\subsubsection{Algebraic Datatypes}
+\subsubsection*{Algebraic Datatypes}
 
 Algebraic data types are a staple of functional programming and fit nicely
 in our paradigm. Indeed, it is sufficient to ensure  that the kinds of
@@ -150,7 +150,7 @@ unrestricted.
 Our prototype implements non-recursive algebraic datatypes with
 pattern matching.
 
-\subsubsection{Branching constructs}
+\subsubsection*{Branching constructs}
 
 Our formalization of \lang does not contain branching constructs. As a consequence,
 subexpressions are always executed sequentially. Ordering is import
@@ -161,6 +161,34 @@ Its definition follows immediately from the semantics of borrows and linearity
 shown so far and it must be used in the typing rules for branching
 constructs such as if-then-else and pattern matching.
 This extension is implemented in our prototype.
+
+\subsection{Concurrency}
+\label{sec:concurrency}
+
+While our present semantic model does not consider concurrency, some
+design decisions were taken with a possible extension to concurrency
+in mind. The main impact of this foresight is the distinction between
+exclusive borrows and shared borrows, which materializes in the
+metatheory. The intended contract of the shared 
+borrow is that it can be duplicated and that the program consistently
+observes the same state of the underlying resource inside its region
+even in the presence of concurrency.
+
+The exclusive borrow, on the other hand, is propagated according to
+the evaluation order with the intention that any suspended binding
+split of from an exclusive borrow has finished its action on the
+resource before the borrow gets exercised. In the presence of
+concurrency, this intended semantics of the exclusive borrow should
+guarantee freedom of data races.
+
+That is, if a thread closes over a borrow, that thread should have
+terminated before the parent thread leaves the borrow's region. Rust
+addresses this lifetime issue with the \lstinline/move/ qualification
+for a thread which transfers ownership of the free variables to the
+thread. However, moving (in Rust) only applies to the resource itself, but not
+to borrows. A more discerning kind system would be needed for \lang to
+enable safe sharing of synchronizable resources or borrows analogously
+to Rust's \texttt{Sync} trait.
 
 \lstDeleteShortInline@
 
