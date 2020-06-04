@@ -73,6 +73,9 @@ Other questions to the author:
   and `Sync` that indicate if types can be shared between threads. Is Affe's
   kind mechanism also powerful enough to keep track of things like `Send` and
   `Sync`?
+### DONE: addressed in related work/comparison with Rust. TLDR: with
+  the above three traits Rust can express 7 different shades of
+  unrestrictedness. Of course, one could refine the kind U accordingly.
 
 Minor comments:
 
@@ -239,6 +242,7 @@ it didn't become clear to me at all why you need to distinguish
 between borrows and exclusive borrows. What could go wrong, for
 example, if the set function of the array module would use a
 non-exclusive borrow type in the argument?
+### DONE: see discussion of concurrency in subsection 6.6
 
 A minor issue was the claim (in the abstract) that expressions don't
 require linearity annotations. Do you mean that linearity annotations
