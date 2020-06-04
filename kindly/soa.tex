@@ -76,16 +76,18 @@ None of the following languages support borrows.
 
 The comparison matrix in \cref{fig:comparison-matrix} gives an
 overview over the systems discussed in this section. The column UAL
-specifies the substructural features. Borrows and state are
-self-explanatory. ``Subsumption'' indicates that unrestricted elements
-can be promoted to affine and then linear. This applies to resources,
+specifies the substructural features supported (unrestricted, affine,
+linear). Borrows and state indicate support for the respective
+feature. ``Subsumption'' indicates that unrestricted elements 
+can be promoted to affine and then linear. This promotion applies to
+all objects, resources,
 borrows, or closures. ``Polymorphism'' refers to polymorphism over
-usage (unrestricted, affine, linear), notably for closures.
+substructural features, notably for closures.
 ``Identity'' indicates that the language supports a notion
 of identity, usually through existential types, as described in
 \cref{identity}.
-Inference is self-explanatory, formalisation
-refers to the formal semantics and type soundness proof. Basis is self-explanatory.
+Inference is self-explanatory, formalization
+refers to the existence of a formal semantics and type soundness proof. Basis is self-explanatory.
 
 System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
 extends System F with kinds to distinguish
@@ -117,7 +119,7 @@ Quill does not support borrows.
 Alms~\citep{DBLP:conf/popl/TovP11} is an ML-like language with rich, kind-based
 affine types and ML modules, similar to \lang.
 Alms examples often rely on existential types to track the identity
-of objects. For instance
+of objects. For instance, consider the signature
 \lstinline/Array.create : int -> 'a -> \E 'b. ('a, 'b) array/ where
 \lstinline/'b/ uniquely identifies the array.
 Due to the reliance on existentials, Alms does not support complete type inference.
@@ -219,7 +221,10 @@ to enable safe low-level programming.
 \lang is inspired by Rust's borrowing system and transfers some of its
 ideas  to a functional setting with type inference, garbage collection, and
 an ML-like module system.
-Rust's lifetime system is more explicit and more expressive than \lang.
+Instead of kinds, Rust uses marker traits like \lstinline/Copy/,
+\lstinline/Send/, and \lstinline/Sync/ to distinguish characteristics 
+of types, which would just be unrestricted in \lang.
+Also, Rust's lifetime system is more explicit and more expressive than \lang.
 While Rust provides partial lifetime inference, it
 does not support full type inference. 
 Recently, \citet{DBLP:journals/corr/abs-1903-00982}
