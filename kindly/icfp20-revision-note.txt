@@ -2,7 +2,47 @@ Thanks to the reviewers for their careful reading and their thought
 provoking comments. This document is an annotated version of the
 reviews that explains the changes we implemented for the revision.
 
+TLDR:
+> The program committee has decided to accept this paper. For the revision, we require the authors to implement the changes listed in the response, namely: 
+> 
+> - Expand and improve the examples 
 
+All in section 2:
+* 192-213 explain the significance of each subsection
+* API in 2.1 revised to make it more general, revised the discussion
+* In 2.2: added signatures (302). Improved readability of the code
+(e.g., by renaming variables 304-313). Revised explanation of the code
+(330-340). Added explanation of borrow/reborrow (341/344). Emphasized
+the impact of capturing borrows in a closure (348-354).
+* In 2.3: more discussion of consuming vs borrowing, leading up to
+discussing (borrowing) bfold (368-374). Revised the example use of
+bfold (381-384). Added a whole chunk of discussion of the low-level
+implementation of bfold and mutable iteration (397-430), which unveils
+the (typing of the) primitives neede to implement those.
+
+> - Provide a more detailed comparison with similar type systems
+
+All in section 7:
+* created comparison matrix (fig 14, 1128-1140) plus explanation
+(1179-1186).
+* added detailed discussion of the RustBelt project (1261-1271).
+* brief discussion of Vault and Plaid (1272-1278)
+
+> - Discuss limitations of the system (concurrency, extending APIs to
+    be polymorphic)
+
+The linear array API in 2.1 was made more polymorphic.
+
+Mostly in section 6:
+* Revised discussion of flow sensitivity and NLL (1062-1080)
+* new subsection on capabilities (1083-1097)
+* revised discussion of algebraic datatypes and conditionals
+(1122-1151)
+* added discussion of the impact of concurrency (1154-1168). The
+caveat is that this is completely informal as we have no technical
+results regarding concurrency.
+
+See below for the details. Items are marked with `###`.
 
 ICFP 2020 Paper #74 Reviews and Comments
 ===========================================================================
