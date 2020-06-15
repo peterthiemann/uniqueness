@@ -29,9 +29,9 @@
     
     \begin{tabular}{l|ccccccccc}
       \textbf{Language}
-      & URAL & \rot{Borrows} & \rot{State}
-      & \rot{R. Subsumption}
-      & \rot{R. Polymorphism}
+      & UAL & \rot{Borrows} & \rot{State}
+      & \rot{Resource Subsumption}
+      & \rot{Resource Polymorphism}
       & \rot{Identity}
       & \rot{Inference} & \rot{Formalisation}
       & \rot{Basis}
@@ -46,12 +46,12 @@
       Lin. Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
       & UL & --- & \M & \N & \Y & \N & \MC Non-principal & \MC Manual & Haskell \\
       Mezzo~\citep{DBLP:phd/hal/Protzenko14}
-      & UAL & --- & \Y & \M & \Y & \Y & \N & \MC Manual & --- \\
+      & UA & --- & \Y & \M & \Y & \Y & \MC Local & \YC Coq & --- \\
       \hline
-      Rust~\citep{rust}
+      Rust~\citep{rust,DBLP:journals/pacmpl/0002JKD18}
       & UA & \Y & \Y & \Y & \M & \N & \MC Local & \YC Coq & --- \\
       Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}
-      & UA & --- & \Y & \Y & \Y & \Y & \N & \MC Manual & --- \\
+      & UA & --- & \Y & \Y & \Y & \Y & \N & \MC Manual & Java \\
       \hline
       \lang
       & UAL & \Y & \Y & \Y & \Y & \N & \YC Principal & \MC Manual & ML/HM(X)
@@ -78,10 +78,10 @@ The comparison matrix in \cref{fig:comparison-matrix} gives an
 overview over the systems discussed in this section. The column UAL
 specifies the substructural features supported (unrestricted, affine,
 linear). Borrows and state indicate support for the respective
-feature. ``Subsumption'' indicates that unrestricted elements 
+feature. ``Resource Subsumption'' indicates that unrestricted elements 
 can be promoted to affine and then linear. This promotion applies to
 all objects, resources,
-borrows, or closures. ``Polymorphism'' refers to polymorphism over
+borrows, or closures. ``Resource Polymorphism'' refers to polymorphism over
 substructural features, notably for closures.
 ``Identity'' indicates that the language supports a notion
 of identity, usually through existential types, as described in
