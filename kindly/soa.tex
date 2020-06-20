@@ -27,34 +27,35 @@
     }
     \newcommand*\rot{\multicolumn{1}{R{45}{1em}}}
     
-    \begin{tabular}{l|ccccccccc}
+    \begin{tabular}{l|c@{~}ccccccccc}
       \textbf{Language}
       & UAL & \rot{Borrows} & \rot{State}
       & \rot{Resource Subsumption}
       & \rot{Resource Polymorphism}
       & \rot{Identity}
+      & \rot{Concurrency}
       & \rot{Inference} & \rot{Formalisation}
       & \rot{Basis}
       \\\hline
       System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
-      & UL & \N & \N & \N & \N & \N & \N & \YC Coq & System F
+      & UL & \N & \N & \N & \N & \N & \N & \N & \YC Coq & System F
       \\
       Alms~\citep{DBLP:conf/popl/TovP11}
-      & UA & \N & \Y & \M & \Y & \Y & \MC Local & \N & ML \\
+      & UA & \N & \Y & \M & \Y & \Y & \Y & \MC Local & \N & ML \\
       Quill~\citep{DBLP:conf/icfp/Morris16}
-      & UL & \N & \N & \N & \Y & \N & \YC Principal & \MC Manual & Qualified types\\
+      & UL & \N & \N & \N & \Y & \N & \N & \YC Principal & \MC Manual & Qualified types\\
       Lin. Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
-      & UL & \N & \M & \N & \Y & \N & \MC Non-principal & \MC Manual & Haskell \\
-      Mezzo~\citep{DBLP:phd/hal/Protzenko14}
-      & UA & \M & \Y & \M & \Y & \Y & \MC Local & \YC Coq & --- \\
+      & UL & \N & \M & \N & \Y & \N & \M & \MC Non-pr. & \MC Manual & Haskell \\
+      Mezzo~\citep{DBLP:phd/hal/Protzenko14,DBLP:journals/toplas/BalabonskiPP16}
+      & UA & \M & \Y & \M & \Y & \Y & \Y & \MC Local & \YC Coq & ML \\
       \hline
       Rust~\citep{rust,DBLP:journals/pacmpl/0002JKD18}
-      & UA & \Y & \Y & \Y & \M & \N & \MC Local & \YC Coq & --- \\
-      Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}
-      & UA & \N & \Y & \Y & \Y & \Y & \N & \MC Manual & Java \\
+      & UA & \Y & \Y & \Y & \M & \N & \Y & \MC Local & \YC Coq & --- \\
+      Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09,DBLP:journals/toplas/GarciaTWA14}
+      & UA & \N & \Y & \Y & \Y & \Y & \N   & \N & \MC Manual & Java \\
       \hline
       \lang
-      & UAL & \Y & \Y & \Y & \Y & \N & \YC Principal & \MC Manual & ML/HM(X)
+      & UAL & \Y & \Y & \Y & \Y & \N & \N & \YC Principal & \MC Manual & ML/HM(X)
       \\
     \end{tabular}
   \end{center}
@@ -76,9 +77,11 @@ None of the following languages support borrows.
 
 The comparison matrix in \cref{fig:comparison-matrix} gives an
 overview over the systems discussed in this section.
-Each column indicates if a feature is present (\Y), absent (\N) or
-partially supported (\M) such as when the feature is limited or can
+Each column indicates whether a feature is present (\Y), absent (\N), or
+partially supported (\M), i.e., if the feature is limited or can
 only be obtained through a non-trivial encoding.
+Features are selected according to their contribution to expressivity
+and programmer convenience.
 The column UAL
 specifies the substructural features supported (unrestricted, affine,
 linear). Borrows and state indicate support for the respective
@@ -90,8 +93,13 @@ substructural features, notably for closures.
 ``Identity'' indicates that the language supports a notion
 of identity, usually through existential types, as described in
 \cref{identity}.
-Inference is self-explanatory, formalization
-refers to the existence of a formal semantics and type soundness proof. Basis is self-explanatory.
+``Concurrency'' indicates whether the language supports
+concurrency. For example, the implementation of Linear Haskell
+supports state and concurrency, but its theory covers neither.
+Type ``inference''  can be local, principal, or non-principal (if the
+inferred type is not necessary the most general). ``Formalization''
+refers to the existence of a formal semantics and type soundness
+proof. ``Basis'' indicates the heritage or inspiration of the language.
 
 System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
 extends System F with kinds to distinguish
@@ -193,7 +201,7 @@ Most relevant to \lang:
 %   that no non-linear function can manipulate it. On the other
 \end{itemize}
 
-Mezzo~\citep{DBLP:phd/hal/Protzenko14} is an ML-like language
+Mezzo~\citep{DBLP:phd/hal/Protzenko14,DBLP:journals/toplas/BalabonskiPP16} is an ML-like language
 with a rich capability system which is able to encode numerous
 properties akin to separation logic~\citep{DBLP:conf/lics/Reynolds02}.
 Mezzo explores the  boundaries of the design space of type systems for
@@ -264,7 +272,7 @@ this task for \lang. At present, the metatheory of \lang does not
 cover concurrency.
 
 Vault~\citep{DBLP:conf/pldi/DeLineF01}
-and Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}
+and Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09,DBLP:journals/toplas/GarciaTWA14}
 leverage typestate and capabilities
 to express rich properties in objects and protocols.
 These systems are designed for either low-level or object-oriented
