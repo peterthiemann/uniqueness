@@ -10,14 +10,14 @@
 % uniqueness with adoption. In POPL, pages 283–295. ACM, 2005.
 % \cite{DBLP:conf/popl/BoylandR05}
 
+\newcommand\YC{\color{Green}}
+\newcommand\NC{\color{Red}}
+\newcommand\MC{\color{Orange}}
+\newcommand\Y{{\YC{\ding{52}}}\xspace}
+\newcommand\N{{\NC{\ding{56}}}\xspace}
+\newcommand\M{{\MC{\textasciitilde}}\xspace} % "Meh"
 \begin{figure}[tp]
   \begin{center}
-    \newcommand\YC{\color{Green}}
-    \newcommand\NC{\color{Red}}
-    \newcommand\MC{\color{Orange}}
-    \newcommand\Y{{\YC{\ding{52}}}\xspace}
-    \newcommand\N{{\NC{\ding{56}}}\xspace}
-    \newcommand\M{\MC{\textasciitilde}} % "Meh"
 
     % Little bit of magic to make angled headers
     \newcolumntype{R}[2]{%
@@ -29,29 +29,29 @@
     
     \begin{tabular}{l|ccccccccc}
       \textbf{Language}
-      & URAL & \rot{Borrows} & \rot{State}
-      & \rot{R. Subsumption}
-      & \rot{R. Polymorphism}
+      & UAL & \rot{Borrows} & \rot{State}
+      & \rot{Resource Subsumption}
+      & \rot{Resource Polymorphism}
       & \rot{Identity}
       & \rot{Inference} & \rot{Formalisation}
       & \rot{Basis}
       \\\hline
       System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
-      & UL & --- & \N & \N & \N & \N & \N & \YC Coq & System F
+      & UL & \N & \N & \N & \N & \N & \N & \YC Coq & System F
       \\
       Alms~\citep{DBLP:conf/popl/TovP11}
-      & UA & --- & \Y & \M & \Y & \Y & \MC Local & \N & ML \\
+      & UA & \N & \Y & \M & \Y & \Y & \MC Local & \N & ML \\
       Quill~\citep{DBLP:conf/icfp/Morris16}
-      & UL & --- & \N & \N & \Y & \N & \YC Principal & \MC Manual & Qualified types\\
+      & UL & \N & \N & \N & \Y & \N & \YC Principal & \MC Manual & Qualified types\\
       Lin. Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
-      & UL & --- & \M & \N & \Y & \N & \MC Non-principal & \MC Manual & Haskell \\
+      & UL & \N & \M & \N & \Y & \N & \MC Non-principal & \MC Manual & Haskell \\
       Mezzo~\citep{DBLP:phd/hal/Protzenko14}
-      & UAL & --- & \Y & \M & \Y & \Y & \N & \MC Manual & --- \\
+      & UA & \M & \Y & \M & \Y & \Y & \MC Local & \YC Coq & --- \\
       \hline
-      Rust~\citep{rust}
+      Rust~\citep{rust,DBLP:journals/pacmpl/0002JKD18}
       & UA & \Y & \Y & \Y & \M & \N & \MC Local & \YC Coq & --- \\
       Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09}
-      & UA & --- & \Y & \Y & \Y & \Y & \N & \MC Manual & --- \\
+      & UA & \N & \Y & \Y & \Y & \Y & \N & \MC Manual & Java \\
       \hline
       \lang
       & UAL & \Y & \Y & \Y & \Y & \N & \YC Principal & \MC Manual & ML/HM(X)
@@ -75,13 +75,17 @@ both. In many cases, it is easy to adapt a system to support both, as
 None of the following languages support borrows.
 
 The comparison matrix in \cref{fig:comparison-matrix} gives an
-overview over the systems discussed in this section. The column UAL
+overview over the systems discussed in this section.
+Each column indicates if a feature is present (\Y), absent (\N) or
+partially supported (\M) such as when the feature is limited or can
+only be obtained through a non-trivial encoding.
+The column UAL
 specifies the substructural features supported (unrestricted, affine,
 linear). Borrows and state indicate support for the respective
-feature. ``Subsumption'' indicates that unrestricted elements 
+feature. ``Resource Subsumption'' indicates that unrestricted elements 
 can be promoted to affine and then linear. This promotion applies to
 all objects, resources,
-borrows, or closures. ``Polymorphism'' refers to polymorphism over
+borrows, or closures. ``Resource Polymorphism'' refers to polymorphism over
 substructural features, notably for closures.
 ``Identity'' indicates that the language supports a notion
 of identity, usually through existential types, as described in
@@ -226,7 +230,7 @@ Instead of kinds, Rust uses marker traits like \lstinline/Copy/,
 of types, which would just be unrestricted in \lang.
 Also, Rust's lifetime system is more explicit and more expressive than \lang.
 While Rust provides partial lifetime inference, it
-does not support full type inference. 
+does not support full type inference.
 Recently, \citet{DBLP:journals/corr/abs-1903-00982}
 formalized Rust's ownership discipline, including non-lexical lifetimes.
 Moreover, Rust programmers have full control over memory allocation
