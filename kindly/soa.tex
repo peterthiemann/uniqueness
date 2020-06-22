@@ -27,35 +27,36 @@
     }
     \newcommand*\rot{\multicolumn{1}{R{45}{1em}}}
     
-    \begin{tabular}{l|c@{~}ccccccccc}
+    \begin{tabular}{l|c@{~}cccccccccc}
       \textbf{Language}
       & UAL & \rot{Borrows} & \rot{State}
       & \rot{Resource Subsumption}
       & \rot{Resource Polymorphism}
       & \rot{Identity}
       & \rot{Concurrency}
+      & \rot{Escape hatch}
       & \rot{Inference} & \rot{Formalisation}
       & \rot{Basis}
       \\\hline
       System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
-      & UL & \N & \N & \N & \N & \N & \N & \N & \YC Coq & System F
+      & UL & \N & \N & \N & \N & \N & \N & \N & \N & \YC Coq & System F
       \\
       Alms~\citep{DBLP:conf/popl/TovP11}
-      & UA & \N & \Y & \M & \Y & \Y & \Y & \MC Local & \N & ML \\
+      & UA & \N & \Y & \M & \Y & \Y & \Y & \Y & \MC Local & \N & ML \\
       Quill~\citep{DBLP:conf/icfp/Morris16}
-      & UL & \N & \N & \N & \Y & \N & \N & \YC Principal & \MC Manual & Qualified types\\
+      & UL & \N & \N & \N & \Y & \N & \N & \N & \YC Principal & \MC Manual & Qual. types\\
       Lin. Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
-      & UL & \N & \M & \N & \Y & \N & \M & \MC Non-pr. & \MC Manual & Haskell \\
+      & UL & \N & \M & \N & \Y & \N & \M & \M & \MC Non-pr. & \MC Manual & Haskell \\
       Mezzo~\citep{DBLP:phd/hal/Protzenko14,DBLP:journals/toplas/BalabonskiPP16}
-      & UA & \M & \Y & \M & \Y & \Y & \Y & \MC Local & \YC Coq & ML \\
+      & UA & \M & \Y & \M & \Y & \Y & \Y & \Y & \MC Local & \YC Coq & ML \\
       \hline
       Rust~\citep{rust,DBLP:journals/pacmpl/0002JKD18}
-      & UA & \Y & \Y & \Y & \M & \N & \Y & \MC Local & \YC Coq & --- \\
+      & UA & \Y & \Y & \Y & \M & \N & \Y & \Y & \MC Local & \YC Coq & --- \\
       Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09,DBLP:journals/toplas/GarciaTWA14}
-      & UA & \N & \Y & \Y & \Y & \Y & \N   & \N & \MC Manual & Java \\
+      & UA & \N & \Y & \Y & \Y & \Y & \N & \Y & \N & \MC Manual & Java \\
       \hline
       \lang
-      & UAL & \Y & \Y & \Y & \Y & \N & \N & \YC Principal & \MC Manual & ML/HM(X)
+      & UAL & \Y & \Y & \Y & \Y & \N & \N & \M & \YC Principal & \MC Manual & ML/HM(X)
       \\
     \end{tabular}
   \end{center}
@@ -96,6 +97,10 @@ of identity, usually through existential types, as described in
 ``Concurrency'' indicates whether the language supports
 concurrency. For example, the implementation of Linear Haskell
 supports state and concurrency, but its theory covers neither.
+``Escape hatch'' indicates whether users can (locally) opt out of
+the resource management through language-integrated means such
+as Rust's \texttt{unsafe}. Partial support, in the case of \lang
+for instance, indicates this feature is available, but not formalized.
 Type ``inference''  can be local, principal, or non-principal (if the
 inferred type is not necessary the most general). ``Formalization''
 refers to the existence of a formal semantics and type soundness
