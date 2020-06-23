@@ -29,9 +29,11 @@
     
     \begin{tabular}{l|c@{~}cccccccccc}
       \textbf{Language}
-      & UAL & \rot{Borrows} & \rot{State}
-      & \rot{Resource Subsumption}
-      & \rot{Resource Polymorphism}
+      & UAL
+      & \rot{State}
+      & \rot{Borrows}
+      & \rot{Multiplicity Subsumption}
+      & \rot{Multiplicity Polymorphism}
       & \rot{Identity}
       & \rot{Concurrency}
       & \rot{Escape hatch}
@@ -42,18 +44,18 @@
       & UL & \N & \N & \N & \N & \N & \N & \N & \N & \YC Coq & System F
       \\
       Alms~\citep{DBLP:conf/popl/TovP11}
-      & UA & \N & \Y & \M & \Y & \Y & \Y & \Y & \MC Local & \N & ML \\
+      & UA & \Y & \N & \M & \Y & \Y & \Y & \Y & \MC Local & \N & ML \\
       Quill~\citep{DBLP:conf/icfp/Morris16}
       & UL & \N & \N & \N & \Y & \N & \N & \N & \YC Principal & \MC Manual & Qual. types\\
       Lin. Haskell~\citep{DBLP:journals/pacmpl/BernardyBNJS18}
-      & UL & \N & \M & \N & \Y & \N & \M & \M & \MC Non-pr. & \MC Manual & Haskell \\
+      & UL & \M & \N & \N & \Y & \N & \M & \M & \MC Non-pr. & \MC Manual & Haskell \\
       Mezzo~\citep{DBLP:phd/hal/Protzenko14,DBLP:journals/toplas/BalabonskiPP16}
-      & UA & \M & \Y & \M & \Y & \Y & \Y & \Y & \MC Local & \YC Coq & ML \\
+      & UA & \Y & \M & \M & \Y & \Y & \Y & \Y & \MC Local & \YC Coq & ML \\
       \hline
       Rust~\citep{rust,DBLP:journals/pacmpl/0002JKD18}
       & UA & \Y & \Y & \Y & \M & \N & \Y & \Y & \MC Local & \YC Coq & --- \\
       Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09,DBLP:journals/toplas/GarciaTWA14}
-      & UA & \N & \Y & \Y & \Y & \Y & \N & \Y & \N & \MC Manual & Java \\
+      & UA & \Y & \N & \Y & \Y & \Y & \N & \Y & \N & \MC Manual & Java \\
       \hline
       \lang
       & UAL & \Y & \Y & \Y & \Y & \N & \N & \M & \YC Principal & \MC Manual & ML/HM(X)
@@ -63,6 +65,57 @@
   \caption{Comparison matrix}
   \label{fig:comparison-matrix}
 \end{figure}
+
+The comparison matrix in \cref{fig:comparison-matrix} gives an
+overview over the systems discussed in this section.
+Each column indicates whether a feature is present (\Y), absent (\N), or
+partially supported (\M), i.e., if the feature is limited or can
+only be obtained through a non-trivial encoding.
+Features are selected according to their relevance for type-based resource
+management and programmer convenience.
+
+The column UAL
+specifies the substructural features supported (Unrestricted, Affine,
+Linear). The columns ``State'' and ``Borrows'' indicate support for the respective
+feature. In an ideal world, the presence of linearity and state
+indicates that the system is able to support safe manual memory
+management as linearity enforces manual deallocation. True affinity
+and state only works with garbage collection, which eventually
+automatically finalizes an object that is no longer referenced. In practice, this
+distinction is often watered down. For example, Rust automatically
+destructs objects at the end of their lifetime, which creates the
+illusion of affinity while the low-level code is strictly linear. On
+the other hand, there are ways to consume an object at the source
+level without invoking its destructor (using
+\lstinline/mem::forget/)\footnote{See
+  \url{https://doc.rust-lang.org/nomicon/leaking.html} which contains
+  further examples and discussion. Thanks to
+  Derek Dreyer and Ralf Jung for pointing this out.}
+where the high-level code exhibits linearity, but the low-level code
+is affine.
+
+``Multiplicity Subsumption'' indicates that unrestricted elements 
+can be promoted to affine and then linear. This promotion applies to
+objects, resources, borrows, and closures. ``Multiplicity Polymorphism'' refers to polymorphism over
+substructural features: a function can be parameterized over the multiplicity
+restriction of an object. For instance, the type of function
+composition should express that applies to functions with linear,
+affine, and unrestricted multiplicity and returns a function with the
+same multiplicity. 
+``Identity'' indicates that the language supports a notion
+of identity, usually through existential types, as described in
+\cref{identity}.
+``Concurrency'' indicates whether the language supports
+concurrency. For example, the implementation of Linear Haskell
+supports state and concurrency, but its theory covers neither.
+``Escape hatch'' indicates whether a programmer can (locally) opt out of
+resource management through language-integrated means such
+as Rust's \texttt{unsafe}. Partial support ``\M'', in the case of \lang
+for instance, indicates that this feature is available, but not formalized.
+Type ``inference''  can be local, principal, or non-principal (if the
+inferred type is not necessarily the most general one). ``Formalization''
+refers to the existence of a formal semantics and type soundness
+proof. ``Basis'' indicates the heritage or inspiration of the language.
 
 \subsection{Substructural type-systems in functional languages}
 
@@ -76,35 +129,6 @@ both. In many cases, it is easy to adapt a system to support both, as
 \lang does.
 None of the following languages support borrows.
 
-The comparison matrix in \cref{fig:comparison-matrix} gives an
-overview over the systems discussed in this section.
-Each column indicates whether a feature is present (\Y), absent (\N), or
-partially supported (\M), i.e., if the feature is limited or can
-only be obtained through a non-trivial encoding.
-Features are selected according to their relevance for resource
-management and programmer convenience.
-The column UAL
-specifies the substructural features supported (unrestricted, affine,
-linear). Borrows and state indicate support for the respective
-feature. ``Resource Subsumption'' indicates that unrestricted elements 
-can be promoted to affine and then linear. This promotion applies to
-all objects, resources,
-borrows, or closures. ``Resource Polymorphism'' refers to polymorphism over
-substructural features, notably for closures.
-``Identity'' indicates that the language supports a notion
-of identity, usually through existential types, as described in
-\cref{identity}.
-``Concurrency'' indicates whether the language supports
-concurrency. For example, the implementation of Linear Haskell
-supports state and concurrency, but its theory covers neither.
-``Escape hatch'' indicates whether users can (locally) opt out of
-the resource management through language-integrated means such
-as Rust's \texttt{unsafe}. Partial support, in the case of \lang
-for instance, indicates this feature is available, but not formalized.
-Type ``inference''  can be local, principal, or non-principal (if the
-inferred type is not necessary the most general). ``Formalization''
-refers to the existence of a formal semantics and type soundness
-proof. ``Basis'' indicates the heritage or inspiration of the language.
 
 System F\degree~\citep{DBLP:conf/tldi/MazurakZZ10}
 extends System F with kinds to distinguish
@@ -238,14 +262,15 @@ to enable safe low-level programming.
 \lang is inspired by Rust's borrowing system and transfers some of its
 ideas  to a functional setting with type inference, garbage collection, and
 an ML-like module system.
-Instead of kinds, Rust uses marker traits like \lstinline/Copy/,
-\lstinline/Send/, and \lstinline/Sync/ to distinguish characteristics 
-of types, which would just be unrestricted in \lang.
-Also, Rust's lifetime system is more explicit and more expressive than \lang.
+Everything is affine in Rust and marker traits like \lstinline/Copy/,
+\lstinline/Send/, and \lstinline/Sync/ are used to modulate the characteristics 
+of types. \lang relies on kinds to express substructural properties of
+types and marker traits may be considered as implementing a
+fine-grained kind structure on Rust types.
+Rust's lifetime system is more explicit and more expressive than
+\lang's regions.
 While Rust provides partial lifetime inference, it
 does not support full type inference.
-Recently, \citet{DBLP:journals/corr/abs-1903-00982}
-formalized Rust's ownership discipline, including non-lexical lifetimes.
 Moreover, Rust programmers have full control over memory allocation
 and memory layout of objects; they can pass arguments by value or by reference.
 These features are crucial for the efficiency goals of Rust.
@@ -268,13 +293,23 @@ code to the function's type signature as a proof obligation to
 the programmer. The RustBelt project
 \cite{DBLP:journals/pacmpl/0002JKD18} provides a formal 
 foundation for creating such proofs by exhibiting a framework for
-semantic soundness of the Rust type system that incorporates aspects
-of concurrecy (i.e., data-race freedom). Similar proof obligations
+semantic soundness of the Rust type system in terms of a low-level
+core language that incorporates aspects
+of concurrency (i.e., data-race freedom). Similar proof obligations
 would be needed in \lang to check that an implementation of the module
 types or the type of fold shown in \cref{motivation} matches the
 semantics of the typings. We aim to develop a suitable framework for
 this task for \lang. At present, the metatheory of \lang does not
 cover concurrency.
+
+\citet{DBLP:journals/corr/abs-1903-00982}
+formalize Rust's ownership discipline from a source-level
+perspective. Their approach is purely syntactic and is therefore not
+able to reason about unsafe fragments of Rust code. However, their
+flow-sensitive type discipline enables soundness proofs for
+non-lexical lifetimes, which have been adopted in Rust, but cannot be
+expressed in \lang at present.
+
 
 Vault~\citep{DBLP:conf/pldi/DeLineF01}
 and Plaid~\citep{DBLP:conf/oopsla/AldrichSSS09,DBLP:journals/toplas/GarciaTWA14}

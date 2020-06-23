@@ -1,0 +1,41 @@
+We have reviewed the revised version of the article and found that most of the raised points have been addressed. However, we disagree with the characterization of related work in Figure 14. We ask you to take into account the following comments when preparing the camera-ready version of the article. 
+
+* Header 
+* Add a discussion that describe how this particular list of features is picked. The features seem picked in a way that checks most of Affe's features. There are plenty of Rust features (concurrency, non-lexical lifetimes, traits, ...) that are not there. 
+### DONE: the scope is typing features related to resource management
+### DONE: added concurrency & type system escape hatch (Rust's unsafe)
+### NLL didn't feel meaningful because it's only supported by Rust
+### traits is a pretty generic feature (hence omitted); in the discussion on Rust, we mention that Rust employs marker traits to simulate a fine-grained kind system
+
+### The discussion in the header section has been expanded
+
+* Should "URAL" be "UAL"? (unrestricted, affine, linear) What does the "R" stand for? What does the "R." prefix in Subsumption and Polymorphism mean? 
+### DONE: URAL -> UAL, R. -> Multiplicity
+### R in URAL stands for *relevance* (must use at least once), the forth point in the substructural diamond.
+### R. used to stand for Resource, but this was misleading.
+
+
+* For Mezzo 
+* UA, not UAL
+* There is a Coq formalization (TOPLAS'16 and FLOPS'14)
+* Mezzo has local type inference (let-bindings do not need to be annotated, only function arguments and return types)
+* Reference [29] contains an encoding of borrowing 
+### DONE: matrix updated accordingly
+
+* For Rust, Coq is not mentioned in the paper that you cite [19]. Did you mean to cite rustbelt? 
+### DONE: now we cite both
+
+* The inspiration for Plaid is Java. So maybe you could mention that in the basis column. 
+### DONE
+
+* It's not explained what the long dash and the orange dash mean 
+### DONE
+
+* It's not clear what it means that Linear Haskell has no state. Section 2.2 of [6] discusses mutable arrays in Linear Haskell. 
+### DONE: the theory behind LH is just lambda calculus, but the implementation supports it, of course. Hence "orange dash"
+
+* "'Polymorphism' refers to polymorphism over substructural features" is a pretty vague description.
+### DONE: renamed to Multiplicity, more explanation added.
+
+Furthermore, in 7.2 you write "Recently, Weiss et al. [40] formalized Rust’s ownership discipline, including non-lexical lifetimes." This sentence seems misplaced in the middle of that paragraph. RustBelt also covers both of these features, so this is confusing. This part could benefit from some restructuring where there is a separate paragraph for Rust itself, and another for formal versions of Rust. 
+### DONE: there are now separate paragraphs on Rust, RustBelt, and Oxide [40]
