@@ -152,14 +152,13 @@ pattern matching.
 
 \subsubsection*{Branching constructs}
 
-Our formalization of \lang does not contain branching constructs. As a consequence,
-subexpressions are always executed sequentially. Ordering is import
-for the splitting relation introduced in \cref{sdtyping}, as it must
-coincide with the order of evaluation. To account for borrows and linear
-values in different branches, we need a different, straightforward (symmetric) join relation.
-Its definition follows immediately from the semantics of borrows and linearity
-shown so far and it must be used in the typing rules for branching
-constructs such as if-then-else and pattern matching.
+Our formalization of \lang does not cover conditionals. In the
+typing rules, a conditional is supported as usual by checking all
+branches with the same constraint and typing environment and requiring
+the return types to match.
+It materializes in the inference algorithm as a straightforward
+(symmetric) join relation which is used for all elimination rules on
+sum types.
 This extension is implemented in our prototype.
 
 \subsection{Concurrency}
