@@ -325,8 +325,7 @@ let rec eval
     let* (gamma', kappas', cstr', k', x', e') = getstpoly w in
     let pi' =
       if cstr'./{ks-->kappas'} <=> [(k' <<= KUNR None)]./{ks-->kappas'}
-      then pi
-      else pi <-> !$ ell
+      then pi else pi <-> !$ ell
     in
     let w = STCLOS (gamma', k'./{ks-->kappas'}, x', e'./{ks-->kappas'}) in
     let (ell', delta') = salloc delta w in

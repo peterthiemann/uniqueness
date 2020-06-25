@@ -81,11 +81,11 @@ feature. In an ideal world, the presence of linearity and state
 indicates that the system is able to support safe manual memory
 management as linearity enforces manual deallocation. True affinity
 and state only works with garbage collection, which eventually
-automatically finalizes an object that is no longer referenced. In practice, this
+automatically finalizes an object no longer referenced. In practice, this
 distinction is often watered down. For example, Rust automatically
-destructs objects at the end of their lifetime, which creates the
-illusion of affinity while the low-level code is strictly linear. On
-the other hand, there are ways to consume an object at the source
+destructs objects at the end of their lifetime, creating the
+illusion of affinity while the low-level code is strictly linear.
+However, there are ways to consume an object at the source
 level without invoking its destructor (using
 \lstinline/mem::forget/)\footnote{See
   \url{https://doc.rust-lang.org/nomicon/leaking.html} which contains

@@ -551,20 +551,19 @@
     {\E;\bvar{x}{\tvar}
       % ;\bvar{\tvar}{\kvar_\tvar}
     }{e}{\tau} \\\\
-    \addlin{ \Sv = \Sv_x \Sdel{x} }\\
     D = C'\Cand
-    \addlin{\Cleq{\Sv}{\kvar} \Cand \Weaken_{\bvar{x}{\tvar}}(\Sv_x)} \\\\
+    \addlin{\Cleq{\Sv_x \Sdel{x}}{\kvar} \Cand \Weaken_{\bvar{x}{\tvar}}(\Sv_x)} \\\\
     (C,\unif) = \normalize{D}{\unif'}
   }
-  { \inferW{\addlin{\Sv}}{(C,\unif\Sdel{\tvar,\kvar})}{\E}
+  { \inferW{\addlin{\Sv_x \Sdel{x}}}{(C,\unif\Sdel{\tvar,\kvar})}{\E}
     {\lam{x}{e}}{\unif(\tvar)\tarr{\unif(\kvar)}\tau} }
 }
 \newcommand\ruleIApp{%
   \inferrule[App$_I$]
   { \tvar,\kvar\text{ fresh}\\
-    \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\
-    \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\\\
+    \inferW{\Sv_1}{(C_1,\unif_1)}{\E}{e_1}{\tau_1} \\\\
     \addlin{\bsplit{C_s}{\Sv}{\Sv_1}{\Sv_2}}\\
+    \inferW{\Sv_2}{(C_2,\unif_2)}{\E}{e_2}{\tau_2} \\\\
     D =
     C_1 \Cand C_2 \Cand \Cleq{\tau_1}{\tau_2\tarr{\kvar}\tvar}
     \Cand \addlin{C_s} \\\\
@@ -645,8 +644,8 @@
 \newcommand\ruleIRegion{%
   \inferrule[Region$_I$]
   { \inferW{\addlin{\Sv'}}{(C',\unif')}{\E}{e}{\tau} \\
+    \addlin{ \bregion{C_r}{x}{\Sv}{\Sv'} }\\\\
     \inferK{(C_\tau,\unif_\tau)}{\E}{\tau}{k_\tau}\\\\
-    \addlin{ \bregion{C_r}{x}{\Sv}{\Sv'} }\\
     D = C' \Cand C_\tau \Cand \Cleq{k_\tau}{\klin_{n-1}} \Cand C_r\\\\
     (C,\unif) = \normalize{D}{\unif' \mostgeneral \unif_\tau}\\
   }  { \inferW{\addlin{\Sv}}{(C,\unif)}{\E}{\region{\Sone x \BORROW}{e}}{\tau} }
