@@ -49,7 +49,7 @@ resource-passing style is not an option at all. To this end,
 \emph{borrowing} a resource. The idea is that a linear resource can be
 borrowed to a function call. The function can work with a borrow of
 the resource, but it cannot release the resource. Only the original
-owner of the resource has all rights to it and can release it.
+owner of the resource has the rights to release it.
 
 The concepts of ownership and borrowing have grown popular over time
 and they form the foundation of the type system of the Rust language
@@ -175,8 +175,7 @@ would be an error to use the affine closure twice as in
 \begin{lstlisting}[numbers=none]
 let w = File.write &!h in w "Hello "; w "world!" (*type error*)
 \end{lstlisting}
-The remaining arrows in
-the API are unrestricted and we write @->@ instead of the
+The remaining arrows are unrestricted and we write @->@ instead of the
 explicitly annotated @-{un}>@.
 
 Every borrow is restricted to a \emph{region}, i.e., a lexically
@@ -218,9 +217,9 @@ might provide functions like
 
 In general, kinds can be polymorphic and constrained. Function
 application and composition are the archetypical
-examples for functions exploiting that feature.\footnote{Compared to
-  Quill \cite{DBLP:conf/icfp/Morris16} the signatures of application and
-  composition are simpler because \lang{} supports kind subsumption.}
+examples for functions exploiting that feature.\footnote{\lang{}'s signature
+  for application and composition are simpler than
+  Quill \cite{DBLP:conf/icfp/Morris16} thanks to kind subsumption.}
 For application, \lang{} infers the following type.
 \begin{lstlisting}[numbers=none]
 let app f x = f x
@@ -267,7 +266,7 @@ $\kappa\le\kappa_1$ and omits the prenex quantification over $\kappa,
 \item A polymorphic type system that encodes linearity and affinity with
   borrowing in lexical regions. Polymorphism covers types and kinds that
   express multiplicity constraints on the number of uses of a
-  value. This type system is a conservative extension of systems for
+  value. This type system is a conservative extension of
   existing ML-like languages.
 \item Expressive type soundness theorem with respect to a big-step linearity-aware semantics.
 \item An extension of the \hmx framework

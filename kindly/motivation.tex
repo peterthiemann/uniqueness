@@ -27,7 +27,8 @@ Further examples are available in \cref{sec:extra-example}.
 
 \begin{figure}[tp]
   \centering
-\begin{lstlisting}[numbers=none]
+  \begin{minipage}{0.5\linewidth}
+\begin{lstlisting}
 module Array : sig
   type ('a : 'k) t : lin
   val create : ('a : un) => int * 'a -> 'a t
@@ -46,6 +47,24 @@ end
   \label{ex:array}
   \label{sig:array}
   \vspace{-10pt}
+\end{minipage}~
+\begin{minipage}{0.5\linewidth}
+\begin{lstlisting}
+let mk_fib_array n =
+  let a = create (n, 1) in
+  for i = 2 to n - 1 do
+    let x = get (&a, i-1) + get (&a, i-2) in(*@\label{ex:array:get}*)
+    set (&!a, i, x)(*@\label{ex:array:set}*)
+  done;
+  a(*@\label{ex:array:return}*)
+# mk_fib_array : int -> int Array.t
+\end{lstlisting}
+  \vspace{-5pt}
+  \caption{An array of Fibonacci numbers}
+  \label{ex:fibo}
+  \vspace{-10pt}
+\end{minipage}
+
 \end{figure}
 
 The API for mutable linear arrays (\cref{sig:array})
@@ -102,18 +121,9 @@ borrows are affine (@aff@).
 
 Using the API 
 we can create an
-array of Fibonacci numbers in an imperative coding style:
-\begin{lstlisting}
-let mk_fib_array n =
-  let a = create (n, 1) in
-  for i = 2 to n - 1 do
-    let x = get (&a, i-1) + get (&a, i-2) in(*@\label{ex:array:get}*)
-    set (&!a, i, x)(*@\label{ex:array:set}*)
-  done;
-  a(*@\label{ex:array:return}*)
-# mk_fib_array : int -> int Array.t
-\end{lstlisting}
-
+array of Fibonacci numbers in an imperative coding style, as shown
+in \cref{ex:fibo}.
+%
 After
 creation of the array, the presence of a borrow in the for loop
 prevents access to the ``raw'' resource inside the loop's

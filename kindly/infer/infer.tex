@@ -81,7 +81,7 @@ For now, we simply
 assume the existence of such a function for our constraint system
 and defer details to \cref{infer:solving}.
 
-\subsection{Type Inference}
+\subsection{Type inference}
 
 We write $\inferW{\Sv}{(C,\unif)}{\inP{\E}}{\inP{e}}{\tau}$ when
 $\inP{e}$\ has type $\tau$ in $\inP{\E}$ under the constraints $C$ and unifier $\unif$
@@ -95,7 +95,7 @@ of our inference algorithm and the differences with the syntax-directed
 system in \cref{rule:infer:envs}.
 The complete type inference rules are shown in \cref{appendix:infer}.
 
-\paragraph{Environments and Bindings}
+\paragraph{Environments and bindings}
 \label{infer:envs}
 %
 \begin{figure*}[tb]
@@ -164,7 +164,7 @@ constraints and unifiers.
 
 
 
-\paragraph{Splitting and Regions}
+\paragraph{Splitting and regions}
 \label{infer:split}
 \label{infer:regions}
 
@@ -254,7 +254,7 @@ In addition, we may add ``best-effort'' simplification
 rules which help reduce the size of inferred signatures 
 \citep{DBLP:conf/aplas/Simonet03}.
 
-\subsection{Soundness and Principality}
+\subsection{Soundness and principality}
 
 The extended inference algorithm is sound
 and complete with respect to our extension of \hmx.
@@ -297,7 +297,7 @@ a derivation that gives a type at least as general.
   and $\entail{C\Cand D'}{\Cleq{\subst{\tvar}{\tau''}\tau}{\tau'}}$
 \end{definition}
 
-\begin{definition}[Flattened Environment]
+\begin{definition}[Flattened environment]
 A flattened environment,
 written as $\Eflat\E$, is the environment
 where all the binders are replaced by normal ones. More formally:

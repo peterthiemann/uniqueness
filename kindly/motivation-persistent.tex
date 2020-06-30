@@ -54,7 +54,7 @@ takes the position of the element. Recall that @Array.map@ always
 creates a new array for the result.
 % A more elaborate implementation could use persistent arrays
 % \cite{DBLP:conf/ml/ConchonF07}.
-
+%
 In the example code, we make use of a two-dimensional version
 @Matrix@ of the @CowArray@ data\-structure. The only difference is
 that the API functions @get@, @set@, and @set_mut@ now take two index
@@ -64,7 +64,7 @@ parameters of type @int@ instead of one. The internal working is exactly the sam
 \begin{figure}[tp]
   \centering
   \begin{subfigure}[t]{0.45\linewidth}
-\begin{lstlisting}[numbers=none]
+\begin{lstlisting}
 module type HYBARRAY = sig
   include ARRAY
   val set : &('a t) * int * 'a -> 'a t
@@ -73,7 +73,7 @@ end
 \end{lstlisting}
   \end{subfigure}\hfill
   \begin{subfigure}[t]{0.55\linewidth}
-\begin{lstlisting}[numbers=none]
+\begin{lstlisting}
 module CowArray : HYBARRAY = struct
   include Array
   let set (a, i0, x0) =
@@ -87,11 +87,6 @@ end
   \label{sig:hybarray}
   \label{ex:cow}
 
-\begin{lstlisting}[numbers=none]
-val propagate : int -> int -> &!Matrix.t -> int -> unit
-val solve : int -> int -> Matrix.t -> unit
-\end{lstlisting}
-
   \begin{subfigure}[t]{0.45\linewidth}
   \lstinputlisting[linerange=1-13]{code/sukodu.affe}
   \end{subfigure}\hfill
@@ -99,7 +94,12 @@ val solve : int -> int -> Matrix.t -> unit
   \lstinputlisting[linerange=14-31,firstnumber=last]{code/sukodu.affe}
   \end{subfigure}
   % \lstinputlisting[linerange=1-31,multicols=2]{code/sukodu.affe}
-  \vspace{-15pt}
+  \vspace{-10pt}
+\begin{lstlisting}
+val propagate : int -> int -> &!Matrix.t -> int -> unit
+val solve : int -> int -> Matrix.t -> unit
+\end{lstlisting}
+  \vspace{-10pt}
   \caption{Excerpt of the Sudoku solver}
   \label{ex:sudoku}
 \end{figure}
@@ -110,12 +110,12 @@ val solve : int -> int -> Matrix.t -> unit
 % of the array, while other modifications use @set_mut@, which
 % cannot be reverted.
 
-Our implementation of a Sudoku solver (~\cref{ex:sudoku}) represents
+Our implementation of a Sudoku solver (\cref{ex:sudoku}) represents
 the board as a 2D-matrix (\cref{line:boardtype}).
 Each cell contains an integer set of type @IntSet.t@ that represents
 admissible solutions so far. This type is immutable, i.e.,
 @IntSet.remove@ produces a new value.
-
+%
 The main functions are @solve@ and @propagate@ with the typings shown
 on top of \cref{ex:sudoku}. The types of @propagate_line@ etc are the
 same as for @propagate@. From the types, we can see that @solve@ takes
@@ -135,14 +135,14 @@ The implementation of @propagate@ is split into three parts
 for lines, columns, and square, which are all very similar to function
 @propagate_lines@ (\cref{line:propline}).
 
-As the @board@ parameter to the @propagate@ function is an exclusive
+The @board@ parameter of the @propagate@ function is an exclusive
 borrow, it should be handled 
 in an affine manner. To pass it safely to the three helper functions,
 the body of @propagate@ \emph{reborrows} (i.e., it takes a borrow of a
 borrow) the board three times in 
-\cref{line:reborrow1}-\cref{line:reborrow3}.
+\crefrange{line:reborrow1}{line:reborrow3}.
 The function @propagate_line@ also contains two reborrows of the
-exclusive borrow argument @board@, an
+exclusive borrow @board@, an
 immutable one (\cref{line:reborrow_i}) and an exclusive one
 (\cref{line:reborrow_m}). It demonstrates the facility 
 to take immutable borrows from exclusive ones.
