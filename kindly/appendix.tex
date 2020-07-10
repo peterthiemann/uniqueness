@@ -1,0 +1,146 @@
+\PassOptionsToPackage{svgnames}{xcolor}
+\documentclass[acmsmall,screen]{acmart}
+\settopmatter{printfolios=false,printccs=false,printacmref=false}
+
+\pdfpagewidth=8.5in
+\pdfpageheight=11in
+
+% The page limit for final papers is 27 pages, not including references (but 
+% including appendices). Additional materials may be uploaded to ACM's 
+% Digital Library, in a manner that the publisher will clarify in 
+% instructions sent to you separately. In extraordinary circumstances, I'm 
+% able to grant further pages still, and please write to me if you think your 
+% paper might qualify. There's no fee associated with the number of pages 
+% you use, but we do want to be fair to all authors in allocating space.  
+
+% Encoding and lang
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+% Graphical packages
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{xspace}
+
+% Math
+\usepackage{amsmath}
+\usepackage{amsfonts}
+% \usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{thm-restate}
+% \usepackage{mathrsfs}
+\usepackage{mathtools}
+\usepackage{textcomp}
+\usepackage{gensymb}
+% \usepackage{textgreek}
+\usepackage{multicol}
+
+\usepackage{listings}
+\usepackage[scaled=0.85]{DejaVuSansMono}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[inline,shortlabels]{enumitem}
+\setlist{leftmargin=*,noitemsep}
+\usepackage{array}
+\usepackage{adjustbox}
+\usepackage{bm}%Decent bolding for math symbols
+\usepackage{pifont}%% check mark
+
+\usepackage{natbib}% Good citations and bibliography
+\usepackage{mathpartir} % Syntax trees
+
+\usepackage{xr}
+
+\mprset{sep=1.5em}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.text,backgrounds,positioning,shapes,
+  shadings,shadows,arrows,decorations.markings,calc,fit,fadings,
+  tikzmark
+}
+
+\usepackage[nameinlink,capitalize]{cleveref}
+\addto\extrasenglish{%
+  \def\sectionautorefname{Section}
+  \def\subsectionautorefname{Section}
+  \def\subsubsectionautorefname{Section}
+  \def\lstnumberautorefname{Line}
+}
+\newtheorem{property}{Property}
+%\newtheorem{corollary}{Corollary}
+
+\bibliographystyle{ACM-Reference-Format}
+\citestyle{acmauthoryear}
+
+
+\copyrightyear{2020}
+\acmSubmissionID{icfp20main-p74-p}
+\setcopyright{rightsretained}
+\acmJournal{PACMPL}
+\acmYear{2020}\acmNumber{ICFP}
+\acmPrice{}\acmDOI{10.1145/3408985}
+
+\author{Gabriel Radanne}
+\affiliation{
+  \institution{Inria}
+  \country{Paris}
+}
+\email{gabriel.radanne@inria.fr}
+
+\author{Hannes Saffrich}
+\affiliation{
+  \institution{University of Freiburg}
+  \country{Germany}
+}
+\email{saffrich@informatik.uni-freiburg.de}
+
+\author{Peter Thiemann}
+\affiliation{
+  \institution{University of Freiburg}
+  \country{Germany}
+}
+\email{thiemann@informatik.uni-freiburg.de}
+
+\input{prelude}
+\input{caml}
+\input{lst-rule}
+\input{notations}
+\input{rulemacros}
+
+\externaldocument{main}
+
+\begin{document}
+
+
+\title{Kindly Bent to Free Us -- Appendix}
+\maketitle
+
+\appendix
+
+\section{Further examples}
+\label{sec:extra-example}
+\lstMakeShortInline[keepspaces,basicstyle=\small\ttfamily]@
+\input{motivation-linearity}
+\input{motivation-pool}
+\lstDeleteShortInline@
+
+\input{sdtyping/extra}
+\clearpage
+\input{infer/extra}
+\clearpage
+\input{lang-extra}
+\input{metatheory-extra}
+
+\bibliography{biblio}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

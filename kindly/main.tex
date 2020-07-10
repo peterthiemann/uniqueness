@@ -1,6 +1,9 @@
 \PassOptionsToPackage{svgnames}{xcolor}
 \documentclass[acmsmall,screen]{acmart}
 
+\pdfpagewidth=8.5in
+\pdfpageheight=11in
+
 % The page limit for final papers is 27 pages, not including references (but 
 % including appendices). Additional materials may be uploaded to ACM's 
 % Digital Library, in a manner that the publisher will clarify in 
@@ -50,6 +53,8 @@
 \usepackage{natbib}% Good citations and bibliography
 \usepackage{mathpartir} % Syntax trees
 
+\usepackage{xr}
+
 \mprset{sep=1.5em}
 
 \usepackage{tikz}
@@ -67,6 +72,7 @@
 }
 \newtheorem{property}{Property}
 %\newtheorem{corollary}{Corollary}
+
 
 \bibliographystyle{ACM-Reference-Format}
 \citestyle{acmauthoryear}
@@ -124,6 +130,9 @@
 \input{caml}
 \input{lst-rule}
 \input{notations}
+\input{rulemacros}
+
+\externaldocument{appendix}
 
 \begin{document}
 
@@ -160,7 +169,6 @@
 
 \maketitle
 
-\input{rulemacros}
 
 \input{intro}
 \input{motivation}
@@ -179,24 +187,6 @@
 \end{acks}
 
 \bibliography{biblio}
-
-
-\clearpage
-\appendix
-
-\section{Further examples}
-\label{sec:extra-example}
-\lstMakeShortInline[keepspaces,basicstyle=\small\ttfamily]@
-\input{motivation-linearity}
-\input{motivation-pool}
-\lstDeleteShortInline@
-
-\input{sdtyping/extra}
-\clearpage
-\input{infer/extra}
-\clearpage
-\input{lang-extra}
-\input{metatheory-extra}
 
 \end{document}
 

@@ -1,7 +1,7 @@
 \lstMakeShortInline[keepspaces,basicstyle=\small\ttfamily]@
-\section{Limitations and extensions}
+\section{Limitations and Extensions}
 
-\subsection{Flow sensitivity}
+\subsection{Flow Sensitivity}
 
 The type system defined so far does not support any
 form of flow sensitivity. Therefore, code patterns that rely on
@@ -27,7 +27,7 @@ notion of non-lexical lifetimes which partially supports such
 code patterns. We believe this notion can be adapted to \lang's notion of
 regions.
 
-\subsubsection*{Non-lexical regions}
+\subsubsection*{Non-Lexical Regions}
 
 The notion of non-lexical lifetimes is 
 a recent addition to Rust.
@@ -67,7 +67,7 @@ Thanks to these annotations, type checking the sequence would check
 that the borrow does not escape the left-hand side (i.e., the second
 expression @f a@).
 
-\subsection{Capabilities and identity}
+\subsection{Capabilities and Identity}
 \label{identity}
 
 In \lang the tracking of linearity does
@@ -104,7 +104,7 @@ that existential types can be put to use without compromising
 inference in the rest of the language, by integrating unpacking
 and pattern matching.
 
-\subsection{Ad-hoc polymorphism and borrows}
+\subsection{Ad-hoc Polymorphism and Borrows}
 
 In our formalization, we use two operators, $\borrow{x}$ and $\reborrow{x}$ to
 distinguish between borrows and borrows of borrows.
@@ -122,7 +122,7 @@ types and preserves all properties of our language such
 as principal type inference. Its soundness is orthogonal to linear types
 and has been explored in the literature~\citep{DBLP:conf/fpca/OderskyWW95}.
 
-\subsection{A richer region system}
+\subsection{A Richer Region System}
 
 \lang requires that each region is identified by an index drawn from a partial
 order that is compatible with the nesting of regions.
@@ -137,9 +137,9 @@ In particular, \lang could reuse regions variables provided by
 the ongoing work on effect systems
 for OCaml~\cite{DBLP:conf/sfp/DolanEHMSW17}.
 
-\subsection{Standard features}
+\subsection{Standard Features}
 
-\subsubsection*{Algebraic datatypes}
+\subsubsection*{Algebraic Datatypes}
 
 Algebraic data types are a staple of functional programming and fit nicely
 in our paradigm. Indeed, it is sufficient to ensure  that the kinds of
@@ -150,7 +150,7 @@ unrestricted.
 Our prototype implements non-recursive algebraic datatypes with
 pattern matching.
 
-\subsubsection*{Branching constructs}
+\subsubsection*{Branching Constructs}
 
 Our formalization of \lang does not cover conditionals. In the
 typing rules, a conditional is supported as usual by checking all

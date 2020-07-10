@@ -1,4 +1,4 @@
-\section{Proofs for metatheory}
+\section{Proofs for Metatheory}
 \label{sec:metatheory:proofs}
 
 \begin{itemize}
@@ -312,7 +312,153 @@ $\MultiNumber\Loc\REACH = \infty$.
 \clearpage{}
 \lstMakeShortInline[keepspaces,style=rule]@
 
-\SoundnessThm
+\newcommand\resultOk[2]{
+  $R#2 = \Ok{\Store#2, \Perm#2, r#2}$
+}
+\newcommand\resultEnv[2]{
+  $\SE#1 \le \SE#2$, $\Store#1 \le \Store#2$, $\vdash \Store#2 : \SE#2$
+}
+\newcommand\resultPermDom[2]{
+  $\Perm#2$ is wellformed and
+  $\Rawloc{\Perm#2} \subseteq \Dom{\Store#2} \setminus {\Store#2}^{-1}
+  (\StFreed)$.
+}
+\newcommand\resultReachPerm[2]{
+  $\Reach0{r#2} \subseteq \Perm#2$,
+  $\Reach{\Store#2}{r#2} \subseteq \Sclos{\Perm#2}$
+  % \textcolor{red}{
+    $\cap (\Reach{\Store#2}{\VEnv#1} \setminus
+    \Reach{\Store#2}{\Suspended{\VEnv#1}}
+    \cup \Dom{\Store#2} \setminus \Dom{\Store#1})$.
+  % }
+}
+\newcommand\resultFrame[3]{
+  % input, inputenv, output
+  Frame: \\
+  For all $\Loc \in \Dom{\Store#1} \setminus
+  \Rawloc{\Reach{\Store#3}{\VEnv#2}}$ it must be that
+  \begin{itemize}
+  \item $\Store#3 (\Loc) = \Store#1 (\Loc)$ and
+  \item  for any $\Addr$ with $\Rawloc\Addr = \{\Loc\}$,
+    $\Addr \in \Perm#1 \Leftrightarrow \Addr\in\Perm#3$.
+  \end{itemize}
+}
+\newcommand\resultImmutables[3]{
+  % input, inputenv, output
+  Unrestricted values, resources, and borrows: \\
+  For all $\Addr \in
+  \Reach{\Store#3}{\ImmutableBorrows{\VEnv#2}, \Suspended[\kun]{\VEnv#2}}$ with
+  $\Rawloc\Addr = \{\Loc\}$, it must be that
+  $\Loc\in\Dom{\Store#1}$,
+  $\Store#3 (\Loc) = \Store#1 (\Loc) \ne \StFreed$
+  and $\Addr\in\Perm#3$.
+}
+\newcommand\resultMutables[3]{
+  % input, inputenv, output
+  Affine borrows and resources:\\
+  For all $\Addr \in  \Reach{\Store#3}{\MutableBorrows{\VEnv#2}, \Suspended[\kaff]{\VEnv#2}}$
+  with $\Rawloc\Addr = \{\Loc\}$, it must be that
+  $\Loc\in\Dom{\Store#1}$. If $\Addr\ne\Loc$, then
+  $\Store#3 (\Loc) \ne \StFreed$.
+  If $\Addr \in \Reach{\Store#3}{\Suspended[\kaff]{\VEnv#2}}$, then
+  $\Addr \in \Perm#3$.
+}
+\newcommand\resultSuspendedXXX[3]{
+  % input, inputenv, output
+  Suspended borrows: \\
+  For all $\Addr \in \Reach{\Store#3}{\Suspended{\VEnv#2}}$ with
+  $\Rawloc\Addr = \{\Loc\}$ it must be that $\Addr \in \Perm#3$
+  and  $\Store#3 (\Loc) \ne \StFreed$.
+  % \begin{itemize}
+  % \item If $\Addr = \IBORROW\Addr'$, then $\Loc\in\Dom{\Store#1}$ and
+  %   $\Store#3 (\Loc) = \Store#1 (\Loc) \ne \StFreed$.
+  % \item If $\Addr = \MBORROW\Addr'$ and
+  %   $\Loc\in\Dom{\Store#1}$, then
+  %   $\Store#3 (\Loc) \ne \StFreed$.
+  % \end{itemize}
+}
+\newcommand\resultResources[3]{
+  % input, inputenv, output
+  Resources: Let $\REACH#1 = \Reach{\Store#1}{\Active{\VEnv#2}}$.  Let
+  $\REACH#3 =\Reach{\Store#3}{\Active{\VEnv#2}}$.
+  \\
+  For all $\Loc\in \REACH#1$ it must be that
+  $\MultiNumber\Loc{\REACH#1}=\MultiNumber\Loc{\REACH#3}=1$,
+  % \textcolor{red}{
+  %   either $\Loc\notin\Perm#3$ and $\Store#3 (\Loc) =\StFreed$
+  %   or $\Loc\in\Perm#3$ and $\Loc \in \Reach{\Store#3}{r#3}$.
+  % }
+  % \textcolor{blue}{
+    $\Loc\notin\Perm#3$, and if $\Store#1(\Loc)$ is a resource, then
+    $\Store#3 (\Loc) = \StFreed$.
+  % }
+}
+\newcommand\resultThinAir[2]{
+  No thin air permission: \\
+  $\Perm#2 \subseteq
+  \Perm#1 \cup ( \Dom{\Store#2} \setminus \Dom{\Store#1})$.
+  % For all $\Addr\in {\Perm#2}$, $\Addr
+  % \in \Perm#1 \cup ( \Dom{\Store#2} \setminus \Dom{\Store#1})$.
+}
+\newcommand\assumeWellformed[1]{
+  $\Perm#1$ is wellformed and $\Rawloc{\Perm#1} \subseteq
+  \Dom{\Store#1} \setminus {\Store#1}^{-1} (\StFreed)$
+}
+\newcommand\assumeIncoming[2]{
+  Incoming Resources:
+  \begin{enumerate}
+  \item $\forall \Loc\in \Rawloc{\Reach{\Store#1}{\VEnv#2}}$,
+    $\Store#1 (\Loc) \ne \StFreed$.
+    % suspended bindings must not point to freed resources
+  \item $\forall \Loc \in \REACH#1
+    =\Rawloc{\Reach{\Store#1}{\Active{\VEnv#2},\MutableBorrows{\VEnv#2},
+      \Suspended[\kaff]{\VEnv#2}}}$,
+    % if $\Affine\SE\Loc$ then
+    $\MultiNumber\Loc{\REACH#1}= 1$.
+  \end{enumerate}
+}
+\newcommand\assumeReachable[2]{
+  $\Reach0{\VEnv#2} \subseteq {\Perm#1}$, 
+  $\Reach{\Store#1}{\VEnv#2} \subseteq \Sclos{\Perm#1}$.
+}
+\begin{restatable}[Type Soundness]{theorem}{SoundnessThm}\label{thm:soundness}
+  Suppose that
+  \begin{enumerate}[({A}1)]
+  \item $\inferS{C}{\E}{e}{\tau}$
+  \item\label{item:32} $\SE \vdash \VEnv : \E$
+  \item\label{item:33} $\vdash \Store : \SE$
+  \item\label{item:11} \assumeWellformed{}
+  \item\label{item:12} \assumeReachable{}{}
+  \item $\Rawloc{\Active\VEnv}$,
+    $\Rawloc{\MutableBorrows\VEnv}$,
+    $\Rawloc{\ImmutableBorrows\VEnv}$, and
+    $\Rawloc{\Suspended\VEnv}$ are all disjoint
+  % \item  $\VEnv'$ with $\Rawloc{\VEnv'}
+  %   \subseteq \Dom\Store$ and $\Dom\VEnv \cap \Dom{\VEnv'}=\emptyset$
+  \item\label{item:15} \assumeIncoming{}{}
+  \end{enumerate}
+  For all $i\in\Nat$, if
+  % Sorry for the ugly fix... I can't get lstinline to behave like
+  % \lstMakeShortInline, but copy pasting would also be bad.
+  \ \lstinline[style=rule]{R' = eval} $\Store$ $\Perm$ $\VEnv$ \lstinline[style=rule]{i e}
+  %$\Store, \Perm, \VEnv \vdash {e}  \Downarrow^i R'$
+  and $R'\ne \TimeOut$,
+  then
+  $\exists$ $\Store'$, $\Perm'$, $r'$, $\SE'$ such that
+  \begin{enumerate}[({R}1)]
+  \item \resultOk{}{'}
+  \item \resultEnv{}{'}
+  \item $\SE' \vdash r' : \tau$
+  \item \resultPermDom{}{'}
+  \item \resultReachPerm{}{'}
+  \item \resultFrame{}{}{'}
+  \item \resultImmutables{}{}{'}
+  \item \resultMutables{}{}{'}
+  % \item \resultSuspended{}{}{'}
+  \item \resultResources{}{}{'}
+  \item \resultThinAir{}{'}
+  \end{enumerate}
+\end{restatable}
 
 Some explanations are in order for the resource-related assumptions
 and statements.

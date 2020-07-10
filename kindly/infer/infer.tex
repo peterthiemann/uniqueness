@@ -81,7 +81,7 @@ For now, we simply
 assume the existence of such a function for our constraint system
 and defer details to \cref{infer:solving}.
 
-\subsection{Type inference}
+\subsection{Type Inference}
 
 We write $\inferW{\Sv}{(C,\unif)}{\inP{\E}}{\inP{e}}{\tau}$ when
 $\inP{e}$\ has type $\tau$ in $\inP{\E}$ under the constraints $C$ and unifier $\unif$
@@ -95,7 +95,7 @@ of our inference algorithm and the differences with the syntax-directed
 system in \cref{rule:infer:envs}.
 The complete type inference rules are shown in \cref{appendix:infer}.
 
-\paragraph{Environments and bindings}
+\paragraph{Environments and Bindings}
 \label{infer:envs}
 %
 \begin{figure*}[tb]
@@ -164,7 +164,7 @@ constraints and unifiers.
 
 
 
-\paragraph{Splitting and regions}
+\paragraph{Splitting and Regions}
 \label{infer:split}
 \label{infer:regions}
 
@@ -217,12 +217,12 @@ that make it suitable for use in the \hmx framework.
 The complete constraint system is
 defined in \cref{appendix:constraints}.
 
-\subsubsection{Constraints normalization by example}
+\subsubsection{Constraints Normalization by Example}
 
 \input{infer/exampleconstr}
 
 
-\subsubsection{Properties of the constraint system}
+\subsubsection{Properties of the Constraint System}
 
 To apply \hmx to $\CL$, normalize must compute principal normal forms
 and $\CL$ must be regular.
@@ -254,7 +254,7 @@ In addition, we may add ``best-effort'' simplification
 rules which help reduce the size of inferred signatures 
 \citep{DBLP:conf/aplas/Simonet03}.
 
-\subsection{Soundness and principality}
+\subsection{Soundness and Principality}
 
 The extended inference algorithm is sound
 and complete with respect to our extension of \hmx.
