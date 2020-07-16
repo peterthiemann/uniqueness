@@ -131,7 +131,7 @@ The output $p'$ is a program with explicit annotations
 of the form $\region{\Sone x\BORROW}{e}$ such that no borrow occurs
 outside a region.
 We give an informal presentation of our code transformation and defer
-the complete definition to \cref{appendix:regionannot}. This code transformation
+the complete definition to Appendix B. This code transformation
 aims to find, for each borrow $\borrow{x}$, the biggest region satisfying
 the following rules:
 \begin{enumerate}
@@ -223,7 +223,7 @@ these properties.
 
 To avoid distraction, this section focuses on the essential and novel
 parts of the type system. A complete
-description is available in \cref{appendix:sdtyping}.
+description is available in Appendix D.
 % In this section, we focus on chosen parts of our system
 % through a set of selected rules.
 %
@@ -707,7 +707,7 @@ permissions, and the actual result.
 
 We give some excerpts of the definition of @eval@ in
 \cref{fig:big-step-interpretation} and leave the full
-definition for \cref{sec:semant-defin}.
+definition for Appendix F.
 % The appendix also
 % contains the semantics in mathematical notation.
 The definition uses OCaml syntax with extensive pretty

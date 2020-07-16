@@ -6,7 +6,7 @@
 \lang{} supports the resource-passing style
 common in functional encodings of session types (e.g.,
 \cite{DBLP:journals/jfp/Padovani17}; see also
-\cref{sec:session-linearity} in the supplement) as well as other
+Appendix A.1 in the supplement) as well as other
 functional resource handling. But it really shines
 when manipulating mutable resources like buffers or connection pools
 using a mix of functional and imperative programming styles.
@@ -20,7 +20,7 @@ Sudoko solver based on a hybrid copy-on-write data structure; the
 third example demonstrates advanced uses 
 of regions with iterators on linear values and the low-level
 primitives needed to implement them.
-Further examples are available in \cref{sec:extra-example}.
+Further examples are available in Appendix A.
 
 \subsection{Imperative Programming with Linear Arrays}
 \label{sec:imper-progr}
@@ -227,7 +227,7 @@ using parallel iterations in the immutable case.
 \lang's region variables ensure that the content iterated on can never
 be leaked outside of the iteration function.
 This pattern is essential in many use cases of linearity such
-as pools of linear objects (see \cref{tuto:pool}).
+as pools of linear objects (see Appendix A.2).
 
 To close this discussion, let's see which primitives are needed to implement
 functions like @bfold@ and @iter_mut@. The naive sequential implementations of
