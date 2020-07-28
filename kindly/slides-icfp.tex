@@ -1,0 +1,294 @@
+\documentclass[aspectratio=169,dvipsnames,svgnames,10pt]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french, english]{babel}
+\selectlanguage{english}
+
+\usepackage{graphicx}
+
+% Math
+\usepackage{amsmath}
+% \usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+% \usepackage{mathrsfs}
+\usepackage{mathtools}
+\usepackage{textcomp}
+% \usepackage{textgreek}
+
+% Specialized packages
+% \usepackage{syntax} % Grammar definitions
+\usepackage{verbatim}
+\usepackage{listings} % Code
+\usepackage{xspace} % Useful for macros
+\usepackage{natbib}% Good citations and bibliography
+\usepackage{mathpartir} % Syntax trees
+\usepackage{colortbl}
+\usepackage{hhline}
+\usepackage{multicol}%multicolumn lists
+\usepackage{pifont}%% check mark
+\usepackage{minted}
+
+% \usepackage{mathptmx}
+% \usepackage[scaled=0.9]{helvet}
+\usepackage{beramono}
+
+\bibliographystyle{ACM-Reference-Format}
+\citestyle{acmauthoryear}
+\usepackage{appendixnumberbeamer}
+
+\usetheme{metropolis}
+\beamertemplatenavigationsymbolsempty
+\setbeamercovered{transparent=20}
+
+\usepackage{wasysym}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.text,backgrounds,positioning,shapes,
+  shadings,shadows,arrows,decorations.markings,calc,fit,fadings,
+  tikzmark
+}
+
+\def\HUGE{\fontsize{35pt}{15pt}\selectfont}
+
+\input{prelude}
+\input{caml}
+\input{notations}
+\input{rulemacros}
+
+
+\newcommand\Y{{\color{Green}{\ding{52}}}}
+\newcommand\N{{\color{Red}{\ding{56}}}}
+\newcommand\M{{\color{Orange}{\textasciitilde}}}
+
+\lstset{
+  tabsize=4,
+  aboveskip={0.5\baselineskip},
+  belowcaptionskip=0.5\baselineskip,
+  basicstyle=\scriptsize\ttfamily,
+}
+
+\title{Kindly Bent To Free Us}
+\author{\textbf{Gabriel \textsc{Radanne}}
+  \and Hannes \textsc{Saffrich}
+  \and Peter \textsc{Thiemann}}
+
+\begin{document}
+
+\lstMakeShortInline[keepspaces,basicstyle=\small\ttfamily]@
+
+\frame[plain]{\titlepage}
+
+
+\begin{frame}
+  \frametitle{Motivation}
+
+  Memory safety is the cause of numerous bugs and security issues.
+  
+  Recent classification (2015-2020) of \og high severity security bugs\fg in Chromium:
+
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width=0.55\textwidth]
+    {chromium-use-after-free}
+  \end{figure}
+
+  \pause
+  Chromium is written in C/C++!\\
+  Surely these bugs don't happen in high-level typed languages \dots
+  
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Let's write some OCaml code}
+
+\begin{minted}{OCaml}
+let db = Dbm.opendbm "mydb" [Dbm_rdwr] 0o666 in
+Dbm.add db "hello" "world";
+(* ... *)
+Dbm.close db;
+(* ... *)
+print_string (Dbm.find db "hello") (* bug! *)
+\end{minted}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Solutions?}
+
+  Existing ways to solve this
+  
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Affe!}
+
+\begin{minted}[texcomments=true]{OCaml}
+let db = Dbm.opendbm "firstnames" [Dbm_rdwr] 0o666 in
+Dbm.add &!db "Radanne" "Gabriel";
+(* ... *)
+Dbm.close db;
+(* ... *)
+print_string (Dbm.find &db "Saffrich") (* \N Compile time error! *)
+\end{minted}
+
+  \TODO{Add lot's of annotation w. arrows/pointers to explain the code piece by piece}
+  
+\end{frame}
+
+
+\begin{frame}[fragile]{A recap on borrows}
+
+  \TODO{C/C, to refine}
+
+  Borrows allow to lend usage of something to someone else.
+
+  There are different types of borrows:
+  \begin{itemize}
+  \item Shared borrows @&a@ which are \emph{Unrestricted} (@un@)
+  \item Exclusive borrows @&!a@ which are \emph{Affine} (@aff@)
+  \end{itemize}
+
+  We cannot use a borrow of @a@ and @a@ itself at the same time.\\
+  A borrow must not escape.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Borrows}
+  \begin{onlyenv}<1>
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+let avg =
+  (Dbm.find &gradeDB "math" + Dbm.find &gradeDB "compsci") / 2
+  (* \Y Multiple shared borrows *)
+in
+Dbm.add &!gradeDB "average" avg (* \Y One exclusive borrow *)
+\end{minted}
+\end{onlyenv}
+
+% \begin{onlyenv}<2>
+% \begin{minted}[texcomments=true]{OCaml}
+% let gradeDB = ... in
+% let avg =
+%  let grade topic = Dbm.find &gradeDB topic in (* \Y Capture *)
+%  (grade "math" + grade "compsci") / 2
+% in
+% Dbm.add &!gradeDB "average" avg (* \Y Exclusive borrow *)
+% \end{minted}
+% \end{onlyenv}
+
+\begin{onlyenv}<2>
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+f (&!gradeDB, &gradeDB) (* \N Conflicting borrows *)
+\end{minted}
+\end{onlyenv}
+\begin{onlyenv}<3>
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+f (gradeDB, &gradeDB) (* \N Use and borrow *)
+\end{minted}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{API}
+
+\begin{minted}[texcomments=true]{OCaml}
+type t : lin
+val find : &(Dbm.t,'k) -> string -{'k}> int
+val add : &!(Dbm.t,'k) -> string -{'k}> int -{'k}> unit
+\end{minted}
+  
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Captures}
+  \begin{onlyenv}<1>
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+(Dbm.find &gradeDB "math" + Dbm.find &gradeDB "compsci") / 2
+\end{minted}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+let grade subject = Dbm.find &gradeDB subject in (* \Y Capture *)
+(grade "math" + grade "compsci") / 2
+\end{minted}
+  \end{onlyenv}
+  \begin{onlyenv}<3>
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+let grade = Dbm.find &gradeDB in (* \Y Partial application *)
+(grade "math" + grade "compsci") / 2
+\end{minted}
+  \end{onlyenv}
+  \begin{onlyenv}<4->
+\begin{minted}[texcomments=true]{OCaml}
+(* \Y Easy functional abstraction *)
+let average db subjects = 
+  List.map (Dbm.find db) subjects / List.length subjects
+
+let main () =
+  let gradeDB = ... in
+  average &gradeDB ["math";"compsci";...]
+  ...
+\end{minted}
+  \end{onlyenv}
+\end{frame}
+
+
+\begin{frame}[fragile]{Region}
+
+With explicit regions:
+  
+\begin{minted}[texcomments=true]{OCaml}
+let average db subjects = 
+  List.map (Dbm.find db) subjects / List.length subjects
+
+let main () =
+  let gradeDB = ... in
+  let avg = {| average &gradeDB ["math";"compsci";...] |} in
+  {| Dbm.add &!gradeDB "average" avg |}
+\end{minted}
+   
+\end{frame}
+
+\begin{frame}
+  \frametitle{Region -- details}
+  Explain the indexed types in slightly more detailed
+\end{frame}
+
+\begin{frame}
+  \frametitle{High order functions}
+
+  Talk about fancy iterators ?
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Affe -- Recap}
+  Recap all the nice properties we showed
+\end{frame}
+
+\begin{frame}
+  \frametitle{Theory}
+  Give the theoretical contributions of the paper
+\end{frame}
+
+\begin{frame}
+  \frametitle{Conclusion}
+  
+\end{frame}
+
+\bibliography{biblio}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-command-extra-options: "-shell-escape"
+%%% TeX-master: "slides-icfp"
+%%% End:
