@@ -50,6 +50,16 @@
   tikzmark
 }
 
+
+\tikzset{
+  annot/.style={align=center,draw=black,scale=0.9,text depth=0pt,rounded corners=6pt, thick},
+  onslide/.code args={<#1>#2}{\only<#1>{\pgfkeysalso{#2}}},
+}
+\tikzstyle{link}=[->,>=latex, rounded corners=6pt, thick]
+\newcommand\tikzcoord[1]{%
+  \tikz[baseline,remember picture]{\node[coordinate] (#1) {};}}
+
+
 \def\HUGE{\fontsize{35pt}{15pt}\selectfont}
 
 \input{prelude}
@@ -96,7 +106,7 @@
 
   \pause
   Chromium is written in C/C++!\\
-  Surely these bugs don't happen in high-level typed languages \dots
+  Surely these bugs don't happen in high-level typed languages\alt<3>{ \dots right?}{.}
   
 \end{frame}
 
@@ -104,7 +114,7 @@
   \frametitle{Let's write some OCaml code}
 
 \begin{minted}{OCaml}
-let db = Dbm.opendbm "mydb" [Dbm_rdwr] 0o666 in
+let db : database = Dbm.opendbm "mydb" [Dbm_rdwr] 0o666 in
 Dbm.add db "hello" "world";
 (* ... *)
 Dbm.close db;
@@ -124,17 +134,30 @@ print_string (Dbm.find db "hello") (* bug! *)
 \begin{frame}[fragile]
   \frametitle{Affe!}
 
-\begin{minted}[texcomments=true]{OCaml}
-let db = Dbm.opendbm "firstnames" [Dbm_rdwr] 0o666 in
-Dbm.add &!db "Radanne" "Gabriel";
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let db : data#\tikzcoord{db}#base = Dbm.opendbm "mydb" [Dbm_rdwr] 0o666 in
+Dbm.add &!#\tikzcoord{borrow1}#db "hello" "world"#\tikzcoord{string}#;
 (* ... *)
 Dbm.close db;
 (* ... *)
-print_string (Dbm.find &db "Saffrich") (* \N Compile time error! *)
+print_string (Dbm.find &#\tikzcoord{borrow2}#db "hello") (* \N Compile time error! *)
 \end{minted}
 
-  \TODO{Add lot's of annotation w. arrows/pointers to explain the code piece by piece}
-  
+  \begin{tikzpicture}[remember picture,overlay]
+    \begin{onlyenv}<2->
+      \draw[overlay,link] ($(db)+(0,1em)$) to[out=90,in=180]
+      +(2,1) node[annot,anchor=west]
+      {@type database : lin (* Linear kind *)@};
+      \draw[overlay,link] ($(string)+(-1em,-0.2em)$) to[out=-30,in=180]
+      +(1.5,-0.1) node[annot,anchor=west]
+      {@type string : un (* Unrestricted kind *)@};
+    \end{onlyenv}
+    \begin{onlyenv}<3->
+      \node[annot] at ($(borrow1)+(1.8,-0.8)$) (borrows) {Borrows!};
+      \draw[overlay,link] ($(borrow1)-(0,0.2em)$) to[out=-60,in=120] (borrows) ;
+      \draw[overlay,link] ($(borrow2)+(0,1em)$) to[out=120,in=-60] (borrows) ;
+    \end{onlyenv}
+  \end{tikzpicture}
 \end{frame}
 
 
