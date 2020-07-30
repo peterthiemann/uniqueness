@@ -1,0 +1,12 @@
+
+\tikzset{
+  annot/.style={draw=black,scale=0.9,rounded corners=6pt, thick},
+  onslide/.code args={<#1>#2}{\only<#1>{\pgfkeysalso{#2}}},
+  overline/.style={
+    opacity=.2, inner xsep=2pt, inner ysep=0.5em, yshift=3pt, minimum height=11pt
+  },
+  code/.style={overline,rounded corners=6pt,fill=Blue},
+}
+\tikzstyle{link}=[->,>=latex, rounded corners=6pt, thick]
+\newcommand\tikzcoord[1]{%
+  \tikz[baseline,remember picture]{\node[coordinate] (#1) {};}}
