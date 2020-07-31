@@ -109,12 +109,12 @@
   \frametitle{Let's write some OCaml code}
 
 \begin{minted}{OCaml}
-let db : database = Dbm.opendbm "mydb" [Dbm_rdwr] 0o666 in
-Dbm.add db "hello" 42;
+let gradeDB : database = Dbm.opendbm "gradeDB" ... in
+Dbm.add gradeDB "math" 42;
 (* ... *)
-Dbm.close db;
+Dbm.close gradeDB;
 (* ... *)
-print_int (Dbm.find db "hello") (* bug! *)
+print_int (Dbm.find gradeDB "literature") (* bug! *)
 \end{minted}
   
 \end{frame}
@@ -131,22 +131,22 @@ print_int (Dbm.find db "hello") (* bug! *)
 
   \begin{onlyenv}<1-3>
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-let db : #\tikzcoord{db1}#database#\tikzcoord{db2}# = Dbm.opendbm "mydb" [Dbm_rdwr] 0o666 in
-Dbm.add #\tikzcoord{A1}#&!db#\tikzcoord{A2}# #\tikzcoord{string1}#"hello"#\tikzcoord{string2}# 42;
+let gradeDB : #\tikzcoord{db1}#database#\tikzcoord{db2}# = Dbm.opendbm "gradeDB" ... in
+Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# #\tikzcoord{string1}#"math"#\tikzcoord{string2}# 42;
 (* ... *)
-Dbm.close db;
+Dbm.close gradeDB;
 (* ... *)
-print_int (Dbm.find #\tikzcoord{U1}#&db#\tikzcoord{U2}# "world") (* \N Compile time error! *)
+print_int (Dbm.find #\tikzcoord{U1}#&gradeDB#\tikzcoord{U2}# "literature") (* \N Compile time error! *)
 \end{minted}
   \end{onlyenv}
   \begin{onlyenv}<4>
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-let db #\tikzcoord{eq1}#=#\tikzcoord{eq2}# Dbm.opendbm "mydb" [Dbm_rdwr] 0o666 in
-Dbm.add &!db "hello" "world";
+let gradeDB #\tikzcoord{eq1}#=#\tikzcoord{eq2}# Dbm.opendbm "gradeDB" ... in
+Dbm.add &!gradeDB "math" 42;
 (* ... *)
-Dbm.close db;
+Dbm.close gradeDB;
 (* ... *)
-print_string (Dbm.find &db "hello") (* \N Compile time error! *)
+print_string (Dbm.find &gradeDB "literature") (* \N Compile time error! *)
 \end{minted}
   \end{onlyenv}
   
@@ -154,13 +154,14 @@ print_string (Dbm.find &db "hello") (* \N Compile time error! *)
     \begin{onlyenv}<2>
       \node[code,fit=(db1) (db2)] (db) {};
       \node[code,fit=(string1) (string2)] (string) {};
-      \node[overlay,text width=8.7cm,annot,scale=1] at (5,-0.7) {
-        \textbf{Kinds determine usage:}
-        \begin{itemize}
-        \item Linear (@lin@): Used exactly once $[1]$
-        \item Affine (@aff@): Used at most once $[0-1]$
-        \item Unrestricted (@un@): Used arbitrarily many time $[0-\infty]$
-        \end{itemize}
+      \node[overlay% ,text width=8.7cm
+      ,annot,scale=1.2] at (5,-0.7) {
+        Kinds determine usage
+        % \begin{itemize}
+        % \item Linear (@lin@): Used exactly once $[1]$
+        % \item Affine (@aff@): Used at most once $[0-1]$
+        % \item Unrestricted (@un@): Used arbitrarily many time $[0-\infty]$
+        % \end{itemize}
       };
       \draw[overlay,link] (db) to[out=60,in=180]
       +(2,1) node[annot,anchor=west]
@@ -172,13 +173,13 @@ print_string (Dbm.find &db "hello") (* \N Compile time error! *)
     \begin{onlyenv}<3>
       \node[code,fit=(A1) (A2)] (A) {};
       \node[code,fit=(U1) (U2)] (U) {};
-      \node[annot,scale=1.2] at ($(A)+(1.8,-0.8)$) (borrows) {Borrows!};
-      \draw[overlay,link] (A) to[out=-30,in=150] (borrows) ;
-      \draw[overlay,link] (U) to[out=120,in=-60] (borrows) ;
+      \node[annot,scale=1.2] at ($(A)+(2,-0.8)$) (borrows) {Borrows!};
+      \draw[overlay,link,<-] (A) to[out=-30,in=150] (borrows) ;
+      \draw[overlay,link,<-] (U) to[out=120,in=-70] (borrows) ;
     \end{onlyenv}
     \begin{onlyenv}<4>
       \node[code,fit=(eq1) (eq2)] (eq) {};
-      \draw[overlay,link] (eq) to[out=90,in=-90]
+      \draw[overlay,link,<-] (eq) to[out=90,in=-90]
       +(0.5,1) node[annot,scale=1.2,anchor=south]
       {Complete Type Inference};
     \end{onlyenv}
@@ -230,39 +231,39 @@ val create_list : ('a : un) => int -> 'a -> 'a list
 
 \section{Functions and captures}
 
-\begin{frame}[fragile]
+\begin{frame}[t,fragile]
   \frametitle{Functions and captures}
 
   What about functions ? We can capture: 
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-let db = Dbm.open ... 
+let gradeDB = Dbm.open ... 
 
-let #\tikzcoord{fun1}#conclude#\tikzcoord{fun2}# x = 
-  Dbm.add &db "conclude" x;
-  Dbm.close db
+let #\tikzcoord{fun1}#log_n_close#\tikzcoord{fun2}# msg = 
+  printf "Closing: %s" msg;
+  Dbm.close gradeDB
 \end{minted}
   \begin{onlyenv}<3->
     We infer the type:
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-val oups : int #\tikzcoord{arr1}#-{lin}>#\tikzcoord{arr2}# unit
+val conclude : string #\tikzcoord{arr1}#-{lin}>#\tikzcoord{arr2}# unit
 \end{minted}
   \end{onlyenv}
 
   \begin{tikzpicture}[remember picture,overlay]
     \begin{onlyenv}<2>
       \node[code,fit=(fun1) (fun2)] (fun) {};
-      \draw[overlay,link] (fun) to[out=30,in=180]
+      \draw[overlay,link,<-] (fun) to[out=30,in=180]
       +(3,0.5) node[annot,scale=1,anchor=west] {
-        This function must behave \textbf{linearly}
+        This function \textbf{must} be used exactly once
       };
     \end{onlyenv}
     \begin{onlyenv}<3->
       \node[code,fit=(arr1) (arr2)] (arr) {};
-      \draw[overlay,link] (arr) to[out=-30,in=180]
-      +(2,-0.5) node[annot,scale=1,anchor=west] {
+      \draw[overlay,link,<-] (arr) to[out=-110,in=70]
+      +(-1,-1) node[annot,scale=1,anchor=north] {
         Arrows are annotated with their usage mode
       };
-      \node<4>[annot,scale=1.2,red] at ($(arr)+(5,1)$) {
+      \node<4>[annot,scale=1.2,red] at ($(arr)+(4,1)$) {
         \textbf{Warning}: This does not say anything about the arguments!!
       };
     \end{onlyenv}
@@ -271,54 +272,40 @@ val oups : int #\tikzcoord{arr1}#-{lin}>#\tikzcoord{arr2}# unit
 
 \section{Borrows and regions}
 
-\begin{frame}[fragile]{Borrows}
-
-\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-let gradeDB = ... in
-let grade = Dbm.find #\tikzcoord{U1}#&gradeDB#\tikzcoord{U2}# "compsci" in
-Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# "best" grade;
-Dbm.close db
-\end{minted}
+\begin{frame}[t,fragile]{Borrows}
   
   Borrows allow to lend usage of something to someone else.
   \begin{itemize}
-  \item \textbf{Shared} borrows \tikzcoord{U3}@&a@\tikzcoord{U4} which are Unrestricted (@un@)
-  \item \textbf{Exclusive} borrows \tikzcoord{A3}@&!a@\tikzcoord{A4} which are Affine (@aff@)
+  \item \textbf{Shared} borrows \tikzcoord{UX1}@&a@\tikzcoord{UX2} which are Unrestricted (@un@)
+  \item \textbf{Exclusive} borrows \tikzcoord{AX1}@&!a@\tikzcoord{AX2} which are Affine (@aff@)
   \end{itemize}
 
-  \visible<2>{
-    \textbf{There are rules to respect!}
-  }
-  
-  % \textbf{Rules:}
-  % \begin{itemize}
-  % \item Cannot use a borrow of @a@ and @a@ itself at the same time.
-  % \item Only one exclusive borrows at a time
-  % \item Borrows must not escape
-  % \end{itemize}
+  \begin{onlyenv}<2->
+  A correct usage of borrows:
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let avg =
+  (Dbm.find #\tikzcoord{U1}#&gradeDB#\tikzcoord{U2}# "math" + Dbm.find #\tikzcoord{U3}#&gradeDB#\tikzcoord{U4}# "compsci") / 2
+  (* \Y Multiple shared borrows *)
+in
+Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# "average" avg (* \Y One exclusive borrow *)
+\end{minted}
+  \end{onlyenv}
+  \visible<3>{There are rules to respect!}
   
   \begin{tikzpicture}[remember picture,overlay]
-    \node[code,color=yellow,fit=(A1) (A2)] {};
-    \node[code,color=red,fit=(U1) (U2)] {};
-    \node[code,color=yellow,fit=(A3) (A4)] {};
-    \node[code,color=red,fit=(U3) (U4)] {};
+    \begin{onlyenv}<2->
+      \node[code,color=yellow,fit=(A1) (A2)] {};
+      \node[code,color=red,fit=(U1) (U2)] {};
+      \node[code,color=red,fit=(U3) (U4)] {};
+    \end{onlyenv}
+    \node[code,color=yellow,fit=(AX1) (AX2)] {};
+    \node[code,color=red,fit=(UX1) (UX2)] {};
   \end{tikzpicture}
 \end{frame}
 
 
 \begin{frame}[fragile]
   \frametitle{Borrows -- Example of uses}
-  \begin{onlyenv}<1>
-    Good use of borrows:
-\begin{minted}[texcomments=true]{OCaml}
-let gradeDB = ... in
-let avg =
-  (Dbm.find &gradeDB "math" + Dbm.find &gradeDB "compsci") / 2
-  (* \Y Multiple shared borrows *)
-in
-Dbm.add &!gradeDB "average" avg (* \Y One exclusive borrow *)
-\end{minted}
-\end{onlyenv}
 
 % \begin{onlyenv}<2>
 % \begin{minted}[texcomments=true]{OCaml}
@@ -330,37 +317,48 @@ Dbm.add &!gradeDB "average" avg (* \Y One exclusive borrow *)
 % Dbm.add &!gradeDB "average" avg (* \Y Exclusive borrow *)
 % \end{minted}
 % \end{onlyenv}
-
-\begin{onlyenv}<2>
+\begin{onlyenv}<1>
   \textbf{Rule 1}: Cannot use a borrow and the thing itself simultaneously
 \begin{minted}[texcomments=true]{OCaml}
 let gradeDB = ... in
 f (gradeDB, &gradeDB) (* \N Conflicting use and borrow! *)
 \end{minted}
-\end{onlyenv}
-\begin{onlyenv}<3>
+\end{onlyenv}%
+\begin{onlyenv}<2>
   \textbf{Rule 2}: Cannot use an exclusive borrow and any other borrow simultaneously
 \begin{minted}[texcomments=true]{OCaml}
 let gradeDB = ... in
 f (&!gradeDB, &gradeDB) (* \N Conflicting borrows! *)
 \end{minted}
-\end{onlyenv}
-\begin{onlyenv}<4>
+\end{onlyenv}%
+\begin{onlyenv}<3->
   \textbf{Rule 3}: Borrows must not escape
-\begin{minted}[texcomments=true]{OCaml}
+  \begin{onlyenv}<3>
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 let f () = 
   let gradeDB = ... in
-  let x = (&gradeDb, "mygrades") in
-  x (* \N Borrow escaping its scope! *)
+  #\tikzcoord{R1}#let x = (&gradeDb, "mygrades") in#\tikzcoord{R2}#
+  #\tikzcoord{R3}#x#\tikzcoord{R4}#
+  (* \N Borrow escaping its scope! *)
 \end{minted}
-\end{onlyenv}
+  \end{onlyenv}
+  \begin{onlyenv}<4>
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let f () = 
+  let gradeDB = ... in
+  #\tikzcoord{R1}#{| let x = (&gradeDb, "mygrades") in#\tikzcoord{R2}#
+  #\tikzcoord{R3}#x |}#\tikzcoord{R4}#
+  (* \N Borrow escaping its scope! *)
+\end{minted}
+  \end{onlyenv}
+  \begin{tikzpicture}[remember picture,overlay]%
+    \begin{onlyenv}<4>
+      \node[code,rounded corners=0,color=green,fit=(R1) (R2)] {};
+      \node[code,rounded corners=0,minimum height=15pt,yshift=1pt,color=green,fit=(R3) (R4)] {};
+    \end{onlyenv}
+  \end{tikzpicture}%
+\end{onlyenv}%
 \end{frame}
-
-\begin{frame}
-  \frametitle{Regions/Scoping}
-  \TODO{Very quick example of region/scoping}
-\end{frame}
-
 
 % \begin{frame}[fragile]{API}
 
