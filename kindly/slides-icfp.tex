@@ -342,21 +342,35 @@ let f () =
   (* \N Borrow escaping its scope! *)
 \end{minted}
   \end{onlyenv}
-  \begin{onlyenv}<4>
+  \begin{onlyenv}<4->
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 let f () = 
   let gradeDB = ... in
-  #\tikzcoord{R1}#{| let x = (&gradeDb, "mygrades") in#\tikzcoord{R2}#
+  #\tikzcoord{R1}#{| let x = (#\tikzcoord{B1}#&gradeDb#\tikzcoord{B2}#, "mygrades") in#\tikzcoord{R2}#
   #\tikzcoord{R3}#x |}#\tikzcoord{R4}#
   (* \N Borrow escaping its scope! *)
 \end{minted}
-  \end{onlyenv}
+  \end{onlyenv}%
   \begin{tikzpicture}[remember picture,overlay]%
-    \begin{onlyenv}<4>
+    \begin{onlyenv}<4->
       \node[code,rounded corners=0,color=red,fit=(R1) (R2)] {};
       \node[code,rounded corners=0,minimum height=15pt,yshift=1pt,color=red,fit=(R3) (R4)] {};
+      \node[code,opacity=0,fit=(B1) (B2)] (B) {};
+    \end{onlyenv}
+    \begin{onlyenv}<5->
+      \draw[link,<-] (B.10) to[in=180,out=40] ++(2,1) node[annot, anchor=west] {
+        @&gradeDb : &(database, un_2)@
+      };
+      \draw[link,<-] (R2) to[in=90,out=-10] ++(1.5,-0.5) node[annot, anchor=north] {
+        Region nesting level: 1
+      };
     \end{onlyenv}
   \end{tikzpicture}%
+  \visible<5>{%
+    We use \textbf{indexed} kinds to check that borrows do not escape!
+
+    Borrows of index $2$ cannot escape a region of index $1$.
+  }
 \end{onlyenv}%
 \end{frame}
 
