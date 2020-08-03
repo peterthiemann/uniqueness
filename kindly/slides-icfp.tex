@@ -353,8 +353,8 @@ let f () =
   \end{onlyenv}
   \begin{tikzpicture}[remember picture,overlay]%
     \begin{onlyenv}<4>
-      \node[code,rounded corners=0,color=green,fit=(R1) (R2)] {};
-      \node[code,rounded corners=0,minimum height=15pt,yshift=1pt,color=green,fit=(R3) (R4)] {};
+      \node[code,rounded corners=0,color=red,fit=(R1) (R2)] {};
+      \node[code,rounded corners=0,minimum height=15pt,yshift=1pt,color=red,fit=(R3) (R4)] {};
     \end{onlyenv}
   \end{tikzpicture}%
 \end{onlyenv}%
@@ -370,34 +370,53 @@ let f () =
 % \end{minted}
   
 % \end{frame}
+  
+  % \begin{tikzpicture}[remember picture,overlay]
+  %   \begin{onlyenv}<2->
+  %     \node[code,color=yellow,fit=(A1) (A2)] {};
+  %     \node[code,color=red,fit=(U1) (U2)] {};
+  %     \node[code,color=red,fit=(U3) (U4)] {};
+  %   \end{onlyenv}
+  %   \node[code,color=yellow,fit=(AX1) (AX2)] {};
+  %   \node[code,color=red,fit=(UX1) (UX2)] {};
+  % \end{tikzpicture}
 
 \begin{frame}[fragile]
   \frametitle{Everything together}
-  \TODO{Make that straighter/punchier}
   
   \begin{onlyenv}<1>
 \begin{minted}[texcomments=true]{OCaml}
 let gradeDB = ... in
-(Dbm.find &gradeDB "math" + Dbm.find &gradeDB "compsci") / 2
+let avg =
+  (Dbm.find &gradeDB "math" + Dbm.find &gradeDB "compsci") / 2
+
+in
+Dbm.add &!gradeDB "average" avg
 \end{minted}
   \end{onlyenv}
   \begin{onlyenv}<2>
 \begin{minted}[texcomments=true]{OCaml}
 let gradeDB = ... in
-let grade subject = Dbm.find &gradeDB subject in (* \Y Capture *)
-(grade "math" + grade "compsci") / 2
+let avg =
+  let grade subject = Dbm.find &gradeDB subject in (* \Y Capture *)
+  (grade "math" + grade "compsci") / 2
+in
+Dbm.add &!gradeDB "average" avg
 \end{minted}
   \end{onlyenv}
   \begin{onlyenv}<3>
 \begin{minted}[texcomments=true]{OCaml}
 let gradeDB = ... in
-let grade = Dbm.find &gradeDB in (* \Y Partial application *)
-(grade "math" + grade "compsci") / 2
+let avg =
+  let grade = Dbm.find &gradeDB in (* \Y Partial application *)
+  (grade "math" + grade "compsci") / 2
+in
+Dbm.add &!gradeDB "average" avg
 \end{minted}
   \end{onlyenv}
   \begin{onlyenv}<4->
+    \begin{onlyenv}<4>%
 \begin{minted}[texcomments=true]{OCaml}
-(* \Y Easy functional abstraction *)
 let average db subjects = 
   List.map (Dbm.find db) subjects / List.length subjects
 
@@ -406,7 +425,32 @@ let main () =
   let avg = average &gradeDB ["math";"compsci";...] in
   Dbm.add &!gradeDB "average" avg
 \end{minted}
-  \end{onlyenv}
+    \end{onlyenv}%
+    \begin{onlyenv}<5>%
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let average db subjects #\tikzcoord{eq1}#=#\tikzcoord{eq2}#
+  List.map (Dbm.find db) subjects / List.length subjects
+
+let main () =
+  let gradeDB = ... in
+  let avg = #\tikzcoord{R1}#{| average &gradeDB ["math";"compsci";...] |}#\tikzcoord{R2}# in
+  #\tikzcoord{R3}#{| Dbm.add &!gradeDB "average" avg |}#\tikzcoord{R4}#
+\end{minted}
+    \end{onlyenv}%
+  \end{onlyenv}%
+  \begin{tikzpicture}[remember picture,overlay]%
+    \begin{onlyenv}<5>
+      \node[code,fit=(eq1) (eq2)] (eq) {};
+      \draw[overlay,link,<-] (eq) to[out=90,in=-90]
+      +(0.5,1) node[annot,scale=1.2,anchor=south]
+      {No type annotation};
+      \node[code,rounded corners=0,color=red,fit=(R1) (R2)] (RA) {};
+      \node[code,rounded corners=0,color=yellow,fit=(R3) (R4)] (RB) {};
+      \node[annot,scale=1.2] at ($(R4)+(1,-1)$) (AR) {Disjoint regions};
+      \draw[link] (AR) to[out=90,in=-40] (RA.-8);
+      \draw[link] (AR) to[out=180,in=-40] (RB.-8);
+    \end{onlyenv}
+  \end{tikzpicture}%
 \end{frame}
 
 \section{Inference and constraints}
