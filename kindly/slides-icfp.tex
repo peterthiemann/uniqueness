@@ -469,22 +469,102 @@ let main () =
 
 \section{Inference and constraints}
 
-\begin{frame}[fragile]{Inference and constraints}
+\begin{frame}{Inference and constraints}
 
-\TODO{Show the global step-by-step process}
-  
+  Inference proceeds in the following steps:
+
+  \begin{enumerate}
+  \item Infer where regions goes
+  \item Turn the type, linearity and escape checks into constraints
+  \item Solve the constraints
+  \item Simplify the resulting types
+  \end{enumerate}
+\end{frame}
+
+% \begin{frame}[fragile]
+%   \frametitle{Inference in action}
+%   \begin{onlyenv}<1>%
+% \begin{minted}[texcomments=true]{OCaml}
+% let average db subjects = 
+%   List.map (Dbm.find db) subjects / List.length subjects
+
+% let main () =
+%   let gradeDB = ... in
+%   let avg = average &gradeDB ["math";"compsci";...] in
+%   Dbm.add &!gradeDB "average" avg
+% \end{minted}
+%   \end{onlyenv}%
+%   \begin{onlyenv}<2>%
+% \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+% let average db subjects =
+%   List.map (Dbm.find db) subjects / List.length subjects
+
+% let main () =
+%   let gradeDB = ... in
+%   let avg = #\tikzcoord{R1}#{| average &gradeDB ["math";"compsci";...] |}#\tikzcoord{R2}# in
+%   #\tikzcoord{R3}#{| Dbm.add &!gradeDB "average" avg |}#\tikzcoord{R4}#
+% \end{minted}
+%   \end{onlyenv}%
+%   \begin{tikzpicture}[remember picture,overlay]%
+%     \begin{onlyenv}<2>
+%       \node[code,rounded corners=0,color=red,fit=(R1) (R2)] (RA) {};
+%       \node[code,rounded corners=0,color=yellow,fit=(R3) (R4)] (RB) {};
+%     \end{onlyenv}
+%   \end{tikzpicture}%
+% \end{frame}
+
+\begin{frame}[fragile,shrink]
+  \frametitle{Inference in action}
+  \begin{center}
+    \begin{tikzpicture}
+      \node[annot,text width=11.5cm,scale=0.5] at (180:5) (S1) {%
 \begin{minted}[texcomments=true]{OCaml}
 let average db subjects = 
   List.map (Dbm.find db) subjects / List.length subjects
 
 let main () =
   let gradeDB = ... in
-  let avg = {| average &gradeDB ["math";"compsci";...] |} in
-  {| Dbm.add &!gradeDB "average" avg |}
+  let avg = average &gradeDB ["math";"compsci";...] in
+  Dbm.add &!gradeDB "average" avg
 \end{minted}
-   
-\end{frame}
+      };
+      
+      \node[annot,text width=12cm,scale=0.5] at (108:3) (S2) {%
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let average db subjects =
+  List.map (Dbm.find db) subjects / List.length subjects
 
+let main () =
+  let gradeDB = ... in
+  let avg = #\tikzcoord{R1}#{| average &gradeDB ["math";"compsci";...] |}#\tikzcoord{R2}# in
+  #\tikzcoord{R3}#{| Dbm.add &!gradeDB "average" avg |}#\tikzcoord{R4}#
+\end{minted}
+        \tikz[remember picture,overlay]{
+          \node[code,rounded corners=0,color=red,fit=(R1) (R2)] (RA) {};
+          \node[code,rounded corners=0,color=yellow,fit=(R3) (R4)] (RB) {};
+        }%
+      };
+
+      \node[annot] at (36:4) (S3) {
+        CONTRAINTES
+      };
+
+      \node[annot] at (-36:4) (S4) {
+        SCHEMES
+      };
+
+      \node[annot] at (-108:3) (S5) {
+        SIMPLIFIED SCHEMES
+      };
+
+      \draw[link,->] (S1) to[bend left] node[midway] {Infer regions} (S2) ;
+      \draw[link,->] (S2) to[bend left] node[midway] {Convert into constraints} (S3);
+      \draw[link,->] (S3) to[bend left] node[midway] {Solve constraints} (S4);
+      \draw[link,->] (S4) to[bend left] node[midway] {Simplify types} (S5);
+    \end{tikzpicture}
+  \end{center}
+
+\end{frame}
 \section*{Conclusion}
 
 \begin{frame}
