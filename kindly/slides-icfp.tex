@@ -91,11 +91,11 @@
 
   Memory safety is the cause of numerous bugs and security issues.
   
-  Recent classification (2015-2020) of \og high severity security bugs\fg in Chromium:
+  Recent classification (2015-2020) of\\ \og high severity security bugs\fg in Chromium:
 
   \begin{figure}[h]
     \centering
-    \includegraphics[width=0.55\textwidth]
+    \includegraphics[width=0.5\textwidth]
     {chromium-use-after-free}
   \end{figure}
 
@@ -122,7 +122,7 @@ print_int (Dbm.find gradeDB "literature") (* bug! *)
 \begin{frame}
   \frametitle{Solutions?}
 
-  Existing ways to solve this
+  \TODO{Existing ways to solve this}
   
 \end{frame}
 
@@ -163,8 +163,8 @@ print_string (Dbm.find &gradeDB "literature") (* \N Compile time error! *)
         % \item Unrestricted (@un@): Used arbitrarily many time $[0-\infty]$
         % \end{itemize}
       };
-      \draw[overlay,link] (db) to[out=60,in=180]
-      +(2,1) node[annot,anchor=west]
+      \draw[overlay,link] (db) to[out=60,in=-90]
+      +(0,1) node[annot,anchor=south]
       {@type database : lin (* Linear kind *)@};
       \draw[overlay,link] (string) to[out=-30,in=180]
       +(1.5,-0.5) node[annot,anchor=west]
@@ -245,7 +245,7 @@ let #\tikzcoord{fun1}#log_n_close#\tikzcoord{fun2}# msg =
   \begin{onlyenv}<3->
     We infer the type:
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-val conclude : string #\tikzcoord{arr1}#-{lin}>#\tikzcoord{arr2}# unit
+val conclude : string #\tikzcoord{arr1}##$\tarr{\texttt{lin}}$##\tikzcoord{arr2}# unit
 \end{minted}
   \end{onlyenv}
 
@@ -253,12 +253,12 @@ val conclude : string #\tikzcoord{arr1}#-{lin}>#\tikzcoord{arr2}# unit
     \begin{onlyenv}<2>
       \node[code,fit=(fun1) (fun2)] (fun) {};
       \draw[overlay,link,<-] (fun) to[out=30,in=180]
-      +(3,0.5) node[annot,scale=1,anchor=west] {
-        This function \textbf{must} be used exactly once
+      +(3,0.2) node[annot,scale=1,anchor=west,text width=3.2cm] {
+        This function \textbf{must}\\ be used exactly once
       };
     \end{onlyenv}
     \begin{onlyenv}<3->
-      \node[code,fit=(arr1) (arr2)] (arr) {};
+      \node[code,minimum height=18pt,fit=(arr1) (arr2)] (arr) {};
       \draw[overlay,link,<-] (arr) to[out=-110,in=70]
       +(-1,-1) node[annot,scale=1,anchor=north] {
         Arrows are annotated with their usage mode
@@ -358,7 +358,7 @@ let f () =
       \node[code,opacity=0,fit=(B1) (B2)] (B) {};
     \end{onlyenv}
     \begin{onlyenv}<5->
-      \draw[link,<-] (B.10) to[in=180,out=40] ++(2,1) node[annot, anchor=west] {
+      \draw[link,<-] (B.10) to[in=180,out=40] ++(0.5,0.5) node[annot, anchor=west] {
         @&gradeDb : &(database, un_2)@
       };
       \draw[link,<-] (R2) to[in=90,out=-10] ++(1.5,-0.5) node[annot, anchor=north] {
@@ -397,8 +397,18 @@ let f () =
 
 \begin{frame}[fragile]
   \frametitle{Everything together}
+
+  The @Database@ API:
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+type database : lin
+val find : &(database,'k) -> string #$\tarr{\texttt{'k}}$# int
+val add : &!(database,'k) -> string #$\tarr{\texttt{'k}}$# int #$\tarr{\texttt{'k}}$# unit
+\end{minted}
   
-  \begin{onlyenv}<1>
+  \begin{onlyenv}<2->
+    A simple use:
+  \end{onlyenv}
+  \begin{onlyenv}<2>
 \begin{minted}[texcomments=true]{OCaml}
 let gradeDB = ... in
 let avg =
@@ -408,7 +418,7 @@ in
 Dbm.add &!gradeDB "average" avg
 \end{minted}
   \end{onlyenv}
-  \begin{onlyenv}<2>
+  \begin{onlyenv}<3>
 \begin{minted}[texcomments=true]{OCaml}
 let gradeDB = ... in
 let avg =
@@ -418,7 +428,7 @@ in
 Dbm.add &!gradeDB "average" avg
 \end{minted}
   \end{onlyenv}
-  \begin{onlyenv}<3>
+  \begin{onlyenv}<4>
 \begin{minted}[texcomments=true]{OCaml}
 let gradeDB = ... in
 let avg =
@@ -428,23 +438,21 @@ in
 Dbm.add &!gradeDB "average" avg
 \end{minted}
   \end{onlyenv}
-  \begin{onlyenv}<4->
-    \begin{onlyenv}<4>%
+  \begin{onlyenv}<5->
+    \begin{onlyenv}<5>%
 \begin{minted}[texcomments=true]{OCaml}
 let average db subjects = 
   List.map (Dbm.find db) subjects / List.length subjects
-
 let main () =
   let gradeDB = ... in
   let avg = average &gradeDB ["math";"compsci";...] in
   Dbm.add &!gradeDB "average" avg
 \end{minted}
     \end{onlyenv}%
-    \begin{onlyenv}<5>%
+    \begin{onlyenv}<6>%
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 let average db subjects #\tikzcoord{eq1}#=#\tikzcoord{eq2}#
   List.map (Dbm.find db) subjects / List.length subjects
-
 let main () =
   let gradeDB = ... in
   let avg = #\tikzcoord{R1}#{| average &gradeDB ["math";"compsci";...] |}#\tikzcoord{R2}# in
@@ -453,10 +461,10 @@ let main () =
     \end{onlyenv}%
   \end{onlyenv}%
   \begin{tikzpicture}[remember picture,overlay]%
-    \begin{onlyenv}<5>
+    \begin{onlyenv}<6>
       \node[code,fit=(eq1) (eq2)] (eq) {};
-      \draw[overlay,link,<-] (eq) to[out=90,in=-90]
-      +(0.5,1) node[annot,scale=1.2,anchor=south]
+      \draw[overlay,link,<-] (eq) to[out=60,in=180]
+      +(0.5,0.5) node[annot,scale=1.2,anchor=west]
       {No type annotation};
       \node[code,rounded corners=0,color=red,fit=(R1) (R2)] (RA) {};
       \node[code,rounded corners=0,color=yellow,fit=(R3) (R4)] (RB) {};
@@ -513,11 +521,11 @@ let main () =
 %   \end{tikzpicture}%
 % \end{frame}
 
-\begin{frame}[fragile,shrink]
+\begin{frame}[fragile,t,shrink]
   \frametitle{Inference in action}
   \begin{center}
-    \begin{tikzpicture}
-      \node[annot,text width=11.5cm,scale=0.5] at (180:5) (S1) {%
+    \begin{tikzpicture}[xscale=1,yscale=0.8]
+      \node[annot,text width=11.5cm,scale=0.5] at (0,4) (S1) {%
 \begin{minted}[texcomments=true]{OCaml}
 let average db subjects = 
   List.map (Dbm.find db) subjects / List.length subjects
@@ -529,7 +537,7 @@ let main () =
 \end{minted}
       };
       
-      \node[annot,text width=12cm,scale=0.5] at (108:3) (S2) {%
+      \node[annot,text width=12cm,scale=0.5] at (8,4) (S2) {%
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 let average db subjects =
   List.map (Dbm.find db) subjects / List.length subjects
@@ -545,40 +553,107 @@ let main () =
         }%
       };
 
-      \node[annot] at (36:4) (S3) {
-        CONTRAINTES
-      };
+      \draw[link,->] (S1) to node[midway,above,sloped] {1. Infer regions} (S2) ;
+      
+      \visible<2->{
+        \node[annot,text width=4.8cm] at (8,0) (S3) {%
+          \vspace{-1em}
+          \begin{align*}
+            \E = &(\tvar_f : \kvar_f)
+                 (\tvar_x : \kvar_x)\dots\\
+            C = &(\tvar_f \leq \gamma \tarr{\kvar_1} \beta )
+                \Cand
+                (\gamma \leq \tvar_x)\\
+                &\Cand
+                (\beta \times  \tvar_x \leq \alpha_r)
+                \Cand
+                  (\kvar_x \leq \kun)\\
+                 &\Cand \dots
+          \end{align*}
+        };
+        \draw[link,->] (S2) to
+        node[midway,right,text width=3cm] {2. Convert\\ into constraints}
+        (S3);
+      }
 
-      \node[annot] at (-36:4) (S4) {
-        SCHEMES
-      };
+      \begin{onlyenv}<3->
+        \node[annot,text width=10.5cm,scale=0.7] at (0.7,1) (S4) {
+          @val average : 'k_2 . &(database,'k) -{'k_2}> string list -{'k}> int list@
+        };
+        \draw[link,->] ($(S3.west)+(0,1)$) to
+        node[midway, above, sloped] {3. Solve}
+        node[midway, below, sloped] {constraints}
+        (S4.east);
+      \end{onlyenv}
+      
+      \begin{onlyenv}<4->
+        \node[annot,text width=9.7cm,scale=0.7] at (0.7,-1) (S5) {
+          @val average : &(database,'k) -> string list -{'k}> int list@
+        };
+        \draw[link,->] (S4) to
+        node[midway, left] {4. Simplify}
+        node[midway, right] {types}
+        (S5);
+      \end{onlyenv}
 
-      \node[annot] at (-108:3) (S5) {
-        SIMPLIFIED SCHEMES
-      };
-
-      \draw[link,->] (S1) to[bend left] node[midway] {Infer regions} (S2) ;
-      \draw[link,->] (S2) to[bend left] node[midway] {Convert into constraints} (S3);
-      \draw[link,->] (S3) to[bend left] node[midway] {Solve constraints} (S4);
-      \draw[link,->] (S4) to[bend left] node[midway] {Simplify types} (S5);
     \end{tikzpicture}
   \end{center}
+
+  \only<1>{%
+    1. Infer the placement of region based on the position of borrows and the borrowing rules.
+  }%
+  \only<2>{%
+    2. Convert into a custom constraint system based on HM(X).
+  }%
+  \only<3>{%
+    3. Solve the constraints using a custom algorithm and obtain principal type schemes.
+  }%
+  \only<4>{%
+    4. Simplify the obtained type scheme by leveraging subkinding
+  }%
 
 \end{frame}
 \section*{Conclusion}
 
+
+
 \begin{frame}
-  \frametitle{Affe -- Recap}
-  Recap all the nice properties we showed
+  \frametitle{The \lang language -- Summary}
+
+  Prototype: \url{https://affe.netlify.com/}  
+  
+  \begin{itemize}
+  \item[\Y] Linearity, Closures, Borrows and Regions\\
+    $\Rightarrow$ Good support for both imperative and functional programming
+  \item[\Y] Support managed and unmanaged objects
+  \item[\Y] Principal type inference
+  \item[\N] No flow sensitivity
+  \item[\N] No concurrency story (yet)
+  \end{itemize}
+  
+  Many examples in the paper: files, session types, semi-persistent arrays, iterators, connection pools, \dots
 \end{frame}
 
 \begin{frame}
-  \frametitle{Theory}
-  Give the theoretical contributions of the paper
+  \frametitle{The theory -- Summary}
+  In the paper, the theoretical contributions:
+
+  \begin{itemize}
+  \item A Syntax-directed type system for \lang\\
+    $\Rightarrow$ How to encode borrows into an ML-style type-system
+  \item A formal semantics that takes allocations into account (+ proof of soundness)
+  \item An inference algorithm for \lang:
+    \begin{itemize}
+    \item An extension of HM(X) with kinds
+    \item A novel constraint systems to encode linearity and borrows
+    \item A constraint solving algorithm, and its proof of completeness
+    \end{itemize}
+  \end{itemize}
 \end{frame}
 
-\begin{frame}
-  \frametitle{Conclusion}
+\begin{frame}[standout]
+
+  \centering\Huge\texttt{Close(Talk)}
   
 \end{frame}
 
