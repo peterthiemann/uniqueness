@@ -137,7 +137,7 @@ Dbm.add &!gradeDB "math" 42;
 (* ... *)
 Dbm.close gradeDB;
 (* ... *)
-print_string (Dbm.find &gradeDB "literature") (* \N compile-time error! *)
+print_int (Dbm.find &gradeDB "literature") (* \N compile-time error! *)
 \end{minted}
   \end{onlyenv}
   
@@ -177,13 +177,13 @@ print_string (Dbm.find &gradeDB "literature") (* \N compile-time error! *)
   \end{tikzpicture}
 \end{frame}
 
-
 \begin{frame}{Table of contents}
   \setbeamertemplate{section in toc}[sections numbered]
   \tableofcontents[hideallsubsections]
 \end{frame}
 
 \section{Linearity through kinds}
+
 
 \begin{frame}[fragile]
   \frametitle{Linearity through kinds}
@@ -221,6 +221,12 @@ val create_list : ('a : un) => int -> 'a -> 'a list
 
 
 \section{Functions and captures}
+
+
+\begin{frame}{Table of contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections,currentsection]
+\end{frame}
 
 \begin{frame}[t,fragile]
   \frametitle{Functions and captures}
@@ -268,15 +274,20 @@ val log_n_close : string #\tikzcoord{arr1}##$\tarr{\texttt{lin}}$##\tikzcoord{ar
 
 \section{Borrows and regions}
 
+\begin{frame}{Table of contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections,currentsection]
+\end{frame}
+
 \begin{frame}[t,fragile]{Borrows}
   
   A borrow is a temporary loan of a resource @a@
   \begin{itemize}
   \item
-    \textbf{Shared} borrows \tikzcoord{UX1}@&a@\tikzcoord{UX2} are for observing the resource (Unrestricted -- @un@)
+    \textbf{Shared} borrows \tikzcoord{UX1}@&a@\tikzcoord{UX2} are for observing the resource
     % \textbf{Shared} borrows \tikzcoord{UX1}@&a@\tikzcoord{UX2} which are Unrestricted (@un@)
   \item
-    \textbf{Exclusive} borrows \tikzcoord{AX1}@&!a@\tikzcoord{AX2} are for modifying the resource (Affine -- @aff@)
+    \textbf{Exclusive} borrows \tikzcoord{AX1}@&!a@\tikzcoord{AX2} are for modifying the resource
     % \textbf{Exclusive} borrows \tikzcoord{AX1}@&!a@\tikzcoord{AX2} which are Affine (@aff@)
   \end{itemize}
 
@@ -292,9 +303,14 @@ Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# "average" avg (* \Y One exclus
   \end{onlyenv}  
   \begin{tikzpicture}[remember picture,overlay]
     \begin{onlyenv}<2->
-      \node[code,color=yellow,fit=(A1) (A2)] {};
-      \node[code,color=red,fit=(U1) (U2)] {};
-      \node[code,color=red,fit=(U3) (U4)] {};
+      \node[code,color=yellow,fit=(A1) (A2)] (A) {};
+      \node[code,color=red,fit=(U1) (U2)] (UA) {};
+      \node[code,color=red,fit=(U3) (U4)] (UB) {};
+      \node[annot] at ($(UA)+(3,1)$) (un) { Unrestricted -- @un@ } ;
+      \draw[link] (un) to[out=180,in=80] (UA) ;
+      \draw[link] (un) to[out=0,in=100] (UB) ;
+      \node[annot] at ($(A)+(2,-1)$) (aff) { Affine -- @aff@ } ;
+      \draw[link] (aff) to[out=180,in=-80] (A) ;
     \end{onlyenv}
     \node[code,color=yellow,fit=(AX1) (AX2)] {};
     \node[code,color=red,fit=(UX1) (UX2)] {};
@@ -475,15 +491,20 @@ let main () =
 
 \section{Inference and constraints}
 
-\begin{frame}{Inference and constraints}
-
-  \begin{enumerate}
-  \item Elaborate regions
-  \item Generate constraints for type, linearity and escape checks
-  \item Solve the constraints
-  \item Simplify the resulting types
-  \end{enumerate}
+\begin{frame}{Table of contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections,currentsection]
 \end{frame}
+
+% \begin{frame}{Inference and constraints}
+
+%   \begin{enumerate}
+%   \item Elaborate regions
+%   \item Generate constraints for type, linearity and escape checks
+%   \item Solve the constraints
+%   \item Simplify the resulting types
+%   \end{enumerate}
+% \end{frame}
 
 % \begin{frame}[fragile]
 %   \frametitle{Inference in action}
@@ -549,7 +570,8 @@ let main () =
         }%
       };
 
-      \draw[link,->] (S1) to node[midway,above,sloped] {1. Elaborate regions} (S2) ;
+      \draw[link,->] (S1) to node[midway,above,sloped] {1. Elaborate} (S2) ;
+      \draw[link,->] (S1) to node[midway,below,sloped] {regions} (S2) ;
       
       \visible<2->{
         \node[annot,text width=4.8cm] at (8,0) (S3) {%
