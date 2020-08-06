@@ -87,21 +87,19 @@
 
 
 \begin{frame}
-  \frametitle{Motivation}
-
-  Memory safety is the cause of numerous bugs and security issues.
-  
-  Recent classification (2015-2020) of\\ \og high severity security bugs\fg in Chromium:
+  \frametitle{\og high severity security bugs\fg in Chromium}
 
   \begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\textwidth]
+    \includegraphics[width=0.7\textwidth]
     {chromium-use-after-free}
   \end{figure}
 
-  \pause
-  Chromium is written in C/C++!\\
-  Surely these bugs don't happen in high-level typed languages\alt<3>{ \dots right?}{.}
+  \visible<2->{
+    Chromium is written in C/C++!\\
+    Surely these bugs don't happen in high-level typed languages%
+    \alt<3>{ \dots right?}{.}
+  }
   
 \end{frame}
 
@@ -114,15 +112,8 @@ Dbm.add gradeDB "math" 42;
 (* ... *)
 Dbm.close gradeDB;
 (* ... *)
-print_int (Dbm.find gradeDB "literature") (* bug! *)
+print_int (Dbm.find gradeDB "literature") (* run-time error! *)
 \end{minted}
-  
-\end{frame}
-
-\begin{frame}
-  \frametitle{Solutions?}
-
-  \TODO{Existing ways to solve this}
   
 \end{frame}
 
@@ -136,7 +127,7 @@ Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# #\tikzcoord{string1}#"math"#\t
 (* ... *)
 Dbm.close gradeDB;
 (* ... *)
-print_int (Dbm.find #\tikzcoord{U1}#&gradeDB#\tikzcoord{U2}# "literature") (* \N Compile time error! *)
+print_int (Dbm.find #\tikzcoord{U1}#&gradeDB#\tikzcoord{U2}# "literature") (* \N compile-time error! *)
 \end{minted}
   \end{onlyenv}
   \begin{onlyenv}<4>
@@ -146,7 +137,7 @@ Dbm.add &!gradeDB "math" 42;
 (* ... *)
 Dbm.close gradeDB;
 (* ... *)
-print_string (Dbm.find &gradeDB "literature") (* \N Compile time error! *)
+print_string (Dbm.find &gradeDB "literature") (* \N compile-time error! *)
 \end{minted}
   \end{onlyenv}
   
@@ -216,15 +207,15 @@ type string : un
 type ('a : 'k) list : 'k
 \end{minted}
   \end{onlyenv}
-  \begin{onlyenv}<3>
+  \begin{onlyenv}<3->
 \begin{minted}[texcomments=true]{OCaml}
 type ('a : 'k) list : 'k
 val create_list : ('a : un) => int -> 'a -> 'a list
 \end{minted}
-
-    We also use \textbf{kind constraints} and \textbf{subkinding}\\
-    $\Rightarrow$ Type signatures are still reasonably simple!
-    \TODO{More on subkinding ?}
+    
+    \begin{onlyenv}<4>
+      We also use \textbf{subkinding}: @un <= aff <= lin@
+    \end{onlyenv}
   \end{onlyenv}
 \end{frame}
 
@@ -234,38 +225,43 @@ val create_list : ('a : un) => int -> 'a -> 'a list
 \begin{frame}[t,fragile]
   \frametitle{Functions and captures}
 
-  What about functions ? We can capture: 
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 let gradeDB = Dbm.open ... 
 
 let #\tikzcoord{fun1}#log_n_close#\tikzcoord{fun2}# msg = 
   printf "Closing: %s" msg;
-  Dbm.close gradeDB
+  Dbm.close #\tikzcoord{db1}#gradeDB#\tikzcoord{db2}#
 \end{minted}
   \begin{onlyenv}<3->
     We infer the type:
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-val conclude : string #\tikzcoord{arr1}##$\tarr{\texttt{lin}}$##\tikzcoord{arr2}# unit
+val log_n_close : string #\tikzcoord{arr1}##$\tarr{\texttt{lin}}$##\tikzcoord{arr2}# unit
 \end{minted}
   \end{onlyenv}
 
   \begin{tikzpicture}[remember picture,overlay]
-    \begin{onlyenv}<2>
+    \begin{onlyenv}<2->
       \node[code,fit=(fun1) (fun2)] (fun) {};
-      \draw[overlay,link,<-] (fun) to[out=30,in=180]
-      +(3,0.2) node[annot,scale=1,anchor=west,text width=3.2cm] {
-        This function \textbf{must}\\ be used exactly once
+      \node[code,fit=(db1) (db2)] (db) {};
+      \node[annot,scale=1.2]
+      at ($(fun)+(5,0.2)$) (capture) {
+        Capture!
       };
+      \draw[overlay,link] (fun) to[out=20,in=170] (capture) ;
+      \draw[overlay,link] (capture) to[out=-90,in=0] (db) ;
     \end{onlyenv}
     \begin{onlyenv}<3->
       \node[code,minimum height=18pt,fit=(arr1) (arr2)] (arr) {};
       \draw[overlay,link,<-] (arr) to[out=-110,in=70]
-      +(-1,-1) node[annot,scale=1,anchor=north] {
-        Arrows are annotated with their usage mode
+      +(-1,-1) node[annot,scale=1.2,anchor=north] {
+        Usage mode
       };
-      \node<4>[annot,scale=1.2,red] at ($(arr)+(4,1)$) {
-        \textbf{Warning}: This does not say anything about the arguments!!
+    \end{onlyenv}
+    \begin{onlyenv}<4>
+      \node[annot,scale=1.2,red] at ($(arr)+(4,1)$) (warn) {
+        \textbf{Warning}: Does not say anything about the arguments!!
       };
+      \draw[overlay,link,<-,red] (arr.north) to[out=70,in=-150] (warn.-175) ;
     \end{onlyenv}
   \end{tikzpicture}
 \end{frame}
@@ -274,10 +270,14 @@ val conclude : string #\tikzcoord{arr1}##$\tarr{\texttt{lin}}$##\tikzcoord{arr2}
 
 \begin{frame}[t,fragile]{Borrows}
   
-  Borrows allow to lend usage of something to someone else.
+  A borrow is a temporary loan of a resource @a@
   \begin{itemize}
-  \item \textbf{Shared} borrows \tikzcoord{UX1}@&a@\tikzcoord{UX2} which are Unrestricted (@un@)
-  \item \textbf{Exclusive} borrows \tikzcoord{AX1}@&!a@\tikzcoord{AX2} which are Affine (@aff@)
+  \item
+    \textbf{Shared} borrows \tikzcoord{UX1}@&a@\tikzcoord{UX2} are for observing the resource (Unrestricted -- @un@)
+    % \textbf{Shared} borrows \tikzcoord{UX1}@&a@\tikzcoord{UX2} which are Unrestricted (@un@)
+  \item
+    \textbf{Exclusive} borrows \tikzcoord{AX1}@&!a@\tikzcoord{AX2} are for modifying the resource (Affine -- @aff@)
+    % \textbf{Exclusive} borrows \tikzcoord{AX1}@&!a@\tikzcoord{AX2} which are Affine (@aff@)
   \end{itemize}
 
   \begin{onlyenv}<2->
@@ -289,9 +289,7 @@ let avg =
 in
 Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# "average" avg (* \Y One exclusive borrow *)
 \end{minted}
-  \end{onlyenv}
-  \visible<3>{There are rules to respect!}
-  
+  \end{onlyenv}  
   \begin{tikzpicture}[remember picture,overlay]
     \begin{onlyenv}<2->
       \node[code,color=yellow,fit=(A1) (A2)] {};
@@ -318,7 +316,7 @@ Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# "average" avg (* \Y One exclus
 % \end{minted}
 % \end{onlyenv}
 \begin{onlyenv}<1>
-  \textbf{Rule 1}: Cannot use a borrow and the thing itself simultaneously
+  \textbf{Rule 1}: Cannot use a borrow and the resource itself simultaneously
 \begin{minted}[texcomments=true]{OCaml}
 let gradeDB = ... in
 f (gradeDB, &gradeDB) (* \N Conflicting use and borrow! *)
@@ -367,7 +365,7 @@ let f () =
     \end{onlyenv}
   \end{tikzpicture}%
   \visible<5>{%
-    We use \textbf{indexed} kinds to check that borrows do not escape!
+    \textbf{Indexed} kinds ensure that borrows do not escape!
 
     Borrows of index $2$ cannot escape a region of index $1$.
   }
@@ -479,11 +477,9 @@ let main () =
 
 \begin{frame}{Inference and constraints}
 
-  Inference proceeds in the following steps:
-
   \begin{enumerate}
-  \item Infer where regions goes
-  \item Turn the type, linearity and escape checks into constraints
+  \item Elaborate regions
+  \item Generate constraints for type, linearity and escape checks
   \item Solve the constraints
   \item Simplify the resulting types
   \end{enumerate}
@@ -553,7 +549,7 @@ let main () =
         }%
       };
 
-      \draw[link,->] (S1) to node[midway,above,sloped] {1. Infer regions} (S2) ;
+      \draw[link,->] (S1) to node[midway,above,sloped] {1. Elaborate regions} (S2) ;
       
       \visible<2->{
         \node[annot,text width=4.8cm] at (8,0) (S3) {%
@@ -572,7 +568,7 @@ let main () =
           \end{align*}
         };
         \draw[link,->] (S2) to
-        node[midway,right,text width=3cm] {2. Convert\\ into constraints}
+        node[midway,right,text width=3cm] {2. Generate\\ constraints}
         (S3);
       }
 
@@ -603,7 +599,7 @@ let main () =
     1. Infer the placement of region based on the position of borrows and the borrowing rules.
   }%
   \only<2>{%
-    2. Convert into a custom constraint system based on HM(X).
+    2. Generate custom constraints based on HM(X).
   }%
   \only<3>{%
     3. Solve the constraints using a custom algorithm and obtain principal type schemes.
@@ -636,7 +632,6 @@ let main () =
 
 \begin{frame}
   \frametitle{The theory -- Summary}
-  In the paper, the theoretical contributions:
 
   \begin{itemize}
   \item A Syntax-directed type system for \lang\\
