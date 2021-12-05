@@ -1,0 +1,1329 @@
+\documentclass[aspectratio=169,dvipsnames,svgnames,10pt]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french, english]{babel}
+\selectlanguage{english}
+
+\usepackage{graphicx}
+
+% Math
+\usepackage{amsmath}
+% \usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+% \usepackage{mathrsfs}
+\usepackage{mathtools}
+\usepackage{textcomp}
+% \usepackage{textgreek}
+
+% Specialized packages
+% \usepackage{syntax} % Grammar definitions
+\usepackage{verbatim}
+\usepackage{listings} % Code
+\usepackage{xspace} % Useful for macros
+\usepackage{natbib}% Good citations and bibliography
+\usepackage{mathpartir} % Syntax trees
+\usepackage{colortbl}
+\usepackage{hhline}
+\usepackage{multicol}%multicolumn lists
+\usepackage{pifont}%% check mark
+\usepackage{minted}
+\usepackage{wasysym}
+\usepackage{skull}
+
+% \usepackage{mathptmx}
+% \usepackage[scaled=0.9]{helvet}
+\usepackage{beramono}
+
+\bibliographystyle{ACM-Reference-Format}
+\citestyle{acmauthoryear}
+\usepackage{appendixnumberbeamer}
+
+\usetheme{metropolis}
+\beamertemplatenavigationsymbolsempty
+\setbeamercovered{transparent=20}
+\metroset{
+  sectionpage=none,
+  numbering=fraction,
+  progressbar=foot,
+}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.text,backgrounds,positioning,shapes,
+  shadings,shadows,arrows,decorations.markings,calc,fit,fadings,
+  tikzmark,scopes
+}
+\input{tikz}
+
+\def\HUGE{\fontsize{35pt}{15pt}\selectfont}
+
+\input{prelude}
+\input{caml}
+\input{notations}
+\input{rulemacros}
+
+
+\newcommand\Y{{\color{Green}{\ding{52}}}}
+\newcommand\N{{\color{Red}{\ding{56}}}}
+\newcommand\M{{\color{Orange}{\textasciitilde}}}
+
+\lstset{
+  tabsize=4,
+  aboveskip={0.5\baselineskip},
+  belowcaptionskip=0.5\baselineskip,
+  basicstyle=\scriptsize\ttfamily,
+}
+
+\title{Kindly Bent To Free Us}
+\author{\textbf{Gabriel \textsc{Radanne}}
+  \and Hannes \textsc{Saffrich}
+  \and Peter \textsc{Thiemann}}
+\date{}
+
+\begin{document}
+
+\lstMakeShortInline[keepspaces,basicstyle=\small\ttfamily]@
+
+\frame[plain]{\titlepage}
+
+
+\begin{frame}
+  \frametitle{\og high severity security bugs\fg in Chromium}
+
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]
+    {chromium-use-after-free}
+  \end{figure}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{\og Use after free\fg}
+  \begin{columns}
+    \begin{column}{0.6\textwidth}
+      \begin{onlyenv}<1>
+        A \og Use after free\fg in C
+\begin{minted}{C}
+char *s = malloc(len);
+/* ... */
+free(s);
+/* ... */
+s[i] // bug!
+\end{minted}
+      \end{onlyenv}
+      \begin{onlyenv}<2,3>
+        Growable vectors in C
+\begin{minted}[texcomments=true]{C}
+struct vector {
+  int* data; int limit; int size;
+};
+
+struct vector v = init();
+/* ... */
+int *a = v.data; // Point to the content
+/* ... */
+push(v,2); // Vectors can grow
+/* ... */
+a[i] // bug! $\skull$
+\end{minted}
+      \end{onlyenv}%
+    \end{column}
+    \begin{column}{0.39\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \tikzset{
+          split/.style={rectangle split, draw, inner sep=0ex,
+            rectangle split horizontal,minimum size=2ex,text width=2ex},
+        }
+        \tikzset{
+          etiquette/.style={align=center,black!60,scale=0.8,text depth=0pt},
+          top etiquette/.style={etiquette,anchor=south,above=0pt of #1.north},
+          bottom etiquette/.style={etiquette,anchor=north,below=-1pt of #1.south},
+          onslide/.code args={<#1>#2}{\only<#1>{\pgfkeysalso{#2}}},
+        }
+        \tikzstyle{link}=[->,>=latex, rounded corners=6pt]
+        \tikzstyle{Tlink}=[link, thick]
+        \tikzstyle{vTlink}=[link, very thick]
+        \uncover<2>{
+          \node<2,3>[split,rectangle split parts=3] at (0,0) (mem) {\nodepart{two}\nodepart{three}};
+          \node<2,3>[bottom etiquette=mem] {\tt data};
+        }
+        \visible<3>{
+          \node[split,rectangle split parts=6] at (0,2) (mem2) {\nodepart{two}\nodepart{three}\nodepart{four}\nodepart{five}\nodepart{six}};
+          \node[top etiquette=mem2] {New \tt data};
+        }
+        \node<2,3> at (1,1) (v) {\tt v};
+        \node<2,3>[onslide=<2->{red}] at (-1,1) (a) {\tt a};
+        \draw<2>[Tlink] (v) to (mem);
+        \draw<3>[Tlink] (v) to (mem2);
+        \draw<2,3>[Tlink,onslide=<2->{red}] (a) to (mem);
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Let's write some OCaml code}
+
+  Surely everything is better in a high level strongly typed language:
+  
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB : database = Dbm.create "gradeDB" ... in
+Dbm.add gradeDB "math" 42;
+(* ... *)
+Dbm.close gradeDB;
+(* ... *)
+print_int (Dbm.find gradeDB "literature") (* run-time error! $\skull$ *)
+\end{minted}
+  
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Affe!}
+
+  \begin{onlyenv}<1-3>
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let gradeDB : #\tikzcoord{db1}#database#\tikzcoord{db2}# = Dbm.create "gradeDB" in
+Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# #\tikzcoord{string1}#"math"#\tikzcoord{string2}# 42;
+(* ... *)
+Dbm.close gradeDB;
+(* ... *)
+print_int (Dbm.find #\tikzcoord{U1}#&gradeDB#\tikzcoord{U2}# "literature") (* compile-time error! \N *)
+\end{minted}
+  \end{onlyenv}
+  \begin{onlyenv}<4>
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let gradeDB #\tikzcoord{eq1}#=#\tikzcoord{eq2}# Dbm.create "gradeDB" in
+Dbm.add &!gradeDB "math" 42;
+(* ... *)
+Dbm.close gradeDB;
+(* ... *)
+print_int (Dbm.find &gradeDB "literature") (* compile-time error! \N *)
+\end{minted}
+  \end{onlyenv}
+  
+  \begin{tikzpicture}[remember picture,overlay]
+    \begin{onlyenv}<2>
+      \node[code,fit=(db1) (db2)] (db) {};
+      \node[code,fit=(string1) (string2)] (string) {};
+      \node[overlay% ,text width=8.7cm
+      ,annot,scale=1.2] at (5,-0.7) {
+        Kinds determine usage
+        % \begin{itemize}
+        % \item Linear (@lin@): Used exactly once $[1]$
+        % \item Affine (@aff@): Used at most once $[0-1]$
+        % \item Unrestricted (@un@): Used arbitrarily many time $[0-\infty]$
+        % \end{itemize}
+      };
+      \draw[overlay,link] (db) to[out=60,in=-90]
+      +(0,1) node[annot,anchor=south]
+      {@type database : lin (* Linear kind *)@};
+      \draw[overlay,link] (string) to[out=-30,in=180]
+      +(1.5,-0.5) node[annot,anchor=west]
+      {@type string : un (* Unrestricted kind *)@};
+    \end{onlyenv}
+    \begin{onlyenv}<3>
+      \node[code,fit=(A1) (A2)] (A) {};
+      \node[code,fit=(U1) (U2)] (U) {};
+      \node[annot,scale=1.2] at ($(A)+(2,-0.8)$) (borrows) {Borrows!};
+      \draw[overlay,link,<-] (A) to[out=-30,in=150] (borrows) ;
+      \draw[overlay,link,<-] (U) to[out=120,in=-70] (borrows) ;
+    \end{onlyenv}
+    \begin{onlyenv}<4>
+      \node[code,fit=(eq1) (eq2)] (eq) {};
+      \draw[overlay,link,<-] (eq) to[out=90,in=-90]
+      +(0.5,1) node[annot,scale=1.2,anchor=south]
+      {Complete Type Inference};
+    \end{onlyenv}
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Table of contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{The \lang language}
+
+\subsection{Linearity through kinds}
+
+
+\begin{frame}[fragile]
+  \frametitle{Linearity through kinds}
+  
+  \textbf{Kinds determine usage:}
+  \begin{itemize}
+  \item Linear (@lin@): Used exactly once $[1]$
+  \item Affine (@aff@): Used at most once $[0-1]$
+  \item Unrestricted (@un@): Used arbitrarily many time $[0-\infty]$
+  \end{itemize}
+
+  \textbf{Examples:}
+  \begin{onlyenv}<1>
+\begin{minted}[texcomments=true]{OCaml}
+type database : lin
+type string : un
+\end{minted}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+\begin{minted}[texcomments=true]{OCaml}
+type ('a : 'k) list : 'k
+\end{minted}
+  \end{onlyenv}
+  \begin{onlyenv}<3->
+\begin{minted}[texcomments=true]{OCaml}
+type ('a : 'k) list : 'k
+val create_list : ('a : un) => int -> 'a -> 'a list
+\end{minted}
+    
+    \begin{onlyenv}<4>
+      We also use \textbf{subkinding}: @un <= aff <= lin@
+    \end{onlyenv}
+  \end{onlyenv}
+\end{frame}
+
+
+\subsection{Functions and captures}
+
+
+\begin{frame}{Table of contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections,currentsection]
+\end{frame}
+
+\begin{frame}[t,fragile]
+  \frametitle{Functions and captures}
+
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let gradeDB = Dbm.create "mydb" 
+
+let #\tikzcoord{fun1}#log_n_close#\tikzcoord{fun2}# msg = 
+  printf "Closing: %s" msg;
+  Dbm.close #\tikzcoord{db1}#gradeDB#\tikzcoord{db2}#
+\end{minted}
+  \begin{onlyenv}<3->
+    We infer the type:
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+val log_n_close : string #\tikzcoord{arr1}##$\tarr{\texttt{lin}}$##\tikzcoord{arr2}# unit
+\end{minted}
+  \end{onlyenv}
+
+  \begin{tikzpicture}[remember picture,overlay]
+    \begin{onlyenv}<2->
+      \node[code,fit=(fun1) (fun2)] (fun) {};
+      \node[code,fit=(db1) (db2)] (db) {};
+      \node[annot,scale=1.2]
+      at ($(fun)+(5,0.2)$) (capture) {
+        Capture!
+      };
+      \draw[overlay,link] (fun) to[out=20,in=170] (capture) ;
+      \draw[overlay,link] (capture) to[out=-90,in=0] (db) ;
+    \end{onlyenv}
+    \begin{onlyenv}<3->
+      \node[code,minimum height=18pt,fit=(arr1) (arr2)] (arr) {};
+      \draw[overlay,link,<-] (arr) to[out=-110,in=70]
+      +(-1,-1) node[annot,scale=1.2,anchor=north] {
+        Usage mode
+      };
+    \end{onlyenv}
+    \begin{onlyenv}<4>
+      \node[annot,scale=1.2,red] at ($(arr)+(4,1)$) (warn) {
+        \textbf{Warning}: Does not say anything about the arguments!!
+      };
+      \draw[overlay,link,<-,red] (arr.north) to[out=70,in=-150] (warn.-175) ;
+    \end{onlyenv}
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}[t,fragile]
+  \frametitle{Going polymorphic!}
+
+  
+  So far, we have seen limited polymorphism.
+
+  What is the type of @compose@ ?
+
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let compose f g x = f (g x)
+\end{minted}
+
+  The type of @compose f g@ depends on the linearity of @f@ and @g@.
+\begin{onlyenv}<2>
+\begin{lstlisting}
+val compose :
+  ('b -{'k_1}> 'a) -> ('c -{'k_2}> 'b) -{?}> 'c -{?}> 'a
+\end{lstlisting}\pause
+
+We would expect something of the form $\kappa_1 \sqcup \kappa_2$
+\end{onlyenv}
+
+\begin{onlyenv}<3>
+\begin{lstlisting}
+val compose :
+  ('k_1 <= 'k_2) =>
+  ('b -{'k_1}> 'a) -> ('c -{'k_2}> 'b) -{'k_1}> 'c -{'k_2}> 'a
+\end{lstlisting}
+
+We use kind inequalities and subkinding to express such constraints.
+
+This type is the most general and is inferred.
+\end{onlyenv}
+  
+\end{frame}
+
+\subsection{Borrows and regions}
+
+\begin{frame}{Table of contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections,currentsection]
+\end{frame}
+
+\begin{frame}[t,fragile]{Borrows}
+  
+  A borrow is a temporary loan of a resource @a@
+  \begin{itemize}
+  \item
+    \textbf{Shared} borrows \tikzcoord{UX1}@&a@\tikzcoord{UX2} are for observing the resource
+    % \textbf{Shared} borrows \tikzcoord{UX1}@&a@\tikzcoord{UX2} which are Unrestricted (@un@)
+  \item
+    \textbf{Exclusive} borrows \tikzcoord{AX1}@&!a@\tikzcoord{AX2} are for modifying the resource
+    % \textbf{Exclusive} borrows \tikzcoord{AX1}@&!a@\tikzcoord{AX2} which are Affine (@aff@)
+  \end{itemize}
+
+  \begin{onlyenv}<2->
+  A correct usage of borrows:
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let avg =
+  (Dbm.find #\tikzcoord{U1}#&gradeDB#\tikzcoord{U2}# "math" + Dbm.find #\tikzcoord{U3}#&gradeDB#\tikzcoord{U4}# "compsci") / 2
+  (* \Y Multiple shared borrows *)
+in
+Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# "average" avg (* \Y One exclusive borrow *)
+\end{minted}
+  \end{onlyenv}  
+  \begin{tikzpicture}[remember picture,overlay]
+    \begin{onlyenv}<2->
+      \node[code,color=yellow,fit=(A1) (A2)] (A) {};
+      \node[code,color=red,fit=(U1) (U2)] (UA) {};
+      \node[code,color=red,fit=(U3) (U4)] (UB) {};
+      \node[annot] at ($(UA)+(3,1)$) (un) { Unrestricted -- @un@ } ;
+      \draw[link] (un) to[out=180,in=80] (UA) ;
+      \draw[link] (un) to[out=0,in=100] (UB) ;
+      \node[annot] at ($(A)+(2,-1)$) (aff) { Affine -- @aff@ } ;
+      \draw[link] (aff) to[out=180,in=-80] (A) ;
+    \end{onlyenv}
+    \node[code,color=yellow,fit=(AX1) (AX2)] {};
+    \node[code,color=red,fit=(UX1) (UX2)] {};
+  \end{tikzpicture}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Borrows -- Example of uses}
+
+% \begin{onlyenv}<2>
+% \begin{minted}[texcomments=true]{OCaml}
+% let gradeDB = ... in
+% let avg =
+%  let grade topic = Dbm.find &gradeDB topic in (* \Y Capture *)
+%  (grade "math" + grade "compsci") / 2
+% in
+% Dbm.add &!gradeDB "average" avg (* \Y Exclusive borrow *)
+% \end{minted}
+% \end{onlyenv}
+\begin{onlyenv}<1>
+  \textbf{Rule 1}: Cannot use a borrow and the resource itself simultaneously
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+f (gradeDB, &gradeDB) (* \N Conflicting use and borrow! *)
+\end{minted}
+\end{onlyenv}%
+\begin{onlyenv}<2>
+  \textbf{Rule 2}: Cannot use an exclusive borrow and any other borrow simultaneously
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+f (&!gradeDB, &gradeDB) (* \N Conflicting borrows! *)
+\end{minted}
+\end{onlyenv}%
+\begin{onlyenv}<3->
+  \textbf{Rule 3}: Borrows must not escape
+  \begin{onlyenv}<3>
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let f () = 
+  let gradeDB = ... in
+  #\tikzcoord{R1}#let x = (&gradeDb, "mygrades") in#\tikzcoord{R2}#
+  #\tikzcoord{R3}#x#\tikzcoord{R4}#
+  (* \N Borrow escaping its scope! *)
+\end{minted}
+  \end{onlyenv}
+  \begin{onlyenv}<4->
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let f () = 
+  let gradeDB = ... in
+  #\tikzcoord{R1}#{| let x = (#\tikzcoord{B1}#&gradeDb#\tikzcoord{B2}#, "mygrades") in#\tikzcoord{R2}#
+  #\tikzcoord{R3}#x |}#\tikzcoord{R4}#
+  (* \N Borrow escaping its scope! *)
+\end{minted}
+  \end{onlyenv}%
+  \begin{tikzpicture}[remember picture,overlay]%
+    \begin{onlyenv}<4->
+      \node[code,rounded corners=0,color=red,fit=(R1) (R2)] {};
+      \node[code,rounded corners=0,minimum height=15pt,yshift=1pt,color=red,fit=(R3) (R4)] {};
+      \node[code,opacity=0,fit=(B1) (B2)] (B) {};
+    \end{onlyenv}
+    \begin{onlyenv}<5->
+      \draw[link,<-] (B.10) to[in=180,out=40] ++(0.5,0.5) node[annot, anchor=west] {
+        @&gradeDb : &(database, un_2)@
+      };
+      \draw[link,<-] (R2) to[in=90,out=-10] ++(1.5,-0.5) node[annot, anchor=north] {
+        Region nesting level: 1
+      };
+    \end{onlyenv}
+  \end{tikzpicture}%
+  \visible<5>{%
+    \textbf{Indexed} kinds ensure that borrows do not escape!
+
+    Borrows of index $2$ cannot escape a region of index $1$.
+  }
+\end{onlyenv}%
+\end{frame}
+
+\subsection{An example of API}
+
+\begin{frame}{Table of contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections,currentsection]
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The {\tt Dbm} API}
+
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+type 'a database : lin
+val create : string -> 'a database
+val close : 'a database -> unit
+
+val cardinal : &('a database, 'k) -> unit
+
+val find : ('a : un) => &('a database,'k) -> string #$\tarr{\texttt{'k}}$# 'a
+val add : ('a : aff) => &!('a database,'k) -> string #$\tarr{\texttt{'k}}$# 'a #$\tarr{\texttt{'k}}$# unit
+\end{minted}
+
+  All uses are qualified by their modes!
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Everything together}
+
+  The @Dbm@ API:
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+type 'a database : lin
+...
+val find : ('a : un) => &('a database,'k) -> string #$\tarr{\texttt{'k}}$# 'a
+val add : ('a : aff) => &!('a database,'k) -> string #$\tarr{\texttt{'k}}$# 'a #$\tarr{\texttt{'k}}$# unit
+\end{minted}
+  
+  \begin{onlyenv}<1->
+    A simple use:
+  \end{onlyenv}
+  \begin{onlyenv}<1>
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+let avg =
+  (Dbm.find &gradeDB "math" + Dbm.find &gradeDB "compsci") / 2
+
+in
+Dbm.add &!gradeDB "average" avg
+\end{minted}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+let avg =
+  let grade subject = Dbm.find &gradeDB subject in (* \Y Capture *)
+  (grade "math" + grade "compsci") / 2
+in
+Dbm.add &!gradeDB "average" avg
+\end{minted}
+  \end{onlyenv}
+  \begin{onlyenv}<3>
+\begin{minted}[texcomments=true]{OCaml}
+let gradeDB = ... in
+let avg =
+  let grade = Dbm.find &gradeDB in (* \Y Partial application *)
+  (grade "math" + grade "compsci") / 2
+in
+Dbm.add &!gradeDB "average" avg
+\end{minted}
+  \end{onlyenv}
+  \begin{onlyenv}<4->
+    \begin{onlyenv}<4>%
+\begin{minted}[texcomments=true]{OCaml}
+let average db subjects = 
+  List.map (Dbm.find db) subjects / List.length subjects
+let main () =
+  let gradeDB = ... in
+  let avg = average &gradeDB ["math";"compsci";...] in
+  Dbm.add &!gradeDB "average" avg
+\end{minted}
+    \end{onlyenv}%
+    \begin{onlyenv}<5>%
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let average db subjects #\tikzcoord{eq1}#=#\tikzcoord{eq2}#
+  List.map (Dbm.find db) subjects / List.length subjects
+let main () =
+  let gradeDB = ... in
+  let avg = #\tikzcoord{R1}#{| average &gradeDB ["math";"compsci";...] |}#\tikzcoord{R2}# in
+  #\tikzcoord{R3}#{| Dbm.add &!gradeDB "average" avg |}#\tikzcoord{R4}#
+\end{minted}
+    \end{onlyenv}%
+  \end{onlyenv}%
+  \begin{tikzpicture}[remember picture,overlay]%
+    \begin{onlyenv}<5>
+      \node[code,fit=(eq1) (eq2)] (eq) {};
+      \draw[overlay,link,<-] (eq) to[out=60,in=180]
+      +(0.5,0.5) node[annot,scale=1.2,anchor=west]
+      {No type annotation};
+      \node[code,rounded corners=0,color=red,fit=(R1) (R2)] (RA) {};
+      \node[code,rounded corners=0,color=yellow,fit=(R3) (R4)] (RB) {};
+      \node[annot,scale=1.2] at ($(R4)+(1,-1)$) (AR) {Disjoint regions};
+      \draw[link] (AR) to[out=90,in=-40] (RA.-8);
+      \draw[link] (AR) to[out=180,in=-40] (RB.-8);
+    \end{onlyenv}
+  \end{tikzpicture}%
+\end{frame}
+
+\section{A closer look at the theory}
+
+\begin{frame}{Table of contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections,currentsection]
+\end{frame}
+
+% \begin{frame}{Inference and constraints}
+
+%   \begin{enumerate}
+%   \item Elaborate regions
+%   \item Generate constraints for type, linearity and escape checks
+%   \item Solve the constraints
+%   \item Simplify the resulting types
+%   \end{enumerate}
+% \end{frame}
+
+% \begin{frame}[fragile]
+%   \frametitle{Inference in action}
+%   \begin{onlyenv}<1>%
+% \begin{minted}[texcomments=true]{OCaml}
+% let average db subjects = 
+%   List.map (Dbm.find db) subjects / List.length subjects
+
+% let main () =
+%   let gradeDB = ... in
+%   let avg = average &gradeDB ["math";"compsci";...] in
+%   Dbm.add &!gradeDB "average" avg
+% \end{minted}
+%   \end{onlyenv}%
+%   \begin{onlyenv}<2>%
+% \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+% let average db subjects =
+%   List.map (Dbm.find db) subjects / List.length subjects
+
+% let main () =
+%   let gradeDB = ... in
+%   let avg = #\tikzcoord{R1}#{| average &gradeDB ["math";"compsci";...] |}#\tikzcoord{R2}# in
+%   #\tikzcoord{R3}#{| Dbm.add &!gradeDB "average" avg |}#\tikzcoord{R4}#
+% \end{minted}
+%   \end{onlyenv}%
+%   \begin{tikzpicture}[remember picture,overlay]%
+%     \begin{onlyenv}<2>
+%       \node[code,rounded corners=0,color=red,fit=(R1) (R2)] (RA) {};
+%       \node[code,rounded corners=0,color=yellow,fit=(R3) (R4)] (RB) {};
+%     \end{onlyenv}
+%   \end{tikzpicture}%
+% \end{frame}
+
+
+\begin{frame}[fragile,t,shrink]
+  \frametitle{Behind the scene}
+
+  The rest of this talk:
+  \begin{center}
+    \begin{tikzpicture}[xscale=1,yscale=0.8]
+      \node[annot,text width=11.5cm,scale=0.5] at (0,4) (S1) {%
+\begin{minted}[texcomments=true]{OCaml}
+let average db subjects = 
+  List.map (Dbm.find db) subjects / List.length subjects
+
+let main () =
+  let gradeDB = ... in
+  let avg = average &gradeDB ["math";"compsci";...] in
+  Dbm.add &!gradeDB "average" avg
+\end{minted}
+      };
+      
+      \node[annot,text width=12cm,scale=0.5] at (8,4) (S2) {%
+\begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
+let average db subjects =
+  List.map (Dbm.find db) subjects / List.length subjects
+
+let main () =
+  let gradeDB = ... in
+  let avg = #\tikzcoord{R1}#{| average &gradeDB ["math";"compsci";...] |}#\tikzcoord{R2}# in
+  #\tikzcoord{R3}#{| Dbm.add &!gradeDB "average" avg |}#\tikzcoord{R4}#
+\end{minted}
+        \tikz[remember picture,overlay]{
+          \node[code,rounded corners=0,color=red,fit=(R1) (R2)] (RA) {};
+          \node[code,rounded corners=0,color=yellow,fit=(R3) (R4)] (RB) {};
+        }%
+      };
+
+      \draw[link,->] (S1) to node[midway,above,sloped] {1. Elaborate} (S2) ;
+      \draw[link,->] (S1) to node[midway,below,sloped] {regions} (S2) ;
+      
+      \visible<2->{
+        \node[annot,text width=4.8cm] at (8,0) (S3) {%
+          \vspace{-1em}
+          \begin{align*}
+            \E = &(\tvar_f : \kvar_f)
+                 (\tvar_x : \kvar_x)\dots\\
+            C = &(\tvar_f \leq \gamma \tarr{\kvar_1} \beta )
+                \Cand
+                (\gamma \leq \tvar_x)\\
+                &\Cand
+                (\beta \times  \tvar_x \leq \alpha_r)
+                \Cand
+                  (\kvar_x \leq \kun)\\
+                 &\Cand \dots
+          \end{align*}
+        };
+        \draw[link,->] (S2) to
+        node[midway,right,text width=3cm] {2. Generate\\ constraints}
+        (S3);
+      }
+
+      \begin{onlyenv}<3->
+        \node[annot,text width=10.5cm,scale=0.7] at (0.7,1) (S4) {
+          @val average : 'k_2 . &(database,'k) -{'k_2}> string list -{'k}> int list@
+        };
+        \draw[link,->] ($(S3.west)+(0,1)$) to
+        node[midway, above, sloped] {3. Solve}
+        node[midway, below, sloped] {constraints}
+        (S4.east);
+      \end{onlyenv}
+      
+      \begin{onlyenv}<4->
+        \node[annot,text width=9.7cm,scale=0.7] at (0.7,-1) (S5) {
+          @val average : &(database,'k) -> string list -{'k}> int list@
+        };
+        \draw[link,->] (S4) to
+        node[midway, left] {4. Simplify}
+        node[midway, right] {types}
+        (S5);
+      \end{onlyenv}
+
+    \end{tikzpicture}
+  \end{center}
+
+  \only<1>{%
+    1. Infer the placement of region based on the position of borrows and the borrowing rules.
+  }%
+  \only<2>{%
+    2. Generate custom constraints based on HM(X).
+  }%
+  \only<3>{%
+    3. Solve the constraints using a custom algorithm and obtain principal type schemes.
+  }%
+  \only<4>{%
+    4. Simplify the obtained type scheme by leveraging subkinding
+  }%
+
+\end{frame}
+
+\begin{frame}[fragile]{More precise syntax}
+
+  Let's clarify some syntax:
+
+  \begin{itemize}
+  \item
+    Kind constants are composed of a ``quality'' (unrestricted $\kun$, Affine $\kaff$, Linear $\klin$) and a ``level'' $n\in\Nat$.
+  \item
+    Borrows are noted
+    $\borrow[\kaff]{a}$ (Exclusive) and $\borrow[\kun]{a}$ (Shared).
+  \item
+    Borrow types are annotated with their kind: $\borrowty{k}{\tau}$.
+  \item
+    Regions annotated
+    with their ``nesting'' and inner borrows.
+  \end{itemize}
+
+  Example of code:
+\[
+  \setlength{\jot}{-1pt}
+  \begin{aligned}
+  \lam{a}{}\region[1]{\Sone a\MBORROW}{\ &%
+  \letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+  &\region[2]{\Sone x\MBORROW}{g\ (\borrow[\kaff]{x})};\\
+  &\region[2]{\Sone x\IBORROW}{f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})}\\
+  &\!\!\!}
+\end{aligned}
+\]
+\end{frame}
+
+\begin{frame}{Subkinding lattice}
+
+  \lang has subkinding. Kind constants respects the following lattice:
+  
+  \begin{center}
+  \begin{tikzpicture}
+    [->,auto,semithick, node distance=1.4cm, every node/.style={scale=1.1}]
+    \node(U) {$\kun_0$} ;
+    \node(A) [above left of=U] {$\kaff_0$} ;
+    \node(L) [above left of=A] {$\klin_0$} ;
+    \node(Un) [above right of=U] {$\kun_n$} ;
+    \node(An) [above left of=Un] {$\kaff_n$} ;
+    \node(Ln) [above left of=An] {$\klin_n$} ;
+    \node(Uinf) [above right of=Un] {$\kun_\infty$} ;
+    \node(Ainf) [above left of=Uinf] {$\kaff_\infty$} ;
+    \node(Linf) [above left of=Ainf] {$\klin_\infty$} ;
+    \path
+    (U) edge (A)
+    (A) edge (L)
+    (Un) edge (An)
+    (An) edge (Ln)
+    (Uinf) edge (Ainf)
+    (Ainf) edge (Linf)
+    ;
+    \path[dashed]
+    (U) edge (Un)
+    (A) edge (An)
+    (L) edge (Ln)
+    (Un) edge (Uinf)
+    (An) edge (Ainf)
+    (Ln) edge (Linf)
+    ;
+  \end{tikzpicture}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Resource management}
+  To model resource management in the theory, we consider the
+type $\tapp{\tres}{\tau}$ of content $\tau : \kun_0$
+  \begin{itemize}
+\item
+$\create$:
+$\forall{\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+{\tvar \tarr{} \tapp\tres\tvar}$
+% Creates a new resource.
+\item
+$\observe$:
+$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+{\borrowty[\IBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar}$
+% Reads from a shared borrow of a resource.
+\item
+$\update$:
+$\forall{\kvar\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+\borrowty[\MBORROW]{\kvar}{\tapp\tres\tvar} \tarr{} \tvar \tarr{\kaff} \tunit$
+% Writes to an exclusive borrow of a resource.
+\item
+$\destroy$:
+$\forall{\kvar_\tvar}\bvar{\tvar}{\kvar_\tvar}.\
+\qual{\Cleq {\kvar_\tvar} {\kun_0}}
+\tapp\tres\tvar \tarr{} \tunit$
+% Destroys a resource.
+\end{itemize}
+\end{frame}
+
+% \begin{frame}
+%   \frametitle{The calculus}
+%   \begin{columns}[t]
+%     \column{0.5\textwidth}
+%     \begin{align*}
+%       \htag{Expressions}
+%       e ::=&\ c\ |\ x\ |\ \app{e}{e'}\ |\ \lam{x}{e}\\
+%       % |&\ \fix{e}\tag{Fixpoint}\\
+%       |&\ \letin{x}{e}{e'}\\
+%       |&\ \introK{K}{e}\ |\ \elimK{K}{e}\\
+%     \end{align*}
+%     \column{0.5\textwidth}
+%     \begin{align*}
+%       \htag{Type Expressions}
+%       \tau ::=&\ \tvar\ |\ \tau\tarr{k}\tau\ |\ \tapp{\tcon}{(\tau^*)}\\
+%       k ::=&\ \kvar\ |\ \ell \in {\mathcal L}
+%     \end{align*}
+%   \end{columns}
+% \end{frame}
+
+\begin{frame}[fragile]{Regions}
+
+  Regions follow lexical scoping. For every borrow @&x@ or @&!x@, We define a region such that:
+\begin{enumerate}
+\item The region contains at least @&x@/@&!x@.
+\item The region is never larger than the scope of @x@.
+\item An exclusive borrow @&!x@ never share a region with any other borrow of @x@.
+\item A use of @x@ is never in the region of @&x@/@&!x@.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{Region inference}
+
+  The region inference algorithm in practice:
+  \setlength{\jot}{-1pt}
+  \begin{onlyenv}<1>
+    \begin{align*}
+      \lam{a}{}\ %
+      &\letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+      &g\ (\borrow[\kaff]{x});\\
+      &f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})\\
+    \end{align*}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+    \begin{align*}
+      \lam{a}{}\region[1]{\Sone a\MBORROW}{\ %
+      &\letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+      &g\ (\borrow[\kaff]{x});\\
+      &f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})\\
+      &\!\!\!}
+    \end{align*}
+  \end{onlyenv}
+  \begin{onlyenv}<3>
+    \begin{align*}
+      \lam{a}{}\region[1]{\Sone a\MBORROW}{\ %
+      &\letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+      &\region[2]{\Sone x\MBORROW}{g\ (\borrow[\kaff]{x})};\\
+      &f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})\\
+      &\!\!\!}
+    \end{align*}
+  \end{onlyenv}
+  \begin{onlyenv}<4>
+    \begin{align*}
+      \lam{a}{}\region[1]{\Sone a\MBORROW}{\ %
+      &\letin{x}{\app{f}{\borrow[\kaff]{a}}}{}\\
+      &\region[2]{\Sone x\MBORROW}{g\ (\borrow[\kaff]{x})};\\
+      &\region[2]{\Sone x\IBORROW}{f\ (\borrow[\kun]{x})\ (\borrow[\kun]{x})}\\
+      &\!\!\!}
+    \end{align*}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{Region inference}
+
+  Another example with explicit region annotations:
+\[
+  \setlength{\jot}{-1pt}
+  \RannotT{
+\begin{aligned}
+  \letin{&r}{\operatorname{ref}\ 0}{}\\
+  \lam{a}{}\ &
+  set\ r\ \region[]{}{g\ (\borrow[\kun]{a})};\\
+  &f\ (\borrow[\kun]{a})
+\end{aligned}
+}{
+\begin{aligned}
+  \letin{&r}{\operatorname{ref}\ 0}{}\\
+  \lam{a}{}\ &
+  set\ r\ \region[1]{\Sone a\IBORROW}{g\ (\borrow[\kun]{a})};\\
+  &\region[1]{\Sone a\IBORROW}{f\ (\borrow[\kun]{a})}
+\end{aligned}
+}
+\]
+\end{frame}
+
+\begin{frame}{Kinds during typing}
+
+  A traditional linear rule for pairs:
+
+  \begin{mathpar}
+    \inferrule
+    { \Gamma = \Gamma_1 \ltimes \Gamma_2 \\
+      \Gamma_1 \vdash e_1 : \tau_1 \\
+      \Gamma_2 \vdash e_2 : \tau_2
+    }
+    { \Gamma \vdash (e_1, e_2) : \tyPair{\tau_1}{\tau_2} }
+  \end{mathpar}
+
+  How to take kinds into account ?
+  
+\end{frame}
+
+\begin{frame}{Kinds during typing}
+  
+  We propagate constraints:
+  \begin{mathpar}
+    \inferrule
+    { \color{blue}{\lsplit{C}{\E}{\E_1}{\E_2}} \\
+      \inferS{C}{\E_1}{e_1}{\tau_1} \\
+      \inferS{C}{\E_2}{e_2}{\tau_2}
+    }
+    { \inferS{C}{\E}{\introPair{e_1}{e_2}}{\tyPair{\tau_1}{\tau_2}} }
+  \end{mathpar}
+  \pause
+  
+  And use a constraint-aware split:
+  \begin{center}
+    \begin{tabular}
+      {@{}>{$}r<{$}@{ $\vdash_e$ }
+      >{$}c<{$}@{ $=$ }
+      >{$}c<{$}@{ $\ltimes$ }
+      >{$}c<{$}r}
+
+      \Cleq{\schm}{\kun_\infty}
+      &\bvar{x}{\schm}&\bvar{x}{\schm}&\bvar{x}{\schm}
+      &Both\\\pause
+
+      {\Ctrue}&{B_x}&{B_x}&{\bnone}
+      &Left\\
+      {\Ctrue}&{B_x}&{\bnone}&{B_x}
+      &Right
+    \end{tabular}\\
+    $\vdots$
+  \end{center}
+\end{frame}
+
+\begin{frame}{How to split with regions}
+
+  To handle regions and borrows, we need special binders: 
+  \begin{center}
+    \begin{tabular}
+      {@{}>{$}r<{$}@{ $\vdash_e$ }
+      >{$}c<{$}@{ $=$ }
+      >{$}c<{$}@{ $\ltimes$ }
+      >{$}c<{$}r}
+
+      {\Cempty}
+      &{\bvar{\borrow[\IBORROW]{x}}{\schm}}
+      &{\bvar{\borrow[\IBORROW]{x}}{\schm}}&{\bvar{\borrow[\IBORROW]{x}}{\schm}}
+      &Borrow\\
+      
+      {\Cempty}
+      &{\bvar x \schm}&{\svar x \schm^n}&{\bvar x \schm}
+      &Susp\\
+
+      {\Cempty}
+      &{\bvar{\borrow x} \schm}&{\svar[\IBORROW] x \schm^n}&{\bvar{\borrow x} \schm}
+      &SuspB\\
+
+      {\Cempty}
+      &{\svar{x} \schm}&{\svar[\IBORROW] x \schm^n}&{\svar{x} \schm}
+      &SuspS\\
+    \end{tabular}
+  \end{center}
+
+  ${\bvar{\borrow[b]{x}}{\schm}}$ means a borrow is usable.
+
+  $\svar[b] x \schm^n$ means a borrow \emph{will be usable} when
+  we enter a region.
+
+  When we enter a region $\region[n]{\Sone x b}{\dots}$, we transform the binders of $x$ in the environment:
+  \begin{mathpar}
+    \inferrule{}{
+      \lregion{(\BORROW_n\lk k) \wedge (k \lk \BORROW_\infty)}{}
+      {\svar[\BORROW]{x}{\tau}^n}
+      {\bvar{\borrow[\BORROW]{x}}{\borrowty[\BORROW] k{\tau}}}
+    }
+  \end{mathpar}
+\end{frame}
+
+
+\begin{frame}{Constraints}
+
+  Constraints are a list of inequalities: $\Cleq{k}{k'}^*$
+
+  We can only use constraints in schemes:
+  \begin{align*}
+    \schm ::=&\ \forall\kvar^*\forall\bvar{\alpha}{k}^*.(\qual{C}{\tau})
+    &\text{Type schemes}\\
+    \kschm ::=&\ \forall\kvar^*.(\qual{C}{k_i^* \karr k})
+    &\text{Kind schemes}
+  \end{align*}\pause
+
+  We use these constraints to verify everything!
+\end{frame}
+
+\begin{frame}{Constraint and regions}
+
+  Consider the following program : 
+\[
+  \setlength{\jot}{-1pt}
+  \begin{aligned}
+  &\letin{x}{\texttt{create} ()}{}\\
+  &\region[n]{\Sone x\MBORROW}{g\ (\borrow[\kaff]{x})}\\
+\end{aligned}
+\]\pause
+
+We deduce the following:
+\begin{align*}
+  &(x : \tau) \wedge (\borrow[\kaff]{x} : \borrowty{k}{\tau}) \wedge
+  (\kaff_{n} \leq k) \wedge (k \leq \kaff_{\infty})\\\pause
+  &(g : \borrowty[\kaff]{k}{\tau}\tarr{\kvar}\tau') \wedge (\tau' : k') \wedge
+  (k' \leq \klin_{n-1})
+\end{align*}
+\pause
+Finally, we must verify and normalize the constraints
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Constraints \hfill Normalization}
+
+  Example : $\lam{f}{\lam{x}{(\app{f}{x},x)}}$
+
+  Raw constraints:
+  \begin{gather*}
+    (\tvar_f : \kvar_f)
+    (\tvar_x : \kvar_x)\dots\\
+    (\tvar_f \leq \gamma \tarr{\kvar_1} \beta )
+    \Cand
+    (\gamma \leq \tvar_x)
+    \Cand
+    (\beta * \tvar_x \leq \alpha_r)
+    \Cand
+    (\kvar_x \leq \kun)
+  \end{gather*}\pause
+
+  We unify the types and discover new constraints:
+  \begin{gather*}
+    \alpha_r =
+    (\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma\\
+    (\kvar_x \leq \kun)
+    \Cand
+    (\kvar_\gamma \leq \kvar_x)
+    \Cand
+    (\kvar_x \leq \kvar_r)
+    \Cand
+    (\kvar_\beta \leq \kvar_r)
+    \Cand
+    (\kvar_3 \leq \kvar_f)
+    \Cand
+    (\kvar_f \leq \kvar_1)
+  \end{gather*}
+\end{frame}
+
+\begin{frame}[plain]
+  \centering
+  \begin{gather*}
+    (\gamma : \kvar_\gamma) (\beta : \kvar_\beta).\
+    (\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma\\
+    \visible<7->{\kvar_\gamma = \kvar_x = \kun}
+    \visible<13>{\Cand \kvar_3 \leq \kvar_1}
+  \end{gather*}
+  \begin{tikzpicture}[every edge/.style=[link,->,>=latex,thick]]
+    \node<-11> (U) {$\kun$} ;
+    \node<-7>[above left=of U] (x) {$\kvar_x$} ;
+    \node<-10>[above=of x] (r) {$\kvar_r$};
+    \node<-7>[left=of x] (g) {$\kvar_\gamma$} ;
+    \node[right=of x] (b) {$\kvar_\beta$} ;
+    \node[right=of b] (3) {$\kvar_3$} ;
+    \node<-10>[above=of 3] (f) {$\kvar_f$} ;
+    \node[above=of f] (1) {$\kvar_1$} ;
+
+    \draw<1> (x) -> (U) ;
+    \draw<2-7> (x) to[bend right] (U) ;
+    \draw<-7> (x) -> (r) ;
+    \draw<-10> (b) -> (r) ;
+    \draw<-7> (g) -> (x) ;
+    \draw<-10> (3) -> (f) ;
+    \draw<-10> (f) -> (1) ;
+
+    \only<2-11>{\begin{scope}[dashed,gray]
+        \draw<-7> (U) to[bend right] (x) ;
+        \draw (U) to (b) ;
+        \draw<-7> (U) to[bend left] (g) ;
+        \draw<-10> (U) to (r) ;
+        \draw (U) to (1) ;
+        \draw (U) to (3) ;
+        \draw<-10> (U) to (f) ;
+      \end{scope}}
+    \visible<3-11>{\begin{scope}[dashed,gray]
+      \node[above left= 0.2 and 1 of 1] (A) {$\klin$} ;
+      \draw<-7> (x) to (A) ;
+      \draw (b) to (A) ;
+      \draw<-7> (g) to (A) ;
+      \draw<-10> (r) to (A) ;
+      \draw (1) to (A) ;
+      \draw (3) to (A) ;
+      \draw<-10> (f) to (A) ;
+      \draw (U) to[out=0,in=0,looseness=1.5] (A) ;
+    \end{scope}}
+
+  \visible<4-5>{
+    \begin{scope}[scale=0.7,xscale=0.9,transform shape, xshift=8cm,yshift=2cm]
+      \node (a1) {$\kvar$};
+      \node[above right=of a1] (a2) {$\kvar_1$};
+      \node[above left=of a1] (a3) {$\kvar_2$};
+      \node[above=of a2] (l2) {$\ell_1$};
+      \node[above=of a3] (l3) {$\ell_2$};
+      \draw (a1) to (a2) ;
+      \draw (a1) to (a3) ;
+      \draw (a2) to (l2) ;
+      \draw (a3) to (l3) ;
+    \visible<5>{\begin{scope}[dashed,gray]
+      \node[above=of a1] (l1) {$\ell_1 \wedge \ell_2$};
+      \draw (a1) to (l1) ;
+      \draw (l1) to (l2) ;
+      \draw (l1) to (l3) ;
+    \end{scope}}
+      \node[scale=1.3, xscale=1.1,draw=Grey, rectangle, rounded corners=10pt, fit=(a1) (l2) (l3)] {};
+    \end{scope}
+  }
+
+  \begin{scope}[on background layer]
+    \visible<6-7>{
+      \node[fill=green!20,draw=green,
+      inner sep=-1mm,ellipse,rotate fit=-20,fit=(U) (x) (g)] {};
+    }
+    \visible<9-10>{
+      \node[fill=red!20,draw=red, inner sep=-2pt, circle,fit=(r)] {};
+      \node[fill=red!20,draw=red, inner sep=-2pt, circle,fit=(f)] {};
+    }
+  \end{scope}
+
+  \draw<10-13> (3) to[bend right] (1) ;
+
+  \end{tikzpicture}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Constraints \hfill Normalization}
+
+  Normalization is complete and principal.
+  \begin{gather*}
+    \lam{f}{\lam{x}{(\app{f}{x},x)}}: \\
+    \forall \kvar_\beta \kvar_1 \kvar_2 \kvar_3
+    (\gamma : \kun) (\beta : \kvar_\beta).\ %
+    \qual
+    {\Cleq{\kvar_3}{\kvar_1}}
+    {(\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma}
+  \end{gather*}
+
+
+
+\end{frame}
+
+\defverbatim{\CompAA}{
+\begin{lstlisting}
+let compose f g x = f (g x)
+val compose :
+  ('k1 < 'k) & ('k1 < 'k3) =>
+  ('b -{'k1}> 'a) -> ('c -{'k}> 'b) -{'k3}>
+  'c -{'k}> 'a
+\end{lstlisting}
+}
+
+
+\begin{frame}[fragile]
+  \frametitle{Constraints \hfill Simplification rules}
+
+  Well known simplifications on constraints:
+  \begin{itemize}
+  \item Replace variable in positive position by their lower bound
+  \item Replace variable in negative position by their upper bound
+  \end{itemize}
+
+  \begin{align*}
+    \only<2>{
+      \forall \kvar_\beta \kvar_1 \kvar_2 \kvar_3
+      (\gamma : \kun) (\beta : \kvar_\beta).&
+      \qual
+      {\Cleq{\kvar_3}{\kvar_1}}
+      {(\gamma \tarr{\kvar_3} \beta) \tarr{\kvar_2} \gamma \tarr{\kvar_1} \beta * \gamma}}
+    \only<3>{
+      \forall \kvar_\beta \kvar_1 \kvar_3
+      (\gamma : \kun) (\beta : \kvar_\beta).&
+      \qual
+      {\Cleq{\kvar_3}{\kvar_1}}
+      {(\gamma \tarr{\kvar_3} \beta) \tarr{} \gamma \tarr{\kvar_1} \beta * \gamma}}
+    \only<4->{
+      \forall \kvar_\beta \kvar
+      (\gamma : \kun) (\beta : \kvar_\beta).&
+      {(\gamma \tarr{\kvar} \beta) \tarr{} \gamma \tarr{\kvar} \beta * \gamma}}
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Constraints -- Tricky bits}
+  Some tricky bits on constraints:
+  \begin{itemize}
+  \item Kinds might be polymorphic, and not all instances will
+    have the same kinds
+  \item Constraint solving is perf-sensitive! Adding too much power
+    there (notably, disjunctions) is problematic.
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Constraints}
+  The only requirement is that $\ell^\bot = \kun$.\pause
+
+  \begin{itemize}
+  \item $\kaff$ doesn't appear in the typing rules.
+
+    It only comes from the buitins and/or the type declarations.
+  \item The lattice doesn't have to be finite.
+  \item The constraint language can be expanded further.
+  \end{itemize}
+\end{frame}
+
+
+
+\section*{Conclusion}
+
+
+
+\begin{frame}
+  \frametitle{The \lang language -- Summary}
+
+  Paper: ``Kindly Bent to Free Us'' -- ICFP2020\\
+  Prototype: \url{https://affe.netlify.com/}  
+  
+  \begin{itemize}
+  \item[\Y] Linearity, Closures, Borrows and Regions\\
+    $\Rightarrow$ Good support for both imperative and functional programming
+  \item[\Y] Support managed and unmanaged objects
+  \item[\Y] Principal type inference
+  \item[\N] No flow sensitivity
+  \item[\N] No concurrency story (yet)
+  \end{itemize}
+  
+  Many examples in the paper: files, session types, semi-persistent arrays, iterators, connection pools, \dots
+\end{frame}
+
+\begin{frame}
+  \frametitle{The theory -- Summary}
+
+  In the paper:
+
+  \begin{itemize}
+  \item A Syntax-directed type system for \lang\\
+    $\Rightarrow$ How to encode borrows into an ML-style type-system
+  \item A formal semantics that takes allocations into account (+ proof of soundness)
+  \item An inference algorithm for \lang:
+    \begin{itemize}
+    \item An extension of HM(X) with kinds
+    \item A novel constraint systems to encode linearity and borrows
+    \item A constraint solving algorithm, and its proof of completeness
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[standout]
+
+  \centering\Huge\texttt{Close(Talk)}
+  
+\end{frame}
+
+\bibliography{biblio}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-command-extra-options: "-shell-escape"
+%%% TeX-master: t
+%%% End:
