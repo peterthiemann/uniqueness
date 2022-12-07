@@ -193,3 +193,6 @@ auto/
 # Ocaml
 *.cmi
 *.cmo
+
+# MAC
+.DS_Store
