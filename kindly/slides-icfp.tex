@@ -2,8 +2,8 @@
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[french, english]{babel}
-\selectlanguage{english}
+%\usepackage[french, english]{babel}
+%\selectlanguage{english}
 
 \usepackage{graphicx}
 
@@ -22,8 +22,8 @@
 \usepackage{verbatim}
 \usepackage{listings} % Code
 \usepackage{xspace} % Useful for macros
-\usepackage{natbib}% Good citations and bibliography
-\usepackage{mathpartir} % Syntax trees
+%\usepackage{natbib}% Good citations and bibliography
+%\usepackage{mathpartir} % Syntax trees
 \usepackage{colortbl}
 \usepackage{hhline}
 \usepackage{multicol}%multicolumn lists
@@ -35,8 +35,8 @@
 % \usepackage[scaled=0.9]{helvet}
 \usepackage{beramono}
 
-\bibliographystyle{ACM-Reference-Format}
-\citestyle{acmauthoryear}
+% \bibliographystyle{ACM-Reference-Format}
+% \citestyle{acmauthoryear}
 \usepackage{appendixnumberbeamer}
 
 \usetheme{metropolis}
@@ -75,10 +75,10 @@
 }
 
 \title{Kindly Bent To Free Us}
-\author{\textbf{Gabriel \textsc{Radanne}}
-  \and Hannes \textsc{Saffrich}
-  \and Peter \textsc{Thiemann}}
-\date{}
+\author{{Gabriel {Radanne}}
+  \and Hannes {Saffrich}
+  \and \textbf{Peter {Thiemann}}}
+\date{ICFP 2020}
 
 \begin{document}
 
@@ -108,12 +108,12 @@
   \frametitle{Let's write some OCaml code}
 
 \begin{minted}{OCaml}
-let gradeDB : database = Dbm.opendbm "gradeDB" ... in
-Dbm.add gradeDB "math" 42;
+let gradeKV : kv_store = KVs.opendbm "grades" ... in
+KVs.add gradeKV "math" 42;
 (* ... *)
-Dbm.close gradeDB;
+KVs.close gradeKV;
 (* ... *)
-print_int (Dbm.find gradeDB "literature") (* run-time error! *)
+print_int (KVs.find gradeKV "literature") (* run-time error! *)
 \end{minted}
   
 \end{frame}
@@ -123,22 +123,22 @@ print_int (Dbm.find gradeDB "literature") (* run-time error! *)
 
   \begin{onlyenv}<1-3>
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-let gradeDB : #\tikzcoord{db1}#database#\tikzcoord{db2}# = Dbm.opendbm "gradeDB" ... in
-Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# #\tikzcoord{string1}#"math"#\tikzcoord{string2}# 42;
+let gradeKV : #\tikzcoord{db1}#kv_store#\tikzcoord{db2}# = KVs.opendbm "grades" ... in
+KVs.add #\tikzcoord{A1}#&!gradeKV#\tikzcoord{A2}# #\tikzcoord{string1}#"math"#\tikzcoord{string2}# 42;
 (* ... *)
-Dbm.close gradeDB;
+KVs.close gradeKV;
 (* ... *)
-print_int (Dbm.find #\tikzcoord{U1}#&gradeDB#\tikzcoord{U2}# "literature") (* \N compile-time error! *)
+print_int (KVs.find #\tikzcoord{U1}#&gradeKV#\tikzcoord{U2}# "literature") (* \N compile-time error! *)
 \end{minted}
   \end{onlyenv}
   \begin{onlyenv}<4>
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-let gradeDB #\tikzcoord{eq1}#=#\tikzcoord{eq2}# Dbm.opendbm "gradeDB" ... in
-Dbm.add &!gradeDB "math" 42;
+let gradeKV #\tikzcoord{eq1}#=#\tikzcoord{eq2}# KVs.opendbm "grades" ... in
+KVs.add &!gradeKV "math" 42;
 (* ... *)
-Dbm.close gradeDB;
+KVs.close gradeKV;
 (* ... *)
-print_int (Dbm.find &gradeDB "literature") (* \N compile-time error! *)
+print_int (KVs.find &gradeKV "literature") (* \N compile-time error! *)
 \end{minted}
   \end{onlyenv}
   
@@ -148,7 +148,7 @@ print_int (Dbm.find &gradeDB "literature") (* \N compile-time error! *)
       \node[code,fit=(string1) (string2)] (string) {};
       \node[overlay% ,text width=8.7cm
       ,annot,scale=1.2] at (5,-0.7) {
-        Kinds determine usage
+        Kinds restrict usage
         % \begin{itemize}
         % \item Linear (@lin@): Used exactly once $[1]$
         % \item Affine (@aff@): Used at most once $[0-1]$
@@ -157,7 +157,7 @@ print_int (Dbm.find &gradeDB "literature") (* \N compile-time error! *)
       };
       \draw[overlay,link] (db) to[out=60,in=-90]
       +(0,1) node[annot,anchor=south]
-      {@type database : lin (* Linear kind *)@};
+      {@type kv_store : lin (* Linear kind *)@};
       \draw[overlay,link] (string) to[out=-30,in=180]
       +(1.5,-0.5) node[annot,anchor=west]
       {@type string : un (* Unrestricted kind *)@};
@@ -189,17 +189,18 @@ print_int (Dbm.find &gradeDB "literature") (* \N compile-time error! *)
 \begin{frame}[fragile]
   \frametitle{Linearity through kinds}
   
-  \textbf{Kinds determine usage:}
+  \textbf{Kinds restrict usage:}
   \begin{itemize}
   \item Linear (@lin@): Used exactly once $[1]$
   \item Affine (@aff@): Used at most once $[0-1]$
   \item Unrestricted (@un@): Used arbitrarily many time $[0-\infty]$
+  \item<2-> Kinds can be polymorphic!
   \end{itemize}
 
   \textbf{Examples:}
   \begin{onlyenv}<1>
 \begin{minted}[texcomments=true]{OCaml}
-type database : lin
+type kv_store : lin
 type string : un
 \end{minted}
   \end{onlyenv}
@@ -233,11 +234,11 @@ val create_list : ('a : un) => int -> 'a -> 'a list
   \frametitle{Functions and captures}
 
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-let gradeDB = Dbm.open ... 
+let gradeKV = KVs.open ... 
 
 let #\tikzcoord{fun1}#log_n_close#\tikzcoord{fun2}# msg = 
   printf "Closing: %s" msg;
-  Dbm.close #\tikzcoord{db1}#gradeDB#\tikzcoord{db2}#
+  KVs.close #\tikzcoord{db1}#gradeKV#\tikzcoord{db2}#
 \end{minted}
   \begin{onlyenv}<3->
     We infer the type:
@@ -266,7 +267,7 @@ val log_n_close : string #\tikzcoord{arr1}##$\tarr{\texttt{lin}}$##\tikzcoord{ar
     \end{onlyenv}
     \begin{onlyenv}<4>
       \node[annot,scale=1.2,red] at ($(arr)+(4,1)$) (warn) {
-        \textbf{Warning}: Does not say anything about the arguments!!
+        \textbf{Warning}: Does not say anything about the arguments
       };
       \draw[overlay,link,<-,red] (arr.north) to[out=70,in=-150] (warn.-175) ;
     \end{onlyenv}
@@ -282,7 +283,8 @@ val log_n_close : string #\tikzcoord{arr1}##$\tarr{\texttt{lin}}$##\tikzcoord{ar
 
 \begin{frame}[t,fragile]{Borrows}
   
-  A borrow is a temporary loan of a resource @a@
+  Let @a@ be a (linear or affine) resource. 
+  A \emph{borrow} is a temporary loan of @a@.
   \begin{itemize}
   \item
     \textbf{Shared} borrows \tikzcoord{UX1}@&a@\tikzcoord{UX2} are for observing the resource
@@ -296,10 +298,10 @@ val log_n_close : string #\tikzcoord{arr1}##$\tarr{\texttt{lin}}$##\tikzcoord{ar
   A correct usage of borrows:
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 let avg =
-  (Dbm.find #\tikzcoord{U1}#&gradeDB#\tikzcoord{U2}# "math" + Dbm.find #\tikzcoord{U3}#&gradeDB#\tikzcoord{U4}# "compsci") / 2
+  (KVs.find #\tikzcoord{U1}#&gradeKV#\tikzcoord{U2}# "math" + KVs.find #\tikzcoord{U3}#&gradeKV#\tikzcoord{U4}# "compsci") / 2
   (* \Y Multiple shared borrows *)
 in
-Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# "average" avg (* \Y One exclusive borrow *)
+KVs.add #\tikzcoord{A1}#&!gradeKV#\tikzcoord{A2}# "average" avg (* \Y One exclusive borrow *)
 \end{minted}
   \end{onlyenv}  
   \begin{tikzpicture}[remember picture,overlay]
@@ -324,26 +326,31 @@ Dbm.add #\tikzcoord{A1}#&!gradeDB#\tikzcoord{A2}# "average" avg (* \Y One exclus
 
 % \begin{onlyenv}<2>
 % \begin{minted}[texcomments=true]{OCaml}
-% let gradeDB = ... in
+% let gradeKV = ... in
 % let avg =
-%  let grade topic = Dbm.find &gradeDB topic in (* \Y Capture *)
+%  let grade topic = KVs.find &gradeKV topic in (* \Y Capture *)
 %  (grade "math" + grade "compsci") / 2
 % in
-% Dbm.add &!gradeDB "average" avg (* \Y Exclusive borrow *)
+% KVs.add &!gradeKV "average" avg (* \Y Exclusive borrow *)
 % \end{minted}
 % \end{onlyenv}
 \begin{onlyenv}<1>
   \textbf{Rule 1}: Cannot use a borrow and the resource itself simultaneously
 \begin{minted}[texcomments=true]{OCaml}
-let gradeDB = ... in
-f (gradeDB, &gradeDB) (* \N Conflicting use and borrow! *)
+let gradeKV = ... in
+f (gradeKV, &gradeKV) (* \N Conflict: direct use and borrow! *)
 \end{minted}
 \end{onlyenv}%
 \begin{onlyenv}<2>
   \textbf{Rule 2}: Cannot use an exclusive borrow and any other borrow simultaneously
 \begin{minted}[texcomments=true]{OCaml}
-let gradeDB = ... in
-f (&!gradeDB, &gradeDB) (* \N Conflicting borrows! *)
+let gradeKV = ... in
+f (&!gradeKV, &gradeKV) (* \N Conflicting borrows! *)
+\end{minted}
+  Two shared borrows are ok
+\begin{minted}[texcomments=true]{OCaml}
+let gradeKV = ... in
+f (&gradeKV, &gradeKV) (* \Y two shared borrows *)
 \end{minted}
 \end{onlyenv}%
 \begin{onlyenv}<3->
@@ -351,8 +358,9 @@ f (&!gradeDB, &gradeDB) (* \N Conflicting borrows! *)
   \begin{onlyenv}<3>
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 let f () = 
-  let gradeDB = ... in
-  #\tikzcoord{R1}#let x = (&gradeDb, "mygrades") in#\tikzcoord{R2}#
+  let gradeKV = ... in
+  #\tikzcoord{R1}#let x = (&gradeKV, "mygrades") in#\tikzcoord{R2}#
+  let clean_up = KVs.close gradeKV in
   #\tikzcoord{R3}#x#\tikzcoord{R4}#
   (* \N Borrow escaping its scope! *)
 \end{minted}
@@ -360,21 +368,22 @@ let f () =
   \begin{onlyenv}<4->
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 let f () = 
-  let gradeDB = ... in
-  #\tikzcoord{R1}#{| let x = (#\tikzcoord{B1}#&gradeDb#\tikzcoord{B2}#, "mygrades") in#\tikzcoord{R2}#
+  let gradeKV = ... in
+  #\tikzcoord{R1}#{| let x = (#\tikzcoord{B1}#&gradeKV#\tikzcoord{B2}#, "mygrades") in#\tikzcoord{R2}#
+  let clean_up = KVs.close gradeKV in
   #\tikzcoord{R3}#x |}#\tikzcoord{R4}#
   (* \N Borrow escaping its scope! *)
 \end{minted}
   \end{onlyenv}%
   \begin{tikzpicture}[remember picture,overlay]%
     \begin{onlyenv}<4->
-      \node[code,rounded corners=0,color=red,fit=(R1) (R2)] {};
+      \node[code,rounded corners=0,color=red,fit=(R1) (R2) (R4)] {};
       \node[code,rounded corners=0,minimum height=15pt,yshift=1pt,color=red,fit=(R3) (R4)] {};
       \node[code,opacity=0,fit=(B1) (B2)] (B) {};
     \end{onlyenv}
     \begin{onlyenv}<5->
       \draw[link,<-] (B.10) to[in=180,out=40] ++(0.5,0.5) node[annot, anchor=west] {
-        @&gradeDb : &(database, un_2)@
+        @&gradeDb : &(kv_store, un_2)@
       };
       \draw[link,<-] (R2) to[in=90,out=-10] ++(1.5,-0.5) node[annot, anchor=north] {
         Region nesting level: 1
@@ -391,11 +400,11 @@ let f () =
 
 % \begin{frame}[fragile]{API}
 
-%   {\Large The \texttt{Dbm} API:}
+%   {\Large The \texttt{KVs} API:}
 % \begin{minted}[texcomments=true]{OCaml}
-% type database : lin
-% val find : &(database,'k) -> string -{'k}> int
-% val add : &!(database,'k) -> string -{'k}> int -{'k}> unit
+% type kv_store : lin
+% val find : &(kv_store,'k) -> string -{'k}> int
+% val add : &!(kv_store,'k) -> string -{'k}> int -{'k}> unit
 % \end{minted}
   
 % \end{frame}
@@ -413,11 +422,11 @@ let f () =
 \begin{frame}[fragile]
   \frametitle{Everything together}
 
-  The @Database@ API:
+  The @Kv_Store@ API:
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
-type database : lin
-val find : &(database,'k) -> string #$\tarr{\texttt{'k}}$# int
-val add : &!(database,'k) -> string #$\tarr{\texttt{'k}}$# int #$\tarr{\texttt{'k}}$# unit
+type kv_store : lin
+val find : &(kv_store,'k) -> string #$\tarr{\texttt{'k}}$# int
+val add : &!(kv_store,'k) -> string #$\tarr{\texttt{'k}}$# int #$\tarr{\texttt{'k}}$# unit
 \end{minted}
   
   \begin{onlyenv}<2->
@@ -425,53 +434,53 @@ val add : &!(database,'k) -> string #$\tarr{\texttt{'k}}$# int #$\tarr{\texttt{'
   \end{onlyenv}
   \begin{onlyenv}<2>
 \begin{minted}[texcomments=true]{OCaml}
-let gradeDB = ... in
+let gradeKV = ... in
 let avg =
-  (Dbm.find &gradeDB "math" + Dbm.find &gradeDB "compsci") / 2
+  (KVs.find &gradeKV "math" + KVs.find &gradeKV "compsci") / 2
 
 in
-Dbm.add &!gradeDB "average" avg
+KVs.add &!gradeKV "average" avg
 \end{minted}
   \end{onlyenv}
   \begin{onlyenv}<3>
 \begin{minted}[texcomments=true]{OCaml}
-let gradeDB = ... in
+let gradeKV = ... in
 let avg =
-  let grade subject = Dbm.find &gradeDB subject in (* \Y Capture *)
+  let grade subject = KVs.find &gradeKV subject in (* \Y Capture *)
   (grade "math" + grade "compsci") / 2
 in
-Dbm.add &!gradeDB "average" avg
+KVs.add &!gradeKV "average" avg
 \end{minted}
   \end{onlyenv}
   \begin{onlyenv}<4>
 \begin{minted}[texcomments=true]{OCaml}
-let gradeDB = ... in
+let gradeKV = ... in
 let avg =
-  let grade = Dbm.find &gradeDB in (* \Y Partial application *)
+  let grade = KVs.find &gradeKV in (* \Y Partial application *)
   (grade "math" + grade "compsci") / 2
 in
-Dbm.add &!gradeDB "average" avg
+KVs.add &!gradeKV "average" avg
 \end{minted}
   \end{onlyenv}
   \begin{onlyenv}<5->
     \begin{onlyenv}<5>%
 \begin{minted}[texcomments=true]{OCaml}
 let average db subjects = 
-  List.map (Dbm.find db) subjects / List.length subjects
+  List.map (KVs.find db) subjects / List.length subjects
 let main () =
-  let gradeDB = ... in
-  let avg = average &gradeDB ["math";"compsci";...] in
-  Dbm.add &!gradeDB "average" avg
+  let gradeKV = ... in
+  let avg = average &gradeKV ["math";"compsci";...] in
+  KVs.add &!gradeKV "average" avg
 \end{minted}
     \end{onlyenv}%
     \begin{onlyenv}<6>%
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 let average db subjects #\tikzcoord{eq1}#=#\tikzcoord{eq2}#
-  List.map (Dbm.find db) subjects / List.length subjects
+  List.map (KVs.find db) subjects / List.length subjects
 let main () =
-  let gradeDB = ... in
-  let avg = #\tikzcoord{R1}#{| average &gradeDB ["math";"compsci";...] |}#\tikzcoord{R2}# in
-  #\tikzcoord{R3}#{| Dbm.add &!gradeDB "average" avg |}#\tikzcoord{R4}#
+  let gradeKV = ... in
+  let avg = #\tikzcoord{R1}#{| average &gradeKV ["math";"compsci";...] |}#\tikzcoord{R2}# in
+  #\tikzcoord{R3}#{| KVs.add &!gradeKV "average" avg |}#\tikzcoord{R4}#
 \end{minted}
     \end{onlyenv}%
   \end{onlyenv}%
@@ -512,23 +521,23 @@ let main () =
 %   \begin{onlyenv}<1>%
 % \begin{minted}[texcomments=true]{OCaml}
 % let average db subjects = 
-%   List.map (Dbm.find db) subjects / List.length subjects
+%   List.map (KVs.find db) subjects / List.length subjects
 
 % let main () =
-%   let gradeDB = ... in
-%   let avg = average &gradeDB ["math";"compsci";...] in
-%   Dbm.add &!gradeDB "average" avg
+%   let gradeKV = ... in
+%   let avg = average &gradeKV ["math";"compsci";...] in
+%   KVs.add &!gradeKV "average" avg
 % \end{minted}
 %   \end{onlyenv}%
 %   \begin{onlyenv}<2>%
 % \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 % let average db subjects =
-%   List.map (Dbm.find db) subjects / List.length subjects
+%   List.map (KVs.find db) subjects / List.length subjects
 
 % let main () =
-%   let gradeDB = ... in
-%   let avg = #\tikzcoord{R1}#{| average &gradeDB ["math";"compsci";...] |}#\tikzcoord{R2}# in
-%   #\tikzcoord{R3}#{| Dbm.add &!gradeDB "average" avg |}#\tikzcoord{R4}#
+%   let gradeKV = ... in
+%   let avg = #\tikzcoord{R1}#{| average &gradeKV ["math";"compsci";...] |}#\tikzcoord{R2}# in
+%   #\tikzcoord{R3}#{| KVs.add &!gradeKV "average" avg |}#\tikzcoord{R4}#
 % \end{minted}
 %   \end{onlyenv}%
 %   \begin{tikzpicture}[remember picture,overlay]%
@@ -546,24 +555,24 @@ let main () =
       \node[annot,text width=11.5cm,scale=0.5] at (0,4) (S1) {%
 \begin{minted}[texcomments=true]{OCaml}
 let average db subjects = 
-  List.map (Dbm.find db) subjects / List.length subjects
+  List.map (KVs.find db) subjects / List.length subjects
 
 let main () =
-  let gradeDB = ... in
-  let avg = average &gradeDB ["math";"compsci";...] in
-  Dbm.add &!gradeDB "average" avg
+  let gradeKV = ... in
+  let avg = average &gradeKV ["math";"compsci";...] in
+  KVs.add &!gradeKV "average" avg
 \end{minted}
       };
       
       \node[annot,text width=12cm,scale=0.5] at (8,4) (S2) {%
 \begin{minted}[texcomments=true,escapeinside=\#\#]{OCaml}
 let average db subjects =
-  List.map (Dbm.find db) subjects / List.length subjects
+  List.map (KVs.find db) subjects / List.length subjects
 
 let main () =
-  let gradeDB = ... in
-  let avg = #\tikzcoord{R1}#{| average &gradeDB ["math";"compsci";...] |}#\tikzcoord{R2}# in
-  #\tikzcoord{R3}#{| Dbm.add &!gradeDB "average" avg |}#\tikzcoord{R4}#
+  let gradeKV = ... in
+  let avg = #\tikzcoord{R1}#{| average &gradeKV ["math";"compsci";...] |}#\tikzcoord{R2}# in
+  #\tikzcoord{R3}#{| KVs.add &!gradeKV "average" avg |}#\tikzcoord{R4}#
 \end{minted}
         \tikz[remember picture,overlay]{
           \node[code,rounded corners=0,color=red,fit=(R1) (R2)] (RA) {};
@@ -597,7 +606,7 @@ let main () =
 
       \begin{onlyenv}<3->
         \node[annot,text width=10.5cm,scale=0.7] at (0.7,1) (S4) {
-          @val average : 'k_2 . &(database,'k) -{'k_2}> string list -{'k}> int list@
+          @val average : 'k_2 . &(kv_store,'k) -{'k_2}> string list -{'k}> int list@
         };
         \draw[link,->] ($(S3.west)+(0,1)$) to
         node[midway, above, sloped] {3. Solve}
@@ -607,7 +616,7 @@ let main () =
       
       \begin{onlyenv}<4->
         \node[annot,text width=9.7cm,scale=0.7] at (0.7,-1) (S5) {
-          @val average : &(database,'k) -> string list -{'k}> int list@
+          @val average : &(kv_store,'k) -> string list -{'k}> int list@
         };
         \draw[link,->] (S4) to
         node[midway, left] {4. Simplify}
@@ -675,7 +684,7 @@ let main () =
   
 \end{frame}
 
-\bibliography{biblio}
+% \bibliography{biblio}
 
 \end{document}
 
